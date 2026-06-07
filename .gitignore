@@ -28,3 +28,27 @@ nul
 # App build outputs
 app/release/
 app/build/
+
+# OS artifacts
+Thumbs.db
+*.swp
+*.swo
+~$*
+
+# Kotlin compiler cache
+.kotlin/
+
+# Package outputs & profiling
+*.apk
+*.aab
+*.hprof
+
+# Security (keystore / signing)
+*.jks
+*.keystore
+keystore.properties
+
+# Extra IDE artifacts
+out/
+*.ipr
+*.iws
