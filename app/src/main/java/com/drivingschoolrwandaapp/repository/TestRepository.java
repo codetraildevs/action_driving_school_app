@@ -1,238 +1,239 @@
 package com.drivingschoolrwandaapp.repository;
 
-import android.app.Application;
+import android.content.Context;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
-import com.drivingschoolrwandaapp.api.ApiService;
-import com.drivingschoolrwandaapp.database.AppDatabase;
-import com.drivingschoolrwandaapp.database.dao.QuestionOptionDao;
-import com.drivingschoolrwandaapp.database.dao.TestDao;
-import com.drivingschoolrwandaapp.database.dao.TestQuestionDao;
-import com.drivingschoolrwandaapp.database.dao.UserDao;
 import com.drivingschoolrwandaapp.database.entities.TestEntity;
 import com.drivingschoolrwandaapp.database.entities.TestQuestionEntity;
+import com.drivingschoolrwandaapp.database.entities.QuestionOptionEntity;
 import com.drivingschoolrwandaapp.database.entities.TestWithQuestions;
-import com.drivingschoolrwandaapp.database.entities.User;
-import com.drivingschoolrwandaapp.models.mappers.TestMapper;
-import com.drivingschoolrwandaapp.models.response.TestQuestionsResponse;
-import com.drivingschoolrwandaapp.models.response.TestsResponse;
-import com.drivingschoolrwandaapp.utils.NetworkUtils;
+import com.drivingschoolrwandaapp.database.entities.QuestionWithOptions;
+import com.drivingschoolrwandaapp.data.local.preferences.AppPreferences;
+import com.drivingschoolrwandaapp.models.LocalExam;
+import com.drivingschoolrwandaapp.models.LocalQuestion;
+import com.drivingschoolrwandaapp.repository.Resource;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
-import retrofit2.Call;
+import dagger.hilt.android.qualifiers.ApplicationContext;
 
+/**
+ * Repository that loads exam data from local JSON assets
+ * instead of making network API calls.
+ * Exam data is loaded using [LocalExamDataSource] and mapped to
+ * existing database entities for UI compatibility.
+ * Supports multilingual exams following the app's language preference.
+ */
+@Singleton
 public class TestRepository {
 
-    private static final long CACHE_EXPIRATION_TIME = TimeUnit.DAYS.toMillis(7);
     private static final String TAG = "TestRepository";
+    private static final String ASSETS_PREFIX = "assets/";
+    private static final String FILE_ASSET_PREFIX = "file:///android_asset/";
 
-    private final ApiService apiService;
-    private final TestDao testDao;
-    private final TestQuestionDao testQuestionDao;
-    private final QuestionOptionDao questionOptionDao;
-    private final UserDao userDao;
-    private final ExecutorService executorService;
-    private final Application application;
+    private final LocalExamDataSource localExamDataSource;
+    private final AppPreferences appPreferences;
 
     @Inject
-    public TestRepository(Application application, ApiService apiService) {
-        this.application = application;
-        this.apiService = apiService;
-        AppDatabase database = AppDatabase.getDatabase(application);
-        this.testDao = database.testDao();
-        this.testQuestionDao = database.testQuestionDao();
-        this.questionOptionDao = database.questionOptionDao();
-        this.userDao = database.userDao();
-        this.executorService = Executors.newSingleThreadExecutor();
+    public TestRepository(LocalExamDataSource localExamDataSource, @ApplicationContext Context context) {
+        this.localExamDataSource = localExamDataSource;
+        this.appPreferences = new AppPreferences(context);
     }
 
+    /**
+     * Get all tests from local JSON assets.
+     * @param forceRefresh ignored for local data, kept for API compatibility
+     * @return LiveData with Resource containing list of TestEntity
+     */
     public LiveData<Resource<List<TestEntity>>> getTests(boolean forceRefresh) {
-        return new NetworkBoundResource<List<TestEntity>, TestsResponse>() {
-            @Override
-            protected void saveCallResult(TestsResponse item) {
-                if (item != null && item.getData() != null) {
-                    // Do NOT deleteAllTests() because it cascades and deletes questions for all tests.
+        MutableLiveData<Resource<List<TestEntity>>> result = new MutableLiveData<>();
 
-                    List<TestEntity> testEntities = TestMapper.INSTANCE.toEntity(item.getData());
-                    List<Integer> newIds = new ArrayList<>();
+        try {
+            // Get current language from app preferences
+            String languageCode = getCurrentLanguage();
 
-                    for (TestEntity entity : testEntities) {
-                        entity.setLastRefreshed(System.currentTimeMillis());
-                        newIds.add(entity.getId());
-                    }
+            // Load exams from local JSON
+            List<LocalExam> localExams = localExamDataSource.loadExams(languageCode);
+            List<TestEntity> testEntities = new ArrayList<>();
 
-                    // Strategy to avoid CASCADE DELETE of questions:
-                    // 1. Insert with IGNORE (adds new tests, keeps existing ones)
-                    testDao.insertTestsIgnore(testEntities);
-                    // 2. Update existing tests (updates details of tests that were already there)
-                    testDao.updateTests(testEntities);
-                    // 3. Delete tests that are no longer in the response
-                    if (!newIds.isEmpty()) {
-                        testDao.deleteTestsNotIn(newIds);
-                    }
-                }
+            for (int i = 0; i < localExams.size(); i++) {
+                LocalExam localExam = localExams.get(i);
+                TestEntity entity = new TestEntity();
+                entity.setId(parseQuizId(localExam.getQuizId(), i));
+                entity.setTitle(localExam.getTitle());
+                entity.setDescription(localExam.getExamType());
+                entity.setTestNumber(i + 1);
+                entity.setImageUrl(convertToAssetUri(localExam.getExamImgUrl()));
+                entity.setTotalMarks(localExam.getQuestions().size());
+                entity.setPassMarks((int) Math.ceil(localExam.getQuestions().size() * 0.5)); // 50% to pass
+                entity.setDuration(30); // Default 30 minutes
+                entity.setFree("Free".equalsIgnoreCase(localExam.getExamType()));
+                entity.setQuestionCount(localExam.getQuestions().size());
+                entity.setLastRefreshed(System.currentTimeMillis());
+                testEntities.add(entity);
             }
 
-            @Override
-            protected boolean shouldFetch(List<TestEntity> data) {
-                if (forceRefresh) return true;
-
-                if (data == null || data.isEmpty()) {
-                    return true;
-                }
-                if (!NetworkUtils.isNetworkAvailable(application)) {
-                    return false;
-                }
-
-                long expirationTime = getCacheExpirationTime();
-                if (expirationTime == 0) return true; // access expired
-
-                return System.currentTimeMillis() - data.get(0).getLastRefreshed() > expirationTime;
-            }
-
-            @Override
-            protected LiveData<List<TestEntity>> loadFromDb() {
-                return testDao.getAllTests();
-            }
-
-            @Override
-            protected Call<TestsResponse> createCall() {
-                return apiService.getTests();
-            }
-        }.getAsLiveData();
-    }
-
-    public LiveData<Resource<TestWithQuestions>> getTestWithQuestions(int testId) {
-        return new NetworkBoundResource<TestWithQuestions, TestQuestionsResponse>() {
-            @Override
-            protected void saveCallResult(TestQuestionsResponse item) {
-                Log.d(TAG, "saveCallResult called for testId: " + testId);
-                if (item != null && item.getData() != null && item.getData().getTest() != null && item.getData().getQuestions() != null) {
-                    try {
-                        AppDatabase.getDatabase(application).runInTransaction(() -> {
-                            Log.d(TAG, "Starting transaction to save questions. Count: " + item.getData().getQuestions().size());
-
-                            // Clear old data first
-                            questionOptionDao.deleteOptionsForTest(testId);
-                            testQuestionDao.deleteQuestionsForTest(testId);
-
-                            // Insert the test
-                            TestEntity testEntity = TestMapper.INSTANCE.toEntity(item.getData().getTest());
-                            testEntity.setLastRefreshed(System.currentTimeMillis());
-
-                            long rowId = testDao.insertTest(testEntity);
-                            Log.d(TAG, "Inserted/Updated TestEntity. ID: " + testEntity.getId() + ", Insert Result: " + rowId);
-
-                            // Insert questions and their options
-                            List<TestQuestionEntity> questionEntities = TestMapper.INSTANCE.toQuestionEntities(item.getData().getQuestions());
-                            Log.d(TAG, "Mapped " + questionEntities.size() + " question entities");
-
-                            for (int i = 0; i < questionEntities.size(); i++) {
-                                TestQuestionEntity questionEntity = questionEntities.get(i);
-                                questionEntity.setTestId(testId);
-                                long questionId = testQuestionDao.insertQuestion(questionEntity);
-                                Log.d(TAG, "Inserted Question " + i + ", ID: " + questionId + ", TestID: " + testId);
-
-                                if (item.getData().getQuestions().get(i).getOptions() != null) {
-                                    questionOptionDao.insertOptions(TestMapper.INSTANCE.toOptionEntities(item.getData().getQuestions().get(i).getOptions(), (int) questionId));
-                                }
-                            }
-                            Log.d(TAG, "Transaction completed successfully");
-                        });
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error saving test questions", e);
-                    }
-                } else {
-                    Log.e(TAG, "saveCallResult: Data is null or incomplete");
-                }
-            }
-
-            @Override
-            protected boolean shouldFetch(TestWithQuestions data) {
-                // If no data, we must fetch
-                if (data == null || data.test == null || data.questions == null || data.questions.isEmpty()) {
-                    Log.d(TAG, "shouldFetch: Data is null or empty, fetching...");
-                    return true;
-                }
-
-                if (!NetworkUtils.isNetworkAvailable(application)) {
-                    Log.d(TAG, "shouldFetch: Offline, using cache.");
-                    return false;
-                }
-
-                long lastRefreshed = data.test.getLastRefreshed();
-                long expirationTime = getCacheExpirationTime();
-
-                if (expirationTime == 0) { // access expired
-                    Log.d(TAG, "shouldFetch: User test access expired, fetching...");
-                    return true;
-                }
-
-                boolean isExpired = System.currentTimeMillis() - lastRefreshed > expirationTime;
-                Log.d(TAG, "shouldFetch: Online. Expired: " + isExpired);
-                return isExpired;
-            }
-
-            @Override
-            protected LiveData<TestWithQuestions> loadFromDb() {
-                return testDao.getTestWithQuestions(testId);
-            }
-
-            @Override
-            protected Call<TestQuestionsResponse> createCall() {
-                return apiService.getTestQuestions(testId);
-            }
-        }.getAsLiveData();
-    }
-    
-    private long getCacheExpirationTime() {
-        User user = userDao.getUserSync();
-        if (user != null && user.getTestAccessExpiresAt() != null) {
-            try {
-                // Try parsing ISO 8601 format (e.g., 2025-12-27T16:20:29.814Z)
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
-                sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-                Date expirationDate = sdf.parse(user.getTestAccessExpiresAt());
-                
-                if (expirationDate != null) {
-                    long remainingTime = expirationDate.getTime() - System.currentTimeMillis();
-                    if (remainingTime <= 0) {
-                        return 0; // Access expired
-                    }
-                    return Math.min(CACHE_EXPIRATION_TIME, remainingTime);
-                }
-            } catch (ParseException e) {
-                Log.e(TAG, "Error parsing date ISO8601: " + user.getTestAccessExpiresAt(), e);
-                // Fallback to simpler format
-                try {
-                     SimpleDateFormat sdfFallback = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-                     Date expirationDate = sdfFallback.parse(user.getTestAccessExpiresAt());
-                     if (expirationDate != null) {
-                         long remainingTime = expirationDate.getTime() - System.currentTimeMillis();
-                         if (remainingTime <= 0) {
-                             return 0; // Access expired
-                         }
-                         return Math.min(CACHE_EXPIRATION_TIME, remainingTime);
-                     }
-                } catch (ParseException e2) {
-                     Log.e(TAG, "Error parsing date fallback: " + user.getTestAccessExpiresAt(), e2);
-                }
-            }
+            result.setValue(Resource.success(testEntities));
+        } catch (Exception e) {
+            Log.e(TAG, "Error loading local exams", e);
+            result.setValue(Resource.<List<TestEntity>>error("Failed to load exams: " + e.getMessage(), null));
         }
-        return CACHE_EXPIRATION_TIME;
+
+        return result;
+    }
+
+    /**
+     * Get test with questions from local JSON assets.
+     * @param testId The test ID (position-based, 1-indexed, or quizId as int)
+     * @return LiveData with Resource containing TestWithQuestions
+     */
+    public LiveData<Resource<TestWithQuestions>> getTestWithQuestions(int testId) {
+        MutableLiveData<Resource<TestWithQuestions>> result = new MutableLiveData<>();
+
+        try {
+            String languageCode = getCurrentLanguage();
+
+            // Load the specific exam (testId maps to quiz sequential index)
+            List<LocalExam> localExams = localExamDataSource.loadExams(languageCode);
+
+            // Find the exam by its position (1-indexed) or by quizId
+            LocalExam localExam = null;
+            String quizIdStr = String.valueOf(testId);
+
+            // First try by quizId
+            localExam = localExamDataSource.loadExamByQuizId(quizIdStr, languageCode);
+
+            // If not found, try by position (1-indexed)
+            if (localExam == null && testId > 0 && testId <= localExams.size()) {
+                localExam = localExamDataSource.loadExamByIndex(testId - 1, languageCode);
+            }
+
+            if (localExam == null) {
+                result.setValue(Resource.<TestWithQuestions>error("Exam not found for ID: " + testId, null));
+                return result;
+            }
+
+            // Build TestWithQuestions from local data
+            TestWithQuestions testWithQuestions = buildTestWithQuestions(localExam, testId, languageCode);
+            result.setValue(Resource.success(testWithQuestions));
+        } catch (Exception e) {
+            Log.e(TAG, "Error loading local exam questions", e);
+            result.setValue(Resource.<TestWithQuestions>error("Failed to load questions: " + e.getMessage(), null));
+        }
+
+        return result;
+    }
+
+    /**
+     * Build a TestWithQuestions entity from a LocalExam.
+     */
+    private TestWithQuestions buildTestWithQuestions(LocalExam localExam, int testId, String languageCode) {
+        TestEntity testEntity = new TestEntity();
+        testEntity.setId(testId);
+        testEntity.setTitle(localExam.getTitle());
+        testEntity.setDescription(localExam.getExamType());
+        testEntity.setTestNumber(parseQuizId(localExam.getQuizId(), testId));
+        testEntity.setImageUrl(convertToAssetUri(localExam.getExamImgUrl()));
+        testEntity.setTotalMarks(localExam.getQuestions().size());
+        testEntity.setPassMarks((int) Math.ceil(localExam.getQuestions().size() * 0.5));
+        testEntity.setDuration(30);
+        testEntity.setFree("Free".equalsIgnoreCase(localExam.getExamType()));
+        testEntity.setQuestionCount(localExam.getQuestions().size());
+        testEntity.setLastRefreshed(System.currentTimeMillis());
+
+        List<QuestionWithOptions> questionsWithOptions = new ArrayList<>();
+        List<LocalQuestion> localQuestions = localExam.getQuestions();
+
+        for (int qIdx = 0; qIdx < localQuestions.size(); qIdx++) {
+            LocalQuestion localQ = localQuestions.get(qIdx);
+
+            TestQuestionEntity questionEntity = new TestQuestionEntity();
+            questionEntity.setId(qIdx + 1);
+            questionEntity.setTestId(testId);
+            questionEntity.setQuestionText(localQ.getQuestion());
+            questionEntity.setQuestionType("multiple_choice");
+            questionEntity.setImageUrl(convertToAssetUri(localQ.getQuestionImgUrl()));
+
+            List<QuestionOptionEntity> options = new ArrayList<>();
+            String[] optionTexts = {
+                localQ.getOption1(),
+                localQ.getOption2(),
+                localQ.getOption3(),
+                localQ.getOption4()
+            };
+
+            int correctIndex = localQ.getCorrectOptionIndex();
+
+            for (int oIdx = 0; oIdx < optionTexts.length; oIdx++) {
+                QuestionOptionEntity option = new QuestionOptionEntity();
+                option.setId(qIdx * 4 + oIdx + 1);
+                option.setQuestionId(qIdx + 1);
+                option.setText(optionTexts[oIdx]);
+                option.setCorrect(oIdx == correctIndex);
+                options.add(option);
+            }
+
+            QuestionWithOptions questionWithOptions = new QuestionWithOptions();
+            questionWithOptions.question = questionEntity;
+            questionWithOptions.options = options;
+            questionsWithOptions.add(questionWithOptions);
+        }
+
+        TestWithQuestions testWithQuestions = new TestWithQuestions();
+        testWithQuestions.test = testEntity;
+        testWithQuestions.questions = questionsWithOptions;
+        return testWithQuestions;
+    }
+
+    /**
+     * Get the current language code from app preferences.
+     * Returns the user's selected language: "en", "fr", or "rw".
+     */
+    private String getCurrentLanguage() {
+        String language = appPreferences.getLanguage();
+        if (language == null || language.isEmpty()) {
+            return "en"; // Default to English
+        }
+        return language;
+    }
+
+    /**
+     * Parse quizId from string to int. Falls back to index if parsing fails.
+     */
+    private int parseQuizId(String quizIdStr, int fallback) {
+        try {
+            return Integer.parseInt(quizIdStr);
+        } catch (NumberFormatException e) {
+            return fallback;
+        }
+    }
+
+    /**
+     * Convert an asset path from the JSON file to a file:///android_asset/ URI
+     * that Glide can load from Android's assets directory.
+     *
+     * JSON stores paths like: "assets/json_questions_images/exam1.png"
+     * Glide expects:          "file:///android_asset/json_questions_images/exam1.png"
+     *
+     * @param imagePath The image path from JSON (may be null or empty)
+     * @return The converted file:// URI, or null if the input is null/empty
+     */
+    private String convertToAssetUri(String imagePath) {
+        if (imagePath == null || imagePath.isEmpty()) {
+            return null;
+        }
+        // Strip the "assets/" prefix if present
+        String cleaned = imagePath;
+        if (cleaned.startsWith(ASSETS_PREFIX)) {
+            cleaned = cleaned.substring(ASSETS_PREFIX.length());
+        }
+        return FILE_ASSET_PREFIX + cleaned;
     }
 }

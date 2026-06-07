@@ -242,7 +242,8 @@ public class TestAdapter extends RecyclerView.Adapter<TestAdapter.TestViewHolder
             // Load Image
             if (displayImageUrl != null && !displayImageUrl.isEmpty() && !displayImageUrl.matches("\\d+")) {
                 String imageUrl = displayImageUrl;
-                if (!imageUrl.startsWith("http")) {
+                // Skip SITE_URL prefix for local asset URIs (file://) and http/https URLs
+                if (!imageUrl.startsWith("http") && !imageUrl.startsWith("file://")) {
                      if (!imageUrl.startsWith("/" + "/")) {
                          imageUrl = "/" + imageUrl;
                      }

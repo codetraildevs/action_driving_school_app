@@ -1,8 +1,8 @@
 package com.drivingschoolrwandaapp.di;
 
-import android.app.Application;
+import android.content.Context;
 
-import com.drivingschoolrwandaapp.api.ApiService;
+import com.drivingschoolrwandaapp.repository.LocalExamDataSource;
 import com.drivingschoolrwandaapp.repository.TestRepository;
 
 import javax.inject.Singleton;
@@ -10,6 +10,7 @@ import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
+import dagger.hilt.android.qualifiers.ApplicationContext;
 import dagger.hilt.components.SingletonComponent;
 
 @Module
@@ -18,7 +19,9 @@ public class TestModule {
 
     @Provides
     @Singleton
-    public TestRepository provideTestRepository(Application application, ApiService apiService) {
-        return new TestRepository(application, apiService);
+    public static LocalExamDataSource provideLocalExamDataSource(@ApplicationContext Context context) {
+        return new LocalExamDataSource(context);
     }
+
+    // TestRepository is auto-provided by Hilt via @Inject constructor with @ApplicationContext
 }

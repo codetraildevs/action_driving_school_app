@@ -5,9 +5,6 @@ import com.drivingschoolrwandaapp.models.IremboApplication;
 import com.drivingschoolrwandaapp.models.entities.Bookmark;
 import com.drivingschoolrwandaapp.models.entities.Notification;
 import com.drivingschoolrwandaapp.models.entities.PdfFile;
-import com.drivingschoolrwandaapp.models.entities.Test;
-import com.drivingschoolrwandaapp.models.entities.TestAttempt;
-import com.drivingschoolrwandaapp.models.entities.TestResult;
 import com.drivingschoolrwandaapp.models.entities.User;
 import com.drivingschoolrwandaapp.models.entities.WhatsAppGroup;
 import com.drivingschoolrwandaapp.models.request.BookmarkRequest;
@@ -19,7 +16,6 @@ import com.drivingschoolrwandaapp.models.request.LoginRequest;
 import com.drivingschoolrwandaapp.models.request.PasswordChangeRequest;
 import com.drivingschoolrwandaapp.models.request.RefreshTokenRequest;
 import com.drivingschoolrwandaapp.models.request.ResetPasswordRequest;
-import com.drivingschoolrwandaapp.models.request.TestSubmissionRequest;
 import com.drivingschoolrwandaapp.models.request.VerifyOtpRequest;
 import com.drivingschoolrwandaapp.models.response.ApiResponse;
 import com.drivingschoolrwandaapp.models.response.IremboPaymentResponse;
@@ -27,8 +23,6 @@ import com.drivingschoolrwandaapp.models.response.LoginResponse;
 import com.drivingschoolrwandaapp.models.response.PaginatedResponse;
 import com.drivingschoolrwandaapp.models.response.RegisterResponse;
 import com.drivingschoolrwandaapp.models.response.SubscriptionPlansResponse;
-import com.drivingschoolrwandaapp.models.response.TestQuestionsResponse;
-import com.drivingschoolrwandaapp.models.response.TestsResponse;
 import com.drivingschoolrwandaapp.models.response.UserSubscriptionResponse;
 
 import java.util.List;
@@ -97,22 +91,6 @@ public interface ApiService {
 
     @POST("pdfs/{id}/bookmark")
     Call<ApiResponse<Bookmark>> addBookmark(@Path("id") int pdfId, @Body BookmarkRequest request);
-
-    // Tests and Assessments
-    @GET("tests")
-    Call<TestsResponse> getTests();
-
-    @GET("tests/{testId}/questions")
-    Call<TestQuestionsResponse> getTestQuestions(@Path("testId") int testId);
-
-    @POST("tests/{id}/attempt")
-    Call<ApiResponse<TestAttempt>> startTestAttempt(@Path("id") int testId);
-
-    @POST("tests/attempts/{attemptId}/submit")
-    Call<ApiResponse<TestResult>> submitTestAttempt(
-            @Path("attemptId") int attemptId,
-            @Body TestSubmissionRequest request
-    );
 
     // Notifications
     @GET("notifications")

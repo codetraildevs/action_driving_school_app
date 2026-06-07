@@ -18,4 +18,7 @@ public class BookmarkEntity {
         this.page = page;
         this.name = name;
     }
+
+    // Required by Room
+    public BookmarkEntity() {}
 }

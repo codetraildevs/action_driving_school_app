@@ -154,7 +154,8 @@ public class QuestionOptionAdapter extends RecyclerView.Adapter<QuestionOptionAd
             String imageUrl = option.getImageUrl();
             if (imageUrl != null && !imageUrl.isEmpty()) {
                 optionImage.setVisibility(View.VISIBLE);
-                if (!imageUrl.startsWith("http")) {
+                // Skip SITE_URL prefix for local asset URIs (file://) and http/https URLs
+                if (!imageUrl.startsWith("http") && !imageUrl.startsWith("file://")) {
                     if (!imageUrl.startsWith("/")) {
                         imageUrl = "/" + imageUrl;
                     }

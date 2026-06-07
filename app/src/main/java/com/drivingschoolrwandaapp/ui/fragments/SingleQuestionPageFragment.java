@@ -151,7 +151,12 @@ public class SingleQuestionPageFragment extends Fragment implements QuestionOpti
 
                     if (displayImageUrl != null && !displayImageUrl.isEmpty()) {
                         questionImageView.setVisibility(VISIBLE);
-                        Glide.with(this).load(ApiClient.SITE_URL + displayImageUrl).into(questionImageView);
+                        // Load local asset URIs directly; prepend SITE_URL for relative network paths
+                        String imageUrl = displayImageUrl;
+                        if (!imageUrl.startsWith("http") && !imageUrl.startsWith("file://")) {
+                            imageUrl = ApiClient.SITE_URL + imageUrl;
+                        }
+                        Glide.with(this).load(imageUrl).into(questionImageView);
                     } else {
                         questionImageView.setVisibility(GONE);
                     }
