@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+
+    tools:showIn="navigation_view">
+
+
+        <item
+            android:id="@+id/dashboardFragment"
+            android:icon="@drawable/ic_home"
+            android:title="@string/home" />
+        <item
+            android:id="@+id/testsFragment"
+            android:icon="@drawable/ic_start_exam"
+            android:title="@string/exams4" />
+        <item
+            android:id="@+id/materialsFragment"
+            android:icon="@drawable/ic_learning_materials"
+            android:title="@string/learning_materials" />
+        <item
+            android:id="@+id/iremboActivity"
+            android:icon="@drawable/ic_irembo"
+            android:title="@string/irembo_services" />
+
+
+
+
+            <item
+                android:id="@+id/nav_share"
+                android:icon="@drawable/ic_share"
+                android:title="@string/share52" />
+            <item
+                android:id="@+id/nav_whatsapp"
+                android:icon="@drawable/whatsapp_svgrepo_com"
+                android:title="@string/whatsapp_group14" />
+
+            <item
+                android:id="@+id/nav_about_us"
+                android:icon="@drawable/ic_info"
+                android:title="@string/aboutus" />
+
+
+    <group android:id="@+id/group_delete_account" android:checkableBehavior="none">
+        <item
+            android:id="@+id/delete_account_item"
+            android:icon="@drawable/trash_bin_minimalistic_2_svgrepo_com"
+            android:title="@string/delete_account" />
+    </group>
+
+</menu>

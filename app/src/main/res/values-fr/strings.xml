@@ -1,0 +1,394 @@
+<resources>
+    <string name="app_name">Action Driving School</string>
+    <string name="title_activity_login">Connectez-vous ici</string>
+    <string name="prompt_email">E-mail</string>
+    <string name="prompt_password">Mot de passe</string>
+    <string name="action_sign_in">Connectez-vous ou créez un compte</string>
+    <string name="action_sign_in_short">Connexion</string>
+    <string name="welcome">Bienvenue !</string>
+    <string name="invalid_username">Le nom d\'utilisateur n\'est pas valide</string>
+    <string name="invalid_password">Le mot de passe doit dépasser 5 caractères</string>
+    <string name="login_failed">Échec de connexion</string>
+    <string name="title_home">Accueil</string>
+    <string name="title_dashboard">Tableau de bord</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="title_profile">Profil</string>
+    <string name="password">Mot de passe</string>
+    <string name="forgot_password">Mot de passe oublié ?</string>
+    <string name="login">Connexion</string>
+    <string name="dont_have_account">Pas de compte ?</string>
+    <string name="email">E-mail</string>
+    <string name="title_lessons">Leçons</string>
+    <string name="title_results">Résultats</string>
+    <string name="first_fragment_label">Accueil</string>
+    <string name="second_fragment_label">Tableau de bord</string>
+    <string name="hello_blank_fragment">Bonjour</string>
+    <string name="next">Suivant</string>
+    <string name="lorem_ipsum">Lorem ipsum</string>
+    <string name="recent_pdfs">PDF récents</string>
+    <string name="featured_pdfs">PDF en vedette</string>
+    <string name="empty_pdfs">Aucun PDF disponible</string>
+    <string name="long_placeholder_text">Lorem ipsum…</string>
+    <string name="previous">Précédent</string>
+    <string name="delete">Supprimer</string>
+    <string name="action_settings">Paramètres</string>
+    <string name="current_password">Mot de passe actuel</string>
+    <string name="new_password">Nouveau mot de passe</string>
+    <string name="confirm_new_password">Confirmer le nouveau mot de passe</string>
+    <string name="save_changes">Enregistrer les modifications</string>
+    <string name="change_password">Changer le mot de passe</string>
+    <string name="forgot_your_password">Vous avez oublié votre mot de passe ?</string>
+    <string name="no_worries_enter_your_email_below_and_we_will_send_you_a_link_to_reset_it">
+        Pas de souci ! Entrez votre e-mail ci-dessous et nous vous enverrons un lien pour le réinitialiser.
+    </string>
+    <string name="send_reset_link">Envoyer le lien de réinitialisation</string>
+    <string name="welcome_back">Bon retour !</string>
+    <string name="email_or_phone_number">Numéro de téléphone</string>
+    <string name="sign_up">S\'inscrire</string>
+
+    <string name="ikaze">Bienvenue !</string>
+    <string name="injira_muri_konte_yawe">Connectez-vous à votre compte</string>
+    <string name="imeyili">E-mail</string>
+    <string name="ijambobanga">Mot de passe</string>
+    <string name="wibagiwe_ijambobanga">Mot de passe oublié ?</string>
+    <string name="injira">Connexion</string>
+    <string name="cyangwa">Ou</string>
+    <string name="fungura_konti_nshya">Créer un nouveau compte</string>
+
+    <string name="enter_verification_code">Entrez le code de vérification</string>
+    <string name="enter_the_6_digit_code_sent_to_your_email_address">
+        Entrez le code à 6 chiffres envoyé à votre adresse e-mail.
+    </string>
+    <string name="verification_code">Code de vérification</string>
+    <string name="verify">Vérifier</string>
+    <string name="didn_t_receive_code_resend">Vous n\'avez pas reçu le code ? Renvoyer</string>
+    <string name="previous1">Précédent</string>
+    <string name="next1">Suivant</string>
+
+    <string name="fungura_konti_nshya7">Créer un nouveau compte</string>
+    <string name="wuzuze_imyirondoro_yawe2">Complétez vos informations</string>
+    <string name="izina_ry_ababyeyi">Noms *</string>
+    <string name="izina_ryo_hagati_ntabwo_ari_ngombwa">Deuxième prénom (optionnel)</string>
+    <string name="izina_ry_idini">Prénom *</string>
+    <string name="imeyili5">E-mail *</string>
+    <string name="telefoni">Entrez votre numéro de téléphone *</string>
+    <string name="italiki_y_amavuko">Date de naissance *</string>
+    <string name="ijambobanga2">Mot de passe *</string>
+    <string name="emeza_ijambobanga">Confirmez le mot de passe *</string>
+    <string name="ndemera_amategeko_n_amabwiriza">J\'accepte les termes et conditions.</string>
+    <string name="iyandikishe">S\'inscrire</string>
+    <string name="usanzwe_ufite_konti">Vous avez déjà un compte ?</string>
+    <string name="injira1">Connexion</string>
+
+    <string name="create_a_new_password">Créer un nouveau mot de passe</string>
+    <string name="your_new_password_must_be_different_from_previous_ones">
+        Votre nouveau mot de passe doit être différent des anciens.
+    </string>
+    <string name="new_password8">Nouveau mot de passe</string>
+    <string name="confirm_new_password8">Confirmer le nouveau mot de passe</string>
+    <string name="reset_password">Réinitialiser le mot de passe</string>
+
+    <string name="welcome_to_driving_school">Bienvenue à Action Driving School</string>
+    <string name="your_journey_to_becoming_a_safe_driver_starts_here">
+        Votre parcours pour devenir un conducteur responsable commence ici.
+    </string>
+    <string name="create_an_account">Nouvel utilisateur? Créer un compte</string>
+    <string name="login_to_your_account">Déjà inscrit ? Connectez-vous à votre compte</string>
+    <string name="by_continuing_you_agree_to_our_terms_of_service_and_privacy_policy">
+        En continuant, vous acceptez nos Conditions d\'utilisation et notre Politique de confidentialité.
+    </string>
+
+    <string name="classes_fragment">Leçons</string>
+    <string name="exams_fragment">Examens</string>
+    <string name="lessons_fragment">Leçons</string>
+
+    <string name="current_plan">Formule actuelle :</string>
+    <string name="manage">Gérer</string>
+    <string name="available_plans">Formules disponibles</string>
+    <string name="change_password1">Changer le mot de passe</string>
+    <string name="results_fragment">Résultats</string>
+    <string name="settings">Paramètres</string>
+
+    <string name="finish_review">Terminer la révision</string>
+    <string name="review_answers">Revoir les réponses</string>
+    <string name="finish">Terminer</string>
+    <string name="error_loading_tests">Erreur lors du chargement des tests</string>
+
+    <string name="pdf_title">Titre du PDF</string>
+    <string name="page_25">Page 25</string>
+    <string name="bookmark_note_goes_here">Note du signet</string>
+    <string name="_2_days_ago">Il y a 2 jours</string>
+    <string name="pdf_title8">Titre du PDF</string>
+    <string name="author_name44">Nom de l\'auteur</string>
+    <string name="_100_pages">100 pages</string>
+    <string name="_4_5_123">4.5 (123)</string>
+
+    <string name="english">Anglais</string>
+    <string name="subscribe">S\'abonner</string>
+    <string name="impano_david">Impano David</string>
+    <string name="impano_example_com">impano@example.com</string>
+
+    <string name="home">Accueil</string>
+    <string name="exams">Examens</string>
+    <string name="classes">Leçons</string>
+    <string name="materials">Documents</string>
+    <string name="profile">Profil</string>
+
+    <string name="exams4">Examens</string>
+    <string name="online_class4">Cours en ligne</string>
+    <string name="learning_materials5">Documents</string>
+    <string name="communicate6">Communiquer</string>
+    <string name="share52">Partager</string>
+    <string name="whatsapp_group14">WhatsApp</string>
+    <string name="logout152">Déconnexion</string>
+
+    <string name="toggle_view">Changer l\'affichage</string>
+    <string name="home554">Accueil</string>
+    <string name="exams25">Examens</string>
+    <string name="classes3232">Leçons</string>
+    <string name="materials26665">Documents</string>
+    <string name="profile2662">Profil</string>
+
+    <string name="bookmark">Signet</string>
+    <string name="submit">Envoyer</string>
+    <string name="fill_all_fields">Veuillez remplir tous les champs</string>
+    <string name="passwords_not_match">Les mots de passe ne correspondent pas</string>
+    <string name="something_went_wrong">Une erreur s\'est produite</string>
+    <string name="invalid_otp">Entrez un OTP valide à 6 chiffres</string>
+    <string name="bookmark_added">Page ajoutée aux signets</string>
+    <string name="terms_of_service">Conditions d\'utilisation</string>
+    <string name="invalid_date_format">Format de date invalide</string>
+    <string name="registration_failed">Échec de l\'inscription. Veuillez réessayer.</string>
+    <string name="first_name_required">Le prénom est requis</string>
+    <string name="last_name_required">Le nom de famille est requis</string>
+    <string name="email_required">L\'e-mail est requis</string>
+    <string name="invalid_email">E-mail invalide</string>
+    <string name="phone_required">Le numéro de téléphone est requis</string>
+    <string name="invalid_phone">Le numéro doit contenir au moins 10 chiffres</string>
+    <string name="dob_required">La date de naissance est requise</string>
+    <string name="password_required">Le mot de passe est requis</string>
+    <string name="password_length_error">Le mot de passe doit contenir au moins 6 caractères</string>
+    <string name="password_mismatch">Les mots de passe ne correspondent pas</string>
+    <string name="password_empty_error">Veuillez remplir tous les champs</string>
+    <string name="token_not_found">Jeton introuvable ou invalide.</string>
+    <string name="password_reset_success">Mot de passe réinitialisé avec succès. Connectez-vous avec le nouveau.</string>
+    <string name="privacy_policy">Politique de confidentialité</string>
+    <string name="expiration_text">Expire :</string>
+    <string name="hours_text">Heures</string>
+    <string name="free">Gratuit</string>
+    <string name="request_access">Demander l\'accès</string>
+    <string name="start_test">Commencer le test</string>
+    <string name="permission_denied">Permission refusée. Impossible de télécharger le fichier.</string>
+    <string name="no_materials_found">Aucun document trouvé.</string>
+    <string name="download_success">Téléchargement terminé !</string>
+    <string name="download_failure">Échec du téléchargement.</string>
+    <string name="download_first">Impossible d\'ouvrir le fichier. Veuillez d\'abord le télécharger.</string>
+    <string name="no_app_found">Aucune application ne peut ouvrir ce type de fichier.</string>
+    <string name="error_opening_file">Impossible d\'ouvrir le fichier.</string>
+    <string name="file_not_found">Fichier introuvable.</string>
+
+    <string name="accass_up_to">Examens accessibles :</string>
+    <string name="access_we_have">Examens disponibles : seulement les examens gratuits</string>
+    <string name="access_status">Statut :</string>
+    <string name="pending_message">Votre demande d\'inscription est en attente de validation.</string>
+    <string name="inactive_message">Votre inscription est inactive ou expirée.</string>
+    <string name="status_none">Statut : Aucun</string>
+    <string name="expiry_date">Expire le :</string>
+    <string name="no_questions_found">Aucune question hors ligne trouvée.</string>
+    <string name="time_up">Temps écoulé ! Envoi du test…</string>
+    <string name="confirm_submission">Envoyer le test</string>
+    <string name="confirm_submission_message">Voulez-vous vraiment terminer le test ?</string>
+    <string name="cancel">Annuler</string>
+    <string name="test_passed">Réussi !</string>
+    <string name="test_failed">Échoué</string>
+    <string name="score_format">Votre score : %d / %d</string>
+    <string name="error_required_field">Requis</string>
+
+    <string name="about_us_text">
+        Cette application vous aide à préparer l\'examen provisoire en vous entraînant avec des questions officielles.
+    </string>
+    <string name="close">Fermer</string>
+    <string name="delete_account">Supprimer le compte</string>
+    <string name="delete_account_text">
+        Voulez-vous vraiment supprimer votre compte ? Cette action est irréversible et toutes vos données seront perdues.
+    </string>
+    <string name="delete_keep">Non, continuer</string>
+    <string name="delete_account_delete">Oui, supprimer</string>
+
+    <string name="comprehensive_studies">Accédez à toutes les leçons et aux PDF pour apprendre le code de la route.</string>
+    <string name="practice_text">Pratiquez avec des tests. Un test gratuit est disponible pour tous. Abonnez-vous pour débloquer davantage.</string>
+    <string name="review_text">Consultez vos résultats et suivez vos progrès.</string>
+    <string name="payment_instructions">Pour débloquer tous les examens</string>
+
+    <string name="payment_instructions_text">
+        Les tests de cette application sont les mêmes que ceux de l\'examen provisoire.
+        Pour débloquer tous les tests, payez via MOMO PAY, Mobile Money ou Tigo Cash
+        (847318, 0782877442, 0722877442).
+        Compte au nom de Alexis :
+    </string>
+
+    <string name="payment_instructions_pay1">1. Tapez *182*8*1*847318#</string>
+    <string name="payment_instructions_pay2">2. Envoyez l\'argent au 0782877442</string>
+    <string name="payment_instructions_pay3">3. Envoyez l\'argent au 0722877442</string>
+    <string name="payment_instructions_after">Pour débloquer tous les examens.</string>
+
+    <string name="call">Appeler</string>
+    <string name="whatsapp">WhatsApp</string>
+    <string name="ihavepaid">Commencer les examens</string>
+
+    <string name="request_access_days_text">Choisissez le nombre de jours d\'accès aux examens.</string>
+    <string name="request_access_number_days">Nombre de jours</string>
+    <string name="request_access_confirm">Demander</string>
+
+    <string name="dafault_name">John Doe</string>
+    <string name="default_email">johndoe@example.com</string>
+    <string name="subscrition_status">État de votre abonnement :</string>
+    <string name="access_status_active">Statut : Actif</string>
+
+    <string name="change_language">Changer de langue</string>
+    <string name="default_name">John Doe</string>
+    <string name="aboutus">À propos</string>
+    <string name="search">Rechercher</string>
+    <string name="instructions">Instructions</string>
+    <string name="irembo_services">Services Irembo</string>
+    <string name="dialog_canel">Annuler</string>
+    <string name="got_it">Compris</string>
+
+    <string name="title_tests">Tests effectués</string>
+    <string name="title_materials">Documents</string>
+    <string name="title_test_questions">Questions</string>
+    <string name="title_test_result">Résultat</string>
+
+    <string name="how_it_works">Comment ça marche</string>
+    <string name="instructions1">1. DESCRIPTION DE L\'APPLICATION</string>
+    <string name="instructions1_content">Cette application appelée \"ACTION DRIVING SCHOOL\" enseigne le code de la route et contient les questions de l\'examen provisoire.</string>
+
+    <string name="instructions2">2. COMMENT L\'APPLICATION FONCTIONNE</string>
+    <string name="instructions2_content_1">1. Pour utiliser l\'application, vous devez d\'abord vous inscrire en entrant votre nom et votre numéro de téléphone.</string>
+    <string name="instructions2_content_2">2. Si vous êtes déjà inscrit, vous n\'avez pas besoin de vous réinscrire : entrez simplement votre numéro et cliquez sur \"Vérifier\" pour accéder au tableau de bord.</string>
+    <string name="instructions2_content_3">3. Pour commencer à apprendre, cliquez sur \"Examens\". 21 tests sont disponibles. Le premier est gratuit, les autres nécessitent un paiement.</string>
+    <string name="instructions2_content_4"> 4. Lorsque tu t’exerces dans cette application, si tu appuies sur la bonne réponse, elle devient verte. Si tu choisis une mauvaise réponse, elle devient rouge parce que tu es en mode d’entraînement. Ensuite, tu vois immédiatement la bonne réponse. Après cela, tu appuies sur « Suivant » pour passer à une autre question.
+Quand tu arrives à la dernière question, tu appuies sur « Terminer l’examen », et tu vois directement la note que tu as obtenue. Puis tu appuies sur « Accueil » pour choisir un autre examen à étudier.</string>
+
+    <string name="instructions3">3. COMMENT LES TESTS RÉELS SERONT SUR MACHINE</string>
+    <string name="instructions_3_conten_1">Lors de l\'examen provisoire, les questions seront identiques à celles de l\'application. Sélectionnez les réponses et cliquez sur \"Suivant\" jusqu\'à la fin.</string>
+
+    <string name="instructions4">4. PAIEMENT POUR DÉBLOQUER LES TESTS</string>
+    <string name="instructions4_content_1">1. Le premier test est gratuit. Les 20 autres coûtent 5000 RWF à envoyer au 0782877442 ou via MoMo Pay: 847318 au nom de Alexis.</string>
+    <string name="instructions4_content_2">2. Une fois le paiement effectué, attendez 5 minutes et retournez dans les tests : les cadenas deviendront verts (ouverts).</string>
+
+    <string name="instructions_4_content_3">3. Vous pouvez payer par test :
+
+        5000 RWF pour un accès complet jusqu\'à 3 moins.
+    </string>
+
+
+    <string name="need_help">Besoin d\'aide ? Appelez :</string>
+    <string name="support_message">Besoin d\'aide ? Appelez :</string>
+    <string name="ok">OK</string>
+
+    <string name="disclaimer_title">Avertissement</string>
+    <string name="disclaimer_message">
+        Cette application n\'est pas affiliée ni approuvée par la Police Nationale du Rwanda.
+        Elle fournit un outil d\'apprentissage basé sur des documents officiels disponibles publiquement.
+    </string>
+
+    <string name="available_tests">Tests disponibles</string>
+    <string name="search_tests">Rechercher un test</string>
+    <string name="free_badge">GRATUIT</string>
+
+    <string name="learning_materials">Documents</string>
+    <string name="search_materials">Rechercher des documents</string>
+    <string name="french">Français</string>
+    <string name="kinyarwanda">Kinyarwanda</string>
+    <string name="go_to_page">Aller à la page</string>
+    <string name="enter_page_number">Entrez un numéro de page</string>
+    <string name="add_bookmark">Ajouter un signet</string>
+    <string name="bookmark_name_optional">Nom du signet (facultatif)</string>
+    <string name="view_bookmarks">Voir les signets</string>
+    <string name="bookmarks">Signets enregistrés</string>
+    <string name="toggle_layout">Changer la disposition</string>
+    <string name="already_have_an_account">Déjà inscrit ?</string>
+    <string name="new_user">Nouvel utilisateur</string>
+    <string name="translation_warning">Désolé, votre accès actuel ne permet pas cette traduction.</string>
+    <string name="days"> Jours</string>
+    <string name="retry" >Réessayer</string>
+    <string name="irembo_license_service">Service Irembo de Permis de Conduire</string>
+    <string name="applicant_name">Nom du Demandeur</string>
+    <string name="phone_number">Numéro de Téléphone</string>
+    <string name="national_id">Carte Nationale d’Identité</string>
+    <string name="address">Adresse</string>
+    <string name="license_category">Catégorie du Permis</string>
+    <string name="license_type">Type de Permis</string>
+    <string name="learner">Permis d’Apprentissage</string>
+    <string name="full">Permis Définitif</string>
+    <string name="application_type">Type de Demande</string>
+    <string name="new_license">Nouvelle Demande</string>
+    <string name="renewal">Renouvellement</string>
+    <string name="duplicate">Duplicata</string>
+    <string name="submit_text">Soumettre</string>
+    <string name="speacial_request">Soumettre</string>
+    <string name="description">Description</string>
+    <string name="category">Catégorie</string>
+    <string name="service_name">Nom du Service</string>
+    <string name="special_irembo_service">Service Irembo Spécial (BUSANZA)</string>
+    <string name="my_applications">Mes Demandes</string>
+    <string name="search_by_id_or_reference">Rechercher par ID ou Référence</string>
+    <string name="all">Tout</string>
+    <string name="pending">En attente</string>
+    <string name="action_required">Action requise</string>
+    <string name="done">Terminé</string>
+    <string name="new_application">Nouvelle Demande</string>
+    <string name="download_pdf">Télécharger PDF</string>
+    <string name="payment_required">Paiement Requis</string>
+    <string name="track_application">Suivre la demande</string>
+    <string name="track_application_prompt">Entrez votre numéro de demande pour vérifier le statut</string>
+    <string name="application_number">Numéro de demande</string>
+    <string name="track">Suivre</string>
+    <string name="recent_activity">Activité récente</string>
+    <string name="view_all">Voir tout</string>
+    <string name="browse_services">Parcourir les services</string>
+    <string name="today">Aujourd’hui</string>
+    <string name="application_details">Détails de la demande</string>
+    <string name="status">STATUT</string>
+    <string name="ref">Réf :</string>
+    <string name="date">Date</string>
+    <string name="progress">Progression</string>
+    <string name="current_step">Étape actuelle</string>
+    <string name="_0">0%</string>
+    <string name="open_group">Ouvrir le groupe</string>
+    <string name="quick_access">ACCÈS RAPIDE</string>
+    <string name="learning_materials_dashboard">Supports pédagogiques</string>
+    <string name="all_services">Demander un code d’accès à l’examen</string>
+    <string name="whatsapp_group_text">Rejoindre les groupes WhatsApp</string>
+    <string name="help_text">Instructions d’utilisation de l’application</string>
+    <string name="provisional_license">Permis provisoire ou permanent</string>
+    <string name="provisional_license_text">Permis provisoire</string>
+    <string name="chip_all">Tous</string>
+    <string name="chip_pending">En attente</string>
+    <string name="chip_processing">En cours de traitement</string>
+    <string name="chip_action">Action</string>
+    <string name="chip_approved">Approuvé</string>
+    <string name="chip_rejected">Rejeté</string>
+    <string name="app_logo">App logo</string>
+    <string name="confirm">Confirmer</string>
+    <string name="back">Retour</string>
+    <string name="select_answer">Sélectionner une réponse</string>
+    <string name="instructions_4">
+
+5000 RWF = tous les examens (3 mois),
+</string>
+
+    <string name="header_price">Prix</string>
+    <string name="header_access">Accès/Durée</string>
+
+    <!-- Chaînes de canaux de notification -->
+    <string name="general_channel_name">Annonces générales</string>
+    <string name="general_channel_description">Notifications pour les annonces générales et les mises à jour.</string>
+    <string name="exams_channel_name">Examens</string>
+    <string name="exams_channel_description">Notifications pour les rappels d\'examens et les résultats.</string>
+
+    <string name="status_channel_name">État de l\'application</string>
+    <string name="status_channel_description">Notifications pour les mises à jour du statut des applications Irembo.</string>
+
+</resources>

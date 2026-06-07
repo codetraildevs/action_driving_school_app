@@ -1,0 +1,381 @@
+<resources>
+    <string name="app_name">Action Driving School</string>
+    <string name="title_activity_login">Kanda hano</string>
+    <string name="prompt_email">Imeri</string>
+    <string name="prompt_password">Ijambobanga</string>
+    <string name="action_sign_in">Injira cyangwa fungura konte</string>
+    <string name="action_sign_in_short">Injira</string>
+    <string name="welcome">Murakaza neza!</string>
+    <string name="invalid_username">Izina ry\'umukoresha ntabwo ari ryiza</string>
+    <string name="invalid_password">Ijambobanga rigomba kurenga inyuguti 5</string>
+    <string name="login_failed">Kwinjira byanze</string>
+    <string name="title_home">Ahabanza</string>
+    <string name="title_dashboard">Dashibodi</string>
+    <string name="title_notifications">Amatangazo</string>
+    <string name="title_profile">Umwirondoro</string>
+    <string name="password">Ijambobanga</string>
+    <string name="forgot_password">Wibagiwe ijambobanga?</string>
+    <string name="login">Emeza</string>
+    <string name="dont_have_account">Nta konte ufite?</string>
+    <string name="email">Imeri</string>
+    <string name="title_lessons">Amasomo</string>
+    <string name="title_results">Ibisubizo</string>
+    <string name="first_fragment_label">Ahabanza</string>
+    <string name="second_fragment_label">Dashibodi</string>
+    <string name="hello_blank_fragment">Muraho</string>
+    <string name="next">Igikurikira</string>
+    <string name="lorem_ipsum">Lorem ipsum</string>
+    <string name="recent_pdfs">PDF za vuba</string>
+    <string name="featured_pdfs">PDF zatoranyijwe</string>
+    <string name="empty_pdfs">Nta PDF zihari</string>
+    <string name="long_placeholder_text">Lorem ipsum…</string>
+    <string name="previous">Subira Inyuma</string>
+    <string name="delete">Siba</string>
+    <string name="action_settings">Amabwiriza</string>
+    <string name="current_password">Ijambobanga ririho ubu</string>
+    <string name="new_password">Ijambobanga rishya</string>
+    <string name="confirm_new_password">Emeza ijambobanga rishya</string>
+    <string name="save_changes">Bika impinduka</string>
+    <string name="change_password">Hindura ijambobanga</string>
+    <string name="forgot_your_password">Wibagiwe ijambobanga ryawe?</string>
+    <string name="no_worries_enter_your_email_below_and_we_will_send_you_a_link_to_reset_it">
+        Ntacyo! Shyiramo imeri yawe hasi, tuzohereza link yo gusubiza ijambobanga ryawe.
+    </string>
+    <string name="send_reset_link">Ohereza link yo gusubiza</string>
+    <string name="welcome_back">Murakaza neza!</string>
+    <string name="email_or_phone_number">Nimero ya telefone</string>
+    <string name="sign_up">Iyandikishe</string>
+
+    <string name="ikaze">Murakaza neza!</string>
+    <string name="injira_muri_konte_yawe">Injira muri konte yawe</string>
+    <string name="imeyili">Imeri</string>
+    <string name="ijambobanga">Ijambobanga</string>
+    <string name="wibagiwe_ijambobanga">Wibagiwe ijambobanga?</string>
+    <string name="injira">Emeza</string>
+    <string name="cyangwa">Cyangwa</string>
+    <string name="fungura_konti_nshya">Fungura konte nshya</string>
+
+    <string name="enter_verification_code">Shyiramo kode yemeza</string>
+    <string name="enter_the_6_digit_code_sent_to_your_email_address">
+        Shyiramo kode y\'inyuguti 6 yoherejwe kuri imeri yawe.
+    </string>
+    <string name="verification_code">Kode y\'emeza</string>
+    <string name="verify">Emeza</string>
+    <string name="didn_t_receive_code_resend">Ntabwo wakiriye kode? Ohereza ukundi</string>
+    <string name="previous1">Ikibanza</string>
+    <string name="next1">Igikurikira</string>
+
+    <string name="fungura_konti_nshya7">Fungura konte nshya</string>
+    <string name="wuzuze_imyirondoro_yawe2">Wuzuze imyirondoro yawe</string>
+    <string name="izina_ry_ababyeyi">Amazina *</string>
+    <string name="izina_ryo_hagati_ntabwo_ari_ngombwa">Izina ry\' hagati (ntago ari ngombwa)</string>
+    <string name="izina_ry_idini">Izina rya mbere *</string>
+    <string name="imeyili5">Imeri *</string>
+    <string name="telefoni">Andika Nimero ya Telefone yawe *</string>
+    <string name="italiki_y_amavuko">Italiki y\'amavuko *</string>
+    <string name="ijambobanga2">Ijambobanga *</string>
+    <string name="emeza_ijambobanga">Emeza ijambobanga *</string>
+    <string name="ndemera_amategeko_n_amabwiriza">Ndemera amategeko n\'amabwiriza.</string>
+    <string name="iyandikishe">Iyandikishe</string>
+    <string name="usanzwe_ufite_konti">Usanzwe ukoresha apulikasiyo?</string>
+    <string name="injira1">Injira</string>
+
+    <string name="create_a_new_password">Hindura ijambobanga</string>
+    <string name="your_new_password_must_be_different_from_previous_ones">
+        Ijambobanga ryawe rishya rigomba kuba ritandukanye n\'iryari rikoreshwa mbere.
+    </string>
+    <string name="new_password8">Ijambobanga rishya</string>
+    <string name="confirm_new_password8">Emeza ijambobanga rishya</string>
+    <string name="reset_password">Subiza ijambobanga</string>
+
+    <string name="welcome_to_driving_school">Action Driving School</string>
+    <string name="your_journey_to_becoming_a_safe_driver_starts_here">
+       Urugendo rwawe rwo kuba Umushoferi rutangirira hano.
+    </string>
+    <string name="create_an_account">Ni ba uri mushya Kanda Hano</string>
+    <string name="login_to_your_account">Kanda Hano</string>
+    <string name="by_continuing_you_agree_to_our_terms_of_service_and_privacy_policy">
+        Ukomeje, wemeye Amategeko y\'Akazi n\'Amabwiriza y\'Ibanga.
+    </string>
+
+    <string name="classes_fragment">Amasomo</string>
+    <string name="exams_fragment">Ibizamini</string>
+    <string name="lessons_fragment">Amasomo</string>
+
+    <string name="current_plan">Igipimo kiriho:</string>
+    <string name="manage">Genzura</string>
+    <string name="available_plans">Ibipimo bihari</string>
+    <string name="change_password1">Hindura ijambobanga</string>
+    <string name="results_fragment">Ibisubizo</string>
+    <string name="settings">Amabwiriza</string>
+
+    <string name="finish_review">Soza Gusubiramo</string>
+    <string name="review_answers">Suzuma ibisubizo</string>
+    <string name="finish">Rangiza</string>
+    <string name="error_loading_tests">Habaye ikibazo mu gufungura ibizamini</string>
+
+    <string name="pdf_title">Izina rya PDF</string>
+    <string name="page_25">Urupapuro rwa 25</string>
+    <string name="bookmark_note_goes_here">Icyitonderwa cya bookmark kirahari</string>
+    <string name="_2_days_ago">Iminsi 2 ishize</string>
+    <string name="pdf_title8">Izina rya PDF</string>
+    <string name="author_name44">Izina ry\'umwanditsi</string>
+    <string name="_100_pages">Paji 100</string>
+    <string name="_4_5_123">4.5 (123)</string>
+
+    <string name="english">Icyongereza</string>
+    <string name="french">Igifaransa</string>
+    <string name="kinyarwanda">Ikinyarwanda</string>
+    <string name="subscribe">Iyandikishe</string>
+    <string name="impano_david">Impano David</string>
+    <string name="impano_example_com">impano@example.com</string>
+
+    <string name="home">Ahabanza</string>
+    <string name="exams">Ibizamini</string>
+    <string name="classes">Amasomo</string>
+    <string name="materials">Igazeti</string>
+    <string name="profile">Umwirondoro</string>
+
+    <string name="exams4">Ibizamini</string>
+    <string name="online_class4">Isomo ryo kuri interineti</string>
+    <string name="learning_materials5">Igazeti</string>
+    <string name="communicate6">Vugana</string>
+    <string name="share52">Sangiza</string>
+    <string name="whatsapp_group14">WhatsApp</string>
+    <string name="logout152">Sohoka</string>
+
+    <string name="toggle_view">Hindura uko ubona</string>
+    <string name="home554">Ahabanza</string>
+    <string name="exams25">Ibizamini</string>
+    <string name="classes3232">Amasomo</string>
+    <string name="materials26665">Igazeti</string>
+    <string name="profile2662">Umwirondoro</string>
+
+    <string name="bookmark">Bookmark</string>
+    <string name="submit">Soza ikizamini</string>
+    <string name="fill_all_fields">Nyamuneka wuzuze ibice byose</string>
+    <string name="passwords_not_match">Amaijambobanga ntahura</string>
+    <string name="something_went_wrong">Habaye ikibazo</string>
+    <string name="invalid_otp">Shyiramo OTP y\'inyuguti 6 yujuje ibisabwa</string>
+    <string name="bookmark_added">Urupapuro rwongewe muri bookmarks</string>
+    <string name="terms_of_service">Amategeko y\'Akazi</string>
+    <string name="invalid_date_format">Italiki ntabwo iri mu buryo bwemewe</string>
+    <string name="registration_failed">Iyandikisho ryanze. Gerageza kongera.</string>
+    <string name="first_name_required">Izina rya mbere rirakenewe</string>
+    <string name="last_name_required">Izina ry\'umuryango rirakenewe</string>
+    <string name="email_required">Imeri irakenewe</string>
+    <string name="invalid_email">Imeri ntabwo iri mu buryo bwemewe</string>
+    <string name="phone_required">Nimero ya telefone irakenewe</string>
+    <string name="invalid_phone">Nimero igomba kuba nibura inyuguti 10</string>
+    <string name="dob_required">Italiki y\'amavuko irakenewe</string>
+    <string name="password_required">Ijambobanga rirakenewe</string>
+    <string name="password_length_error">Ijambobanga rigomba kuba nibura inyuguti 6</string>
+    <string name="password_mismatch">Amaijambobanga ntahura</string>
+    <string name="password_empty_error">Nyamuneka wuzuze ibice byose</string>
+    <string name="token_not_found">Ikimenyetso kirabura cyangwa ntabwo ari cyo.</string>
+    <string name="password_reset_success">Ijambobanga ryasubijwe neza. Injira ukoresheje iryashya.</string>
+    <string name="privacy_policy">Amabwiriza y\'Ibanga</string>
+    <string name="expiration_text">Izifunga:</string>
+    <string name="hours_text">Amasaha</string>
+    <string name="free">Ubuntu</string>
+    <string name="request_access">Saba uburenganzira</string>
+    <string name="start_test">Tangira ikizamini</string>
+    <string name="permission_denied">Uburenganzira bwanze. Ntibishoboka gukurura dosiye.</string>
+    <string name="no_materials_found">Nta bikoresho bibonetse.</string>
+    <string name="download_success">Gukurura byarangiye!</string>
+    <string name="download_failure">Gukurura byanze.</string>
+    <string name="download_first">Dosiye ntabwo yakururwa. Nyamuneka ibanze uyikure.</string>
+    <string name="no_app_found">Nta porogaramu ishobora gufungura ubu bwoko bwa dosiye.</string>
+    <string name="error_opening_file">Ntibishoboka gufungura dosiye.</string>
+    <string name="file_not_found">Dosiye ntiyabonetse.</string>
+    <string name="accass_up_to">Ibizamini Wemerewe Kwiga:</string>
+    <string name="access_we_have">Ibizamini Wemerewe: Ibizamini by\'ubuntu gusa</string>
+    <string name="access_status">Imiterere:</string>
+    <string name="pending_message">Ubusabe bwawe bwo kwiyandikisha buracyategereje kwemezwa.</string>
+    <string name="inactive_message">Iyandikisho ryawe ntabwo rikora cyangwa ryarenze igihe.</string>
+    <string name="status_none">Imiterere: Nta</string>
+    <string name="expiry_date">Bizifunga:</string>
+    <string name="no_questions_found">Nta bibazo byo offline bibonetse.</string>
+    <string name="time_up">Igihe kirarangiye!</string>
+    <string name="confirm_submission">Soza ikizamini</string>
+    <string name="confirm_submission_message">Urashaka koko Gusoza ikizamini?</string>
+    <string name="cancel">Subira Inyuma</string>
+    <string name="test_passed">Watsinze!</string>
+    <string name="test_failed">Watsinzwe</string>
+    <string name="score_format">Amanota yawe: %d / %d</string>
+    <string name="error_required_field">Birakenewe</string>
+    <string name="about_us_text">
+          Apulikasiyo igufasha kwitegura uruhushya rwa porovisoiri Binyuze mu kwitoza ibizamin bya porovisoiri byakozwe.
+    </string>
+    <string name="close">Subira Inyuma</string>
+    <string name="delete_account">Siba konte</string>
+    <string name="delete_account_text">
+        Urashaka koko gusiba konte yawe? Iyi ngingo ntabwo ishobora gusubizwa inyuma kandi amakuru yawe yose azatakara.
+    </string>
+    <string name="delete_keep">Oya, Komeza</string>
+    <string name="delete_account_delete">Yego, siba</string>
+    <string name="comprehensive_studies">Shyira mu bikorwa inyigisho zose na PDF zo kwiga amategeko y\'umuhanda.</string>
+    <string name="practice_text">Gira imyitozo n\'ibizamini. Ibizamini by\'ubuntu bihari ku bantu bose. Iyandikishe kugira ngo ufungure ibizamini byisumbuye.</string>
+    <string name="review_text">Reba ibisubizo byawe kandi ukurikire intambwe yawe.</string>
+    <string name="payment_instructions">Kugirango Ibizamini Bifunguke</string>
+    <string name="payment_instructions_text">IBizamini biri muri apulikasiyo nibyo babaza mu kizamini cya porovisoiri kugirango ibizamini byose bifunguke wishyura amafaranga kuri MOMO PAY, Mobile Money cyangwa kuri Tigo Cash (847318,0782877442, 0722877442); Ibaruye kuri Alexis: </string>
+    <string name="payment_instructions_pay1">1. Kanda hano *182*8*1*847318#</string>
+    <string name="payment_instructions_pay2">2. Ohereza amafaranga kuri 0782877442</string>
+    <string name="payment_instructions_pay3">3. Ohereza amafaranga kuri 0722877442</string>
+    <string name="payment_instructions_after">Kugirango Tugufungurire ibizamini byose.</string>
+    <string name="call">Hamagarira</string>
+    <string name="whatsapp">WhatsApp</string>
+    <string name="ihavepaid">Tangira ibizamini</string>
+    <string name="request_access_days_text">Hitamo umubare w\'iminsi ushaka kubona uburenganzira bwo Kwitoza ibizamini.</string>
+    <string name="request_access_number_days">Umubare w\'iminsi</string>
+    <string name="request_access_confirm">Saba</string>
+    <string name="dafault_name">John Doe</string>
+    <string name="default_email">johndoe@example.com</string>
+    <string name="subscrition_status">Uko Ifabuguzi Ryawe Rihagaze: </string>
+    <string name="access_status_active">Imiterere: Ikora</string>
+    <string name="change_language">Hindura ururimi</string>
+    <string name="default_name">John Doe</string>
+    <string name="aboutus">Ibyerekeye</string>
+    <string name="search">Shakisha</string>
+    <string name="instructions">Amabwiriza</string>
+    <string name="irembo_services">Serivisi za Irembo</string>
+    <string name="dialog_canel">Subira Inyuma</string>
+    <string name="got_it">Ndabyumva</string>
+    <string name="title_tests">Ibizamini Byakozwe</string>
+    <string name="title_materials">Igazeti</string>
+    <string name="title_test_questions">Ibibazo</string>
+    <string name="title_test_result">Ibisubizo</string>
+    <string name="how_it_works">Amabwiriza</string>
+    <string name="instructions1">1. UBUSOBANURO BWA APULIKASIYO</string>
+    <string name="instructions1_content">Iyi Apulikasiyo yitwa "ACTION DRIVING SCHOOL" ni apulikasiyo yigisha amategeko y\'umuhanda, igizwe n\ibibazo babaza mu kizamini cya porovisoiri (Uruhushya rw\'agateganyo)</string>
+    <string name="instructions2">2. UKO APULIKASIYO IKORA</string>
+    <string name="instructions2_content_1">1. Kugirango ukoreshe iyi apulikasiyo ugomba kubanza kwiyandikisha kuri apulikasiyo mugihe ukoze download bwa mbere aho usabwa kwandika amazina na nimero ya telefone yawe.</string>
+    <string name="instructions2_content_2">2. Mugihe usanzwe wariyandikishije ntabwo wongera kwiyandikisha ahubwo ukanda ahanditse injira ugashyuramo nimweo ya telefone ubundi ugakanda "Emeza" ugahita ugera ahitwa dashboard usanga ibikubiyemo muri apulikasiyo.</string>
+    <string name="instructions2_content_3">3. Gutangira kwiga ukanda ahanditse "Ibizamini" iyo uhafunguye hagizwe n\'ibizamini 21 buri kizamini kigizwe nibibabazo 20, ariko ikizamini cya mbere ni "Ubuntu" ibindi bisaba kwishyura.</string>
+    <string name="instructions2_content_4">4. Iyo uri kwitoza muri iyi application ukanda mu gisubizo mu mugambo. Iyo ugikoze gihinduka icyatsi, naho iyo icyishe gihinduka umutuku kuko ari ukwitoza, uhita ubona igisubizo cy’ukuri warangiza, ugakanda ‘next’ ukaiya kukindi kibazo. Iyo ugeze ku cyanyuma, ukanda ‘soza kizamini’, igahita ubona amanota ugize, ugahita ukanda ahanditse ‘home’ ukaiya guhitamo indi exam wiga.</string>
+
+    <string name="instructions3">3. UKO UZASANGA IBIMINI KURI MASHINE BIMEZE</string>
+    <string name="instructions_3_conten_1">Nugera mu Kizamini cya porovisoiri kuri mashine uzasanga ibi bibazo biri muri apulikasiyo  ari nako bimeze mu kizaminini nta kibazo bazakubaza muri mu kizamini cya porovisoiri kitari hano muri apulikasiyo, Muguhihtamo igisubizo uzakanda mu (✔️) ugakomeza kukindi kibazo  ukande ahanditse *Next* ukomeze n\'ibindi bibazo. Iyo usoje ubirangije uzakanda ahanditse "Soza ikizamini" uzahita umenya amanota ugize ako kanya ushatse wanagenzura ibyo wishe nibyo wakoze  nkuko bimeze muri iyi apulikasiyo</string>
+
+    <string name="instructions4">4. KWISHURA KUGIRANGO IBIZAMINI BYOSE BIFUNGUKE</string>
+    <string name="instructions4_content_1">1. Nkuko nabisobanuye haruguru ikizamini cya mbere ni ubuntu ibindi 20 bisaba kwishyura 5000 RWF kuri 0782877442 cyangwa kuri kuri MoNo Pay: 847318 ibaruye Kuri Alexis.</string>
+    <string name="instructions4_content_2">2. Iyo umaze kwishyura usubira inyuma ugategereza iminota 5 ukongera ukajya ku bizamini usanga ibyo wishyuriye byafungutse ahari akagufuri gafunze kumutuku usanga kabaye akagufuri gafunguye mu ibara ry\'icyatsi. NB: ubikora ufite connection (Internet).</string>
+
+    <string name="instructions_4_content_3">3. Muri apulikasiyo ushobora kwishyura make make ikizamini 1 ni 100 Rwf kigafunguka umunsi 1, iyo wishyuye 1000 RWF tugufungurira ibizamini 10 bikamara iminsi 10, iyo wishyuye 2000 RWF tugufungurira ibizamin byose bikamara iminsi 25, iyo wishyuye 5000 tugufungurira ibizamini byose muri apulikasiyo kugera utsinze. </string>
+    <string name="need_help">Ukeneye ubufasha Waduhamagara kuri: </string>
+    <string name="support_message">Ukeneye ubufasha Waduhamagara kuri: </string>
+    <string name="ok">OK</string>
+    <string name="disclaimer_title">Icyitonderwa</string>
+    <string name="disclaimer_message">
+  Iyi porogaramu ntifitanye isano cyangwa ngo ishyigikirwe na Polisi y’u Rwanda.
+    Itanga uburyo bwo kwiga amategeko y’umuhanda hashingiwe ku nyandiko rusange zimewe namategeko.
+</string>
+    <string name="available_tests">Ibizamini Bihari</string>
+    <string name="search_tests">Shakisha ibizamini</string>
+    <string name="free_badge">UBUNTU</string>
+    <string name="learning_materials">Igazeti</string>
+    <string name="search_materials">Shakisha ibikoresho</string>
+    <string name="go_to_page">Jya ku ipaji</string>
+    <string name="enter_page_number">Injiza nimero y\'ipaji</string>
+    <string name="add_bookmark">Ongeraho Bukamakayi</string>
+    <string name="bookmark_name_optional">Izina ry\'Ikimenyetso (si ngombwa)</string>
+    <string name="view_bookmarks">Reba ububiko bw’amapaji</string>
+    <string name="bookmarks">Amapaji wabitse</string>
+    <string name="toggle_layout">Toggle Layout</string>
+    <string name="already_have_an_account">Niba Usanzwe</string>
+    <string name="new_user">Niba uri mushya</string>
+    <string name="translation_warning">Mwihangane, ifatabuguzi ryanyu ntiribemerera bona Habiba mururimi mwifuza.</string>
+    <string name="days"> Iminsi</string>
+    <string name="retry" >Ongera ugerageze</string>
+    <string name="irembo_license_service">Serivisi ya Irembo y’Uruhushya rwo Gutwara</string>
+    <string name="applicant_name">Amazina</string>
+    <string name="phone_number">Numero ya Telefoni</string>
+    <string name="national_id">Indangamuntu</string>
+    <string name="address">Aderesi</string>
+    <string name="license_category">Icyiciro cy\’Uruhushya</string>
+    <string name="license_type">Ubwoko bw’Uruhushya</string>
+    <string name="learner">Uruhushya rwagateganyo</string>
+    <string name="full">Uruhushya Rwa burundu</string>
+    <string name="application_type">Ubwoko bw\’Ubusabe</string>
+    <string name="new_license">Ubusabe Bushya</string>
+    <string name="renewal">Kongera Gusaba</string>
+    <string name="duplicate">Kopi y\’Uruhushya</string>
+    <string name="submit_text">Ohereza</string>
+    <string name="speacial_request">Ohereza</string>
+    <string name="description">Ibisobanuro</string>
+    <string name="category">Icyiciro</string>
+    <string name="service_name">Izina rya Serivisi</string>
+    <string name="special_irembo_service">Serivisi Yihariye ya Irembo (BUSANZA)</string>
+    <string name="my_applications">Ubusabe Bwanjye</string>
+    <string name="search_by_id_or_reference">Shakisha ID cyangwa Reference</string>
+    <string name="all">Byose</string>
+    <string name="pending">Bitegerejwe</string>
+    <string name="action_required">Ibikenewe gukorwa</string>
+    <string name="done">Byarangiye</string>
+    <string name="new_application">Ubusabe Bushya</string>
+    <string name="provisional_license_text">Uruhushya rw\'Agateganyo</string>
+    <string name="provisional_license">Uruhushya rw\'Agateganyo cg rwa burundu</string>
+    <string name="download_pdf">Kurura PDF</string>
+    <string name="payment_required">Birasaba Kwishyura</string>
+    <string name="track_application">Kurikirana Dosiye</string>
+    <string name="track_application_prompt">Shyiramo nimero ya dosiye yawe urebe aho bigeze</string>
+    <string name="application_number">Nimero ya Dosiye</string>
+    <string name="track">Kurikirana</string>
+    <string name="recent_activity">Ibikorwa Biheruka</string>
+    <string name="view_all">Reba Byose</string>
+    <string name="browse_services">Reba Serivisi</string>
+    <string name="today">Uyu munsi</string>
+    <string name="application_details">Ibisobanuro bya Dosiye</string>
+    <string name="status">IMIMERERE</string>
+    <string name="ref">Ref:</string>
+    <string name="date">Itariki</string>
+    <string name="progress">Aho Bigeze</string>
+    <string name="current_step">Icyiciro Kigezweho</string>
+    <string name="_0">0%</string>
+    <string name="open_group">Fungura Itsinda</string>
+    <string name="quick_access">KWINJIRA BYIHUSE</string>
+    <string name="learning_materials_dashboard">Imfashanyigisho</string>
+    <string name="all_services">Saba kode yo gukoreraho ikizamini</string>
+    <string name="whatsapp_group_text">Amatsinda ya WhatsApp</string>
+    <string name="help_text">Amabwiriza yo gukoresha porogaramu</string>
+    <string name="chip_all">Byose</string>
+    <string name="chip_pending">Bitegereje</string>
+    <string name="chip_processing">Birimo Gutunganywa</string>
+    <string name="chip_action">Igikorwa</string>
+    <string name="chip_approved">Byemejwe</string>
+    <string name="chip_rejected">Byanzwe</string>
+    <string name="app_logo">App logo</string>
+    <string name="confirm">Emeza</string>
+    <string name="back">Subira Inyuma</string>
+    <string name="select_answer">Hitamo Igisubizo</string>
+    <string name="instructions_4">
+100 RWF = ikizamini 1 (umunsi 1),
+1000 RWF = ibizamini 10 (iminsi 10),
+2000 RWF = ibizamini byose (iminsi 25),
+5000 RWF = ibizamini byose (amezi 6).
+</string>
+
+    <string name="header_price">Igiciro</string>
+    <string name="header_access">Uburenganzira</string>
+
+    <!-- Notification Channels -->
+    <string name="default_notification_channel_id" translatable="false">default_channel</string>
+    <string name="general_channel_id" translatable="false">general_channel</string>
+    <string name="general_channel_name">General Announcements</string>
+    <string name="general_channel_description">Notifications for general announcements and updates.</string>
+    <string name="exams_channel_id" translatable="false">exams_channel</string>
+    <string name="exams_channel_name">Exams</string>
+    <string name="exams_channel_description">Notifications for exam reminders and results.</string>
+    <string name="irembo_channel_id" translatable="false">irembo_channel</string>
+    <string name="irembo_channel_name">Irembo</string>
+    <string name="irembo_channel_description">Notifications for Irembo services.</string>
+    <string name="application_channel_id" translatable="false">application_channel</string>
+    <string name="application_channel_name">My Applications</string>
+    <string name="application_channel_description">Notifications for your applications.</string>
+    <string name="subscription_channel_id" translatable="false">subscription_channel</string>
+    <string name="subscription_channel_name">Subscription</string>
+    <string name="subscription_channel_description">Notifications for your subscription status.</string>
+    <string name="status_channel_name">Imimerere y\'Ubusabe</string>
+    <string name="status_channel_description">Amakuru yerekeye imimerere y\'ubusabe bwa Irembo.</string>
+
+</resources>

@@ -1,0 +1,298 @@
+package com.drivingschoolrwandaapp.repository;
+
+import android.content.Context;
+import android.content.Intent;
+
+import androidx.annotation.NonNull;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
+import com.drivingschoolrwandaapp.api.ApiService;
+import com.drivingschoolrwandaapp.database.dao.UserDao;
+import com.drivingschoolrwandaapp.database.entities.User;
+import com.drivingschoolrwandaapp.data.local.preferences.TokenManager;
+import com.drivingschoolrwandaapp.models.request.ForgotPasswordRequest;
+import com.drivingschoolrwandaapp.models.request.LoginRequest;
+import com.drivingschoolrwandaapp.models.request.PasswordChangeRequest;
+import com.drivingschoolrwandaapp.models.request.ResetPasswordRequest;
+import com.drivingschoolrwandaapp.models.request.VerifyOtpRequest;
+import com.drivingschoolrwandaapp.models.response.ApiResponse;
+import com.drivingschoolrwandaapp.models.response.LoginResponse;
+import com.drivingschoolrwandaapp.ui.activities.LoginActivity;
+import com.google.gson.Gson;
+
+import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class UserRepository {
+    private final ApiService apiService;
+    private final UserDao userDao;
+    private final Context context;
+    private final TokenManager tokenManager;
+    private final ExecutorService executorService;
+    private final Gson gson = new Gson();
+
+    public UserRepository(Context context, ApiService apiService, UserDao userDao, TokenManager tokenManager) {
+        this.context = context.getApplicationContext();
+        this.apiService = apiService;
+        this.userDao = userDao;
+        this.tokenManager = tokenManager;
+        this.executorService = Executors.newSingleThreadExecutor();
+    }
+
+    private String parseErrorMessage(Response<?> response) {
+        String errorMessage = "An unknown error occurred";
+        if (response.errorBody() != null) {
+            try {
+                ApiResponse<?> errorResponse = gson.fromJson(response.errorBody().charStream(), ApiResponse.class);
+                if (errorResponse.getMessage() != null) {
+                    errorMessage = errorResponse.getMessage();
+                } else if (errorResponse.getError() != null) {
+                    errorMessage = errorResponse.getError();
+                }
+            } catch (Exception e) {
+                // Keep default error message
+            }
+        }
+        return errorMessage;
+    }
+
+    public LiveData<Resource<LoginResponse>> login(String email, String password, String deviceId) {
+        MutableLiveData<Resource<LoginResponse>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading(null));
+        LoginRequest request = new LoginRequest(email, password, deviceId);
+        apiService.login(request).enqueue(new Callback<LoginResponse>() {
+            @Override
+            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    result.postValue(Resource.success(response.body()));
+                } else {
+                    result.postValue(Resource.error(parseErrorMessage(response), null));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<LoginResponse> call, Throwable t) {
+                result.postValue(Resource.error(t.getMessage(), null));
+            }
+        });
+        return result;
+    }
+
+    public LiveData<Resource<ApiResponse<Void>>> changePassword(String currentPassword, String newPassword, String confirmPassword) {
+        MutableLiveData<Resource<ApiResponse<Void>>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading(null));
+        PasswordChangeRequest request = new PasswordChangeRequest(currentPassword, newPassword, confirmPassword);
+        apiService.changePassword(request).enqueue(new Callback<ApiResponse<Void>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<Void>> call, Response<ApiResponse<Void>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    result.postValue(Resource.success(response.body()));
+                } else {
+                    result.postValue(Resource.error(parseErrorMessage(response), null));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
+                result.postValue(Resource.error(t.getMessage(), null));
+            }
+        });
+        return result;
+    }
+
+    public LiveData<Resource<ApiResponse<Void>>> forgotPassword(String email) {
+        MutableLiveData<Resource<ApiResponse<Void>>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading(null));
+        ForgotPasswordRequest request = new ForgotPasswordRequest(email);
+        apiService.forgotPassword(request).enqueue(new Callback<ApiResponse<Void>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<Void>> call, Response<ApiResponse<Void>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    result.postValue(Resource.success(response.body()));
+                } else {
+                    result.postValue(Resource.error(parseErrorMessage(response), null));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
+                result.postValue(Resource.error(t.getMessage(), null));
+            }
+        });
+        return result;
+    }
+
+    public LiveData<Resource<ApiResponse<String>>> verifyOtp(String email, String otp) {
+        MutableLiveData<Resource<ApiResponse<String>>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading(null));
+        VerifyOtpRequest request = new VerifyOtpRequest(email, otp);
+        apiService.verifyOtp(request).enqueue(new Callback<ApiResponse<String>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<String>> call, Response<ApiResponse<String>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    result.postValue(Resource.success(response.body()));
+                } else {
+                    result.postValue(Resource.error(parseErrorMessage(response), null));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<String>> call, Throwable t) {
+                result.postValue(Resource.error(t.getMessage(), null));
+            }
+        });
+        return result;
+    }
+
+    public LiveData<Resource<ApiResponse<Void>>> resetPassword(String token, String newPassword, String confirmPassword) {
+        MutableLiveData<Resource<ApiResponse<Void>>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading(null));
+        ResetPasswordRequest request = new ResetPasswordRequest(token, newPassword, confirmPassword);
+        apiService.resetPassword(request).enqueue(new Callback<ApiResponse<Void>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<Void>> call, Response<ApiResponse<Void>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    result.postValue(Resource.success(response.body()));
+                } else {
+                    result.postValue(Resource.error(parseErrorMessage(response), null));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
+                result.postValue(Resource.error(t.getMessage(), null));
+            }
+        });
+        return result;
+    }
+
+    public void logout() {
+        apiService.logout().enqueue(new Callback<ApiResponse<Void>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<Void>> call, Response<ApiResponse<Void>> response) {
+                performLocalLogout();
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
+                performLocalLogout();
+            }
+        });
+    }
+
+
+    public LiveData<com.drivingschoolrwandaapp.database.entities.User> loadFromDb() {
+        return userDao.getUser();
+    }
+
+    public void updateUser(User user) {
+        executorService.execute(() -> userDao.insert(user));
+    }
+
+    public LiveData<Resource<ApiResponse<Void>>> sleepSubscription(int languageId) {
+        MutableLiveData<Resource<ApiResponse<Void>>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading(null));
+        apiService.sleepSubscription(languageId).enqueue(new Callback<ApiResponse<Void>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<Void>> call, Response<ApiResponse<Void>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    result.postValue(Resource.success(response.body()));
+                } else {
+                    result.postValue(Resource.error(parseErrorMessage(response), null));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
+                result.postValue(Resource.error(t.getMessage(), null));
+            }
+        });
+        return result;
+    }
+
+    public void deleteAccount() {
+        apiService.deleteAccount().enqueue(new Callback<ApiResponse<Void>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<Void>> call, Response<ApiResponse<Void>> response) {
+                performLocalLogout();
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
+                performLocalLogout();
+            }
+        });
+    }
+
+    private void performLocalLogout() {
+        executorService.execute(() -> {
+            userDao.deleteAll();
+            tokenManager.clearTokens();
+            navigateToLogin();
+        });
+    }
+
+    private void navigateToLogin() {
+        Intent intent = new Intent(context, LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        context.startActivity(intent);
+    }
+
+    public LiveData<Resource<com.drivingschoolrwandaapp.database.entities.User>> getProfile() {
+        return new NetworkBoundResource<com.drivingschoolrwandaapp.database.entities.User, ApiResponse<com.drivingschoolrwandaapp.models.entities.User>>() {
+            @Override
+            protected void saveCallResult(@NonNull ApiResponse<com.drivingschoolrwandaapp.models.entities.User> item) {
+                if (item.getData() != null) {
+                    com.drivingschoolrwandaapp.database.entities.User dbUser = mapUser(item.getData());
+                    userDao.insert(dbUser);
+                }
+            }
+
+            @NonNull
+            @Override
+            protected LiveData<com.drivingschoolrwandaapp.database.entities.User> loadFromDb() {
+                return userDao.getUser();
+            }
+
+            @NonNull
+            @Override
+            protected Call<ApiResponse<com.drivingschoolrwandaapp.models.entities.User>> createCall() {
+                return apiService.getProfile();
+            }
+        }.getAsLiveData();
+    }
+
+    private com.drivingschoolrwandaapp.database.entities.User mapUser(com.drivingschoolrwandaapp.models.entities.User networkUser) {
+        com.drivingschoolrwandaapp.database.entities.User dbUser = new com.drivingschoolrwandaapp.database.entities.User();
+        dbUser.setId(networkUser.getId());
+        dbUser.setFirstName(networkUser.getFirstName());
+        dbUser.setMiddleName(networkUser.getMiddleName());
+        dbUser.setLastName(networkUser.getLastName());
+        dbUser.setEmail(networkUser.getEmail());
+        dbUser.setPhoneNumber(networkUser.getPhoneNumber());
+        dbUser.setDob(networkUser.getDob());
+        dbUser.setActive(networkUser.isActive());
+        dbUser.setProfilePicture(networkUser.getProfilePicture());
+        dbUser.setRoleId(networkUser.getRole());
+        dbUser.setLanguageId(networkUser.getLanguageId());
+        dbUser.setTimezoneId(1); // Placeholder
+        dbUser.setCreatedAt(networkUser.getCreatedAt());
+        
+        if (networkUser.getUserTestAccess() != null) {
+            dbUser.setMaxTestAccess(networkUser.getUserTestAccess().getMaxTest());
+            dbUser.setTestAccessExpiresAt(networkUser.getUserTestAccess().getExpiresAt());
+            dbUser.setTestAccessStatus(networkUser.getUserTestAccess().getStatus());
+        } else {
+            dbUser.setMaxTestAccess(0);
+            dbUser.setTestAccessStatus("INACTIVE");
+        }
+        
+        return dbUser;
+    }
+}

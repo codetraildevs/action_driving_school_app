@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@id/testsFragment"
+        android:icon="@drawable/ic_start_exam"
+        android:title="@string/exams" />
+
+    <item
+        android:id="@id/iremboActivity"
+        android:icon="@drawable/ic_irembo"
+        android:title="@string/irembo_services" />
+
+
+    <item
+        android:id="@id/dashboardFragment"
+        android:icon="@drawable/ic_home"
+        android:title="@string/home" />
+
+
+
+    <item
+        android:id="@id/materialsFragment"
+        android:icon="@drawable/ic_materials"
+        android:title="@string/materials" />
+
+    <item
+        android:id="@id/profileFragment"
+        android:icon="@drawable/ic_profile"
+        android:title="@string/profile" />
+
+</menu>

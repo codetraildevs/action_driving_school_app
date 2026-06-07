@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- ************ PRIMARY (your chosen color) ************ -->
+    <color name="colorPrimary">#B7EBF4</color>
+    <color name="my_primary">#33A1C9</color>
+    <color name="my_primary_variant">#8BCFD9</color>
+    <color name="colorOnPrimary">#33A1C9</color> <!-- dark enough for readability -->
+    <color name="colorPrimaryTransparent">#80B7EBF4</color>
+
+    <!-- Primary container (lighter tone for elevated surfaces) -->
+    <color name="colorPrimaryContainer">#DCF7FC</color>
+    <color name="colorOnPrimaryContainer">#00191E</color>
+
+    <!-- Dark mode primary (deeper version of your color) -->
+    <color name="colorPrimaryDark">#8BCFD9</color>
+
+
+    <!-- ************ SECONDARY ************ -->
+    <color name="colorSecondary">#D81B60</color>
+    <color name="colorOnSecondary">#FFFFFF</color>
+    <color name="colorSecondaryContainer">#FFDDE1</color>
+    <color name="colorOnSecondaryContainer">#400010</color>
+
+
+    <!-- ************ TERTIARY ************ -->
+    <color name="colorTertiary">#2962FF</color>
+    <color name="colorOnTertiary">#FFFFFF</color>
+    <color name="colorTertiaryContainer">#D1E4FF</color>
+    <color name="colorOnTertiaryContainer">#001D36</color>
+
+
+
+    <!-- ************ BACKGROUND & SURFACE ************ -->
+    <color name="colorBackground">#F8FDFF</color>
+    <color name="colorOnBackground">#001F2A</color>
+
+    <color name="colorSurface">#FFFFFF</color>
+    <color name="colorOnSurface">#001F2A</color>
+
+    <color name="colorSurfaceVariant">#E0E0E0</color>
+    <color name="colorSurfaceBright">#FFFFFF</color>
+    <color name="colorSurfaceContainer">#F5F5F5</color>
+    <color name="colorSurfaceContainerLow">#FAFAFA</color>
+    <color name="colorSurfaceContainerHigh">#E0E0E0</color>
+
+
+    <!-- ************ OTHER STANDARD COLORS ************ -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+
+    <!-- ************ ERROR ************ -->
+    <color name="colorError">#B00020</color>
+    <color name="colorOnError">#FFFFFF</color>
+
+
+    <!-- ************ LEGACY COLORS ************ -->
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+
+
+    <!-- ************ OUTLINE / INVERSE ************ -->
+    <color name="colorOutline">#757575</color>
+    <color name="colorOutlineVariant">#BDBDBD</color>
+
+    <color name="colorInversePrimary">#4A7882</color>
+    <color name="colorInverseSurface">#303030</color>
+    <color name="colorInverseOnSurface">#F5F5F5</color>
+
+
+    <!-- ************ CUSTOM QUIZ COLORS ************ -->
+    <color name="correct_answer_green">#00C853</color>
+    <color name="incorrect_answer_red">#DD2C00</color>
+    <color name="selected_answer_blue">#2962FF</color>
+
+
+    <!-- ************ DASHBOARD ICON PALETTE ************ -->
+    <color name="dashboard_icon_1">#B7EBF4</color> <!-- Primary -->
+    <color name="dashboard_icon_2">#D81B60</color> <!-- Secondary -->
+    <color name="dashboard_icon_3">#2962FF</color> <!-- Tertiary -->
+    <color name="dashboard_icon_4">#00C853</color> <!-- Success -->
+
+    <!-- ************ STATUS COLORS ************ -->
+    <color name="status_pending_text">#FF9800</color>
+    <color name="status_action_text">#D32F2F</color>
+    <color name="status_done_text">#4CAF50</color>
+    <color name="status_rejected_text">#B00020</color>
+
+
+    <color name="bottom_nav_selected">#33A1C9</color>
+    <color name="bottom_nav_unselected">#757575</color>
+    <color name="bottom_nav_bg">#FFFFFF</color>
+    <color name="bottom_nav_outline">#E0E0E0</color>
+
+
+</resources>
