@@ -52,3 +52,6 @@ keystore.properties
 out/
 *.ipr
 *.iws
+
+# Firebase config (public repo - use google-services.json.example)
+**/google-services.json
