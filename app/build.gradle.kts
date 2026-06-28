@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     kotlin("android")
@@ -18,7 +20,10 @@ android {
         versionCode = 77
         versionName = "1.0.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        resourceConfigurations += listOf("en", "fr", "rw")
+    }
+
+    androidResources {
+        localeFilters += listOf("en", "fr", "rw")
     }
 
 
@@ -34,10 +39,21 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file("upload-keystore.jks")
-            storePassword = "Password123."
-            keyAlias = "upload"
-            keyPassword = "Password123."
+            val keystorePropertiesFile = rootProject.file("keystore.properties")
+            if (keystorePropertiesFile.exists()) {
+                val properties = Properties()
+                properties.load(keystorePropertiesFile.inputStream())
+                storeFile = file(properties.getProperty("storeFile", "upload-keystore.jks"))
+                storePassword = properties.getProperty("storePassword", "Password123.")
+                keyAlias = properties.getProperty("keyAlias", "upload")
+                keyPassword = properties.getProperty("keyPassword", "Password123.")
+            } else {
+                // Fallback: use env vars (GitHub Actions) or hardcoded defaults (local dev)
+                storeFile = file(System.getenv("KEYSTORE_FILE") ?: "upload-keystore.jks")
+                storePassword = System.getenv("KEYSTORE_STORE_PASSWORD") ?: "Password123."
+                keyAlias = System.getenv("KEYSTORE_KEY_ALIAS") ?: "upload"
+                keyPassword = System.getenv("KEYSTORE_KEY_PASSWORD") ?: "Password123."
+            }
         }
     }
 
