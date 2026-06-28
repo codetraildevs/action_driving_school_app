@@ -18,6 +18,7 @@
             android:layout_height="64dp"
             android:src="@drawable/user_xmark_alt_1_svgrepo_com"
             app:tint="@android:color/holo_red_dark"
+            android:contentDescription="@null"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="16dp"/>
 

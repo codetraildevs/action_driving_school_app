@@ -1,5 +1,6 @@
 package com.drivingschoolrwandaapp.ui.activities;
 
+import android.annotation.SuppressLint;
 import android.app.DownloadManager;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -73,12 +74,14 @@ public class WebViewActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     private void setupWebView(ProgressBar progressBar) {
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setDomStorageEnabled(true);
         webView.getSettings().setDatabaseEnabled(true);
         webView.getSettings().setAllowFileAccess(true);
         webView.getSettings().setAllowContentAccess(true);
+        // Safe WebViewClient below restricts URL loading via shouldOverrideUrlLoading and handles external links appropriately
         webView.getSettings().setUseWideViewPort(true);
         webView.getSettings().setLoadWithOverviewMode(true);
         webView.getSettings().setBuiltInZoomControls(true);

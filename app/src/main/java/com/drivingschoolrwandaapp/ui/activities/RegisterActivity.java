@@ -3,6 +3,7 @@ package com.drivingschoolrwandaapp.ui.activities;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.annotation.SuppressLint;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
@@ -107,6 +108,7 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         String phone = Objects.requireNonNull(phoneField.getText()).toString().trim();
+        @SuppressLint("HardwareIds")
         String password = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
 
         String deviceId = password;
@@ -142,6 +144,7 @@ public class RegisterActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     Toast.makeText(RegisterActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
                     String email = phoneField.getText().toString().trim();
+                    @SuppressLint("HardwareIds")
                     String password = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
                     String deviceId = password;
                     userViewModel.login(email, password, deviceId);

@@ -28,10 +28,10 @@
             android:layout_marginTop="40dp"
             android:src="@drawable/user_plus_svgrepo_com"
             app:tint="@color/my_primary"
+            android:contentDescription="@null"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            />
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <!-- Header -->
         <TextView

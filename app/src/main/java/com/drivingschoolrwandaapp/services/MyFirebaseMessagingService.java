@@ -1,6 +1,7 @@
 
 package com.drivingschoolrwandaapp.services;
 
+import android.annotation.SuppressLint;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -77,6 +78,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         sendRegistrationToServer(token);
     }
 
+    @SuppressLint("HardwareIds")
     private void sendRegistrationToServer(String token) {
         String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
         ApiService apiService = ApiClient.getInstance(this).getApiService();

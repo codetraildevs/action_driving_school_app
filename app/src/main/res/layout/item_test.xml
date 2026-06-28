@@ -23,6 +23,7 @@
             android:layout_width="90dp"
             android:layout_height="90dp"
             android:scaleType="centerCrop"
+            android:contentDescription="@null"
             app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"

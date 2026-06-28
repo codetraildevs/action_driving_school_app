@@ -315,8 +315,8 @@ public class IremboFragment extends Fragment implements IremboServiceAdapter.OnI
             RadioButton rbLicenseType = dialogView.findViewById(selectedLicenseTypeId);
             RadioButton rbAppType = dialogView.findViewById(selectedAppTypeId);
 
-            String licenseType = rbLicenseType.getText().toString().toUpperCase();
-            String appType = rbAppType.getText().toString().toUpperCase();
+            String licenseType = rbLicenseType.getText().toString().toUpperCase(Locale.ROOT);
+            String appType = rbAppType.getText().toString().toUpperCase(Locale.ROOT);
 
             IremboLicenseRequest request = new IremboLicenseRequest(
                     category, licenseType, appType, name, phone, nationalId, address

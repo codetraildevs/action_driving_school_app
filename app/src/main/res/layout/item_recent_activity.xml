@@ -18,6 +18,7 @@
             android:layout_height="40dp"
             android:src="@drawable/ic_car_side"
             app:tint="@color/my_primary"
+            android:contentDescription="@null"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 

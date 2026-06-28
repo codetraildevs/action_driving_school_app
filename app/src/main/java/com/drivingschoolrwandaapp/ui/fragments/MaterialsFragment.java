@@ -118,7 +118,7 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
 
         List<LearningMaterial> filteredList = new ArrayList<>();
         for (LearningMaterial material : allMaterials) {
-            if (material.getTitle().toLowerCase().contains(query.toLowerCase())) {
+            if (material.getTitle().toLowerCase(Locale.ROOT).contains(query.toLowerCase(Locale.ROOT))) {
                 filteredList.add(material);
             }
         }

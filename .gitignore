@@ -51,6 +51,11 @@ Thumbs.db
 *.keystore
 keystore.properties
 
+# Node.js artifacts (generated during tool use)
+node_modules/
+package.json
+package-lock.json
+
 # Extra IDE artifacts
 out/
 *.ipr

@@ -349,7 +349,7 @@ public class IremboActivity extends AppCompatActivity implements IremboServiceAd
 
             RadioButton rbLicenseType = dialogView.findViewById(selectedLicenseTypeId);
 
-            String licenseType = rbLicenseType.getText().toString().toUpperCase();
+            String licenseType = rbLicenseType.getText().toString().toUpperCase(Locale.ROOT);
             String appType = "New";
 
             IremboLicenseRequest request = new IremboLicenseRequest(

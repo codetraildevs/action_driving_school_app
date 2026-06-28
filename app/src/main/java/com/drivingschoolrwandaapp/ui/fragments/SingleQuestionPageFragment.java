@@ -86,6 +86,7 @@ public class SingleQuestionPageFragment extends Fragment implements QuestionOpti
 
         final TextView questionTextView = view.findViewById(R.id.question_text_view);
         final TextView translationWarningTextView = view.findViewById(R.id.translation_warning);
+        final View questionImageContainer = view.findViewById(R.id.question_image_container);
         final ImageView questionImageView = view.findViewById(R.id.question_image_view);
         final RecyclerView optionsRecyclerView = view.findViewById(R.id.options_recycler_view);
 
@@ -150,6 +151,7 @@ public class SingleQuestionPageFragment extends Fragment implements QuestionOpti
                     }
 
                     if (displayImageUrl != null && !displayImageUrl.isEmpty()) {
+                        questionImageContainer.setVisibility(VISIBLE);
                         questionImageView.setVisibility(VISIBLE);
                         // Load local asset URIs directly; prepend SITE_URL for relative network paths
                         String imageUrl = displayImageUrl;
@@ -158,6 +160,7 @@ public class SingleQuestionPageFragment extends Fragment implements QuestionOpti
                         }
                         Glide.with(this).load(imageUrl).into(questionImageView);
                     } else {
+                        questionImageContainer.setVisibility(GONE);
                         questionImageView.setVisibility(GONE);
                     }
 

@@ -20,6 +20,7 @@
             android:layout_height="48dp"
             android:layout_marginBottom="8dp"
             tools:src="@drawable/ic_car_side"
+            android:contentDescription="@null"
             app:tint="@color/my_primary"/>
 
         <TextView

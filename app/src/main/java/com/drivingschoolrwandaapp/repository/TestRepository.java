@@ -120,8 +120,17 @@ public class TestRepository {
                 return result;
             }
 
+            // Find sequential position (consistent with getTests() i+1 numbering)
+            int sequentialNumber = 1;
+            for (int i = 0; i < localExams.size(); i++) {
+                if (localExams.get(i).getQuizId().equals(localExam.getQuizId())) {
+                    sequentialNumber = i + 1;
+                    break;
+                }
+            }
+
             // Build TestWithQuestions from local data
-            TestWithQuestions testWithQuestions = buildTestWithQuestions(localExam, testId, languageCode);
+            TestWithQuestions testWithQuestions = buildTestWithQuestions(localExam, testId, languageCode, sequentialNumber);
             result.setValue(Resource.success(testWithQuestions));
         } catch (Exception e) {
             Log.e(TAG, "Error loading local exam questions", e);
@@ -134,12 +143,12 @@ public class TestRepository {
     /**
      * Build a TestWithQuestions entity from a LocalExam.
      */
-    private TestWithQuestions buildTestWithQuestions(LocalExam localExam, int testId, String languageCode) {
+    private TestWithQuestions buildTestWithQuestions(LocalExam localExam, int testId, String languageCode, int sequentialNumber) {
         TestEntity testEntity = new TestEntity();
         testEntity.setId(testId);
         testEntity.setTitle(localExam.getTitle());
         testEntity.setDescription(localExam.getExamType());
-        testEntity.setTestNumber(parseQuizId(localExam.getQuizId(), testId));
+        testEntity.setTestNumber(sequentialNumber);
         testEntity.setImageUrl(convertToAssetUri(localExam.getExamImgUrl()));
         testEntity.setTotalMarks(localExam.getQuestions().size());
         testEntity.setPassMarks((int) Math.ceil(localExam.getQuestions().size() * 0.5));

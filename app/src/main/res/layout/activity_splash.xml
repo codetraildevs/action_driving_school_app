@@ -14,7 +14,7 @@
         android:layout_height="150dp"
         android:layout_centerInParent="true"
         android:src="@drawable/driving_school_svgrepo_com"
-        />
+        android:contentDescription="@null" />
 
     <!-- App Name -->
     <TextView
