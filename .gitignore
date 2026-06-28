@@ -24,6 +24,7 @@ assets/
 # Generated / artifacts
 *.md
 !README.md
+!RELEASE_CHECKLIST.md
 nul
 
 # App build outputs
