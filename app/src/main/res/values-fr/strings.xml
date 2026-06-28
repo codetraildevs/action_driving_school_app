@@ -201,7 +201,7 @@
     <string name="cancel">Annuler</string>
     <string name="test_passed">Réussi !</string>
     <string name="test_failed">Échoué</string>
-    <string name="score_format">Votre score : %d / %d</string>
+    <string name="score_format">Votre score : %1$d / %2$d</string>
     <string name="error_required_field">Requis</string>
 
     <string name="about_us_text">
@@ -391,4 +391,18 @@ Quand tu arrives à la dernière question, tu appuies sur « Terminer l’examen
     <string name="status_channel_name">État de l\'application</string>
     <string name="status_channel_description">Notifications pour les mises à jour du statut des applications Irembo.</string>
 
+    <string name="question_counter_format">Question %1$d sur %2$d</string>
+    <string name="percent_complete_format">%d%% terminé</string>
+    <string name="previous_tests_summary">Vos Résultats</string>
+    <string name="total_tests">Total des Tests</string>
+    <string name="average_score">Score Moyen</string>
+    <string name="pass_rate">Taux de Réussite</string>
+    <string name="no_tests_yet">Aucun Test</string>
+    <string name="no_tests_yet_message">Prêt à passer votre premier test? Commencez à vous entraîner!</string>
+    <string name="start_practicing">Commencer</string>
+    <string name="score_details">Score: %1$d / %2$d</string>
+    <string name="result_passed">Réussi</string>
+    <string name="result_failed">Échoué</string>
+    <string name="percentage_score">%d%%</string>
+    <string name="exam_number_format">Examen %d</string>
 </resources>

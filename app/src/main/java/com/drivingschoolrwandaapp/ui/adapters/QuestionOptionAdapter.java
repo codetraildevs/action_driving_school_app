@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.RadioButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -18,7 +17,6 @@ import com.drivingschoolrwandaapp.api.ApiClient;
 import com.drivingschoolrwandaapp.models.entities.QuestionOption;
 import com.drivingschoolrwandaapp.models.entities.QuestionOptionTranslation;
 import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.color.MaterialColors;
 
 import java.util.List;
 
@@ -32,6 +30,8 @@ public class QuestionOptionAdapter extends RecyclerView.Adapter<QuestionOptionAd
     private final int correctOptionId;
     private OnOptionSelectedListener listener;
     private int languageId = 41;
+
+    private static final String[] OPTION_LABELS = {"A", "B", "C", "D", "E", "F"};
 
     public interface OnOptionSelectedListener {
         void onOptionSelected(int optionId);
@@ -94,26 +94,26 @@ public class QuestionOptionAdapter extends RecyclerView.Adapter<QuestionOptionAd
 
     class QuestionOptionViewHolder extends RecyclerView.ViewHolder {
         MaterialCardView cardView;
-        RadioButton radioButton;
+        TextView optionIndicator;
         TextView optionText;
         ImageView optionImage;
+        ImageView checkIcon;
 
         public QuestionOptionViewHolder(@NonNull View itemView) {
             super(itemView);
             cardView = (MaterialCardView) itemView;
-            radioButton = itemView.findViewById(R.id.option_radio_button);
+            optionIndicator = itemView.findViewById(R.id.option_indicator);
             optionText = itemView.findViewById(R.id.option_text_view);
             optionImage = itemView.findViewById(R.id.option_image_view);
+            checkIcon = itemView.findViewById(R.id.option_check_icon);
 
             itemView.setOnClickListener(v -> {
                 if (isReviewMode) return;
                 int position = getAdapterPosition();
 
-
                 if (position == RecyclerView.NO_POSITION) {
                     return;
                 }
-
 
                 int previousSelectedPosition = selectedPosition;
                 selectedPosition = getAdapterPosition();
@@ -151,10 +151,15 @@ public class QuestionOptionAdapter extends RecyclerView.Adapter<QuestionOptionAd
                 optionText.setText("");
             }
 
+            // Set option indicator letter
+            if (position < OPTION_LABELS.length) {
+                optionIndicator.setText(OPTION_LABELS[position]);
+            }
+
+            // Load option image
             String imageUrl = option.getImageUrl();
             if (imageUrl != null && !imageUrl.isEmpty()) {
                 optionImage.setVisibility(View.VISIBLE);
-                // Skip SITE_URL prefix for local asset URIs (file://) and http/https URLs
                 if (!imageUrl.startsWith("http") && !imageUrl.startsWith("file://")) {
                     if (!imageUrl.startsWith("/")) {
                         imageUrl = "/" + imageUrl;
@@ -170,38 +175,73 @@ public class QuestionOptionAdapter extends RecyclerView.Adapter<QuestionOptionAd
                 optionImage.setVisibility(View.GONE);
             }
 
+            boolean isSelected = position == selectedPosition;
+
             if (isReviewMode) {
-                radioButton.setChecked(selectedAnswerId != null && selectedAnswerId == option.getId());
+                boolean wasSelectedByUser = selectedAnswerId != null && selectedAnswerId == option.getId();
+                
+                // Reset to default state
+                cardView.setCardBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.colorSurface));
                 cardView.setStrokeColor(Color.TRANSPARENT);
+                optionIndicator.setBackgroundTintList(ContextCompat.getColorStateList(itemView.getContext(), R.color.colorSurfaceVariant));
+                optionIndicator.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.colorOnSurface));
+                checkIcon.setVisibility(View.GONE);
+
                 if (option.isCorrect()) {
+                    // Correct answer - green highlight
+                    cardView.setCardBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.colorPrimaryContainer));
                     cardView.setStrokeColor(ContextCompat.getColor(itemView.getContext(), R.color.correct_answer_green));
-                } else if (selectedAnswerId != null && selectedAnswerId == option.getId()) {
+                    optionIndicator.setBackgroundTintList(ContextCompat.getColorStateList(itemView.getContext(), R.color.correct_answer_green));
+                    optionIndicator.setTextColor(Color.WHITE);
+                } else if (wasSelectedByUser) {
+                    // User's wrong selection - red highlight
                     cardView.setStrokeColor(ContextCompat.getColor(itemView.getContext(), R.color.incorrect_answer_red));
+                    optionIndicator.setBackgroundTintList(ContextCompat.getColorStateList(itemView.getContext(), R.color.incorrect_answer_red));
+                    optionIndicator.setTextColor(Color.WHITE);
                 }
             } else {
-                radioButton.setChecked(position == selectedPosition);
+                // Normal mode
+                if (isSelected) {
+                    cardView.setCardBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.colorPrimaryContainer));
+                    cardView.setStrokeColor(ContextCompat.getColor(itemView.getContext(), R.color.my_primary));
+                    optionIndicator.setBackgroundTintList(ContextCompat.getColorStateList(itemView.getContext(), R.color.my_primary));
+                    optionIndicator.setTextColor(Color.WHITE);
+                    checkIcon.setVisibility(View.VISIBLE);
+                    checkIcon.setImageResource(R.drawable.ic_check_circle_small);
+                    checkIcon.setColorFilter(ContextCompat.getColor(itemView.getContext(), R.color.my_primary));
+                } else {
+                    cardView.setCardBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.colorSurface));
+                    cardView.setStrokeColor(ContextCompat.getColor(itemView.getContext(), R.color.colorOutlineVariant));
+                    optionIndicator.setBackgroundTintList(ContextCompat.getColorStateList(itemView.getContext(), R.color.colorSurfaceVariant));
+                    optionIndicator.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.colorOnSurfaceVariant));
+                    checkIcon.setVisibility(View.GONE);
+                }
 
-                if (isRealTimeFeedback) {
-                    cardView.setStrokeColor(Color.TRANSPARENT);
-                    if (selectedPosition != -1) { // an item is selected
-                        boolean selectionIsCorrect = options.get(selectedPosition).getId() == correctOptionId;
-                        if (selectionIsCorrect) {
-                            if (position == selectedPosition) {
-                                cardView.setStrokeColor(ContextCompat.getColor(itemView.getContext(), R.color.correct_answer_green));
-                            }
-                        } else { // selection is incorrect
-                            if (position == selectedPosition) { // the selected, incorrect item
-                                cardView.setStrokeColor(ContextCompat.getColor(itemView.getContext(), R.color.incorrect_answer_red));
-                            }
-                            if (option.getId() == correctOptionId) { // the correct item
-                                cardView.setStrokeColor(ContextCompat.getColor(itemView.getContext(), R.color.correct_answer_green));
-                            }
+                // Real-time feedback overrides
+                if (isRealTimeFeedback && selectedPosition != -1) {
+                    boolean selectionIsCorrect = options.get(selectedPosition).getId() == correctOptionId;
+                    if (selectionIsCorrect) {
+                        if (isSelected) {
+                            cardView.setCardBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.colorPrimaryContainer));
+                            cardView.setStrokeColor(ContextCompat.getColor(itemView.getContext(), R.color.correct_answer_green));
+                            optionIndicator.setBackgroundTintList(ContextCompat.getColorStateList(itemView.getContext(), R.color.correct_answer_green));
+                            optionIndicator.setTextColor(Color.WHITE);
+                            checkIcon.setColorFilter(ContextCompat.getColor(itemView.getContext(), R.color.correct_answer_green));
+                        }
+                    } else {
+                        if (isSelected) {
+                            cardView.setCardBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.colorErrorContainer));
+                            cardView.setStrokeColor(ContextCompat.getColor(itemView.getContext(), R.color.incorrect_answer_red));
+                            optionIndicator.setBackgroundTintList(ContextCompat.getColorStateList(itemView.getContext(), R.color.incorrect_answer_red));
+                            optionIndicator.setTextColor(Color.WHITE);
+                            checkIcon.setColorFilter(ContextCompat.getColor(itemView.getContext(), R.color.incorrect_answer_red));
+                        }
+                        if (option.getId() == correctOptionId) {
+                            cardView.setStrokeColor(ContextCompat.getColor(itemView.getContext(), R.color.correct_answer_green));
+                            optionIndicator.setBackgroundTintList(ContextCompat.getColorStateList(itemView.getContext(), R.color.correct_answer_green));
+                            optionIndicator.setTextColor(Color.WHITE);
                         }
                     }
-                } else { // not real time feedback, just highlight selection
-                    int defaultColor = MaterialColors.getColor(itemView, com.google.android.material.R.attr.colorOutlineVariant);
-                    cardView.setStrokeColor(defaultColor);
-                    radioButton.setChecked(false);
                 }
             }
         }

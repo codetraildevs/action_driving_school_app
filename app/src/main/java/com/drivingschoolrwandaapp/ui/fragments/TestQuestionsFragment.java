@@ -15,9 +15,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -45,9 +45,12 @@ public class TestQuestionsFragment extends Fragment {
     private ViewPager2 viewPager;
     private TestQuestionPagerAdapter pagerAdapter;
     private TextView timerTextView;
+    private TextView timerLabel;
     private TextView questionCounterTextView;
-    private Button previousButton, nextButton,  submitButton;
+    private TextView progressTextView;
     private ProgressBar progressBar;
+    private ProgressBar progressBarLoading;
+    private Button previousButton, nextButton, submitButton;
     private LinearLayout errorLayout;
     private Button retryButton;
     private TextView errorTextView;
@@ -58,6 +61,7 @@ public class TestQuestionsFragment extends Fragment {
     private boolean isFree;
     private String title;
     private AppPreferences appPreferences;
+    private int totalQuestions = 0;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -93,15 +97,17 @@ public class TestQuestionsFragment extends Fragment {
 
         viewPager = view.findViewById(R.id.question_view_pager);
         timerTextView = view.findViewById(R.id.timer_text_view);
+        timerLabel = view.findViewById(R.id.timer_label);
         questionCounterTextView = view.findViewById(R.id.question_counter_text_view);
+        progressTextView = view.findViewById(R.id.progress_text_view);
+        progressBar = view.findViewById(R.id.progress_bar);
+        progressBarLoading = view.findViewById(R.id.progress_bar_loading);
         previousButton = view.findViewById(R.id.previous_button);
         nextButton = view.findViewById(R.id.next_button);
         submitButton = view.findViewById(R.id.submit_button);
         errorLayout = view.findViewById(R.id.error_layout);
         retryButton = view.findViewById(R.id.retry_button);
         errorTextView = view.findViewById(R.id.error_text_view);
-
-        progressBar = view.findViewById(R.id.progress_bar);
 
         pagerAdapter = new TestQuestionPagerAdapter(this, isReviewMode, isRealTimeFeedback, isFree);
         viewPager.setAdapter(pagerAdapter);
@@ -111,6 +117,8 @@ public class TestQuestionsFragment extends Fragment {
             nextButton.setVisibility(View.GONE);
             submitButton.setVisibility(View.GONE);
             timerTextView.setVisibility(View.GONE);
+            progressBar.setVisibility(View.GONE);
+            if (timerLabel != null) timerLabel.setVisibility(View.GONE);
 
         } else {
             submitButton.setVisibility(View.VISIBLE);
@@ -137,6 +145,7 @@ public class TestQuestionsFragment extends Fragment {
                 lastPosition = position;
 
                 updateQuestionCounter(position);
+                updateProgress(position);
                 updateNavigationButtons(position);
             }
         });
@@ -145,23 +154,18 @@ public class TestQuestionsFragment extends Fragment {
 
         observeViewModel();
         testViewModel.loadQuestionsForTest(testId);
-
-
     }
     
     private void setupRetryButton() {
         retryButton.setOnClickListener(v -> {
             errorLayout.setVisibility(View.GONE);
-            progressBar.setVisibility(View.VISIBLE);
+            progressBarLoading.setVisibility(View.VISIBLE);
             testViewModel.loadQuestionsForTest(testId);
         });
     }
 
-
-
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        // Clear the menu first, in case the previous fragment had items
         menu.clear();
         super.onCreateOptionsMenu(menu, inflater);
     }
@@ -180,7 +184,19 @@ public class TestQuestionsFragment extends Fragment {
         if (pagerAdapter != null && pagerAdapter.getItemCount() > 0) {
             int current = position + 1;
             int total = pagerAdapter.getItemCount();
-            questionCounterTextView.setText(String.format(Locale.getDefault(), "%d/%d", current, total));
+            questionCounterTextView.setText(String.format(Locale.getDefault(),
+                    getString(R.string.question_counter_format), current, total));
+        }
+    }
+
+    private void updateProgress(int position) {
+        if (pagerAdapter != null && pagerAdapter.getItemCount() > 0) {
+            int current = position + 1;
+            int total = pagerAdapter.getItemCount();
+            int percentage = (current * 100) / total;
+            progressBar.setProgress(percentage);
+            progressTextView.setText(String.format(Locale.getDefault(),
+                    getString(R.string.percent_complete_format), percentage));
         }
     }
 
@@ -214,19 +230,23 @@ public class TestQuestionsFragment extends Fragment {
             if (resource == null) return;
 
             if (resource.status == Resource.Status.LOADING) {
-                progressBar.setVisibility(View.VISIBLE);
+                progressBarLoading.setVisibility(View.VISIBLE);
                 errorLayout.setVisibility(View.GONE);
             } else {
-                progressBar.setVisibility(View.GONE);
+                progressBarLoading.setVisibility(View.GONE);
             }
 
             if (resource.data != null && resource.data.questions != null && !resource.data.questions.isEmpty()) {
                 errorLayout.setVisibility(View.GONE);
+                // Store test data for reliable calculateResult()
+                testViewModel.storeTestData(resource.data);
                 Test test = TestMapper.INSTANCE.toModel(resource.data);
                 if (test != null && test.getQuestions() != null) {
                     pagerAdapter.setQuestions(test.getQuestions());
+                    totalQuestions = test.getQuestions().size();
 
                     updateQuestionCounter(viewPager.getCurrentItem());
+                    updateProgress(viewPager.getCurrentItem());
                     updateNavigationButtons(viewPager.getCurrentItem());
 
                     if (!isReviewMode) {
@@ -235,16 +255,13 @@ public class TestQuestionsFragment extends Fragment {
                 }
             } else if (resource.status == Resource.Status.ERROR) {
                 if (resource.data == null || resource.data.questions == null || resource.data.questions.isEmpty()) {
-                    // Show full screen error with retry
                     errorLayout.setVisibility(View.VISIBLE);
                     errorTextView.setText(resource.message);
                 } else {
-                    // Show toast if we have data but still got an error (e.g. background refresh failed)
                     Toast.makeText(getContext(), resource.message, Toast.LENGTH_LONG).show();
                 }
             } else if (resource.status != Resource.Status.LOADING) {
                 if (resource.data == null || resource.data.questions == null || resource.data.questions.isEmpty()) {
-                     // Empty state could also use error layout or a specific empty state view
                      errorLayout.setVisibility(View.VISIBLE);
                      errorTextView.setText(getString(R.string.no_questions_found));
                 }
@@ -263,12 +280,17 @@ public class TestQuestionsFragment extends Fragment {
                 long minutes = TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished);
                 long seconds = TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) % 60;
                 timerTextView.setText(String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds));
+
+                // Warn when less than 5 minutes remain
+                if (millisUntilFinished < TimeUnit.MINUTES.toMillis(5)) {
+                    timerTextView.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.holo_red_dark));
+                }
             }
 
             @Override
             public void onFinish() {
                 timerTextView.setText("00:00");
-                if (isAdded()) { // Check if fragment is still attached
+                if (isAdded()) {
                     Toast.makeText(getContext(), getString(R.string.time_up), Toast.LENGTH_SHORT).show();
                     submitTest();
                 }
@@ -277,7 +299,13 @@ public class TestQuestionsFragment extends Fragment {
     }
 
     private void confirmSubmission() {
-        submitTest();
+        // Show confirmation dialog
+        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle(getString(R.string.confirm_submission))
+                .setMessage(getString(R.string.confirm_submission_message))
+                .setPositiveButton(getString(R.string.submit), (dialog, which) -> submitTest())
+                .setNegativeButton(getString(R.string.cancel), null)
+                .show();
     }
 
     private void submitTest() {
@@ -285,7 +313,7 @@ public class TestQuestionsFragment extends Fragment {
             timer.cancel();
         }
         testViewModel.calculateResult();
-        if (isAdded()) { // Check if fragment is still attached
+        if (isAdded()) {
             NavHostFragment.findNavController(this).navigate(R.id.action_testQuestionsFragment_to_testResultFragment);
         }
     }
@@ -296,7 +324,6 @@ public class TestQuestionsFragment extends Fragment {
         if (timer != null) {
             timer.cancel();
         }
-        // Restore the original title when leaving the fragment
         if (getActivity() instanceof AppCompatActivity) {
             ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
             if (actionBar != null) {

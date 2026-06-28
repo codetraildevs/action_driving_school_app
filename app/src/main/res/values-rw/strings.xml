@@ -200,7 +200,7 @@
     <string name="cancel">Subira Inyuma</string>
     <string name="test_passed">Watsinze!</string>
     <string name="test_failed">Watsinzwe</string>
-    <string name="score_format">Amanota yawe: %d / %d</string>
+    <string name="score_format">Amanota yawe: %1$d / %2$d</string>
     <string name="error_required_field">Birakenewe</string>
     <string name="about_us_text">
           Apulikasiyo igufasha kwitegura uruhushya rwa porovisoiri Binyuze mu kwitoza ibizamin bya porovisoiri byakozwe.

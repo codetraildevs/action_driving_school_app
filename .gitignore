@@ -22,12 +22,14 @@ assets/
 .vscode/
 
 # Generated / artifacts
-CODEBASE_ANALYSIS.md
+*.md
+!README.md
 nul
 
 # App build outputs
 app/release/
 app/build/
+/release/
 
 # OS artifacts
 Thumbs.db

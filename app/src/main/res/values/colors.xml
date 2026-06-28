@@ -66,6 +66,8 @@
     <!-- ************ OUTLINE / INVERSE ************ -->
     <color name="colorOutline">#757575</color>
     <color name="colorOutlineVariant">#BDBDBD</color>
+    <color name="colorOnSurfaceVariant">#49454F</color>
+    <color name="colorErrorContainer">#F9DEDC</color>
 
     <color name="colorInversePrimary">#4A7882</color>
     <color name="colorInverseSurface">#303030</color>

@@ -1,9 +1,6 @@
 package com.drivingschoolrwandaapp.ui.adapters;
 
 import android.graphics.Color;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -209,17 +206,17 @@ public class TestAdapter extends RecyclerView.Adapter<TestAdapter.TestViewHolder
         }
 
         void bind(TestEntity test) {
-            String displayTitle = test.getTitle();
+            // Show as "Exam 1", "Exam 2", ... "Exam N" (localized)
+            String examLabel = itemView.getContext().getString(R.string.exam_number_format, test.getTestNumber());
+            testTitle.setText(examLabel);
+            
             String displayDescription = test.getDescription();
             String displayImageUrl = test.getImageUrl();
 
-            // Check for translations
+            // Keep translation support for description and image
             if (test.getTestTranslations() != null) {
                 for (TestTranslation translation : test.getTestTranslations()) {
                     if (translation.getLanguageId() == currentLanguageId) {
-                        if (translation.getTitle() != null && !translation.getTitle().isEmpty()) {
-                            displayTitle = translation.getTitle();
-                        }
                         if (translation.getDescription() != null && !translation.getDescription().isEmpty()) {
                             displayDescription = translation.getDescription();
                         }
@@ -230,14 +227,6 @@ public class TestAdapter extends RecyclerView.Adapter<TestAdapter.TestViewHolder
                     }
                 }
             }
-
-
-            String prefix = test.getTestNumber() + ": ";
-            String fullTitle =  displayTitle;
-            SpannableString spannableTitle = new SpannableString(fullTitle);
-            spannableTitle.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, prefix.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-            testTitle.setText(spannableTitle);
 
             // Load Image
             if (displayImageUrl != null && !displayImageUrl.isEmpty() && !displayImageUrl.matches("\\d+")) {

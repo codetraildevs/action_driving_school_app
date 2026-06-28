@@ -5,5 +5,7 @@ import com.google.gson.annotations.SerializedName
 data class TestResult(
     val score: Int,
     val totalMarks: Int,
-    @get:JvmName("isPassed") val passed: Boolean
+    @get:JvmName("isPassed") val passed: Boolean,
+    val testNumber: Int = 0,
+    val testName: String = ""
 )
