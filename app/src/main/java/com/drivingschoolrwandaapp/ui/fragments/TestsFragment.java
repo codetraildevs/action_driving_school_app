@@ -413,7 +413,9 @@ public class TestsFragment extends Fragment {
             appPreferences.setGridLayout(isGridLayout);
             getActivity().invalidateOptionsMenu();
             updateLayoutManager();
-            testAdapter.notifyDataSetChanged();
+            if (testAdapter.getItemCount() > 0) {
+                testAdapter.notifyItemRangeChanged(0, testAdapter.getItemCount());
+            }
             return true;
         }
         return super.onOptionsItemSelected(item);

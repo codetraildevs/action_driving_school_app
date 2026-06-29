@@ -54,8 +54,15 @@ public class PdfListAdapter extends RecyclerView.Adapter<PdfListAdapter.PdfViewH
     }
 
     public void setPdfFiles(List<PdfFile> pdfFiles) {
+        int oldSize = getItemCount();
         this.pdfFiles = pdfFiles;
-        notifyDataSetChanged();
+        int newSize = getItemCount();
+        if (oldSize > 0) {
+            notifyItemRangeRemoved(0, oldSize);
+        }
+        if (newSize > 0) {
+            notifyItemRangeInserted(0, newSize);
+        }
     }
 
     static class PdfViewHolder extends RecyclerView.ViewHolder {

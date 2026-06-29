@@ -40,8 +40,15 @@ public class MyApplicationsAdapter extends RecyclerView.Adapter<MyApplicationsAd
     }
 
     public void setApplications(List<IremboApplication> applications) {
+        int oldSize = this.applications != null ? this.applications.size() : 0;
         this.applications = applications;
-        notifyDataSetChanged();
+        int newSize = getItemCount();
+        if (oldSize > 0) {
+            notifyItemRangeRemoved(0, oldSize);
+        }
+        if (newSize > 0) {
+            notifyItemRangeInserted(0, newSize);
+        }
     }
 
     @NonNull

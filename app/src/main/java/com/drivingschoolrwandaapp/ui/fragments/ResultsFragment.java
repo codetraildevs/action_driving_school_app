@@ -111,8 +111,15 @@ public class ResultsFragment extends Fragment {
         private List<TestResult> results = java.util.Collections.emptyList();
 
         public void setResults(List<TestResult> results) {
+            int oldSize = this.results.size();
             this.results = results;
-            notifyDataSetChanged();
+            if (oldSize > 0) {
+                notifyItemRangeRemoved(0, oldSize);
+            }
+            int newSize = getItemCount();
+            if (newSize > 0) {
+                notifyItemRangeInserted(0, newSize);
+            }
         }
 
         @NonNull

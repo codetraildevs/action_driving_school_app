@@ -63,3 +63,4 @@ out/
 
 # Firebase config (public repo - use google-services.json.example)
 **/google-services.json
+*.log

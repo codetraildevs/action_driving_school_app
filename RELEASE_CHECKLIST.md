@@ -7,18 +7,27 @@
 ## 1. Prerequisites
 
 - [ ] **Keystore present** — `app/upload-keystore.jks` exists (PKCS12 format)
-- [ ] **Keystore passwords handy** — store password & key password (stored in password manager / env vars)
-- [ ] **Upload key active** — Google Play Console upload key reset must be valid (check email or Play Console)
-- [ ] **google-services.json** — present at `app/google-services.json` (not committed, use `google-services.json.example`)
+- [ ] **Gradle version catalog ready** — `gradle/libs.versions.toml` is the single source of truth for all dependency versions
+- [ ] **`keystore.properties` present** at project root (`DRIVINGSCHOOL2/keystore.properties`) with:
+  ```properties
+  storeFile=upload-keystore.jks
+  storePassword=<your-store-password>
+  keyAlias=upload
+  keyPassword=<your-key-password>
+  ```
+- [ ] **Upload key active** — Google Play Console upload key matches the keystore (verify fingerprints)
+- [ ] **google-services.json** — present at `app/google-services.json` (not committed, use `google-services.json.example` template)
 - [ ] **Clean working tree** — `git status` shows no uncommitted changes (except intentional ones)
 
 ---
 
 ## 2. Bump Version
 
-- [ ] Open `app/build.gradle.kts`
-- [ ] Increment `versionCode` by 1 (e.g., `76` → `77`)
-- [ ] Update `versionName` following semver (e.g., `1.0.1` → `1.0.2`)
+- [ ] Open `app/build.gradle.kts` and update:
+  ```
+  versionCode = 77  →  increment by 1
+  versionName = "1.0.2"  →  update following semver
+  ```
 - [ ] Commit: `git add app/build.gradle.kts && git commit -m "Bump version to X.Y.Z (build N)"`
 
 ---
@@ -27,6 +36,9 @@
 
 - [ ] **google-services.json** present and pointing to the **production** Firebase project
 - [ ] `./gradlew lint` passes — catches resource format issues, unused resources, etc.
+  - ✅ Currently clean (~8 compiler-level annotations only)
+
+---
 
 ## 4. Build & Verify
 
@@ -74,9 +86,10 @@ keytool -list -v -keystore app/upload-keystore.jks -storepass <password> -alias 
   ```bash
   cp app/build/outputs/bundle/release/app-release.aab release/ActionDrivingSchool-v{X.Y.Z}-build{N}.aab
   ```
-- [ ] Optionally copy keystore and PEM certificate alongside:
+- [ ] Optionally copy keystore, properties, and PEM certificate alongside:
   ```bash
   cp app/upload-keystore.jks release/
+  cp keystore.properties release/   # ⚠️ contains passwords — keep secure
   cp app/upload_certificate.pem release/
   ```
 - [ ] Verify all files in `release/`:
@@ -91,7 +104,7 @@ keytool -list -v -keystore app/upload-keystore.jks -storepass <password> -alias 
 - [ ] Go to [Google Play Console](https://play.google.com/console/)
 - [ ] Navigate to **Release > Production / Internal testing / Closed testing**
 - [ ] Upload the `.aab` file from `release/` folder
-- [ ] Fill in **Release notes** (Whats new) in all supported languages — see template below
+- [ ] Fill in **Release notes** (What's new) in all supported languages — see template below
 - [ ] Review and roll out
 
 ### Release Notes Template
@@ -153,9 +166,28 @@ Paste the relevant language into the "What's New" field for each locale in Play 
 | Item | Location |
 |---|---|
 | Keystore | `app/upload-keystore.jks` |
+| Keystore properties | `keystore.properties` (project root, **gitignored**) |
 | Upload cert (PEM) | `app/upload_certificate.pem` |
-| Keystore password | `<your-keystore-password>` |
+| Keystore password | set in `keystore.properties` or env vars |
 | Key alias | `upload` |
-| Release output (AAB) | `release/ActionDrivingSchool-v{X.Y.Z}-build{N}.aab` |
-| Release output (APK) | `app/build/outputs/apk/release/app-release.apk` |
+| Version catalog | `gradle/libs.versions.toml` |
+| Release AAB | `release/ActionDrivingSchool-v{X.Y.Z}-build{N}.aab` |
+| Release APK | `app/build/outputs/apk/release/app-release.apk` |
 | .gitignore | `/release/`, `app/release/`, `app/build/`, `*.aab`, `*.apk`, `*.jks`, `*.keystore` |
+
+---
+
+## One-Time Setup
+
+### Create `keystore.properties` (before first release)
+
+Create `DRIVINGSCHOOL2/keystore.properties`:
+
+```properties
+storeFile=upload-keystore.jks
+storePassword=YOUR_STORE_PASSWORD
+keyAlias=upload
+keyPassword=YOUR_KEY_PASSWORD
+```
+
+> ⚠️ **Do not commit this file.** It is gitignored. The CI (GitHub Actions) uses env vars instead.

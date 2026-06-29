@@ -59,8 +59,15 @@ public class RecentActivityAdapter extends RecyclerView.Adapter<RecentActivityAd
     }
 
     public void setApplications(List<IremboApplication> applications) {
+        int oldSize = this.applications.size();
         this.applications = applications;
-        notifyDataSetChanged();
+        if (oldSize > 0) {
+            notifyItemRangeRemoved(0, oldSize);
+        }
+        int newSize = getItemCount();
+        if (newSize > 0) {
+            notifyItemRangeInserted(0, newSize);
+        }
     }
     
     private String formatDate(String dateString) {

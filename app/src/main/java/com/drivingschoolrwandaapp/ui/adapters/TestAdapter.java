@@ -93,13 +93,22 @@ public class TestAdapter extends RecyclerView.Adapter<TestAdapter.TestViewHolder
                 return Integer.compare(t1.getTestNumber(), t2.getTestNumber());
             }
         });
+        int oldSize = this.tests.size();
         this.tests = tests;
-        notifyDataSetChanged();
+        if (oldSize > 0) {
+            notifyItemRangeRemoved(0, oldSize);
+        }
+        int newSize = getItemCount();
+        if (newSize > 0) {
+            notifyItemRangeInserted(0, newSize);
+        }
     }
 
     public void setCurrentUser(User user) {
         this.currentUser = user;
-        notifyDataSetChanged();
+        if (!tests.isEmpty()) {
+            notifyItemRangeChanged(0, tests.size());
+        }
     }
 
     public void setLanguage(String languageCode) {
@@ -115,7 +124,9 @@ public class TestAdapter extends RecyclerView.Adapter<TestAdapter.TestViewHolder
                 currentLanguageId = 1;
                 break;
         }
-        notifyDataSetChanged();
+        if (!tests.isEmpty()) {
+            notifyItemRangeChanged(0, tests.size());
+        }
     }
 
     public void setOnTestClickListener(OnTestClickListener listener) {

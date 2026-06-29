@@ -58,12 +58,16 @@ public class LearningMaterialAdapter extends RecyclerView.Adapter<LearningMateri
 
     public void setViewType(int viewType) {
         this.viewType = viewType;
-        notifyDataSetChanged();
+        if (!materials.isEmpty()) {
+            notifyItemRangeChanged(0, materials.size());
+        }
     }
 
     public void setCurrentUser(User user) {
         this.currentUser = user;
-        notifyDataSetChanged();
+        if (!materials.isEmpty()) {
+            notifyItemRangeChanged(0, materials.size());
+        }
     }
 
     @Override
@@ -109,11 +113,18 @@ public class LearningMaterialAdapter extends RecyclerView.Adapter<LearningMateri
     }
 
     public void setMaterials(List<LearningMaterial> newMaterials) {
+        int oldSize = materials.size();
         materials.clear();
         if (newMaterials != null) {
             materials.addAll(newMaterials);
         }
-        notifyDataSetChanged();
+        int newSize = materials.size();
+        if (oldSize > 0) {
+            notifyItemRangeRemoved(0, oldSize);
+        }
+        if (newSize > 0) {
+            notifyItemRangeInserted(0, newSize);
+        }
     }
 
     public void setOnItemClickListener(OnItemClickListener listener) {

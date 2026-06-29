@@ -34,8 +34,15 @@ public class WhatsAppGroupAdapter extends RecyclerView.Adapter<WhatsAppGroupAdap
     }
 
     public void setGroups(List<WhatsAppGroup> groups) {
+        int oldSize = this.groups.size();
         this.groups = groups;
-        notifyDataSetChanged();
+        if (oldSize > 0) {
+            notifyItemRangeRemoved(0, oldSize);
+        }
+        int newSize = getItemCount();
+        if (newSize > 0) {
+            notifyItemRangeInserted(0, newSize);
+        }
     }
 
     @NonNull

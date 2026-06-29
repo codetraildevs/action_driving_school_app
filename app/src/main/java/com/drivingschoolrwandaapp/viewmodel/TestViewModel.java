@@ -138,17 +138,28 @@ public class TestViewModel extends AndroidViewModel {
     }
 
     public void calculateResult() {
-        // Use stored test data instead of relying on switchMap getValue()
-        if (loadedTestData != null && loadedTestData.questions != null && !loadedTestData.questions.isEmpty()) {
+        // First try stored test data (set via storeTestData when observed from fragments)
+        TestWithQuestions data = loadedTestData;
+
+        // Fall back to switchMap value if storeTestData was not called (e.g., in tests)
+        if (data == null || data.questions == null || data.questions.isEmpty()) {
+            Resource<TestWithQuestions> resource = questionsForTest.getValue();
+            if (resource != null && resource.data != null
+                    && resource.data.questions != null && !resource.data.questions.isEmpty()) {
+                data = resource.data;
+            }
+        }
+
+        if (data != null && data.questions != null && !data.questions.isEmpty()) {
             int correctAnswers = 0;
-            int totalMarks = loadedTestData.test != null ? loadedTestData.test.getTotalMarks() : loadedTestData.questions.size();
-            int passMarks = loadedTestData.test != null ? loadedTestData.test.getPassMarks() : (int) Math.ceil(loadedTestData.questions.size() * 0.5);
-            int numberOfQuestions = loadedTestData.questions.size();
+            int totalMarks = data.test != null ? data.test.getTotalMarks() : data.questions.size();
+            int passMarks = data.test != null ? data.test.getPassMarks() : (int) Math.ceil(data.questions.size() * 0.5);
+            int numberOfQuestions = data.questions.size();
 
             Map<Integer, Integer> userAnswers = selectedAnswers.getValue();
             if (userAnswers == null) return;
 
-            for (com.drivingschoolrwandaapp.database.entities.QuestionWithOptions questionWithOptions : loadedTestData.questions) {
+            for (com.drivingschoolrwandaapp.database.entities.QuestionWithOptions questionWithOptions : data.questions) {
                 Integer userAnswerId = userAnswers.get(questionWithOptions.question != null ? questionWithOptions.question.getId() : 0);
                 if (userAnswerId != null && questionWithOptions.options != null) {
                     for (com.drivingschoolrwandaapp.database.entities.QuestionOptionEntity option : questionWithOptions.options) {
@@ -158,23 +169,23 @@ public class TestViewModel extends AndroidViewModel {
                     }
                 }
             }
-            
+
             double marksPerQuestion = numberOfQuestions > 0 ? (double) totalMarks / numberOfQuestions : 0;
             int finalScore = (int) Math.round(correctAnswers * marksPerQuestion);
 
             boolean isPassed = finalScore >= passMarks;
-            
-            int testNumber = loadedTestData.test != null ? loadedTestData.test.getTestNumber() : 0;
-            String testName = loadedTestData.test != null && loadedTestData.test.getTitle() != null 
-                ? loadedTestData.test.getTitle() : "Exam " + testNumber;
-            
+
+            int testNumber = data.test != null ? data.test.getTestNumber() : 0;
+            String testName = data.test != null && data.test.getTitle() != null
+                ? data.test.getTitle() : "Exam " + testNumber;
+
             TestResult result = new TestResult(finalScore, totalMarks, isPassed, testNumber, testName);
             testResult.setValue(result);
-            
+
             // Add to history
             List<TestResult> history = testResultHistory.getValue();
             if (history != null) {
-                history.add(0, result); // Add at beginning (newest first)
+                history.add(0, result);
                 testResultHistory.setValue(history);
             }
         }

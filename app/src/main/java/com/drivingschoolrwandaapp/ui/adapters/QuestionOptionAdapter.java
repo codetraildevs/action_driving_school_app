@@ -67,12 +67,16 @@ public class QuestionOptionAdapter extends RecyclerView.Adapter<QuestionOptionAd
 
     public void setLanguageId(int languageId) {
         this.languageId = languageId;
-        notifyDataSetChanged();
+        if (!options.isEmpty()) {
+            notifyItemRangeChanged(0, options.size());
+        }
     }
 
     public void setRealTimeFeedback(boolean realTimeFeedback) {
         this.isRealTimeFeedback = realTimeFeedback;
-        notifyDataSetChanged();
+        if (!options.isEmpty()) {
+            notifyItemRangeChanged(0, options.size());
+        }
     }
 
     @NonNull
@@ -123,7 +127,9 @@ public class QuestionOptionAdapter extends RecyclerView.Adapter<QuestionOptionAd
                 }
 
                 if (isRealTimeFeedback) {
-                    notifyDataSetChanged();
+                    if (!options.isEmpty()) {
+                        notifyItemRangeChanged(0, options.size());
+                    }
                 } else {
                     if (previousSelectedPosition != -1) {
                         notifyItemChanged(previousSelectedPosition);
