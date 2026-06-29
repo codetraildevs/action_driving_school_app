@@ -50,7 +50,8 @@
                         android:layout_width="48dp"
                         android:layout_height="48dp"
                         android:src="@drawable/ic_play_circle"
-                        android:padding="4dp"/>
+                        android:padding="4dp"
+                        android:contentDescription="@null"/>
 
                     <TextView
                         android:layout_width="match_parent"
@@ -96,7 +97,8 @@
                         android:layout_width="48dp"
                         android:layout_height="48dp"
                         android:src="@drawable/books_svgrepo_com"
-                        android:padding="4dp"/>
+                        android:padding="4dp"
+                        android:contentDescription="@null"/>
 
                     <TextView
                         android:layout_width="match_parent"
@@ -142,7 +144,8 @@
                         android:layout_width="48dp"
                         android:layout_height="48dp"
                         android:src="@drawable/ic_irembo"
-                        android:padding="4dp"/>
+                        android:padding="4dp"
+                        android:contentDescription="@null"/>
 
                     <TextView
                         android:layout_width="match_parent"
@@ -188,7 +191,8 @@
                         android:layout_width="48dp"
                         android:layout_height="48dp"
                         android:src="@drawable/whatsapp_icon_logo_svgrepo_com"
-                        android:padding="4dp"/>
+                        android:padding="4dp"
+                        android:contentDescription="@null"/>
 
                     <TextView
                         android:layout_width="match_parent"

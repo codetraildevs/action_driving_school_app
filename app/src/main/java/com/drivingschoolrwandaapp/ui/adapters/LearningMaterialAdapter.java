@@ -179,7 +179,7 @@ public class LearningMaterialAdapter extends RecyclerView.Adapter<LearningMateri
 
             if (material.isDownloaded() && material.getFileSize() > 0) {
                 double sizeInMb = material.getFileSize() / (1024.0 * 1024.0);
-                fileTypeOrSize.setText(String.format(Locale.getDefault(), "%.2f MB", sizeInMb));
+                fileTypeOrSize.setText(String.format(Locale.ROOT, "%.2f MB", sizeInMb));
             } else {
                 fileTypeOrSize.setText(material.getFileType());
             }

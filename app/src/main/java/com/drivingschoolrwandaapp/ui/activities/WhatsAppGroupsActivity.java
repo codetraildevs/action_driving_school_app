@@ -31,6 +31,7 @@ import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -159,8 +160,8 @@ public class WhatsAppGroupsActivity extends AppCompatActivity implements WhatsAp
             filteredList.addAll(allGroups);
         } else {
             for (WhatsAppGroup group : allGroups) {
-                if (group.getName().toLowerCase().contains(text.toLowerCase()) || 
-                    group.getDescription().toLowerCase().contains(text.toLowerCase())) {
+                if (group.getName().toLowerCase(Locale.ROOT).contains(text.toLowerCase(Locale.ROOT)) || 
+                    group.getDescription().toLowerCase(Locale.ROOT).contains(text.toLowerCase(Locale.ROOT))) {
                     filteredList.add(group);
                 }
             }

@@ -158,7 +158,10 @@ public class SingleQuestionPageFragment extends Fragment implements QuestionOpti
                         if (!imageUrl.startsWith("http") && !imageUrl.startsWith("file://")) {
                             imageUrl = ApiClient.SITE_URL + imageUrl;
                         }
-                        Glide.with(this).load(imageUrl).into(questionImageView);
+                        Glide.with(this)
+                                .load(imageUrl)
+                                .error(R.drawable.ic_launcher_background)
+                                .into(questionImageView);
                     } else {
                         questionImageContainer.setVisibility(GONE);
                         questionImageView.setVisibility(GONE);

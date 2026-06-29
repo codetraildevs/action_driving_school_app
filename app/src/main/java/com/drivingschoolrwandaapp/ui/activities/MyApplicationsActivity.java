@@ -25,6 +25,7 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class MyApplicationsActivity extends AppCompatActivity {
 
@@ -112,11 +113,11 @@ public class MyApplicationsActivity extends AppCompatActivity {
         
         for (IremboApplication app : allApplications) {
             boolean matchesStatus = currentStatusFilter.equals("ALL") || 
-                                   (app.getStatus() != null && app.getStatus().toUpperCase().contains(currentStatusFilter));
+                                   (app.getStatus() != null && app.getStatus().toUpperCase(Locale.ROOT).contains(currentStatusFilter));
             
             boolean matchesSearch = currentSearchQuery.isEmpty() || 
-                                   (app.getReference() != null && app.getReference().toLowerCase().contains(currentSearchQuery.toLowerCase())) ||
-                                   (app.getTitle() != null && app.getTitle().toLowerCase().contains(currentSearchQuery.toLowerCase()));
+                                   (app.getReference() != null && app.getReference().toLowerCase(Locale.ROOT).contains(currentSearchQuery.toLowerCase(Locale.ROOT))) ||
+                                   (app.getTitle() != null && app.getTitle().toLowerCase(Locale.ROOT).contains(currentSearchQuery.toLowerCase(Locale.ROOT)));
 
             if (matchesStatus && matchesSearch) {
                 filteredList.add(app);

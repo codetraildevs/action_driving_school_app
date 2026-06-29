@@ -54,6 +54,7 @@ import com.google.android.material.card.MaterialCardView;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -340,9 +341,9 @@ public class TestsFragment extends Fragment {
                 String price = cells[0].trim();
                 String duration = cells[1].trim();
                 int days = 1;
-                if (duration.toLowerCase().contains("10")) days = 10;
-                else if (duration.toLowerCase().contains("25")) days = 25;
-                else if (duration.toLowerCase().contains("6") || duration.toLowerCase().contains("amezi")) days = 180;
+                if (duration.toLowerCase(Locale.ROOT).contains("10")) days = 10;
+                else if (duration.toLowerCase(Locale.ROOT).contains("25")) days = 25;
+                else if (duration.toLowerCase(Locale.ROOT).contains("6") || duration.toLowerCase(Locale.ROOT).contains("amezi")) days = 180;
                 
                 planList.add(new PlanOption(price, duration, days));
             }

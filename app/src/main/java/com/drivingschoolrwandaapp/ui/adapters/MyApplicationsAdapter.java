@@ -66,16 +66,16 @@ public class MyApplicationsAdapter extends RecyclerView.Adapter<MyApplicationsAd
         if (dateString == null || dateString.isEmpty()) return "N/A";
         try {
             // Try parsing ISO 8601 format
-            SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+            SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
             Date date = isoFormat.parse(dateString);
             if (date != null) {
-                SimpleDateFormat readableFormat = new SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault());
+                SimpleDateFormat readableFormat = new SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.US);
                 return readableFormat.format(date);
             }
         } catch (ParseException e) {
             // Try alternative ISO format with Z or milliseconds
             try {
-                SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
+                SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
                 Date date = isoFormat.parse(dateString);
                 if (date != null) {
                     SimpleDateFormat readableFormat = new SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault());

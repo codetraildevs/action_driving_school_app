@@ -1,0 +1,145 @@
+[versions]
+# ─── Kotlin & Build ───
+kotlin = "1.9.22"
+agp = "8.13.1"
+hilt = "2.50"
+hilt-work = "1.2.0"
+firebase-bom = "33.0.0"
+firebase-crashlytics = "2.9.9"
+firebase-gms = "4.4.1"
+
+# ─── AndroidX Core (original project versions) ───
+appcompat = "1.6.1"
+core-ktx = "1.12.0"
+material = "1.12.0"
+constraintlayout = "2.1.4"
+swiperefreshlayout = "1.1.0"
+activity = "1.8.0"
+splashscreen = "1.0.1"
+
+# ─── Lifecycle ───
+lifecycle = "2.7.0"
+
+# ─── Navigation ───
+navigation = "2.7.6"
+
+# ─── Room ───
+room = "2.6.1"
+
+# ─── Networking ───
+retrofit = "2.9.0"
+okhttp = "4.12.0"
+gson = "2.10.1"
+
+# ─── Image Loading ───
+glide = "4.16.0"
+
+# ─── DI / Compilers ───
+mapstruct = "1.5.5.Final"
+
+# ─── Background Work ───
+work = "2.9.0"
+
+# ─── Secure Storage ───
+security-crypto = "1.1.0-alpha06"
+
+# ─── In-App Updates ───
+app-update = "2.1.0"
+
+# ─── Photo Viewer ───
+photoview = "2.3.0"
+
+# ─── SVG ───
+androidsvg = "1.4"
+
+# ─── Testing ───
+junit = "4.13.2"
+junit-androidx = "1.1.5"
+mockito = "5.11.0"
+espresso = "3.5.1"
+core-testing = "2.2.0"
+
+
+[libraries]
+# ── AndroidX Core ──
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
+androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
+androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+androidx-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swiperefreshlayout" }
+androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }
+com-google-android-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+
+# ── Lifecycle ──
+androidx-lifecycle-viewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "lifecycle" }
+androidx-lifecycle-livedata = { group = "androidx.lifecycle", name = "lifecycle-livedata", version.ref = "lifecycle" }
+androidx-lifecycle-runtime = { group = "androidx.lifecycle", name = "lifecycle-runtime", version.ref = "lifecycle" }
+androidx-lifecycle-compiler = { group = "androidx.lifecycle", name = "lifecycle-compiler", version.ref = "lifecycle" }
+
+# ── Navigation ──
+androidx-navigation-fragment = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigation" }
+androidx-navigation-ui = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigation" }
+
+# ── Room ──
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+
+# ── WorkManager ──
+androidx-work-runtime = { group = "androidx.work", name = "work-runtime", version.ref = "work" }
+
+# ── Security ──
+androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "security-crypto" }
+
+# ── Networking ──
+squareup-retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+squareup-retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
+squareup-okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+squareup-okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
+google-gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+
+# ── Image Loading ──
+glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
+glide-okhttp = { group = "com.github.bumptech.glide", name = "okhttp3-integration", version.ref = "glide" }
+glide-compiler = { group = "com.github.bumptech.glide", name = "compiler", version.ref = "glide" }
+
+# ── DI / Hilt ──
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
+hilt-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "hilt-work" }
+hilt-work-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "hilt-work" }
+
+# ── MapStruct ──
+mapstruct = { group = "org.mapstruct", name = "mapstruct", version.ref = "mapstruct" }
+mapstruct-processor = { group = "org.mapstruct", name = "mapstruct-processor", version.ref = "mapstruct" }
+
+# ── PhotoView ──
+photoview = { group = "com.github.chrisbanes", name = "PhotoView", version.ref = "photoview" }
+
+# ── In-App Updates ──
+app-update = { group = "com.google.android.play", name = "app-update", version.ref = "app-update" }
+app-update-ktx = { group = "com.google.android.play", name = "app-update-ktx", version.ref = "app-update" }
+
+# ── SVG ──
+androidsvg = { group = "com.caverock", name = "androidsvg-aar", version.ref = "androidsvg" }
+
+# ── Firebase ──
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
+firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
+
+# ── Testing ──
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+junit-androidx = { group = "androidx.test.ext", name = "junit", version.ref = "junit-androidx" }
+mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
+espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso" }
+core-testing = { group = "androidx.arch.core", name = "core-testing", version.ref = "core-testing" }
+
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+google-services = { id = "com.google.gms.google-services", version.ref = "firebase-gms" }
+firebase-crashlytics-plugin = { id = "com.google.firebase.crashlytics", version.ref = "firebase-crashlytics" }

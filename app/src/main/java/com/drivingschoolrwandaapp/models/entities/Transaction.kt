@@ -2,6 +2,7 @@ package com.drivingschoolrwandaapp.models.entities
 
 import com.google.gson.annotations.SerializedName
 import java.io.Serializable
+import java.util.Locale
 
 data class Transaction(
     @SerializedName("id") var id: Int = 0,
@@ -14,6 +15,6 @@ data class Transaction(
 ) : Serializable {
 
     fun getFormattedAmount(): String {
-        return String.format("RWF %.2f", amount)
+        return String.format(Locale.ROOT, "RWF %.2f", amount)
     }
 }

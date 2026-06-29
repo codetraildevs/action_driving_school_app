@@ -122,7 +122,7 @@ public class ApplicationDetailsActivity extends AppCompatActivity {
             }
             
             Date date = inputFormat.parse(standardDate);
-            SimpleDateFormat outputFormat = new SimpleDateFormat("MMM dd, yyyy • h:mm a", Locale.getDefault());
+            SimpleDateFormat outputFormat = new SimpleDateFormat("MMM dd, yyyy • h:mm a", Locale.US);
             return outputFormat.format(date);
         } catch (Exception e) {
             e.printStackTrace();

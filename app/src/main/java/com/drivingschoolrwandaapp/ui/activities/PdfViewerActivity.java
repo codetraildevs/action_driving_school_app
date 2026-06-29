@@ -35,6 +35,7 @@ import com.drivingschoolrwandaapp.viewmodel.PdfViewModel;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.Locale;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -145,7 +146,7 @@ public class PdfViewerActivity extends AppCompatActivity {
     }
 
     private void updatePageIndicator(int position) {
-        pageNumberText.setText(String.format("%d / %d", position + 1, pdfRenderer.getPageCount()));
+        pageNumberText.setText(String.format(Locale.ROOT, "%d / %d", position + 1, pdfRenderer.getPageCount()));
     }
 
     @Override
