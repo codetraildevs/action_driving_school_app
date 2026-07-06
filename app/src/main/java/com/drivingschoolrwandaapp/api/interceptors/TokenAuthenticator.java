@@ -2,6 +2,7 @@ package com.drivingschoolrwandaapp.api.interceptors;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -73,6 +74,7 @@ public class TokenAuthenticator implements Authenticator {
                     return null;
                 }
             } catch (IOException e) {
+                Log.e("TokenAuthenticator", "Failed to refresh access token", e);
                 return null; // Let the original request fail.
             }
         }

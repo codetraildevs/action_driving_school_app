@@ -147,7 +147,7 @@ public class DashboardFragment extends Fragment {
                  }
              } else if (resource.status == Resource.Status.ERROR) {
                  hideLoadingDialog();
-                 Toast.makeText(requireContext(), "Error: " + resource.message, Toast.LENGTH_LONG).show();
+                 Toast.makeText(requireContext(), getString(R.string.error_format, resource.message), Toast.LENGTH_LONG).show();
              }
          });
     }

@@ -1,5 +1,6 @@
 package com.drivingschoolrwandaapp.ui.adapters;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,7 +43,7 @@ public class RecentActivityAdapter extends RecyclerView.Adapter<RecentActivityAd
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         IremboApplication application = applications.get(position);
         holder.title.setText(application.getTitle());
-        holder.reference.setText("Ref: " + application.getReference());
+        holder.reference.setText(application.getReference());
         holder.status.setText(application.getStatus());
         holder.date.setText(formatDate(application.getDate()));
         
@@ -83,6 +84,7 @@ public class RecentActivityAdapter extends RecyclerView.Adapter<RecentActivityAd
             Date date = inputFormat.parse(dateString);
             return outputFormat.format(date);
         } catch (ParseException e) {
+            Log.e("RecentActivity", "Failed to parse date (with millis): " + dateString, e);
             // Try without milliseconds if it fails
             SimpleDateFormat inputFormatNoMillis = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
             inputFormatNoMillis.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -90,6 +92,7 @@ public class RecentActivityAdapter extends RecyclerView.Adapter<RecentActivityAd
                 Date date = inputFormatNoMillis.parse(dateString);
                 return outputFormat.format(date);
             } catch (ParseException ex) {
+                Log.e("RecentActivity", "Failed to parse date (no millis): " + dateString, ex);
                 return dateString; // Return original if parsing fails
             }
         }

@@ -2,6 +2,7 @@ package com.drivingschoolrwandaapp.ui.activities;
 
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -24,6 +25,9 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class ApplicationDetailsActivity extends AppCompatActivity {
 
     private IremboViewModel iremboViewModel;
@@ -66,7 +70,7 @@ public class ApplicationDetailsActivity extends AppCompatActivity {
                 }
             } else if (resource.status == Resource.Status.ERROR) {
                 hideLoadingDialog();
-                Toast.makeText(this, "Error: " + resource.message, Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getString(R.string.error_format, resource.message), Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -84,14 +88,14 @@ public class ApplicationDetailsActivity extends AppCompatActivity {
 
         // Header
         tvServiceName.setText(app.getTitle());
-        tvReference.setText("Ref: " + app.getReference());
-        tvStatus.setText(app.getStatus() != null ? app.getStatus().toUpperCase() : "UNKNOWN");
+        tvReference.setText(getString(R.string.ref_format, app.getReference()));
+        tvStatus.setText(app.getStatus() != null ? app.getStatus().toUpperCase(Locale.ROOT) : "UNKNOWN");
         tvDate.setText(formatDate(app.getDate()));
         
         // Progress
         String currentStep = app.getCurrentStep();
         if (TextUtils.isEmpty(currentStep)) {
-            tvCurrentStep.setText("Processing");
+            tvCurrentStep.setText(getString(R.string.processing_status));
         } else {
             tvCurrentStep.setText(currentStep);
         }
@@ -102,7 +106,7 @@ public class ApplicationDetailsActivity extends AppCompatActivity {
         // Message
         String message = app.getMessage();
         if (TextUtils.isEmpty(message)) {
-            tvMessage.setText("No additional details available.");
+            tvMessage.setText(getString(R.string.no_details_available));
         } else {
             tvMessage.setText(message);
         }
@@ -125,7 +129,8 @@ public class ApplicationDetailsActivity extends AppCompatActivity {
             SimpleDateFormat outputFormat = new SimpleDateFormat("MMM dd, yyyy • h:mm a", Locale.US);
             return outputFormat.format(date);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("AppDetails", "Error parsing date (standard format): " + dateString, e);
+            com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
             // Try one more time with the original approach just in case
              try {
                 SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
@@ -134,6 +139,8 @@ public class ApplicationDetailsActivity extends AppCompatActivity {
                 SimpleDateFormat outputFormat = new SimpleDateFormat("MMM dd, yyyy • h:mm a", Locale.getDefault());
                 return outputFormat.format(date);
             } catch (Exception ex) {
+                Log.e("AppDetails", "Error parsing date (fallback format): " + dateString, ex);
+                com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(ex);
                 return dateString;
             }
         }

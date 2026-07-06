@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -113,6 +114,8 @@ public class WebViewActivity extends AppCompatActivity {
                         startActivity(intent);
                         return true;
                     } catch (Exception e) {
+                        Log.e("WebView", "Error launching external intent for URL: " + url, e);
+                        com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
                         return false;
                     }
                 }
@@ -151,10 +154,12 @@ public class WebViewActivity extends AppCompatActivity {
                 DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
                 if (dm != null) {
                     dm.enqueue(request);
-                    Toast.makeText(WebViewActivity.this, "Downloading file...", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(WebViewActivity.this, getString(R.string.downloading_file), Toast.LENGTH_SHORT).show();
                 }
             } catch (Exception e) {
-                Toast.makeText(this, "Download failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("WebView", "Download failed", e);
+                com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
+                Toast.makeText(this, getString(R.string.download_failed_msg, e.getMessage()), Toast.LENGTH_SHORT).show();
             }
         });
     }

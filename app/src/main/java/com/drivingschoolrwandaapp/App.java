@@ -7,6 +7,7 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,6 +34,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.bumptech.glide.Glide;
 import com.drivingschoolrwandaapp.api.ApiClient;
+import com.drivingschoolrwandaapp.data.local.preferences.AppPreferences;
 import com.drivingschoolrwandaapp.database.entities.User;
 import com.drivingschoolrwandaapp.ui.activities.WhatsAppGroupsActivity;
 import com.drivingschoolrwandaapp.viewmodel.UserViewModel;
@@ -43,6 +45,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.android.play.core.appupdate.AppUpdateInfo;
 import com.google.android.play.core.appupdate.AppUpdateManager;
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
@@ -69,16 +72,16 @@ public class App extends AppCompatActivity {
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
         if (isGranted) {
-            Toast.makeText(this, "Notifications permission granted", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.notifications_permission_granted), Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this, "Notifications will not be shown.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.notifications_permission_denied), Toast.LENGTH_SHORT).show();
         }
     });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
         setContentView(R.layout.activity_app);
 
@@ -149,6 +152,12 @@ public class App extends AppCompatActivity {
         userViewModel.getUserLiveData().observe(this, resource -> {
             if (resource != null && resource.data != null) {
                 updateNavHeader(resource.data);
+                // Set Crashlytics user identifier for crash tracking
+                if (resource.data.getPhoneNumber() != null) {
+                    FirebaseCrashlytics.getInstance().setUserId(resource.data.getPhoneNumber());
+                }
+                FirebaseCrashlytics.getInstance().setCustomKey("user_name", resource.data.getFirstName() + " " + resource.data.getLastName());
+                FirebaseCrashlytics.getInstance().setCustomKey("language_id", resource.data.getLanguageId());
             }
         });
 
@@ -179,17 +188,25 @@ public class App extends AppCompatActivity {
             return handled;
         });
 
-        navigationView.getMenu().findItem(R.id.delete_account_item).setOnMenuItemClickListener(menuItem -> {
-            showDeleteAccountConfirmation();
-            drawerLayout.close();
-            return true;
-        });
+        MenuItem deleteAccountItem = navigationView.getMenu().findItem(R.id.delete_account_item);
+        if (deleteAccountItem != null) {
+            deleteAccountItem.setOnMenuItemClickListener(menuItem -> {
+                showDeleteAccountConfirmation();
+                drawerLayout.close();
+                return true;
+            });
+        }
 
         askNotificationPermission();
 
-        appUpdateManager = AppUpdateManagerFactory.create(this);
-        appUpdateManager.registerListener(installStateUpdatedListener);
-        checkForUpdate();
+        try {
+            appUpdateManager = AppUpdateManagerFactory.create(this);
+            appUpdateManager.registerListener(installStateUpdatedListener);
+            checkForUpdate();
+        } catch (Exception e) {
+            Log.e("App", "Google Play In-app updates not available on this device", e);
+            FirebaseCrashlytics.getInstance().recordException(e);
+        }
     }
 
     private void checkForUpdate() {
@@ -205,7 +222,8 @@ public class App extends AppCompatActivity {
                             this,
                             APP_UPDATE_REQUEST_CODE);
                 } catch (IntentSender.SendIntentException e) {
-                    e.printStackTrace();
+                    Log.e("App", "Failed to start update flow", e);
+                    FirebaseCrashlytics.getInstance().recordException(e);
                 }
             }
         });
@@ -220,20 +238,24 @@ public class App extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        appUpdateManager
-                .getAppUpdateInfo()
-                .addOnSuccessListener(
-                        appUpdateInfo -> {
-                            if (appUpdateInfo.installStatus() == InstallStatus.DOWNLOADED) {
-                                showSnackbarForCompleteUpdate();
-                            }
-                        });
+        if (appUpdateManager != null) {
+            appUpdateManager
+                    .getAppUpdateInfo()
+                    .addOnSuccessListener(
+                            appUpdateInfo -> {
+                                if (appUpdateInfo.installStatus() == InstallStatus.DOWNLOADED) {
+                                    showSnackbarForCompleteUpdate();
+                                }
+                            });
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        appUpdateManager.unregisterListener(installStateUpdatedListener);
+        if (appUpdateManager != null) {
+            appUpdateManager.unregisterListener(installStateUpdatedListener);
+        }
     }
 
     private void showSnackbarForCompleteUpdate() {
@@ -303,7 +325,7 @@ public class App extends AppCompatActivity {
 
         // inflate about us version with the one generated by app
         TextView versionTv = dialogView.findViewById(R.id.versionTv);
-        versionTv.setText("Version " + BuildConfig.VERSION_NAME);
+        versionTv.setText(getString(R.string.version_format, BuildConfig.VERSION_NAME));
         builder.setView(dialogView);
 
         AlertDialog dialog = builder.create();
@@ -330,6 +352,8 @@ public class App extends AppCompatActivity {
         btnCancel.setOnClickListener(v -> dialog.dismiss());
 
         btnConfirm.setOnClickListener(v -> {
+            // Allow this device to register again if account is deleted
+            new AppPreferences(App.this).setDeviceRegistered(false);
             userViewModel.deleteAccount();
             dialog.dismiss();
         });
@@ -344,7 +368,7 @@ public class App extends AppCompatActivity {
         if (requestCode == APP_UPDATE_REQUEST_CODE) {
             if (resultCode != RESULT_OK) {
                 // Log or show a toast that the update was cancelled or failed.
-                Toast.makeText(this, "Update flow failed! Result code: " + resultCode, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.update_flow_failed, resultCode), Toast.LENGTH_SHORT).show();
             }
         }
     }

@@ -1,6 +1,7 @@
 package com.drivingschoolrwandaapp.ui.fragments;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -78,7 +79,10 @@ public class TestResultFragment extends Fragment {
                 if (actionBar != null) {
                     actionBar.setTitle(examTitle);
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception e) {
+                Log.e("TestResultFragment", "Failed to set action bar title", e);
+                com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
+            }
         }
         
         testViewModel.getTestResult().observe(getViewLifecycleOwner(), result -> {

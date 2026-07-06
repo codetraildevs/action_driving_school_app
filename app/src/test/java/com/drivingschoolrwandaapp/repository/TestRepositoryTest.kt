@@ -8,6 +8,7 @@ import com.drivingschoolrwandaapp.database.entities.TestEntity
 import com.drivingschoolrwandaapp.database.entities.TestWithQuestions
 import com.drivingschoolrwandaapp.models.LocalExam
 import com.drivingschoolrwandaapp.models.LocalQuestion
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -41,10 +42,13 @@ class TestRepositoryTest {
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var repository: TestRepository
     private var logMock: MockedStatic<Log>? = null
+    private var crashlyticsMock: MockedStatic<FirebaseCrashlytics>? = null
 
     @Before
     fun setUp() {
         logMock = mockStatic(Log::class.java)
+        crashlyticsMock = mockStatic(FirebaseCrashlytics::class.java)
+        `when`(FirebaseCrashlytics.getInstance()).thenReturn(mock(FirebaseCrashlytics::class.java))
 
         localExamDataSource = mock(LocalExamDataSource::class.java)
         context = mock(Context::class.java)
@@ -62,6 +66,7 @@ class TestRepositoryTest {
     @After
     fun tearDown() {
         logMock?.close()
+        crashlyticsMock?.close()
     }
 
     // ---------------------------------------------------------------------------
@@ -229,7 +234,9 @@ class TestRepositoryTest {
 
         assertEquals(Resource.Status.ERROR, resource.status)
         assertNotNull("Expected error message", resource.message)
-        assertTrue("Error message should mention failure", resource.message!!.contains("Failed to load"))
+        // Verify ErrorUtils replaced the raw exception text with a user-friendly message
+        assertTrue("Error should not contain raw exception text",
+            !resource.message!!.contains("DB error") && !resource.message!!.contains("RuntimeException"))
     }
 
     @Test
@@ -365,6 +372,9 @@ class TestRepositoryTest {
         val resource = repository.getTestWithQuestions(1).value!!
 
         assertEquals(Resource.Status.ERROR, resource.status)
-        assertTrue("Error should mention failure", resource.message!!.contains("Failed to load"))
+        assertNotNull("Expected error message", resource.message)
+        // Verify ErrorUtils replaced the raw exception text with a user-friendly message
+        assertTrue("Error should not contain raw exception text",
+            !resource.message!!.contains("Load failed") && !resource.message!!.contains("RuntimeException"))
     }
 }

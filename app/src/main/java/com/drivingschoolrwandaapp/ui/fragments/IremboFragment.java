@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -96,8 +97,9 @@ public class IremboFragment extends Fragment implements IremboServiceAdapter.OnI
             String json = new String(buffer, StandardCharsets.UTF_8);
             locationData = new JSONObject(json);
         } catch (IOException | JSONException e) {
-            e.printStackTrace();
-            Toast.makeText(getContext(), "Error loading location data", Toast.LENGTH_SHORT).show();
+            Log.e("IremboFragment", "Error loading location data", e);
+            com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
+            if (getContext() != null) Toast.makeText(getContext(), getString(R.string.error_loading_location), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -170,7 +172,7 @@ public class IremboFragment extends Fragment implements IremboServiceAdapter.OnI
                 if (resource.data != null) {
                     showPaymentConfirmationDialog(resource.data);
                 } else {
-                    Toast.makeText(getContext(), "License request submitted successfully", Toast.LENGTH_SHORT).show();
+                    if (getContext() != null) Toast.makeText(getContext(), getString(R.string.license_submitted), Toast.LENGTH_SHORT).show();
                     iremboViewModel.fetchRecentApplications();
                 }
             } else if (resource.status == Resource.Status.ERROR) {
@@ -187,7 +189,7 @@ public class IremboFragment extends Fragment implements IremboServiceAdapter.OnI
                 if (resource.data != null) {
                     showPaymentConfirmationDialog(resource.data);
                 } else {
-                    Toast.makeText(getContext(), "Special request submitted successfully", Toast.LENGTH_SHORT).show();
+                    if (getContext() != null) Toast.makeText(getContext(), getString(R.string.special_submitted), Toast.LENGTH_SHORT).show();
                     iremboViewModel.fetchRecentApplications();
                 }
             } else if (resource.status == Resource.Status.ERROR) {
@@ -267,7 +269,8 @@ public class IremboFragment extends Fragment implements IremboServiceAdapter.OnI
                         }
                         Collections.sort(districts);
                     } catch (JSONException e) {
-                        e.printStackTrace();
+                        Log.e("IremboFragment", "Error loading districts for province", e);
+                        com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
                     }
 
                     ArrayAdapter<String> districtAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, districts);
@@ -307,7 +310,7 @@ public class IremboFragment extends Fragment implements IremboServiceAdapter.OnI
             if (TextUtils.isEmpty(phone)) { etPhone.setError(getString(R.string.error_required_field)); return; }
             if (TextUtils.isEmpty(nationalId)) { etNationalId.setError(getString(R.string.error_required_field)); return; }
             if (nationalId.length() != 16) { etNationalId.setError("Must be 16 digits"); return; }
-            if (TextUtils.isEmpty(province) || TextUtils.isEmpty(district)) { Toast.makeText(getContext(), "Please select location", Toast.LENGTH_SHORT).show(); return; }
+            if (TextUtils.isEmpty(province) || TextUtils.isEmpty(district)) { if (getContext() != null) Toast.makeText(getContext(), getString(R.string.please_select_location), Toast.LENGTH_SHORT).show(); return; }
             if (TextUtils.isEmpty(category)) { Toast.makeText(getContext(), getString(R.string.error_required_field), Toast.LENGTH_SHORT).show(); return; }
             if (selectedLicenseTypeId == -1) { Toast.makeText(getContext(), getString(R.string.error_required_field), Toast.LENGTH_SHORT).show(); return; }
             if (selectedAppTypeId == -1) { Toast.makeText(getContext(), getString(R.string.error_required_field), Toast.LENGTH_SHORT).show(); return; }
@@ -415,7 +418,9 @@ public class IremboFragment extends Fragment implements IremboServiceAdapter.OnI
              try {
                  startActivity(intent);
              } catch (Exception e) {
-                 Toast.makeText(getContext(), "Could not open dialer", Toast.LENGTH_SHORT).show();
+                 Log.e("IremboFragment", "Could not open dialer for MTN payment", e);
+                 com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
+                 if (getContext() != null) Toast.makeText(getContext(), getString(R.string.could_not_open_dialer), Toast.LENGTH_SHORT).show();
              }
              dialog.dismiss();
              iremboViewModel.fetchRecentApplications();
@@ -428,7 +433,9 @@ public class IremboFragment extends Fragment implements IremboServiceAdapter.OnI
              try {
                  startActivity(intent);
              } catch (Exception e) {
-                 Toast.makeText(getContext(), "Could not open dialer", Toast.LENGTH_SHORT).show();
+                 Log.e("IremboFragment", "Could not open dialer for Airtel payment", e);
+                 com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
+                 if (getContext() != null) Toast.makeText(getContext(), getString(R.string.could_not_open_dialer), Toast.LENGTH_SHORT).show();
              }
              dialog.dismiss();
              iremboViewModel.fetchRecentApplications();

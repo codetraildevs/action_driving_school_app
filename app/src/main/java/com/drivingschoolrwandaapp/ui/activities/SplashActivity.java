@@ -22,17 +22,17 @@ public class SplashActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-        // Initialize language settings
-        LanguageUtils.loadAppLanguage(this);
-
         SplashScreen.installSplashScreen(this);
         super.onCreate(savedInstanceState);
+
+        // Initialize language settings after super.onCreate()
+        // to ensure Hilt injection and Activity initialization are complete.
+        LanguageUtils.loadAppLanguage(this);
 
         // Channel creation is now handled by NotificationWorker to ensure it runs every time.
 
         Intent intent;
-        if (tokenManager.getAccessToken() != null && !tokenManager.getAccessToken().isEmpty()) {
+        if (tokenManager.isLoggedIn()) {
 
             intent = new Intent(SplashActivity.this, App.class);
         } else {

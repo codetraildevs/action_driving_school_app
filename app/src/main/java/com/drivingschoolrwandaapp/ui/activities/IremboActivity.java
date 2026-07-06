@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -95,8 +96,8 @@ public class IremboActivity extends AppCompatActivity implements IremboServiceAd
             String json = new String(buffer, StandardCharsets.UTF_8);
             locationData = new JSONObject(json);
         } catch (IOException | JSONException e) {
-            e.printStackTrace();
-            Toast.makeText(this, "Error loading location data", Toast.LENGTH_SHORT).show();
+            Log.e("IremboActivity", "Error loading location data", e);
+            Toast.makeText(this, getString(R.string.error_loading_location), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -178,7 +179,7 @@ public class IremboActivity extends AppCompatActivity implements IremboServiceAd
                 if (resource.data != null) {
                     showPaymentConfirmationDialog(resource.data);
                 } else {
-                    Toast.makeText(this, "License request submitted successfully", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.license_submitted), Toast.LENGTH_SHORT).show();
                     iremboViewModel.fetchRecentApplications();
                 }
             } else if (resource.status == Resource.Status.ERROR) {
@@ -195,7 +196,7 @@ public class IremboActivity extends AppCompatActivity implements IremboServiceAd
                 if (resource.data != null) {
                     showPaymentConfirmationDialog(resource.data);
                 } else {
-                    Toast.makeText(this, "Special request submitted successfully", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.special_submitted), Toast.LENGTH_SHORT).show();
                     iremboViewModel.fetchRecentApplications();
                 }
             } else if (resource.status == Resource.Status.ERROR) {
@@ -304,7 +305,7 @@ public class IremboActivity extends AppCompatActivity implements IremboServiceAd
                         }
                         Collections.sort(districts);
                     } catch (JSONException e) {
-                        e.printStackTrace();
+                        Log.e("IremboActivity", "Error loading districts for province", e);
                     }
 
                     ArrayAdapter<String> districtAdapter = new ArrayAdapter<>(IremboActivity.this, android.R.layout.simple_spinner_item, districts);
@@ -343,7 +344,7 @@ public class IremboActivity extends AppCompatActivity implements IremboServiceAd
             if (TextUtils.isEmpty(phone)) { etPhone.setError(getString(R.string.error_required_field)); return; }
             if (TextUtils.isEmpty(nationalId)) { etNationalId.setError(getString(R.string.error_required_field)); return; }
             if (nationalId.length() != 16) { etNationalId.setError("Must be 16 digits"); return; }
-            if (TextUtils.isEmpty(province) || TextUtils.isEmpty(district)) { Toast.makeText(this, "Please select location", Toast.LENGTH_SHORT).show(); return; }
+            if (TextUtils.isEmpty(province) || TextUtils.isEmpty(district)) { Toast.makeText(this, getString(R.string.please_select_location), Toast.LENGTH_SHORT).show(); return; }
             if (TextUtils.isEmpty(category)) { Toast.makeText(this, getString(R.string.error_required_field), Toast.LENGTH_SHORT).show(); return; }
             if (selectedLicenseTypeId == -1) { Toast.makeText(this, getString(R.string.error_required_field), Toast.LENGTH_SHORT).show(); return; }
 

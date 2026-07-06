@@ -7,7 +7,7 @@ on:
   workflow_dispatch:   # Allow manual trigger from GitHub UI
     inputs:
       version_name:
-        description: 'Version name override (e.g., 1.0.3)'
+        description: 'Version name override (e.g., 1.1.0)'
         required: false
         type: string
 

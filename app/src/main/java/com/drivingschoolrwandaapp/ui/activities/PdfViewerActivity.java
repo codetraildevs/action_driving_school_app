@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -99,6 +100,8 @@ public class PdfViewerActivity extends AppCompatActivity {
                 finish();
             }
         } catch (Exception e) {
+            Log.e("PdfViewer", "Error setting up PDF viewer", e);
+            com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
             Toast.makeText(this, getString(R.string.something_went_wrong) + e.getMessage(), Toast.LENGTH_LONG).show();
             finish();
         }
@@ -185,7 +188,7 @@ public class PdfViewerActivity extends AppCompatActivity {
                 .setPositiveButton(R.string.add_bookmark, (dialog, which) -> {
                     String name = bookmarkNameInput.getText().toString().trim();
                     pdfViewModel.addBookmark(pdfId, currentPage, name);
-                    Toast.makeText(this, "Bookmark added", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.bookmark_added_toast), Toast.LENGTH_SHORT).show();
                 })
                 .setNegativeButton(R.string.cancel, (dialog, which) -> dialog.cancel());
 
@@ -207,7 +210,7 @@ public class PdfViewerActivity extends AppCompatActivity {
                         if (page >= 0 && page < pdfRenderer.getPageCount()) {
                             recyclerView.scrollToPosition(page);
                         } else {
-                            Toast.makeText(this, "Invalid page number", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, getString(R.string.invalid_page_number), Toast.LENGTH_SHORT).show();
                         }
                     }
                 })
@@ -220,7 +223,7 @@ public class PdfViewerActivity extends AppCompatActivity {
     private void showBookmarksDialog() {
         pdfViewModel.getBookmarks(pdfId).observe(this, bookmarks -> {
             if (bookmarks == null || bookmarks.isEmpty()) {
-                Toast.makeText(this, "No bookmarks yet", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.no_bookmarks_yet), Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -271,7 +274,8 @@ public class PdfViewerActivity extends AppCompatActivity {
                 tempFile.delete();
             }
         } catch (Exception e) {
-            // ignore
+            Log.e("PdfViewer", "Error cleaning up PDF resources", e);
+            com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
         }
     }
 }

@@ -82,7 +82,7 @@ public class BookmarkAdapter extends RecyclerView.Adapter<BookmarkAdapter.Bookma
             } else {
                 bookmarkNameTextView.setVisibility(View.GONE);
             }
-            pageNumberTextView.setText("Page " + (bookmark.pageNumber + 1));
+            pageNumberTextView.setText(itemView.getContext().getString(R.string.page_format, bookmark.pageNumber + 1));
         }
     }
 }

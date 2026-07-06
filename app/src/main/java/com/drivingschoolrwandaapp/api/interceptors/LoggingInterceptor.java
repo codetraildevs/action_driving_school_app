@@ -53,6 +53,7 @@ public class LoggingInterceptor implements Interceptor {
             }
         } catch (Exception e) {
             Log.e(TAG, "Error logging request: " + e.getMessage());
+            com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
         }
     }
 
@@ -78,6 +79,7 @@ public class LoggingInterceptor implements Interceptor {
             }
         } catch (Exception e) {
             Log.e(TAG, "Error logging response: " + e.getMessage());
+            com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
         }
     }
 

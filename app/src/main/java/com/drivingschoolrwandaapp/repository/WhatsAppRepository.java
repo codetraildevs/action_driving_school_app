@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.drivingschoolrwandaapp.api.ApiService;
 import com.drivingschoolrwandaapp.models.entities.WhatsAppGroup;
+import com.drivingschoolrwandaapp.utils.ErrorUtils;
 
 import java.util.List;
 
@@ -40,7 +41,7 @@ public class WhatsAppRepository {
 
             @Override
             public void onFailure(@NonNull Call<List<WhatsAppGroup>> call, @NonNull Throwable t) {
-                result.setValue(Resource.error("Network error: " + t.getMessage(), null));
+                result.setValue(Resource.error(ErrorUtils.getUserFriendlyMessage(t), null));
             }
         });
 

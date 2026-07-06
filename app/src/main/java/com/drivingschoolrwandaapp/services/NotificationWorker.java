@@ -79,6 +79,7 @@ public class NotificationWorker extends Worker {
                 Log.d(TAG, "doWork: Large icon downloaded successfully.");
             } catch (Exception e) {
                 Log.e(TAG, "doWork: Synchronous large icon download failed.", e);
+                com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
             }
         }
 

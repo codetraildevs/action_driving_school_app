@@ -43,8 +43,8 @@ public class WelcomeActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
 
         setContentView(R.layout.activity_welcome);
         appPreferences = new AppPreferences(this);
@@ -54,9 +54,14 @@ public class WelcomeActivity extends AppCompatActivity {
 
         TextView termsPolicyText = findViewById(R.id.terms_policy_text);
         versionTv = findViewById(R.id.versionTv);
-        versionTv.setText("Version "+ BuildConfig.VERSION_NAME);
+        versionTv.setText(getString(R.string.version_format, BuildConfig.VERSION_NAME));
         makeTermsAndPolicyClickable(termsPolicyText);
-        showSupportDialog();
+
+        // Show disclaimer only on first launch
+        if (!appPreferences.isDisclaimerShown()) {
+            appPreferences.setDisclaimerShown(true);
+            showSupportDialog();
+        }
     }
 
     private void setupButtons() {
@@ -110,8 +115,9 @@ public class WelcomeActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        super.onPause();
-        handler.postDelayed(runnable, 3000);
+        if (runnable != null) {
+            handler.postDelayed(runnable, 3000);
+        }
     }
 
     @Override

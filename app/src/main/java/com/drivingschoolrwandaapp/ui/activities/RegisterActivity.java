@@ -3,6 +3,8 @@ package com.drivingschoolrwandaapp.ui.activities;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.annotation.SuppressLint;
 import android.provider.Settings;
 import android.util.Log;
@@ -11,13 +13,16 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
+
 import com.drivingschoolrwandaapp.App;
 import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.api.ApiService;
+import com.drivingschoolrwandaapp.data.local.preferences.AppPreferences;
 import com.drivingschoolrwandaapp.data.local.preferences.TokenManager;
 import com.drivingschoolrwandaapp.models.entities.Device;
 import com.drivingschoolrwandaapp.models.entities.User;
@@ -26,6 +31,7 @@ import com.drivingschoolrwandaapp.viewmodel.UserViewModel;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
+
 import java.util.Locale;
 import java.util.Objects;
 import java.util.TimeZone;
@@ -46,17 +52,44 @@ public class RegisterActivity extends AppCompatActivity {
     private ProgressBar loadingIndicator;
     private UserViewModel userViewModel;
     private TokenManager tokenManager;
+    private AppPreferences appPreferences;
     private static final String TAG = "RegisterActivity";
+    private static final long LOADING_TIMEOUT_MS = 45_000; // 45 seconds
+    private boolean isRegistering = false;
+    private Handler loadingTimeoutHandler;
+    private String registeredPhone = ""; // Phone used in the last successful registration, for auto-login fallback
 
     @Inject
     ApiService apiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
 //        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
         setContentView(R.layout.activity_register);
+
+        loadingTimeoutHandler = new Handler(Looper.getMainLooper());
+
+        tokenManager = new TokenManager(this);
+        appPreferences = new AppPreferences(this);
+
+        // One account per device: if this device already has a registered account, redirect
+        if (appPreferences.isDeviceRegistered() || tokenManager.isLoggedIn()) {
+            Intent intent;
+            if (tokenManager.isLoggedIn()) {
+                // Already logged in - go to main app
+                intent = new Intent(RegisterActivity.this, App.class);
+            } else {
+                // Device has an account but not logged in - go to login
+                Toast.makeText(this, getString(R.string.account_already_exists), Toast.LENGTH_LONG).show();
+                intent = new Intent(RegisterActivity.this, LoginActivity.class);
+            }
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+            return;
+        }
 
         // Initialize Fields
         fullNameField = findViewById(R.id.fullName_field);
@@ -71,14 +104,80 @@ public class RegisterActivity extends AppCompatActivity {
         Button loginButton = findViewById(R.id.login_button);
         loadingIndicator = findViewById(R.id.loading_indicator);
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
-        tokenManager = new TokenManager(this);
+        
         // Set Listeners
         loginButton.setOnClickListener(v -> {
             Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
             startActivity(intent);
         });
         registerButton.setOnClickListener(v -> validateAndRegister());
+        
+        // Register the login observer once (not inside the register callback to avoid stacking)
+        setupLoginObserver();
 
+    }
+
+    private void setupLoginObserver() {
+        userViewModel.getLoginResult().observe(RegisterActivity.this, resource -> {
+            switch (resource.status) {
+                case LOADING:
+                    loadingIndicator.setVisibility(View.VISIBLE);
+                    if (registerButton != null) {
+                        registerButton.setEnabled(false);
+                        registerButton.setText(getString(R.string.loading));
+                    }
+                    break;
+                case SUCCESS:
+                    isRegistering = false;
+                    if (loadingTimeoutHandler != null) {
+                        loadingTimeoutHandler.removeCallbacksAndMessages(null);
+                    }
+                    loadingIndicator.setVisibility(View.GONE);
+                    if (registerButton != null) {
+                        registerButton.setEnabled(true);
+                        registerButton.setText(getString(R.string.confirm));
+                    }
+                    if (resource.data != null && resource.data.isSuccess()) {
+                        // Registration auto-login always uses Remember Me (30 days)
+                        tokenManager.saveTokens(
+                            resource.data.getAccessToken(),
+                            resource.data.getRefreshToken(),
+                            true
+                        );
+                        Log.d(TAG, "Login after registration successful.");
+                        Toast.makeText(RegisterActivity.this, getString(R.string.login_successful_redirect), Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(RegisterActivity.this, App.class));
+                        finish();
+                    } else {
+                        String message = resource.data != null ? resource.data.getMessage() : getString(R.string.login_failed);
+                        Toast.makeText(RegisterActivity.this, message, Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+                case ERROR:
+                    isRegistering = false;
+                    if (loadingTimeoutHandler != null) {
+                        loadingTimeoutHandler.removeCallbacksAndMessages(null);
+                    }
+                    loadingIndicator.setVisibility(View.GONE);
+                    if (registerButton != null) {
+                        registerButton.setEnabled(true);
+                        registerButton.setText(getString(R.string.confirm));
+                    }
+                    // Auto-login failed — navigate to Login with phone pre-filled so user can try with one tap
+                    String errorText = resource.message != null ? resource.message : getString(R.string.login_failed);
+                    Toast.makeText(RegisterActivity.this, errorText, Toast.LENGTH_LONG).show();
+                    if (!registeredPhone.isEmpty()) {
+                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                            intent.putExtra("phone", registeredPhone);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(intent);
+                            finish();
+                        }, 1500);
+                    }
+                    break;
+            }
+        });
     }
 
     private void validateAndRegister() {
@@ -86,7 +185,15 @@ public class RegisterActivity extends AppCompatActivity {
             return; // Validation failed
         }
 
+        isRegistering = true;
         setLoadingState(true);
+
+        // Set a timeout for the registration request
+        loadingTimeoutHandler.postDelayed(() -> {
+            if (isRegistering) {
+                Toast.makeText(RegisterActivity.this, getString(R.string.request_timeout), Toast.LENGTH_LONG).show();
+            }
+        }, LOADING_TIMEOUT_MS);
 
         String fullName = Objects.requireNonNull(fullNameField.getText()).toString().trim();
         String[] names = fullName.split("\\s+");
@@ -140,73 +247,124 @@ public class RegisterActivity extends AppCompatActivity {
         call.enqueue(new Callback<RegisterResponse>() {
             @Override
             public void onResponse(@NonNull Call<RegisterResponse> call, @NonNull Response<RegisterResponse> response) {
+                isRegistering = false;
+                if (loadingTimeoutHandler != null) {
+                    loadingTimeoutHandler.removeCallbacksAndMessages(null);
+                }
                 setLoadingState(false);
+
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    Toast.makeText(RegisterActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
-                    String email = phoneField.getText().toString().trim();
+                    // Mark this device as having a registered account (one account per device)
+                    if (appPreferences != null) {
+                        appPreferences.setDeviceRegistered(true);
+                    }
+                    // Show the server's success message
+                    String successMsg = response.body().getMessage();
+                    if (successMsg == null || successMsg.isEmpty()) {
+                        successMsg = getString(R.string.registration_success);
+                    }
+                    Toast.makeText(RegisterActivity.this, successMsg, Toast.LENGTH_SHORT).show();
+                    
+                    // Save phone for auto-login fallback
+                    registeredPhone = phone;
+                    // Auto-login: make a direct API call so user goes straight to home/dashboard
                     @SuppressLint("HardwareIds")
-                    String password = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-                    String deviceId = password;
-                    userViewModel.login(email, password, deviceId);
-                    userViewModel.getLoginResult().observe(RegisterActivity.this, resource -> {
-                        switch (resource.status) {
-                            case LOADING:
-                                loadingIndicator.setVisibility(View.VISIBLE);
-                                break;
-                            case SUCCESS:
-                                loadingIndicator.setVisibility(View.GONE);
-                                if (resource.data != null && resource.data.isSuccess()) {
-                                    tokenManager.saveTokens(resource.data.getAccessToken(), resource.data.getRefreshToken());
-                                    Log.d(TAG, "Login successful.");
-                                    Toast.makeText(RegisterActivity.this, resource.data.getMessage(), Toast.LENGTH_SHORT).show();
-                                    startActivity(new Intent(RegisterActivity.this, App.class));
-                                    finish();
-                                } else {
-                                    String message = resource.data != null ? resource.data.getMessage() : getString(R.string.login_failed);
-                                    Toast.makeText(RegisterActivity.this, message, Toast.LENGTH_SHORT).show();
-                                }
-                                break;
-                            case ERROR:
-                                loadingIndicator.setVisibility(View.GONE);
-                                Toast.makeText(RegisterActivity.this, resource.message, Toast.LENGTH_SHORT).show();
-                                break;
-                        }
-                    });
+                    String loginPassword = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+                    String loginDeviceId = loginPassword;
+                    userViewModel.login(phone, loginPassword, loginDeviceId);
                 } else {
                     String errorMessage = getString(R.string.registration_failed);
+
                     if (response.errorBody() != null) {
                         try {
-                            RegisterResponse errorResponse = new Gson().fromJson(
-                                    response.errorBody().charStream(),
-                                    RegisterResponse.class
-                            );
-                            if (errorResponse != null && errorResponse.getMessage() != null) {
-                                errorMessage = errorResponse.getMessage();
+                            String errorBodyStr = response.errorBody().string();
+                            if (!errorBodyStr.isEmpty()) {
+                                RegisterResponse errorResponse = new Gson().fromJson(errorBodyStr, RegisterResponse.class);
+                                if (errorResponse != null && errorResponse.getMessage() != null) {
+                                    errorMessage = errorResponse.getMessage();
+                                }
                             }
                         } catch (Exception e) {
-                            // Could not parse error body
+                            Log.e("RegisterActivity", "Could not parse error response body", e);
+                            com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
                         }
                     } else if (response.body() != null && response.body().getMessage() != null) {
                         errorMessage = response.body().getMessage();
                     }
-                    Toast.makeText(RegisterActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+
+                    if (isMessageAlreadyRegistered(errorMessage)) {
+                        // Guide user to login instead
+                        Toast.makeText(RegisterActivity.this, getString(R.string.account_already_exists), Toast.LENGTH_LONG).show();
+                        // Navigate to login after short delay, pre-filling the phone
+                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                            intent.putExtra("phone", phone);
+                            startActivity(intent);
+                        }, 1500);
+                    } else if (errorMessage != null && errorMessage.toLowerCase(Locale.ROOT).contains("device")) {
+                        // Show device-not-allowed message with support numbers
+                        Toast.makeText(RegisterActivity.this, getString(R.string.device_not_allowed_short), Toast.LENGTH_LONG).show();
+                    } else {
+                        // Show the backend's actual error message
+                        Toast.makeText(RegisterActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+                    }
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<RegisterResponse> call, @NonNull Throwable t) {
+                isRegistering = false;
+                if (loadingTimeoutHandler != null) {
+                    loadingTimeoutHandler.removeCallbacksAndMessages(null);
+                }
                 setLoadingState(false);
-                Toast.makeText(RegisterActivity.this, getString(R.string.registration_failed) + t.getMessage(), Toast.LENGTH_SHORT).show();
+
+                // Show user-friendly error message based on the type of failure
+                String friendlyMessage = getUserFriendlyErrorMessage(t);
+                Toast.makeText(RegisterActivity.this, friendlyMessage, Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    /**
+     * Checks if the error message from the registration API indicates the user already has an account.
+     */
+    private boolean isMessageAlreadyRegistered(String message) {
+        if (message == null) return false;
+        String lowerMsg = message.toLowerCase(Locale.ROOT);
+        return lowerMsg.contains("already") || lowerMsg.contains("exists") || lowerMsg.contains("registered");
+    }
+
+    /**
+     * Converts a Throwable error from a network call into a user-friendly message.
+     */
+    /**
+     * Converts a Throwable error from a network call into a user-friendly message.
+     * Shows a message with support contact info for persistent network issues.
+     */
+    private String getUserFriendlyErrorMessage(Throwable t) {
+        if (t == null) return getString(R.string.something_went_wrong);
+        String message = t.getMessage();
+        if (message != null) {
+            String lowerMsg = message.toLowerCase(Locale.ROOT);
+            if (lowerMsg.contains("unable to resolve host") || lowerMsg.contains("failed to connect") || lowerMsg.contains("network is unreachable")) {
+                return getString(R.string.network_error);
+            }
+            if (lowerMsg.contains("timeout") || lowerMsg.contains("timed out")) {
+                return getString(R.string.request_timeout);
+            }
+        }
+        return getString(R.string.registration_failed);
     }
 
     private void setLoadingState(boolean isLoading) {
         if (isLoading) {
             registerButton.setEnabled(false);
+            registerButton.setText(getString(R.string.loading));
             loadingIndicator.setVisibility(View.VISIBLE);
         } else {
             registerButton.setEnabled(true);
+            registerButton.setText(getString(R.string.confirm));
             loadingIndicator.setVisibility(View.GONE);
         }
     }

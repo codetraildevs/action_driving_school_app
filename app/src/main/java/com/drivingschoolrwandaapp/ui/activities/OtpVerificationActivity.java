@@ -43,9 +43,12 @@ public class OtpVerificationActivity extends AppCompatActivity {
                 Toast.makeText(this, getString(R.string.invalid_otp), Toast.LENGTH_SHORT).show();
                 return;
             }
-            if (email != null) {
-                userViewModel.verifyOtp(email, otp);
+            if (email == null || email.isEmpty()) {
+                Toast.makeText(this, getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show();
+                finish();
+                return;
             }
+            userViewModel.verifyOtp(email, otp);
         });
 
         userViewModel.getVerifyOtpResult().observe(this, resource -> {

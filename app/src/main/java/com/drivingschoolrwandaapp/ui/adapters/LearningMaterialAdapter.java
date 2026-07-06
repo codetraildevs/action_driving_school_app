@@ -211,6 +211,7 @@ public class LearningMaterialAdapter extends RecyclerView.Adapter<LearningMateri
                         parseSuccess = true;
                     }
                 } catch (ParseException e) {
+                    Log.e("MaterialAdapter", "Failed to parse date (ISO), trying fallback: " + currentUser.getTestAccessExpiresAt(), e);
                     try {
                         SimpleDateFormat sdfFallback = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
                         Date expirationDate = sdfFallback.parse(currentUser.getTestAccessExpiresAt());
@@ -219,7 +220,7 @@ public class LearningMaterialAdapter extends RecyclerView.Adapter<LearningMateri
                             parseSuccess = true;
                         }
                     } catch (ParseException e2) {
-                        Log.e("MaterialAdapter", "Error parsing date: " + currentUser.getTestAccessExpiresAt(), e2);
+                        Log.e("MaterialAdapter", "Error parsing date with fallback: " + currentUser.getTestAccessExpiresAt(), e2);
                     }
                 }
 
@@ -227,7 +228,7 @@ public class LearningMaterialAdapter extends RecyclerView.Adapter<LearningMateri
 
                     if (remainingMillis <= 0) {
                         {
-                            expirationText.setText("Access Expired");
+                            expirationText.setText(itemView.getContext().getString(R.string.access_expired));
                             expirationText.setVisibility(View.VISIBLE);
                             expirationText.setTextColor(Color.RED);
                         }
@@ -259,7 +260,7 @@ public class LearningMaterialAdapter extends RecyclerView.Adapter<LearningMateri
         private void loadThumbnail(String thumbnailUrl) {
             if (thumbnailUrl != null && !thumbnailUrl.isEmpty()) {
                 String fullThumbnailUrl = ApiClient.SITE_URL + thumbnailUrl;
-                if (fullThumbnailUrl.toLowerCase().endsWith(".svg")) {
+                if (fullThumbnailUrl.toLowerCase(Locale.ROOT).endsWith(".svg")) {
                     loadSvg(thumbnail.getContext(), fullThumbnailUrl, thumbnail);
                 } else {
                     Glide.with(itemView.getContext())

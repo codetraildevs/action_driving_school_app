@@ -2,6 +2,7 @@ package com.drivingschoolrwandaapp.ui.adapters;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -80,6 +81,7 @@ public class MyApplicationsAdapter extends RecyclerView.Adapter<MyApplicationsAd
                 return readableFormat.format(date);
             }
         } catch (ParseException e) {
+            Log.e("MyAppAdapter", "Failed to parse date (ISO): " + dateString, e);
             // Try alternative ISO format with Z or milliseconds
             try {
                 SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
@@ -89,7 +91,7 @@ public class MyApplicationsAdapter extends RecyclerView.Adapter<MyApplicationsAd
                     return readableFormat.format(date);
                 }
             } catch (ParseException ex) {
-                // Return original string if parsing fails
+                Log.e("MyAppAdapter", "Failed to parse date (ISO with Z): " + dateString, ex);
             }
         }
         return dateString;
@@ -120,8 +122,8 @@ public class MyApplicationsAdapter extends RecyclerView.Adapter<MyApplicationsAd
 
         void bind(IremboApplication app) {
             tvTitle.setText(app.getTitle());
-            tvRef.setText("Ref: " + app.getReference());
-            tvDate.setText("Applied: " + formatDate(app.getDate()));
+            tvRef.setText(context.getString(R.string.ref_format, app.getReference()));
+            tvDate.setText(context.getString(R.string.applied_format, formatDate(app.getDate())));
             tvStatus.setText(app.getStatus());
 
             // Reset visibility
@@ -133,7 +135,7 @@ public class MyApplicationsAdapter extends RecyclerView.Adapter<MyApplicationsAd
 
             int bgDrawable;
             
-            String status = app.getStatus() != null ? app.getStatus().toUpperCase() : "";
+            String status = app.getStatus() != null ? app.getStatus().toUpperCase(Locale.ROOT) : "";
 
             switch (status) {
                 case "PENDING":
@@ -143,13 +145,13 @@ public class MyApplicationsAdapter extends RecyclerView.Adapter<MyApplicationsAd
                     progressBar.setVisibility(View.VISIBLE);
                     progressBar.setProgress(app.getCompletionPercentage());
                     tvStatusMessage.setVisibility(View.VISIBLE);
-                    tvStatusMessage.setText("Waiting for approval");
+                    tvStatusMessage.setText(context.getString(R.string.waiting_for_approval));
                     break;
 
                 case "ACTION":
                      bgDrawable = R.drawable.status_action_background;
                     tvActionMessage.setVisibility(View.VISIBLE);
-                    tvActionMessage.setText("Action Required");
+                    tvActionMessage.setText(context.getString(R.string.action_required_text));
                     break;
 
                 case "APPROVED":

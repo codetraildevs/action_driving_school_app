@@ -9,6 +9,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.drivingschoolrwandaapp.api.ApiService;
 import com.drivingschoolrwandaapp.models.IremboApplication;
+import com.drivingschoolrwandaapp.utils.ErrorUtils;
 import com.drivingschoolrwandaapp.models.request.IremboLicenseRequest;
 import com.drivingschoolrwandaapp.models.request.IremboSpecialRequest;
 import com.drivingschoolrwandaapp.models.response.ApiResponse;
@@ -74,7 +75,7 @@ public class IremboViewModel extends AndroidViewModel {
 
                     @Override
                     public void onFailure(Call<ApiResponse<List<IremboApplication>>> call, Throwable t) {
-                        recentApplications.setValue(Resource.error(t.getMessage(), null));
+                        recentApplications.setValue(Resource.error(ErrorUtils.getUserFriendlyMessage(t), null));
                     }
                 });
     }
@@ -94,7 +95,7 @@ public class IremboViewModel extends AndroidViewModel {
 
                     @Override
                     public void onFailure(Call<ApiResponse<IremboPaymentResponse>> call, Throwable t) {
-                        licenseRequestStatus.setValue(Resource.error(t.getMessage(), null));
+                        licenseRequestStatus.setValue(Resource.error(ErrorUtils.getUserFriendlyMessage(t), null));
                     }
                 });
     }
@@ -114,7 +115,7 @@ public class IremboViewModel extends AndroidViewModel {
 
                     @Override
                     public void onFailure(Call<ApiResponse<IremboPaymentResponse>> call, Throwable t) {
-                        specialRequestStatus.setValue(Resource.error(t.getMessage(), null));
+                        specialRequestStatus.setValue(Resource.error(ErrorUtils.getUserFriendlyMessage(t), null));
                     }
                 });
     }
@@ -134,7 +135,7 @@ public class IremboViewModel extends AndroidViewModel {
 
                     @Override
                     public void onFailure(Call<ApiResponse<IremboApplication>> call, Throwable t) {
-                        applicationDetails.setValue(Resource.error(t.getMessage(), null));
+                        applicationDetails.setValue(Resource.error(ErrorUtils.getUserFriendlyMessage(t), null));
                     }
                 });
     }

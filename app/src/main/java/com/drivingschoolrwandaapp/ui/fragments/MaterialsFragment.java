@@ -5,6 +5,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -218,7 +219,7 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
     private boolean canAccessPaidContent(String action) {
         com.drivingschoolrwandaapp.database.entities.User user = userDao.getUserSync();
         if (user == null || !"ACTIVE".equalsIgnoreCase(user.getTestAccessStatus())) {
-            Toast.makeText(getContext(), "You need an active subscription to " + action + " this material.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), getString(R.string.need_active_subscription, action), Toast.LENGTH_SHORT).show();
             return false;
         }
 
@@ -232,20 +233,23 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
                     isExpired = false;
                 }
             } catch (ParseException e) {
-                 try {
-                     SimpleDateFormat sdfFallback = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-                     Date expirationDate = sdfFallback.parse(user.getTestAccessExpiresAt());
-                     if (expirationDate != null && !expirationDate.before(new Date())) {
-                         isExpired = false;
-                     }
+                Log.e("MaterialsFragment", "Failed to parse expiration date (ISO): " + user.getTestAccessExpiresAt(), e);
+                com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
+                try {
+                    SimpleDateFormat sdfFallback = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+                    Date expirationDate = sdfFallback.parse(user.getTestAccessExpiresAt());
+                    if (expirationDate != null && !expirationDate.before(new Date())) {
+                        isExpired = false;
+                    }
                 } catch (ParseException e2) {
-                     // Keep isExpired as true
+                    Log.e("MaterialsFragment", "Failed to parse expiration date (fallback): " + user.getTestAccessExpiresAt(), e2);
+                    com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e2);
                 }
             }
         }
 
         if (isExpired) {
-            Toast.makeText(getContext(), "Your test access has expired. You cannot " + action + " this material.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), getString(R.string.test_access_expired_msg, action), Toast.LENGTH_SHORT).show();
             return false;
         }
 
@@ -300,8 +304,12 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
                     intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     startActivity(intent);
                 } catch (ActivityNotFoundException e) {
+                    Log.e("MaterialsFragment", "No app found to open file: " + material.getFileType(), e);
+                    com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
                     Toast.makeText(getContext(), getString(R.string.no_app_found), Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
+                    Log.e("MaterialsFragment", "Error opening file: " + material.getTitle(), e);
+                    com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
                     Toast.makeText(getContext(), getString(R.string.error_opening_file), Toast.LENGTH_SHORT).show();
                 }
             }

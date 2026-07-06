@@ -2,11 +2,14 @@ package com.drivingschoolrwandaapp.repository;
 
 import android.content.Context;
 import android.content.Intent;
+import android.text.TextUtils;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.api.ApiService;
 import com.drivingschoolrwandaapp.database.dao.UserDao;
 import com.drivingschoolrwandaapp.database.entities.User;
@@ -21,7 +24,8 @@ import com.drivingschoolrwandaapp.models.response.LoginResponse;
 import com.drivingschoolrwandaapp.ui.activities.LoginActivity;
 import com.google.gson.Gson;
 
-import java.io.IOException;
+import java.util.Locale;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -46,20 +50,46 @@ public class UserRepository {
     }
 
     private String parseErrorMessage(Response<?> response) {
-        String errorMessage = "An unknown error occurred";
+        String errorMessage = context.getString(R.string.something_went_wrong);
         if (response.errorBody() != null) {
             try {
-                ApiResponse<?> errorResponse = gson.fromJson(response.errorBody().charStream(), ApiResponse.class);
-                if (errorResponse.getMessage() != null) {
-                    errorMessage = errorResponse.getMessage();
-                } else if (errorResponse.getError() != null) {
-                    errorMessage = errorResponse.getError();
+                String errorBodyStr = response.errorBody().string();
+                if (!TextUtils.isEmpty(errorBodyStr)) {
+                    ApiResponse<?> errorResponse = gson.fromJson(errorBodyStr, ApiResponse.class);
+                    if (errorResponse != null) {
+                        if (errorResponse.getMessage() != null) {
+                            errorMessage = errorResponse.getMessage();
+                        } else if (errorResponse.getError() != null) {
+                            errorMessage = errorResponse.getError();
+                        }
+                    }
                 }
             } catch (Exception e) {
-                // Keep default error message
+                Log.e("UserRepository", "Failed to parse error response", e);
+                com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
             }
         }
+        // If the error message is about a device, show the full support message with phone numbers
+        if (errorMessage != null && errorMessage.toLowerCase(Locale.ROOT).contains("device")) {
+            Log.w("UserRepository", "Device-related error detected: " + errorMessage);
+            errorMessage = context.getString(R.string.device_not_allowed);
+        }
         return errorMessage;
+    }
+
+    private String getNetworkErrorMessage(Throwable t) {
+        if (t == null) return context.getString(R.string.something_went_wrong);
+        String message = t.getMessage();
+        if (message != null) {
+            String lowerMsg = message.toLowerCase(Locale.ROOT);
+            if (lowerMsg.contains("unable to resolve host") || lowerMsg.contains("failed to connect") || lowerMsg.contains("network is unreachable")) {
+                return context.getString(R.string.network_error);
+            }
+            if (lowerMsg.contains("timeout") || lowerMsg.contains("timed out")) {
+                return context.getString(R.string.request_timeout);
+            }
+        }
+        return context.getString(R.string.something_went_wrong);
     }
 
     public LiveData<Resource<LoginResponse>> login(String email, String password, String deviceId) {
@@ -78,7 +108,7 @@ public class UserRepository {
 
             @Override
             public void onFailure(Call<LoginResponse> call, Throwable t) {
-                result.postValue(Resource.error(t.getMessage(), null));
+                result.postValue(Resource.error(getNetworkErrorMessage(t), null));
             }
         });
         return result;
@@ -100,7 +130,7 @@ public class UserRepository {
 
             @Override
             public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
-                result.postValue(Resource.error(t.getMessage(), null));
+                result.postValue(Resource.error(getNetworkErrorMessage(t), null));
             }
         });
         return result;
@@ -122,7 +152,7 @@ public class UserRepository {
 
             @Override
             public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
-                result.postValue(Resource.error(t.getMessage(), null));
+                result.postValue(Resource.error(getNetworkErrorMessage(t), null));
             }
         });
         return result;
@@ -144,7 +174,7 @@ public class UserRepository {
 
             @Override
             public void onFailure(Call<ApiResponse<String>> call, Throwable t) {
-                result.postValue(Resource.error(t.getMessage(), null));
+                result.postValue(Resource.error(getNetworkErrorMessage(t), null));
             }
         });
         return result;
@@ -166,7 +196,7 @@ public class UserRepository {
 
             @Override
             public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
-                result.postValue(Resource.error(t.getMessage(), null));
+                result.postValue(Resource.error(getNetworkErrorMessage(t), null));
             }
         });
         return result;
@@ -210,7 +240,7 @@ public class UserRepository {
 
             @Override
             public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
-                result.postValue(Resource.error(t.getMessage(), null));
+                result.postValue(Resource.error(getNetworkErrorMessage(t), null));
             }
         });
         return result;

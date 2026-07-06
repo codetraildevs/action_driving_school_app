@@ -74,7 +74,7 @@ public class PaymentUtils {
                     dialUssd(fragment, ussdToCall);
                 }
             } else {
-                Toast.makeText(fragment.getContext(), "Permission denied to make a call", Toast.LENGTH_SHORT).show();
+                Toast.makeText(fragment.getContext(), fragment.getString(R.string.permission_denied_call), Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -86,7 +86,7 @@ public class PaymentUtils {
                     dialUssd(activity, ussdToCall);
                 }
             } else {
-                Toast.makeText(activity, "Permission denied to make a call", Toast.LENGTH_SHORT).show();
+                Toast.makeText(activity, activity.getString(R.string.permission_denied_call), Toast.LENGTH_SHORT).show();
             }
         }
     }

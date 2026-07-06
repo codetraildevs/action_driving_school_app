@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -177,10 +178,12 @@ public class WhatsAppGroupsActivity extends AppCompatActivity implements WhatsAp
                 intent.setData(Uri.parse(group.getWhatsappLink()));
                 startActivity(intent);
             } catch (Exception e) {
-                Toast.makeText(this, "Could not open link", Toast.LENGTH_SHORT).show();
+                Log.e("WhatsAppGroups", "Could not open WhatsApp link: " + group.getWhatsappLink(), e);
+                com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
+                Toast.makeText(this, getString(R.string.could_not_open_link), Toast.LENGTH_SHORT).show();
             }
         } else {
-            Toast.makeText(this, "Invalid link", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.invalid_link), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -190,9 +193,9 @@ public class WhatsAppGroupsActivity extends AppCompatActivity implements WhatsAp
             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText("WhatsApp Group Link", group.getWhatsappLink());
             clipboard.setPrimaryClip(clip);
-            Toast.makeText(this, "Link copied to clipboard", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.link_copied), Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this, "No link to copy", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.no_link_to_copy), Toast.LENGTH_SHORT).show();
         }
     }
 }

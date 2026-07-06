@@ -19,6 +19,7 @@ public class TokenManager {
     private static final String KEY_ACCESS_TOKEN = "access_token";
     private static final String KEY_REFRESH_TOKEN = "refresh_token";
     private static final String KEY_TOKEN_EXPIRY = "token_expiry";
+    private static final String KEY_REMEMBER_ME = "remember_me";
 
     private final SharedPreferences encryptedPreferences;
 
@@ -41,18 +42,38 @@ public class TokenManager {
             );
         } catch (GeneralSecurityException | IOException e) {
             Log.e(TAG, "Error creating encrypted preferences: " + e.getMessage());
+            com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
             // Fallback to regular SharedPreferences (less secure)
             return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         }
     }
 
+    /**
+     * Save tokens using the previously stored Remember Me preference.
+     * Used by TokenAuthenticator during automatic token refresh.
+     */
     public void saveTokens(String accessToken, String refreshToken) {
+        boolean rememberMe = encryptedPreferences.getBoolean(KEY_REMEMBER_ME, true);
+        saveTokens(accessToken, refreshToken, rememberMe);
+    }
+
+    /**
+     * Save tokens with configurable expiry.
+     *
+     * @param rememberMe if true, tokens expire after 30 days;
+     *                   if false, tokens expire after 1 hour (session-only).
+     */
+    public void saveTokens(String accessToken, String refreshToken, boolean rememberMe) {
         SharedPreferences.Editor editor = encryptedPreferences.edit();
         editor.putString(KEY_ACCESS_TOKEN, accessToken);
         editor.putString(KEY_REFRESH_TOKEN, refreshToken);
-        editor.putLong(KEY_TOKEN_EXPIRY, System.currentTimeMillis() + (24 * 60 * 60 * 1000)); // 24 hours
+        long expiry = rememberMe
+            ? System.currentTimeMillis() + (30L * 24 * 60 * 60 * 1000)  // 30 days
+            : System.currentTimeMillis() + (60L * 60 * 1000);            // 1 hour
+        editor.putLong(KEY_TOKEN_EXPIRY, expiry);
+        editor.putBoolean(KEY_REMEMBER_ME, rememberMe);
         editor.apply();
-        Log.d(TAG, "Tokens saved successfully");
+        Log.d(TAG, "Tokens saved successfully (rememberMe=" + rememberMe + ")");
     }
 
     public String getAccessToken() {
@@ -78,6 +99,20 @@ public class TokenManager {
     }
 
     public boolean isLoggedIn() {
-        return getAccessToken() != null && !getAccessToken().isEmpty();
+        return getAccessToken() != null && !getAccessToken().isEmpty() && !isTokenExpired();
+    }
+
+    /**
+     * Returns the token expiry time in milliseconds since epoch, or 0 if not set.
+     */
+    public long getTokenExpiryTime() {
+        return encryptedPreferences.getLong(KEY_TOKEN_EXPIRY, 0);
+    }
+
+    /**
+     * Returns whether the user chose "Remember Me" for the current session.
+     */
+    public boolean isRememberMe() {
+        return encryptedPreferences.getBoolean(KEY_REMEMBER_ME, true);
     }
 }

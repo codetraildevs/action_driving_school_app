@@ -127,6 +127,22 @@ jobs:
       - name: Run unit tests
         run: ./gradlew testDebugUnitTest
 
+      # ── Espresso (instrumented) tests ──
+      # Requires an Android emulator. The avd-target is set to a common API level
+      # that works with the project's minSdk (27) and compileSdk (36).
+      - name: Run Espresso tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 31
+          target: default
+          arch: x86_64
+          avd-name: ci-test-device
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          disable-animations: true
+          kvm: true
+          script: ./gradlew connectedDebugAndroidTest
+
       # ── Upload artifacts ──
       - name: Upload lint results
         if: always()

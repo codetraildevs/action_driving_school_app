@@ -17,8 +17,8 @@ android {
         applicationId = "com.drivingschoolrwandaapp"
         minSdk = 27
         targetSdk = 35
-        versionCode = 78
-        versionName = "1.0.3"
+        versionCode = 79
+        versionName = "1.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -166,6 +166,7 @@ dependencies {
     androidTestImplementation(libs.junit.androidx)
     androidTestImplementation(libs.espresso.core)
 }
+
 
 kapt {
     correctErrorTypes = true

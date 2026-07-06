@@ -406,4 +406,25 @@ Quand tu arrives à la dernière question, tu appuies sur « Terminer l’examen
     <string name="result_failed">Échoué</string>
     <string name="percentage_score">%d%%</string>
     <string name="exam_number_format">Examen %d</string>
+
+    <!-- Login & Registration error messages -->
+    <string name="account_already_exists">Ce numéro est déjà inscrit. Veuillez vous connecter.</string>
+    <string name="account_not_found">Aucun compte trouvé avec ce numéro de téléphone. Veuillez vous inscrire.</string>
+    <string name="network_error">Échec de connexion. Vérifiez votre connexion Internet et réessayez.</string>
+    <string name="request_timeout">La requête a expiré. Le serveur ne répond pas. Veuillez réessayer plus tard ou contacter le support.</string>
+    <string name="login_successful_redirect">Connexion réussie!</string>
+    <string name="registration_success">Compte créé avec succès ! Veuillez vous connecter pour continuer.</string>
+    <string name="register_try_login">Échec de l\'inscription. Si vous avez déjà un compte, veuillez vous connecter.</string>
+    <string name="invalid_phone_format">Veuillez entrer un numéro de téléphone valide (ex: 078xxxxxxx)</string>
+    <string name="loading">Chargement...</string>
+    <string name="remember_me">Se souvenir de moi (30 jours)</string>
+    <string name="session_info">Session</string>
+    <string name="session_remembered">Mémorisée pour 30 jours</string>
+    <string name="session_expires_in">La session expire dans %s</string>
+    <string name="session_expired">Session expirée — reconnectez-vous</string>
+
+    <!-- Device not allowed error - login -->
+    <string name="device_not_allowed">Vous n\'êtes pas autorisé à vous connecter depuis cet appareil. Veuillez contacter le support au +250782877442 ou +250722877442.</string>
+    <string name="device_not_allowed_short">Cet appareil n\'est pas reconnu. Veuillez contacter le support au +250782877442 ou +250722877442 pour réinitialiser l\'association de votre appareil.</string>
+
 </resources>

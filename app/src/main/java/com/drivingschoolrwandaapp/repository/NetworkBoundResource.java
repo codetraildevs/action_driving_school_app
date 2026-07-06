@@ -9,6 +9,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 
 import com.drivingschoolrwandaapp.models.response.ApiResponse;
+import com.drivingschoolrwandaapp.utils.ErrorUtils;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -55,7 +56,7 @@ public abstract class NetworkBoundResource<ResultType, RequestType> {
             public void onFailure(@NonNull Call<RequestType> call, @NonNull Throwable t) {
                 onFetchFailed();
                 result.removeSource(dbSource);
-                result.addSource(dbSource, newData -> result.setValue(Resource.error(t.getMessage(), newData)));
+                result.addSource(dbSource, newData -> result.setValue(Resource.error(ErrorUtils.getUserFriendlyMessage(t), newData)));
             }
         });
     }

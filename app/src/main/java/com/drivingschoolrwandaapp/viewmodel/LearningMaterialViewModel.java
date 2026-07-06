@@ -3,6 +3,7 @@ package com.drivingschoolrwandaapp.viewmodel;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -115,6 +116,7 @@ public class LearningMaterialViewModel extends AndroidViewModel {
                     error.setValue("No offline content available.");
                 }
             } catch (IOException e) {
+                Log.e("LearningMaterialVM", "Could not load offline content from cache", e);
                 error.setValue("Could not load offline content.");
             }
         } else {
@@ -126,7 +128,7 @@ public class LearningMaterialViewModel extends AndroidViewModel {
         try (FileWriter writer = new FileWriter(cacheFile)) {
             gson.toJson(materialsToCache, writer);
         } catch (IOException e) {
-            // Caching failed, not a critical error
+            Log.e("LearningMaterialVM", "Failed to cache materials to disk", e);
         }
     }
 
@@ -241,6 +243,7 @@ public class LearningMaterialViewModel extends AndroidViewModel {
                 return false;
             }
         } catch (IOException e) {
+            Log.e("LearningMaterialVM", "Failed to write downloaded file to disk", e);
             if (destinationFile.exists()) {
                 destinationFile.delete();
             }

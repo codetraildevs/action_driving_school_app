@@ -87,7 +87,7 @@ public class WhatsAppGroupAdapter extends RecyclerView.Adapter<WhatsAppGroupAdap
 
             if (group.isActive()) {
                 tvStatusBadge.setVisibility(View.VISIBLE);
-                tvStatusBadge.setText("ACTIVE");
+                tvStatusBadge.setText(itemView.getContext().getString(R.string.active_status));
             } else {
                 tvStatusBadge.setVisibility(View.GONE);
             }

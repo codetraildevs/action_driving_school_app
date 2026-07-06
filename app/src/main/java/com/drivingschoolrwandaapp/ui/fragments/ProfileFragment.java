@@ -1,6 +1,7 @@
 package com.drivingschoolrwandaapp.ui.fragments;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,6 +22,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.bumptech.glide.Glide;
 import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.data.local.preferences.AppPreferences;
+import com.drivingschoolrwandaapp.data.local.preferences.TokenManager;
 import com.drivingschoolrwandaapp.database.entities.User;
 import com.drivingschoolrwandaapp.utils.LanguageUtils;
 import com.drivingschoolrwandaapp.viewmodel.UserViewModel;
@@ -30,6 +32,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 public class ProfileFragment extends Fragment {
 
@@ -41,15 +44,18 @@ public class ProfileFragment extends Fragment {
     private TextView tvAccessLevel;
     private TextView tvExpiryDate;
     private TextView tvPendingMessage;
+    private TextView tvSessionStatus;
 
     private ProgressBar progressBar;
     private AppPreferences appPreferences;
+    private TokenManager tokenManager;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
         appPreferences = new AppPreferences(requireContext());
+        tokenManager = new TokenManager(requireContext());
     }
 
     @Nullable
@@ -69,6 +75,7 @@ public class ProfileFragment extends Fragment {
         tvAccessLevel = view.findViewById(R.id.tv_access_level);
         tvExpiryDate = view.findViewById(R.id.tv_expiry_date);
         tvPendingMessage = view.findViewById(R.id.tv_pending_message);
+        tvSessionStatus = view.findViewById(R.id.tv_session_status);
 
         progressBar = view.findViewById(R.id.progress_bar);
 
@@ -76,7 +83,17 @@ public class ProfileFragment extends Fragment {
         observeViewModels();
         userViewModel.loadProfile();
 
+        // Display session expiry info
+        updateSessionInfo();
+
         view.findViewById(R.id.change_language_button).setOnClickListener(v -> LanguageUtils.showLanguageDialog(requireContext()));
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Refresh session expiry display when user returns to this tab
+        updateSessionInfo();
     }
 
     private void setupMenu() {
@@ -171,6 +188,58 @@ public class ProfileFragment extends Fragment {
         }
     }
 
+    /**
+     * Updates the session status card with the remaining token expiry time.
+     */
+    private void updateSessionInfo() {
+        if (tokenManager == null || tvSessionStatus == null) return;
+
+        long expiryTime = tokenManager.getTokenExpiryTime();
+        long now = System.currentTimeMillis();
+
+        if (expiryTime <= 0 || now >= expiryTime) {
+            // No token or already expired
+            tvSessionStatus.setText(getString(R.string.session_expired));
+            tvSessionStatus.setTextColor(getResources().getColor(android.R.color.holo_red_dark, null));
+            return;
+        }
+
+        long diffMs = expiryTime - now;
+        boolean rememberMe = tokenManager.isRememberMe();
+
+        if (rememberMe) {
+            // Show remaining time in days/hours
+            long days = TimeUnit.MILLISECONDS.toDays(diffMs);
+            long hours = TimeUnit.MILLISECONDS.toHours(diffMs) % 24;
+
+            if (days > 0) {
+                tvSessionStatus.setText(getString(R.string.session_expires_in,
+                    days + "d " + hours + "h"));
+            } else if (hours > 0) {
+                long minutes = TimeUnit.MILLISECONDS.toMinutes(diffMs) % 60;
+                tvSessionStatus.setText(getString(R.string.session_expires_in,
+                    hours + "h " + minutes + "m"));
+            } else {
+                long minutes = TimeUnit.MILLISECONDS.toMinutes(diffMs);
+                tvSessionStatus.setText(getString(R.string.session_expires_in,
+                    (minutes > 0 ? minutes + "m" : "<1m")));
+            }
+            tvSessionStatus.setTextColor(getResources().getColor(android.R.color.holo_green_dark, null));
+        } else {
+            // Session-only: show remaining time in minutes
+            long minutes = TimeUnit.MILLISECONDS.toMinutes(diffMs);
+            if (minutes > 0) {
+                tvSessionStatus.setText(getString(R.string.session_expires_in,
+                    minutes + "m"));
+            } else {
+                long seconds = TimeUnit.MILLISECONDS.toSeconds(diffMs);
+                tvSessionStatus.setText(getString(R.string.session_expires_in,
+                    (seconds > 0 ? seconds + "s" : "<1s")));
+            }
+            tvSessionStatus.setTextColor(getResources().getColor(android.R.color.holo_orange_dark, null));
+        }
+    }
+
     private String formatDate(String dateStr) {
         try {
             SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
@@ -178,9 +247,13 @@ public class ProfileFragment extends Fragment {
             SimpleDateFormat outputFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
             return outputFormat.format(date);
         } catch (ParseException e) {
+            Log.e("ProfileFragment", "Error parsing date: " + dateStr, e);
+            com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
             return dateStr; 
         } catch (Exception e) {
-             return dateStr;
+            Log.e("ProfileFragment", "Unexpected error parsing date: " + dateStr, e);
+            com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
+            return dateStr;
         }
     }
 }

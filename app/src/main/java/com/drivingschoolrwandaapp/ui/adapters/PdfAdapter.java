@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.pdf.PdfRenderer;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -80,7 +81,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.PdfViewHolder> {
                             photoView.setImageBitmap(bitmap);
                         });
                     } catch (OutOfMemoryError e) {
-                        // Fallback if memory is tight
+                        Log.e("PdfAdapter", "Out of memory rendering PDF page " + position, e);
                         page.close();
                     }
                 }

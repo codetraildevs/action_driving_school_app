@@ -4,6 +4,7 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -118,6 +119,8 @@ public class SingleQuestionPageFragment extends Fragment implements QuestionOpti
                         try {
                             Navigation.findNavController(view).popBackStack();
                         } catch (Exception e) {
+                            Log.e("SingleQuestionPage", "Navigation failed during translation warning", e);
+                            com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
                             if (getActivity() != null) {
                                 getActivity().onBackPressed();
                             }

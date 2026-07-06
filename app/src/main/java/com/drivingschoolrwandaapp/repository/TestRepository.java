@@ -13,6 +13,7 @@ import com.drivingschoolrwandaapp.database.entities.TestWithQuestions;
 import com.drivingschoolrwandaapp.database.entities.QuestionWithOptions;
 import com.drivingschoolrwandaapp.data.local.preferences.AppPreferences;
 import com.drivingschoolrwandaapp.models.LocalExam;
+import com.drivingschoolrwandaapp.utils.ErrorUtils;
 import com.drivingschoolrwandaapp.models.LocalQuestion;
 import com.drivingschoolrwandaapp.repository.Resource;
 
@@ -83,7 +84,8 @@ public class TestRepository {
             result.setValue(Resource.success(testEntities));
         } catch (Exception e) {
             Log.e(TAG, "Error loading local exams", e);
-            result.setValue(Resource.<List<TestEntity>>error("Failed to load exams: " + e.getMessage(), null));
+            com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
+            result.setValue(Resource.<List<TestEntity>>error(ErrorUtils.getUserFriendlyMessage(e), null));
         }
 
         return result;
@@ -134,7 +136,8 @@ public class TestRepository {
             result.setValue(Resource.success(testWithQuestions));
         } catch (Exception e) {
             Log.e(TAG, "Error loading local exam questions", e);
-            result.setValue(Resource.<TestWithQuestions>error("Failed to load questions: " + e.getMessage(), null));
+            com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
+            result.setValue(Resource.<TestWithQuestions>error(ErrorUtils.getUserFriendlyMessage(e), null));
         }
 
         return result;

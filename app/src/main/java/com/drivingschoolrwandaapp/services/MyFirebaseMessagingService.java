@@ -96,6 +96,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         Log.e(TAG, "ERROR: Failed to update Firebase token on server. Code: " + response.code() + " Message: " + errorBody);
                     } catch (Exception e) {
                         Log.e(TAG, "ERROR: Failed to parse error response from token update. Code: " + response.code(), e);
+                        com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
                     }
                 }
             }

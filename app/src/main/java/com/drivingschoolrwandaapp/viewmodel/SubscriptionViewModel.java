@@ -1,6 +1,7 @@
 package com.drivingschoolrwandaapp.viewmodel;
 
 import android.app.Application;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -9,6 +10,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.drivingschoolrwandaapp.database.entities.UserSubscriptionWithPlan;
 import com.drivingschoolrwandaapp.models.mappers.SubscriptionMapper;
+import com.drivingschoolrwandaapp.utils.ErrorUtils;
 import com.drivingschoolrwandaapp.models.entities.SubscriptionPlan;
 import com.drivingschoolrwandaapp.models.entities.UserSubscription;
 import com.drivingschoolrwandaapp.models.response.ApiResponse;
@@ -127,7 +129,7 @@ public class SubscriptionViewModel extends AndroidViewModel {
 
             @Override
             public void onFailure(@NonNull Call<UserSubscriptionResponse> call, @NonNull Throwable t) {
-                error.setValue(t.getMessage());
+                error.setValue(ErrorUtils.getUserFriendlyMessage(t));
                 isLoading.setValue(false);
             }
         });
@@ -149,7 +151,7 @@ public class SubscriptionViewModel extends AndroidViewModel {
 
             @Override
             public void onFailure(@NonNull Call<ApiResponse<Void>> call, @NonNull Throwable t) {
-                error.setValue(t.getMessage());
+                error.setValue(ErrorUtils.getUserFriendlyMessage(t));
                 isLoading.setValue(false);
             }
         });
@@ -170,7 +172,7 @@ public class SubscriptionViewModel extends AndroidViewModel {
 
             @Override
             public void onFailure(@NonNull Call<ApiResponse<Void>> call, @NonNull Throwable t) {
-                error.setValue(t.getMessage());
+                error.setValue(ErrorUtils.getUserFriendlyMessage(t));
                 isLoading.setValue(false);
             }
         });
@@ -194,6 +196,7 @@ public class SubscriptionViewModel extends AndroidViewModel {
                     error.setValue(defaultErrorMessage);
                 }
             } catch (IOException e) {
+                Log.e("SubscriptionVM", "Failed to read API error body", e);
                 error.setValue(defaultErrorMessage);
             }
         } else {

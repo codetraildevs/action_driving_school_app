@@ -362,4 +362,24 @@
     <string name="status_channel_name">Imimerere y\'Ubusabe</string>
     <string name="status_channel_description">Amakuru yerekeye imimerere y\'ubusabe bwa Irembo.</string>
 
+    <!-- Login & Registration error messages -->
+    <string name="account_already_exists">Nimero ya telefone isanzwe yiyandikishije. Nyamuneka injira hano.</string>
+    <string name="account_not_found">Nta konte ibonetse kuri iyi numero ya telefone. Nyamuneka iyandikishe.</string>
+    <string name="network_error">Kwihuuza byanze. Reba niba ufite interineti hanyuma ugerageze kongera.</string>
+    <string name="request_timeout">Igihe kirarangiye. Seriveri ntago isubiza. Gerageza nyuma cyangwa waduhamagare.</string>
+    <string name="login_successful_redirect">Kwinjira byaciyemo neza!</string>
+    <string name="registration_success">Konte yashizweho neza! Nyamuneka injira ukomeze.</string>
+    <string name="register_try_login">Iyandikisho ryanze. Niba usanzwe ufite konte, injira hano.</string>
+    <string name="invalid_phone_format">Andika numero ya telefone ikoreshwa (urugero: 078xxxxxxx)</string>
+    <string name="loading">Birakoze...</string>
+    <string name="remember_me">Nyibuka (iminsi 30)</string>
+    <string name="session_info">Igihe cya sesiyo</string>
+    <string name="session_remembered">Wibukijwe iminsi 30</string>
+    <string name="session_expires_in">Igihe cya sesiyo kirarangiye nyuma y %s</string>
+    <string name="session_expired">Igihe cya sesiyo kirarangiye — Injira ubundi</string>
+
+    <!-- Device not allowed error - login -->
+    <string name="device_not_allowed">Ntabwo wemerewe kwinjira ukoresheje iyi aparati. Nyamuneka waduhamagare kuri +250782877442 cyangwa +250722877442.</string>
+    <string name="device_not_allowed_short">Iyi aparati ntiyemewe. Nyamuneka waduhamagare kuri +250782877442 cyangwa +250722877442 babashe gusubiza aparati yawe.</string>
+
 </resources>
