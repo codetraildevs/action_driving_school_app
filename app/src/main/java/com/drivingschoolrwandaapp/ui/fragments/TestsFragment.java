@@ -44,6 +44,7 @@ import com.drivingschoolrwandaapp.database.entities.User;
 import com.drivingschoolrwandaapp.ui.adapters.TestAdapter;
 import com.drivingschoolrwandaapp.utils.GridSpacingItemDecoration;
 import com.drivingschoolrwandaapp.utils.PaymentUtils;
+import com.drivingschoolrwandaapp.utils.SafetyUtils;
 import com.drivingschoolrwandaapp.viewmodel.SubscriptionViewModel;
 import com.drivingschoolrwandaapp.viewmodel.TestViewModel;
 import com.drivingschoolrwandaapp.viewmodel.UserViewModel;
@@ -231,9 +232,11 @@ public class TestsFragment extends Fragment {
                 if (requestAccessDialog != null && requestAccessDialog.isShowing()) {
                     requestAccessDialog.dismiss();
                 }
-                userViewModel.loadProfile();
-                subscriptionViewModel.doneShowingRequestAccessDialog();
-                showPaymentInstructionsDialog(selectedPlan);
+                if (isAdded()) {
+                    userViewModel.loadProfile();
+                    subscriptionViewModel.doneShowingRequestAccessDialog();
+                    showPaymentInstructionsDialog(selectedPlan);
+                }
             }
         });
 
@@ -242,13 +245,15 @@ public class TestsFragment extends Fragment {
                  if (requestAccessDialog != null && requestAccessDialog.isShowing()) {
                     requestAccessDialog.dismiss();
                 }
-                Toast.makeText(getContext(), error, Toast.LENGTH_LONG).show();
+                if (isAdded() && getContext() != null) {
+                    Toast.makeText(getContext(), error, Toast.LENGTH_LONG).show();
+                }
             }
         });
     }
 
     private void downloadUnlockedTests() {
-        if (currentUser == null || testAdapter == null) return;
+        if (currentUser == null || testAdapter == null || !isAdded()) return;
         Resource<List<TestEntity>> testsResource = testViewModel.getTests().getValue();
         if (testsResource == null || testsResource.data == null) return;
 
@@ -293,12 +298,11 @@ public class TestsFragment extends Fragment {
 
     private void showRequestAccessDialog(TestEntity test) {
         requestAccessDialog = new BottomSheetDialog(requireContext());
-        View dialogView = getLayoutInflater().inflate(R.layout.dialog_subscription, null);
-        requestAccessDialog.setContentView(dialogView);
+        requestAccessDialog.setContentView(R.layout.dialog_subscription);
 
-        Button btnConfirm = dialogView.findViewById(R.id.btn_confirm);
-        ProgressBar dialogProgressBar = dialogView.findViewById(R.id.dialog_progress_bar);
-        RecyclerView rvOptions = dialogView.findViewById(R.id.rv_subscription_options);
+        Button btnConfirm = requestAccessDialog.findViewById(R.id.btn_confirm);
+        ProgressBar dialogProgressBar = requestAccessDialog.findViewById(R.id.dialog_progress_bar);
+        RecyclerView rvOptions = requestAccessDialog.findViewById(R.id.rv_subscription_options);
 
         selectedDays = -1;
         selectedPlan = null;
@@ -352,8 +356,9 @@ public class TestsFragment extends Fragment {
     }
 
     private void showPaymentInstructionsDialog(PlanOption plan) {
+        if (!isAdded() || getActivity() == null) return;
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        LayoutInflater inflater = requireActivity().getLayoutInflater();
+        LayoutInflater inflater = getActivity().getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_payment_instructions, null);
         builder.setView(dialogView);
 
@@ -411,7 +416,8 @@ public class TestsFragment extends Fragment {
         if (item.getItemId() == R.id.action_toggle_layout) {
             isGridLayout = !isGridLayout;
             appPreferences.setGridLayout(isGridLayout);
-            getActivity().invalidateOptionsMenu();
+            SafetyUtils.runIfActivityAttached(this, "onOptionsItemSelected",
+                    () -> getActivity().invalidateOptionsMenu());
             updateLayoutManager();
             if (testAdapter.getItemCount() > 0) {
                 testAdapter.notifyItemRangeChanged(0, testAdapter.getItemCount());

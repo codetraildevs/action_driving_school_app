@@ -84,7 +84,7 @@
                     android:paddingTop="3dp"
                     android:paddingBottom="3dp"
                     android:text="@string/free_badge"
-                    android:textSize="10sp"
+                    android:textSize="12sp"
                     android:textStyle="bold"
                     android:visibility="gone"
                     android:layout_marginStart="8dp"

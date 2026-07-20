@@ -416,7 +416,7 @@ Quand tu arrives à la dernière question, tu appuies sur « Terminer l’examen
     <string name="registration_success">Compte créé avec succès ! Veuillez vous connecter pour continuer.</string>
     <string name="register_try_login">Échec de l\'inscription. Si vous avez déjà un compte, veuillez vous connecter.</string>
     <string name="invalid_phone_format">Veuillez entrer un numéro de téléphone valide (ex: 078xxxxxxx)</string>
-    <string name="loading">Chargement...</string>
+    <string name="loading">Chargement…</string>
     <string name="remember_me">Se souvenir de moi (30 jours)</string>
     <string name="session_info">Session</string>
     <string name="session_remembered">Mémorisée pour 30 jours</string>
@@ -426,5 +426,29 @@ Quand tu arrives à la dernière question, tu appuies sur « Terminer l’examen
     <!-- Device not allowed error - login -->
     <string name="device_not_allowed">Vous n\'êtes pas autorisé à vous connecter depuis cet appareil. Veuillez contacter le support au +250782877442 ou +250722877442.</string>
     <string name="device_not_allowed_short">Cet appareil n\'est pas reconnu. Veuillez contacter le support au +250782877442 ou +250722877442 pour réinitialiser l\'association de votre appareil.</string>
+    <string name="share_menu">Partager</string>
+    <string name="open_in_browser">Ouvrir dans le navigateur</string>
+
+    <!-- SetTextI18n format strings -->
+    <string name="timer_placeholder">00:00</string>
+    <string name="timer_format">%1$02d:%2$02d</string>
+    <string name="page_indicator_format">%1$d / %2$d</string>
+    <string name="file_size_mb_format">%.2f Mo</string>
+    <string name="amount_with_currency_format">%1$s %2$s</string>
+    <string name="compact_score_format">%1$d/%2$d</string>
+    <string name="result_placeholder_percentage">--%</string>
+    <string name="result_placeholder_score">-- / --</string>
+    <string name="result_placeholder_status">--</string>
+    <string name="result_placeholder_zero">0</string>
+    <string name="phone_icon_desc">icône téléphone</string>
+    <string name="update_downloaded">Une mise à jour vient d\'être téléchargée.</string>
+    <string name="restart_action">REDÉMARRER</string>
+    <string name="status_unknown">INCONNU</string>
+    <string name="accass_up_to_format">Examens accessibles : %1$d</string>
+    <string name="expiry_date_format">Expire le : %1$s</string>
+
+    <!-- Device registration messages -->
+    <string name="device_already_registered">Vous avez déjà un compte sur cet appareil. Veuillez vous connecter avec le numéro de téléphone que vous avez utilisé lors de l\'inscription ou appelez le +250782877442 ou +250722877442 pour obtenir de l\'aide.</string>
+    <string name="account_already_exists_with_help">Ce numéro de téléphone est déjà inscrit. Veuillez vous connecter avec votre numéro ou appelez le +250782877442 ou +250722877442 pour obtenir de l\'aide.</string>
 
 </resources>

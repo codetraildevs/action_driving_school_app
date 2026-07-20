@@ -93,6 +93,9 @@
     <color name="status_rejected_text">#B00020</color>
 
 
+    <!-- ************ SHIMMER PLACEHOLDER ************ -->
+    <color name="shimmer_placeholder">#E0E0E0</color>
+
     <color name="bottom_nav_selected">#33A1C9</color>
     <color name="bottom_nav_unselected">#757575</color>
     <color name="bottom_nav_bg">#FFFFFF</color>

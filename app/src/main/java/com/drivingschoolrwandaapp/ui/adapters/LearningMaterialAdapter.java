@@ -1,7 +1,5 @@
 package com.drivingschoolrwandaapp.ui.adapters;
 
-import static com.drivingschoolrwandaapp.utils.SvgGlideLoader.loadSvg;
-
 import android.graphics.Color;
 import android.net.Uri;
 import android.util.Log;
@@ -19,11 +17,14 @@ import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
 import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.api.ApiClient;
 import com.drivingschoolrwandaapp.data.models.LearningMaterial;
 import com.drivingschoolrwandaapp.database.entities.User;
 import com.drivingschoolrwandaapp.utils.FileUtils;
+import com.drivingschoolrwandaapp.utils.SvgGlideLoader;
 import com.drivingschoolrwandaapp.viewmodel.DownloadState;
 
 import java.io.File;
@@ -190,7 +191,7 @@ public class LearningMaterialAdapter extends RecyclerView.Adapter<LearningMateri
 
             if (material.isDownloaded() && material.getFileSize() > 0) {
                 double sizeInMb = material.getFileSize() / (1024.0 * 1024.0);
-                fileTypeOrSize.setText(String.format(Locale.ROOT, "%.2f MB", sizeInMb));
+                fileTypeOrSize.setText(itemView.getContext().getString(R.string.file_size_mb_format, sizeInMb));
             } else {
                 fileTypeOrSize.setText(material.getFileType());
             }
@@ -238,7 +239,14 @@ public class LearningMaterialAdapter extends RecyclerView.Adapter<LearningMateri
 
 
 
-            if (material.isDownloaded() && material.getFileType().startsWith("image/")) {
+            // Build consistent Glide request options for material thumbnails
+            RequestOptions thumbnailOptions = new RequestOptions()
+                    .placeholder(R.drawable.ic_materials)
+                    .error(R.drawable.ic_error)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .centerCrop();
+
+            if (material.isDownloaded() && material.getFileType() != null && material.getFileType().startsWith("image/")) {
                 File internalStroageDir = itemView.getContext().getFilesDir();
                 String fileName = FileUtils.getSafeFileName(material);
                 File file = new File(internalStroageDir, fileName);
@@ -246,32 +254,32 @@ public class LearningMaterialAdapter extends RecyclerView.Adapter<LearningMateri
                     Uri fileUri = FileProvider.getUriForFile(itemView.getContext(), itemView.getContext().getPackageName() + ".provider", file);
                     Glide.with(itemView.getContext())
                             .load(fileUri)
-                            .placeholder(R.drawable.ic_launcher_background)
-                            .error(R.drawable.ic_error)
+                            .apply(thumbnailOptions)
                             .into(thumbnail);
                 } else {
-                    loadThumbnail(material.getThumbnailUrl());
+                    loadThumbnail(material.getThumbnailUrl(), thumbnailOptions);
                 }
             } else {
-                loadThumbnail(material.getThumbnailUrl());
+                loadThumbnail(material.getThumbnailUrl(), thumbnailOptions);
             }
         }
         
-        private void loadThumbnail(String thumbnailUrl) {
+        private void loadThumbnail(String thumbnailUrl, RequestOptions options) {
             if (thumbnailUrl != null && !thumbnailUrl.isEmpty()) {
                 String fullThumbnailUrl = ApiClient.SITE_URL + thumbnailUrl;
                 if (fullThumbnailUrl.toLowerCase(Locale.ROOT).endsWith(".svg")) {
-                    loadSvg(thumbnail.getContext(), fullThumbnailUrl, thumbnail);
+                    SvgGlideLoader.loadSvg(thumbnail.getContext(), fullThumbnailUrl, thumbnail,
+                            R.drawable.ic_materials, R.drawable.ic_error);
                 } else {
                     Glide.with(itemView.getContext())
                             .load(fullThumbnailUrl)
-                            .placeholder(R.drawable.ic_launcher_background)
-                            .error(R.drawable.ic_error)
+                            .apply(options)
                             .into(thumbnail);
                 }
             } else {
                 Glide.with(itemView.getContext())
-                        .load(R.drawable.ic_launcher_background)
+                        .load(R.drawable.ic_materials)
+                        .apply(options)
                         .into(thumbnail);
             }
         }

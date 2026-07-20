@@ -16,3 +16,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "ACTION DRIVING SCHOOL"
 include(":app")
+include(":baseline-profile")

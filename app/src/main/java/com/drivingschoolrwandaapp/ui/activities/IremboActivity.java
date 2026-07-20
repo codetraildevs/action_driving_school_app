@@ -53,6 +53,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -65,6 +67,7 @@ public class IremboActivity extends AppCompatActivity implements IremboServiceAd
     private AlertDialog loadingDialog;
     private RecentActivityAdapter recentActivityAdapter;
     private JSONObject locationData;
+    private final ExecutorService locationExecutor = Executors.newSingleThreadExecutor();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,19 +89,34 @@ public class IremboActivity extends AppCompatActivity implements IremboServiceAd
         userViewModel.loadProfile();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        locationExecutor.shutdownNow();
+    }
+
     private void loadLocationData() {
-        try {
-            InputStream is = getAssets().open("location.json");
-            int size = is.available();
-            byte[] buffer = new byte[size];
-            is.read(buffer);
-            is.close();
-            String json = new String(buffer, StandardCharsets.UTF_8);
-            locationData = new JSONObject(json);
-        } catch (IOException | JSONException e) {
-            Log.e("IremboActivity", "Error loading location data", e);
-            Toast.makeText(this, getString(R.string.error_loading_location), Toast.LENGTH_SHORT).show();
-        }
+        // Run file I/O on background thread to avoid ANR on main thread
+        locationExecutor.execute(() -> {
+            try {
+                InputStream is = getAssets().open("location.json");
+                int size = is.available();
+                byte[] buffer = new byte[size];
+                is.read(buffer);
+                is.close();
+                String json = new String(buffer, StandardCharsets.UTF_8);
+                JSONObject result = new JSONObject(json);
+                // Update on main thread
+                runOnUiThread(() -> locationData = result);
+            } catch (IOException | JSONException e) {
+                Log.e("IremboActivity", "Error loading location data", e);
+                runOnUiThread(() -> {
+                    if (!isFinishing()) {
+                        Toast.makeText(IremboActivity.this, getString(R.string.error_loading_location), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
     }
 
     private void setupToolbar() {
@@ -111,7 +129,7 @@ public class IremboActivity extends AppCompatActivity implements IremboServiceAd
         Button btnTrack = findViewById(R.id.btn_track);
 
         btnTrack.setOnClickListener(v -> {
-            String appNumber = etApplicationNumber.getText().toString().trim();
+            String appNumber = etApplicationNumber.getText() != null ? etApplicationNumber.getText().toString().trim() : "";
             if (TextUtils.isEmpty(appNumber)) {
                 etApplicationNumber.setError(getString(R.string.error_required_field));
                 return;
@@ -162,72 +180,86 @@ public class IremboActivity extends AppCompatActivity implements IremboServiceAd
 
     private void setupObservers() {
         iremboViewModel.getRecentApplications().observe(this, resource -> {
+            if (resource == null) return;
             if (resource.status == Resource.Status.SUCCESS) {
                 if (resource.data != null) {
                     recentActivityAdapter.setApplications(resource.data);
                 }
             } else if (resource.status == Resource.Status.ERROR) {
-                Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show();
+                if (!isFinishing()) {
+                    Toast.makeText(this, resource.message != null ? resource.message : getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
         iremboViewModel.getLicenseRequestStatus().observe(this, resource -> {
+            if (resource == null) return;
             if (resource.status == Resource.Status.LOADING) {
                 showLoadingDialog();
             } else if (resource.status == Resource.Status.SUCCESS) {
                 hideLoadingDialog();
                 if (resource.data != null) {
                     showPaymentConfirmationDialog(resource.data);
-                } else {
+                } else if (!isFinishing()) {
                     Toast.makeText(this, getString(R.string.license_submitted), Toast.LENGTH_SHORT).show();
                     iremboViewModel.fetchRecentApplications();
                 }
             } else if (resource.status == Resource.Status.ERROR) {
                 hideLoadingDialog();
-                Toast.makeText(this, "Error: " + resource.message, Toast.LENGTH_LONG).show();
+                if (!isFinishing()) {
+                    Toast.makeText(this, getString(R.string.error_format, resource.message != null ? resource.message : getString(R.string.something_went_wrong)), Toast.LENGTH_LONG).show();
+                }
             }
         });
 
         iremboViewModel.getSpecialRequestStatus().observe(this, resource -> {
+            if (resource == null) return;
             if (resource.status == Resource.Status.LOADING) {
                 showLoadingDialog();
             } else if (resource.status == Resource.Status.SUCCESS) {
                 hideLoadingDialog();
                 if (resource.data != null) {
                     showPaymentConfirmationDialog(resource.data);
-                } else {
+                } else if (!isFinishing()) {
                     Toast.makeText(this, getString(R.string.special_submitted), Toast.LENGTH_SHORT).show();
                     iremboViewModel.fetchRecentApplications();
                 }
             } else if (resource.status == Resource.Status.ERROR) {
                 hideLoadingDialog();
-                Toast.makeText(this, "Error: " + resource.message, Toast.LENGTH_LONG).show();
+                if (!isFinishing()) {
+                    Toast.makeText(this, getString(R.string.error_format, resource.message != null ? resource.message : getString(R.string.something_went_wrong)), Toast.LENGTH_LONG).show();
+                }
             }
         });
 
         iremboViewModel.getApplicationDetails().observe(this, resource -> {
+            if (resource == null) return;
              if (resource.status == Resource.Status.LOADING) {
                  showLoadingDialog();
              } else if (resource.status == Resource.Status.SUCCESS) {
                  hideLoadingDialog();
-                 if (resource.data != null) {
+                 if (resource.data != null && !isFinishing()) {
                      Intent intent = new Intent(this, ApplicationDetailsActivity.class);
                      intent.putExtra("application_details", resource.data);
                      startActivity(intent);
                  }
              } else if (resource.status == Resource.Status.ERROR) {
                  hideLoadingDialog();
-                 Toast.makeText(this, "Error: " + resource.message, Toast.LENGTH_LONG).show();
+                 if (!isFinishing()) {                    Toast.makeText(this, getString(R.string.error_format, resource.message != null ? resource.message : getString(R.string.something_went_wrong)), Toast.LENGTH_LONG).show();
+                }
              }
          });
 
         userViewModel.getUserLiveData().observe(this, resource -> {
+            if (resource == null) return;
             if (resource.status == Resource.Status.SUCCESS) {
                 if (resource.data != null) {
                     currentUser = resource.data;
                 }
             } else if (resource.status == Resource.Status.ERROR) {
-                Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show();
+                if (!isFinishing()) {
+                    Toast.makeText(this, resource.message != null ? resource.message : getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
@@ -438,7 +470,7 @@ public class IremboActivity extends AppCompatActivity implements IremboServiceAd
         NumberFormat format = NumberFormat.getNumberInstance(Locale.US);
         String currency = paymentDetails.getCurrency() != null ? paymentDetails.getCurrency() : "RWF";
 
-        tvAmount.setText(format.format(amount) + " " + currency);
+        tvAmount.setText(getString(R.string.amount_with_currency_format, format.format(amount), currency));
 
         PaymentUtils.setupPaymentMethods(dialogView, this, String.valueOf(amount));
 

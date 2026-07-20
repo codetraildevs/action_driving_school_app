@@ -14,6 +14,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.os.Handler;
+import android.os.Looper;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -58,6 +60,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @AndroidEntryPoint
 public class App extends AppCompatActivity {
@@ -161,7 +165,16 @@ public class App extends AppCompatActivity {
             }
         });
 
-        userViewModel.loadProfile();
+        // Defer profile loading and heavy UI setup to after first frame renders.
+        // On low-RAM devices, reducing main thread work before the first frame
+        // significantly improves cold start metrics.
+        new Handler(Looper.getMainLooper()).post(() -> {
+            userViewModel.loadProfile();
+
+            // Warm up Glide in background thread so image loading is faster
+            // when the nav drawer profile image loads.
+            new Thread(() -> Glide.get(App.this)).start();
+        });
 
         navigationView.setNavigationItemSelectedListener(item -> {
             if (item.getItemId() == R.id.nav_share) {
@@ -199,14 +212,20 @@ public class App extends AppCompatActivity {
 
         askNotificationPermission();
 
-        try {
-            appUpdateManager = AppUpdateManagerFactory.create(this);
-            appUpdateManager.registerListener(installStateUpdatedListener);
-            checkForUpdate();
-        } catch (Exception e) {
-            Log.e("App", "Google Play In-app updates not available on this device", e);
-            FirebaseCrashlytics.getInstance().recordException(e);
-        }
+        // Defer Play Core initialization to a background thread to avoid blocking cold start
+        // on low-RAM devices. Play Core contacts Google Play services and can add 100-300ms.
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(() -> {
+            try {
+                appUpdateManager = AppUpdateManagerFactory.create(this);
+                appUpdateManager.registerListener(installStateUpdatedListener);
+                checkForUpdate();
+            } catch (Exception e) {
+                Log.e("App", "Google Play In-app updates not available on this device", e);
+                FirebaseCrashlytics.getInstance().recordException(e);
+            }
+        });
+        executor.shutdown();
     }
 
     private void checkForUpdate() {
@@ -261,9 +280,9 @@ public class App extends AppCompatActivity {
     private void showSnackbarForCompleteUpdate() {
         Snackbar.make(
                 findViewById(R.id.drawer_layout), // Use a root view of your layout
-                "An update has just been downloaded.",
+                getString(R.string.update_downloaded),
                 Snackbar.LENGTH_INDEFINITE)
-                .setAction("RESTART", view -> appUpdateManager.completeUpdate())
+                .setAction(getString(R.string.restart_action), view -> appUpdateManager.completeUpdate())
                 .show();
     }
 
@@ -296,6 +315,7 @@ public class App extends AppCompatActivity {
         }
     }
 
+    @android.annotation.SuppressLint("ObsoleteSdkInt")
     private void askNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==

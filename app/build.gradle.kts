@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics.plugin)
+    alias(libs.plugins.baselineprofile)
 }
 
 android {
@@ -17,8 +18,8 @@ android {
         applicationId = "com.drivingschoolrwandaapp"
         minSdk = 27
         targetSdk = 35
-        versionCode = 79
-        versionName = "1.1.0"
+        versionCode = 80
+        versionName = "1.2.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -78,6 +79,10 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+    lint {
+        disable += setOf("ObsoleteSdkInt")
+    }
+
     buildFeatures {
         viewBinding = true
         buildConfig = true
@@ -151,8 +156,15 @@ dependencies {
     implementation(libs.app.update)
     implementation(libs.app.update.ktx)
 
+    // ── Shimmer ──
+    implementation(libs.shimmer)
+
     // ── SVG ──
     implementation(libs.androidsvg)
+
+    // ── Baseline Profile ──
+    implementation(libs.profileinstaller)
+    baselineProfile(project(":baseline-profile"))
 
     // ── Firebase ──
     implementation(platform(libs.firebase.bom))

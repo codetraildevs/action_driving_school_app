@@ -29,6 +29,7 @@ import com.drivingschoolrwandaapp.models.entities.TestQuestion;
 import com.drivingschoolrwandaapp.repository.Resource;
 import com.drivingschoolrwandaapp.ui.adapters.QuestionOptionAdapter;
 import com.drivingschoolrwandaapp.utils.NetworkUtils;
+import com.drivingschoolrwandaapp.utils.SafetyUtils;
 import com.drivingschoolrwandaapp.viewmodel.TestViewModel;
 import com.drivingschoolrwandaapp.viewmodel.UserViewModel;
 import com.google.gson.Gson;
@@ -96,6 +97,8 @@ public class SingleQuestionPageFragment extends Fragment implements QuestionOpti
         UserViewModel userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
         userViewModel.getUserLiveData().observe(getViewLifecycleOwner(), resource -> {
             if (resource != null) {
+                // Guard against fragment detachment to prevent NPE crashes
+                if (!isAdded() || getContext() == null) return;
                 // Check if data exists, regardless of status (SUCCESS, ERROR, LOADING)
                 if (resource.getData() != null) {
                     int userLanguageId = resource.getData().getLanguageId();
@@ -121,9 +124,8 @@ public class SingleQuestionPageFragment extends Fragment implements QuestionOpti
                         } catch (Exception e) {
                             Log.e("SingleQuestionPage", "Navigation failed during translation warning", e);
                             com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
-                            if (getActivity() != null) {
-                                getActivity().onBackPressed();
-                            }
+                            SafetyUtils.runIfActivityAttached(SingleQuestionPageFragment.this,
+                                    "onViewCreated", () -> getActivity().onBackPressed());
                         }
                         return; // <- Important: This stops the question from rendering
                     } else {
@@ -150,7 +152,7 @@ public class SingleQuestionPageFragment extends Fragment implements QuestionOpti
                     if (displayQuestionText != null) {
                         questionTextView.setText(displayQuestionText.trim());
                     } else {
-                        questionTextView.setText("");
+                        questionTextView.setText(null);
                     }
 
                     if (displayImageUrl != null && !displayImageUrl.isEmpty()) {
@@ -204,7 +206,7 @@ public class SingleQuestionPageFragment extends Fragment implements QuestionOpti
     @Override
     public void onResume() {
         super.onResume();
-        if (adapter != null && isRealTimeFeedback) {
+        if (adapter != null && isRealTimeFeedback && question != null && testViewModel != null) {
             // Check if we need to update the feedback state based on hidden status
             // This handles cases where we return to the fragment
             boolean shouldHideFeedback = testViewModel.isQuestionFeedbackHidden(question.getId());
@@ -214,7 +216,7 @@ public class SingleQuestionPageFragment extends Fragment implements QuestionOpti
 
     @Override
     public void onOptionSelected(int optionId) {
-        if (!isReviewMode) {
+        if (!isReviewMode && question != null) {
             testViewModel.setAnswer(question.getId(), optionId);
             
             // If real-time feedback is enabled generally, show it now that the user has selected an option

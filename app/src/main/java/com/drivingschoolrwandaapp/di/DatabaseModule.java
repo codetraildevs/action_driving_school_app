@@ -19,10 +19,17 @@ import dagger.hilt.components.SingletonComponent;
 @Module
 public class DatabaseModule {
 
+    private volatile AppDatabase database;
+
     @Provides
     @Singleton
-    public AppDatabase provideAppDatabase(@ApplicationContext Context context) {
-        return AppDatabase.getDatabase(context);
+    public synchronized AppDatabase provideAppDatabase(@ApplicationContext Context context) {
+        // Lazy-initialize Room database to avoid blocking cold start.
+        // Room schema validation on 8 entities can take 200-500ms on low-RAM devices.
+        if (database == null) {
+            database = AppDatabase.getDatabase(context);
+        }
+        return database;
     }
 
     @Provides

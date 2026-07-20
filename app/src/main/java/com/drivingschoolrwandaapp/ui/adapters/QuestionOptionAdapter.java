@@ -18,6 +18,7 @@ import com.drivingschoolrwandaapp.models.entities.QuestionOption;
 import com.drivingschoolrwandaapp.models.entities.QuestionOptionTranslation;
 import com.google.android.material.card.MaterialCardView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class QuestionOptionAdapter extends RecyclerView.Adapter<QuestionOptionAdapter.QuestionOptionViewHolder> {
@@ -38,15 +39,15 @@ public class QuestionOptionAdapter extends RecyclerView.Adapter<QuestionOptionAd
     }
 
     public QuestionOptionAdapter(List<QuestionOption> options, OnOptionSelectedListener listener, boolean isReviewMode, Integer selectedAnswerId, boolean isRealTimeFeedback, int correctOptionId) {
-        this.options = options;
+        this.options = options != null ? options : new ArrayList<>();
         this.listener = listener;
         this.isReviewMode = isReviewMode;
         this.selectedAnswerId = selectedAnswerId;
         this.isRealTimeFeedback = isRealTimeFeedback;
 
         int realCorrectOptionId = correctOptionId;
-        if (options != null) {
-            for (QuestionOption option : options) {
+        if (this.options != null) {
+            for (QuestionOption option : this.options) {
                 if (option.isCorrect()) {
                     realCorrectOptionId = option.getId();
                     break;
@@ -56,8 +57,8 @@ public class QuestionOptionAdapter extends RecyclerView.Adapter<QuestionOptionAd
         this.correctOptionId = realCorrectOptionId;
 
         if (this.selectedAnswerId != null) {
-            for (int i = 0; i < options.size(); i++) {
-                if (options.get(i).getId() == this.selectedAnswerId) {
+            for (int i = 0; i < this.options.size(); i++) {
+                if (this.options.get(i).getId() == this.selectedAnswerId) {
                     this.selectedPosition = i;
                     break;
                 }
@@ -154,7 +155,7 @@ public class QuestionOptionAdapter extends RecyclerView.Adapter<QuestionOptionAd
             if (textToDisplay != null) {
                 optionText.setText(textToDisplay.trim());
             } else {
-                optionText.setText("");
+                optionText.setText(null);
             }
 
             // Set option indicator letter

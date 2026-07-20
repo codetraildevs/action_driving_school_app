@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.MenuProvider;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Lifecycle;
@@ -86,7 +87,14 @@ public class ProfileFragment extends Fragment {
         // Display session expiry info
         updateSessionInfo();
 
-        view.findViewById(R.id.change_language_button).setOnClickListener(v -> LanguageUtils.showLanguageDialog(requireContext()));
+        View changeLanguageButton = view.findViewById(R.id.change_language_button);
+        if (changeLanguageButton != null) {
+            changeLanguageButton.setOnClickListener(v -> {
+                if (isAdded() && getContext() != null) {
+                    LanguageUtils.showLanguageDialog(requireContext());
+                }
+            });
+        }
     }
 
     @Override
@@ -116,31 +124,34 @@ public class ProfileFragment extends Fragment {
 
     private void observeViewModels() {
         userViewModel.getUserLiveData().observe(getViewLifecycleOwner(), resource -> {
-            if (resource != null) {
-                switch (resource.getStatus()) {
-                    case LOADING:
-                        progressBar.setVisibility(View.VISIBLE);
+            if (resource == null || !isAdded()) return;
+            switch (resource.getStatus()) {
+                case LOADING:
+                    if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
 
-                        if (resource.getData() != null) {
-                            updateUserProfile(resource.getData());
-                        }
-                        break;
-                    case SUCCESS:
-                        progressBar.setVisibility(View.GONE);
-                        if (resource.getData() != null) {
-                            updateUserProfile(resource.getData());
-                        }
-                        break;
-                    case ERROR:
-                        progressBar.setVisibility(View.GONE);
+                    if (resource.getData() != null) {
+                        updateUserProfile(resource.getData());
+                    }
+                    break;
+                case SUCCESS:
+                    if (progressBar != null) progressBar.setVisibility(View.GONE);
+                    if (resource.getData() != null) {
+                        updateUserProfile(resource.getData());
+                    }
+                    break;
+                case ERROR:
+                    if (progressBar != null) progressBar.setVisibility(View.GONE);
+                    if (isAdded() && getContext() != null) {
                         Toast.makeText(getContext(), resource.getMessage(), Toast.LENGTH_SHORT).show();
-                        break;
-                }
+                    }
+                    break;
             }
         });
     }
 
     private void updateUserProfile(User user) {
+        if (!isAdded() || getContext() == null) return;
+        
         profileName.setText(user.getFirstName() + " " + user.getLastName() + "("+user.getLanguage()+")");
         profileEmail.setText(user.getPhoneNumber());
         Glide.with(this)
@@ -155,7 +166,7 @@ public class ProfileFragment extends Fragment {
         String expiry = user.getTestAccessExpiresAt();
 
         if (maxTest > 0) {
-             tvAccessLevel.setText(getString(R.string.accass_up_to)+ maxTest);
+             tvAccessLevel.setText(getString(R.string.accass_up_to_format, maxTest));
         } else {
              tvAccessLevel.setText(getString(R.string.access_we_have));
         }
@@ -182,7 +193,7 @@ public class ProfileFragment extends Fragment {
 
         if (expiry != null && !expiry.isEmpty()) {
             tvExpiryDate.setVisibility(View.VISIBLE);
-            tvExpiryDate.setText(getString(R.string.expiry_date) + formatDate(expiry));
+            tvExpiryDate.setText(getString(R.string.expiry_date_format, formatDate(expiry)));
         } else {
             tvExpiryDate.setVisibility(View.GONE);
         }
@@ -191,8 +202,9 @@ public class ProfileFragment extends Fragment {
     /**
      * Updates the session status card with the remaining token expiry time.
      */
+    @android.annotation.SuppressLint("SetTextI18n")
     private void updateSessionInfo() {
-        if (tokenManager == null || tvSessionStatus == null) return;
+        if (tokenManager == null || tvSessionStatus == null || !isAdded() || getContext() == null) return;
 
         long expiryTime = tokenManager.getTokenExpiryTime();
         long now = System.currentTimeMillis();
@@ -200,7 +212,7 @@ public class ProfileFragment extends Fragment {
         if (expiryTime <= 0 || now >= expiryTime) {
             // No token or already expired
             tvSessionStatus.setText(getString(R.string.session_expired));
-            tvSessionStatus.setTextColor(getResources().getColor(android.R.color.holo_red_dark, null));
+            tvSessionStatus.setTextColor(ContextCompat.getColor(getContext(), android.R.color.holo_red_dark));
             return;
         }
 
@@ -224,7 +236,7 @@ public class ProfileFragment extends Fragment {
                 tvSessionStatus.setText(getString(R.string.session_expires_in,
                     (minutes > 0 ? minutes + "m" : "<1m")));
             }
-            tvSessionStatus.setTextColor(getResources().getColor(android.R.color.holo_green_dark, null));
+            tvSessionStatus.setTextColor(ContextCompat.getColor(getContext(), android.R.color.holo_green_dark));
         } else {
             // Session-only: show remaining time in minutes
             long minutes = TimeUnit.MILLISECONDS.toMinutes(diffMs);
@@ -236,7 +248,7 @@ public class ProfileFragment extends Fragment {
                 tvSessionStatus.setText(getString(R.string.session_expires_in,
                     (seconds > 0 ? seconds + "s" : "<1s")));
             }
-            tvSessionStatus.setTextColor(getResources().getColor(android.R.color.holo_orange_dark, null));
+            tvSessionStatus.setTextColor(ContextCompat.getColor(getContext(), android.R.color.holo_orange_dark));
         }
     }
 

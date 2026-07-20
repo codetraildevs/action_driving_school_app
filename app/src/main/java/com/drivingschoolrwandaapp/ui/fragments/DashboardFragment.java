@@ -1,9 +1,7 @@
 package com.drivingschoolrwandaapp.ui.fragments;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -26,7 +24,6 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.bumptech.glide.Glide;
 import com.drivingschoolrwandaapp.R;
-import com.drivingschoolrwandaapp.database.entities.User;
 import com.drivingschoolrwandaapp.repository.Resource;
 import com.drivingschoolrwandaapp.ui.activities.ApplicationDetailsActivity;
 import com.drivingschoolrwandaapp.ui.activities.IremboActivity;
@@ -36,7 +33,6 @@ import com.drivingschoolrwandaapp.viewmodel.IremboViewModel;
 import com.drivingschoolrwandaapp.viewmodel.UserViewModel;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.textfield.TextInputEditText;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -46,10 +42,7 @@ public class DashboardFragment extends Fragment {
     private UserViewModel userViewModel;
     private IremboViewModel iremboViewModel;
 
-    
-    private TextInputEditText etApplicationNumber;
-    private MaterialButton btnTrackStatus;
-    
+
     private AlertDialog loadingDialog;
 
     @Override
@@ -69,22 +62,6 @@ public class DashboardFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        etApplicationNumber = view.findViewById(R.id.et_application_number);
-
-
-
-        // Setup Track Action
-        if (btnTrackStatus != null) {
-            btnTrackStatus.setOnClickListener(v -> {
-                String appNumber = etApplicationNumber.getText().toString().trim();
-                if (TextUtils.isEmpty(appNumber)) {
-                    etApplicationNumber.setError(getString(R.string.error_required_field));
-                    return;
-                }
-                iremboViewModel.fetchApplicationDetails(appNumber);
-            });
-        }
-
         // Setup Quick Access Cards
         MaterialCardView startExamCard = view.findViewById(R.id.start_exam_card);
         if (startExamCard != null) {
@@ -103,7 +80,8 @@ public class DashboardFragment extends Fragment {
         MaterialCardView iremboServiceCard = view.findViewById(R.id.irembo_service_card);
         if (iremboServiceCard != null) {
             iremboServiceCard.setOnClickListener(v -> {
-                Intent intent = new Intent(requireActivity(), IremboActivity.class);
+                if (!isAdded() || getActivity() == null) return;
+                Intent intent = new Intent(getActivity(), IremboActivity.class);
                 startActivity(intent);
             });
         }
@@ -140,14 +118,16 @@ public class DashboardFragment extends Fragment {
                  showLoadingDialog();
              } else if (resource.status == Resource.Status.SUCCESS) {
                  hideLoadingDialog();
-                 if (resource.data != null) {
+                 if (resource.data != null && isAdded()) {
                      Intent intent = new Intent(requireContext(), ApplicationDetailsActivity.class);
                      intent.putExtra("application_details", resource.data);
                      startActivity(intent);
                  }
              } else if (resource.status == Resource.Status.ERROR) {
                  hideLoadingDialog();
-                 Toast.makeText(requireContext(), getString(R.string.error_format, resource.message), Toast.LENGTH_LONG).show();
+                 if (isAdded()) {
+                     Toast.makeText(requireContext(), getString(R.string.error_format, resource.message), Toast.LENGTH_LONG).show();
+                 }
              }
          });
     }

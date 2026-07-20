@@ -1,8 +1,11 @@
 package com.drivingschoolrwandaapp.ui.fragments;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -34,6 +37,7 @@ import com.drivingschoolrwandaapp.models.request.IremboSpecialRequest;
 import com.drivingschoolrwandaapp.models.response.IremboPaymentResponse;
 import com.drivingschoolrwandaapp.repository.Resource;
 import com.drivingschoolrwandaapp.ui.activities.ApplicationDetailsActivity;
+import com.drivingschoolrwandaapp.utils.SafetyUtils;
 import com.drivingschoolrwandaapp.ui.adapters.IremboServiceAdapter;
 import com.drivingschoolrwandaapp.ui.adapters.RecentActivityAdapter;
 import com.drivingschoolrwandaapp.viewmodel.IremboViewModel;
@@ -46,6 +50,8 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -60,8 +66,18 @@ public class IremboFragment extends Fragment implements IremboServiceAdapter.OnI
     private RecentActivityAdapter recentActivityAdapter;
     private JSONObject locationData;
 
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+
     public IremboFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        executor.shutdownNow();
+        mainHandler.removeCallbacksAndMessages(null);
     }
 
     @Override
@@ -87,29 +103,35 @@ public class IremboFragment extends Fragment implements IremboServiceAdapter.OnI
     }
 
     private void loadLocationData() {
-        if (getContext() == null) return;
-        try {
-            InputStream is = getContext().getAssets().open("location.json");
-            int size = is.available();
-            byte[] buffer = new byte[size];
-            is.read(buffer);
-            is.close();
-            String json = new String(buffer, StandardCharsets.UTF_8);
-            locationData = new JSONObject(json);
-        } catch (IOException | JSONException e) {
-            Log.e("IremboFragment", "Error loading location data", e);
-            com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
-            if (getContext() != null) Toast.makeText(getContext(), getString(R.string.error_loading_location), Toast.LENGTH_SHORT).show();
-        }
+        Context context = getContext();
+        if (context == null) return;
+        executor.execute(() -> {
+            try {
+                InputStream is = context.getAssets().open("location.json");
+                int size = is.available();
+                byte[] buffer = new byte[size];
+                is.read(buffer);
+                is.close();
+                String json = new String(buffer, StandardCharsets.UTF_8);
+                JSONObject result = new JSONObject(json);
+                mainHandler.post(() -> locationData = result);
+            } catch (IOException | JSONException e) {
+                Log.e("IremboFragment", "Error loading location data", e);
+                com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
+                mainHandler.post(() -> {
+                    if (getContext() != null) {
+                        Toast.makeText(getContext(), getString(R.string.error_loading_location), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
     }
 
     private void setupToolbar(View view) {
         MaterialToolbar toolbar = view.findViewById(R.id.toolbar);
-        toolbar.setNavigationOnClickListener(v -> {
-            if (getActivity() != null) {
-                getActivity().onBackPressed();
-            }
-        });
+        toolbar.setNavigationOnClickListener(v ->
+                SafetyUtils.runIfActivityAttached(this, "setupToolbar",
+                        () -> getActivity().onBackPressed()));
     }
 
     private void setupRecentActivity(View view) {
@@ -119,7 +141,9 @@ public class IremboFragment extends Fragment implements IremboServiceAdapter.OnI
         recyclerView.setAdapter(recentActivityAdapter);
 
         view.findViewById(R.id.tv_view_all).setOnClickListener(v -> {
-            Toast.makeText(getContext(), getString(R.string.all), Toast.LENGTH_SHORT).show();
+            if (getContext() != null) {
+                Toast.makeText(getContext(), getString(R.string.all), Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
@@ -137,9 +161,11 @@ public class IremboFragment extends Fragment implements IremboServiceAdapter.OnI
 
     @Override
     public void onItemClick(IremboService service) {
-        if (service.getName().equals(R.string.provisional_license_text)) {
+        // Compare against the actual strings used when creating the services in setupBrowseServices()
+        String name = service.getName();
+        if (name.equals(getString(R.string.provisional_license))) {
             showIremboLicenseDialog();
-        } else if (service.getName().equals(R.string.speacial_request)) {
+        } else if (name.equals(getString(R.string.speacial_request))) {
             showIremboSpecialDialog();
         }
     }
@@ -160,7 +186,9 @@ public class IremboFragment extends Fragment implements IremboServiceAdapter.OnI
                     recentActivityAdapter.setApplications(resource.data);
                 }
             } else if (resource.status == Resource.Status.ERROR) {
-                Toast.makeText(getContext(), resource.message, Toast.LENGTH_SHORT).show();
+                if (isAdded() && getContext() != null) {
+                    Toast.makeText(getContext(), resource.message, Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -177,7 +205,9 @@ public class IremboFragment extends Fragment implements IremboServiceAdapter.OnI
                 }
             } else if (resource.status == Resource.Status.ERROR) {
                 hideLoadingDialog();
-                Toast.makeText(getContext(), "Error: " + resource.message, Toast.LENGTH_LONG).show();
+                if (isAdded() && getContext() != null) {
+                    Toast.makeText(getContext(), "Error: " + resource.message, Toast.LENGTH_LONG).show();
+                }
             }
         });
 
@@ -194,7 +224,9 @@ public class IremboFragment extends Fragment implements IremboServiceAdapter.OnI
                 }
             } else if (resource.status == Resource.Status.ERROR) {
                 hideLoadingDialog();
-                Toast.makeText(getContext(), "Error: " + resource.message, Toast.LENGTH_LONG).show();
+                if (isAdded() && getContext() != null) {
+                    Toast.makeText(getContext(), "Error: " + resource.message, Toast.LENGTH_LONG).show();
+                }
             }
         });
     }
@@ -292,9 +324,9 @@ public class IremboFragment extends Fragment implements IremboServiceAdapter.OnI
 
         btnCancel.setOnClickListener(v -> dialog.dismiss());
         btnSubmit.setOnClickListener(v -> {
-            String name = etName.getText().toString().trim();
-            String phone = etPhone.getText().toString().trim();
-            String nationalId = etNationalId.getText().toString().trim();
+            String name = etName.getText() != null ? etName.getText().toString().trim() : "";
+            String phone = etPhone.getText() != null ? etPhone.getText().toString().trim() : "";
+            String nationalId = etNationalId.getText() != null ? etNationalId.getText().toString().trim() : "";
             
             String province = spinnerProvince.getSelectedItem() != null ? spinnerProvince.getSelectedItem().toString() : "";
             String district = spinnerDistrict.getSelectedItem() != null ? spinnerDistrict.getSelectedItem().toString() : "";
@@ -304,22 +336,24 @@ public class IremboFragment extends Fragment implements IremboServiceAdapter.OnI
             String category = selectedCategory != null ? selectedCategory.toString() : "";
 
             int selectedLicenseTypeId = rgLicenseType.getCheckedRadioButtonId();
-            int selectedAppTypeId = 0;
 
             if (TextUtils.isEmpty(name)) { etName.setError(getString(R.string.error_required_field)); return; }
             if (TextUtils.isEmpty(phone)) { etPhone.setError(getString(R.string.error_required_field)); return; }
             if (TextUtils.isEmpty(nationalId)) { etNationalId.setError(getString(R.string.error_required_field)); return; }
             if (nationalId.length() != 16) { etNationalId.setError("Must be 16 digits"); return; }
             if (TextUtils.isEmpty(province) || TextUtils.isEmpty(district)) { if (getContext() != null) Toast.makeText(getContext(), getString(R.string.please_select_location), Toast.LENGTH_SHORT).show(); return; }
-            if (TextUtils.isEmpty(category)) { Toast.makeText(getContext(), getString(R.string.error_required_field), Toast.LENGTH_SHORT).show(); return; }
-            if (selectedLicenseTypeId == -1) { Toast.makeText(getContext(), getString(R.string.error_required_field), Toast.LENGTH_SHORT).show(); return; }
-            if (selectedAppTypeId == -1) { Toast.makeText(getContext(), getString(R.string.error_required_field), Toast.LENGTH_SHORT).show(); return; }
+            if (TextUtils.isEmpty(category)) { if (getContext() != null) Toast.makeText(getContext(), getString(R.string.error_required_field), Toast.LENGTH_SHORT).show(); return; }
+            if (selectedLicenseTypeId == -1) { if (getContext() != null) Toast.makeText(getContext(), getString(R.string.error_required_field), Toast.LENGTH_SHORT).show(); return; }
 
             RadioButton rbLicenseType = dialogView.findViewById(selectedLicenseTypeId);
-            RadioButton rbAppType = dialogView.findViewById(selectedAppTypeId);
+            if (rbLicenseType == null) {
+                if (getContext() != null) Toast.makeText(getContext(), getString(R.string.error_required_field), Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-            String licenseType = rbLicenseType.getText().toString().toUpperCase(Locale.ROOT);
-            String appType = rbAppType.getText().toString().toUpperCase(Locale.ROOT);
+            String licenseType = rbLicenseType.getText() != null ? rbLicenseType.getText().toString().toUpperCase(Locale.ROOT) : "NEW";
+            // Default to new application type (removed the non-existent RadioGroup for app type)
+            String appType = "New";
 
             IremboLicenseRequest request = new IremboLicenseRequest(
                     category, licenseType, appType, name, phone, nationalId, address
@@ -369,7 +403,7 @@ public class IremboFragment extends Fragment implements IremboServiceAdapter.OnI
             String nationalId = etNationalId.getText().toString().trim();
             String description = "";
 
-            if (TextUtils.isEmpty(category)) { Toast.makeText(getContext(), getString(R.string.error_required_field), Toast.LENGTH_SHORT).show(); return; }
+            if (TextUtils.isEmpty(category)) { if (getContext() != null) Toast.makeText(getContext(), getString(R.string.error_required_field), Toast.LENGTH_SHORT).show(); return; }
             if (TextUtils.isEmpty(name)) { etName.setError(getString(R.string.error_required_field)); return; }
             if (TextUtils.isEmpty(phone)) { etPhone.setError(getString(R.string.error_required_field)); return; }
             if (TextUtils.isEmpty(nationalId)) { etNationalId.setError(getString(R.string.error_required_field)); return; }
@@ -406,7 +440,7 @@ public class IremboFragment extends Fragment implements IremboServiceAdapter.OnI
         NumberFormat format = NumberFormat.getNumberInstance(Locale.US);
         String currency = paymentDetails.getCurrency() != null ? paymentDetails.getCurrency() : "RWF";
         
-        tvAmount.setText(format.format(paymentDetails.getAmount()) + " " + currency);
+        tvAmount.setText(getString(R.string.amount_with_currency_format, format.format(paymentDetails.getAmount()), currency));
         
         String reference = paymentDetails.getReference();
 

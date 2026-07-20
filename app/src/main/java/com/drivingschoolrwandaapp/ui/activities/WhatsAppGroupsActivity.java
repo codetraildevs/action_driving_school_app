@@ -92,24 +92,23 @@ public class WhatsAppGroupsActivity extends AppCompatActivity implements WhatsAp
 
     private void fetchGroups() {
         viewModel.getWhatsAppGroups().observe(this, resource -> {
-            if (resource != null) {
-                switch (resource.status) {
-                    case LOADING:
-                        showLoading();
-                        break;
-                    case SUCCESS:
-                        showContent();
-                        if (resource.data != null && !resource.data.isEmpty()) {
-                            allGroups = resource.data;
-                            adapter.setGroups(allGroups);
-                        } else {
-                            showError("No active WhatsApp groups found.");
-                        }
-                        break;
-                    case ERROR:
-                        showError(resource.message);
-                        break;
-                }
+            if (resource == null) return;
+            switch (resource.status) {
+                case LOADING:
+                    showLoading();
+                    break;
+                case SUCCESS:
+                    showContent();
+                    if (resource.data != null && !resource.data.isEmpty()) {
+                        allGroups = resource.data;
+                        adapter.setGroups(allGroups);
+                    } else {
+                        showError("No active WhatsApp groups found.");
+                    }
+                    break;
+                case ERROR:
+                    showError(resource.message);
+                    break;
             }
         });
     }
@@ -160,9 +159,13 @@ public class WhatsAppGroupsActivity extends AppCompatActivity implements WhatsAp
         if (text == null || text.isEmpty()) {
             filteredList.addAll(allGroups);
         } else {
+            String lowerText = text.toLowerCase(Locale.ROOT);
             for (WhatsAppGroup group : allGroups) {
-                if (group.getName().toLowerCase(Locale.ROOT).contains(text.toLowerCase(Locale.ROOT)) || 
-                    group.getDescription().toLowerCase(Locale.ROOT).contains(text.toLowerCase(Locale.ROOT))) {
+                String name = group.getName();
+                String description = group.getDescription();
+                boolean nameMatch = name != null && name.toLowerCase(Locale.ROOT).contains(lowerText);
+                boolean descMatch = description != null && description.toLowerCase(Locale.ROOT).contains(lowerText);
+                if (nameMatch || descMatch) {
                     filteredList.add(group);
                 }
             }

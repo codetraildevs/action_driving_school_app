@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -28,6 +29,7 @@ public class OtpVerificationActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_otp_verification);
 
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
@@ -52,25 +54,34 @@ public class OtpVerificationActivity extends AppCompatActivity {
         });
 
         userViewModel.getVerifyOtpResult().observe(this, resource -> {
+            if (resource == null) return;
             switch (resource.status) {
                 case LOADING:
-                    loadingIndicator.setVisibility(View.VISIBLE);
+                    if (loadingIndicator != null) loadingIndicator.setVisibility(View.VISIBLE);
                     break;
                 case SUCCESS:
-                    loadingIndicator.setVisibility(View.GONE);
+                    if (loadingIndicator != null) loadingIndicator.setVisibility(View.GONE);
                     if (resource.data != null && resource.data.isSuccess()) {
-                        Toast.makeText(this, resource.data.getMessage(), Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(OtpVerificationActivity.this, ResetPasswordActivity.class);
-                        intent.putExtra("token", resource.data.getData());
-                        startActivity(intent);
-                        finish();
+                        String message = resource.data.getMessage();
+                        Toast.makeText(this, message != null ? message : getString(R.string.verify), Toast.LENGTH_SHORT).show();
+                        String token = resource.data.getData();
+                        if (token != null) {
+                            if (!isFinishing()) {
+                                Intent intent = new Intent(OtpVerificationActivity.this, ResetPasswordActivity.class);
+                                intent.putExtra("token", token);
+                                startActivity(intent);
+                                finish();
+                            }
+                        } else {
+                            Toast.makeText(this, getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show();
+                        }
                     } else {
                         Toast.makeText(this, resource.message != null ? resource.message : getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show();
                     }
                     break;
                 case ERROR:
-                    loadingIndicator.setVisibility(View.GONE);
-                    Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show();
+                    if (loadingIndicator != null) loadingIndicator.setVisibility(View.GONE);
+                    Toast.makeText(this, resource.message != null ? resource.message : getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show();
                     break;
             }
         });

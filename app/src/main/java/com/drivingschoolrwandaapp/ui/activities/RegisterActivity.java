@@ -58,6 +58,7 @@ public class RegisterActivity extends AppCompatActivity {
     private boolean isRegistering = false;
     private Handler loadingTimeoutHandler;
     private String registeredPhone = ""; // Phone used in the last successful registration, for auto-login fallback
+    private Call<RegisterResponse> registrationCall; // Stored to allow cancellation in onDestroy()
 
     @Inject
     ApiService apiService;
@@ -82,7 +83,7 @@ public class RegisterActivity extends AppCompatActivity {
                 intent = new Intent(RegisterActivity.this, App.class);
             } else {
                 // Device has an account but not logged in - go to login
-                Toast.makeText(this, getString(R.string.account_already_exists), Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getString(R.string.device_already_registered), Toast.LENGTH_LONG).show();
                 intent = new Intent(RegisterActivity.this, LoginActivity.class);
             }
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -119,6 +120,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void setupLoginObserver() {
         userViewModel.getLoginResult().observe(RegisterActivity.this, resource -> {
+            if (resource == null) return;
             switch (resource.status) {
                 case LOADING:
                     loadingIndicator.setVisibility(View.VISIBLE);
@@ -163,16 +165,18 @@ public class RegisterActivity extends AppCompatActivity {
                         registerButton.setEnabled(true);
                         registerButton.setText(getString(R.string.confirm));
                     }
-                    // Auto-login failed — navigate to Login with phone pre-filled so user can try with one tap
+                    // Always show error feedback — Toast is harmless even if finishing
                     String errorText = resource.message != null ? resource.message : getString(R.string.login_failed);
                     Toast.makeText(RegisterActivity.this, errorText, Toast.LENGTH_LONG).show();
-                    if (!registeredPhone.isEmpty()) {
+                    if (!registeredPhone.isEmpty() && !isFinishing()) {
                         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-                            intent.putExtra("phone", registeredPhone);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            startActivity(intent);
-                            finish();
+                            if (!RegisterActivity.this.isFinishing()) {
+                                Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                                intent.putExtra("phone", registeredPhone);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                startActivity(intent);
+                                finish();
+                            }
                         }, 1500);
                     }
                     break;
@@ -242,9 +246,9 @@ public class RegisterActivity extends AppCompatActivity {
         user.setTimezone(timezone);
         user.setDevice(device);
 
-        Call<RegisterResponse> call = apiService.register(user);
+        registrationCall = apiService.register(user);
 
-        call.enqueue(new Callback<RegisterResponse>() {
+        registrationCall.enqueue(new Callback<RegisterResponse>() {
             @Override
             public void onResponse(@NonNull Call<RegisterResponse> call, @NonNull Response<RegisterResponse> response) {
                 isRegistering = false;
@@ -253,6 +257,7 @@ public class RegisterActivity extends AppCompatActivity {
                 }
                 setLoadingState(false);
 
+                // Always show feedback — Toast is harmless even if finishing
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     // Mark this device as having a registered account (one account per device)
                     if (appPreferences != null) {
@@ -294,12 +299,14 @@ public class RegisterActivity extends AppCompatActivity {
 
                     if (isMessageAlreadyRegistered(errorMessage)) {
                         // Guide user to login instead
-                        Toast.makeText(RegisterActivity.this, getString(R.string.account_already_exists), Toast.LENGTH_LONG).show();
+                        Toast.makeText(RegisterActivity.this, getString(R.string.account_already_exists_with_help), Toast.LENGTH_LONG).show();
                         // Navigate to login after short delay, pre-filling the phone
                         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-                            intent.putExtra("phone", phone);
-                            startActivity(intent);
+                            if (!RegisterActivity.this.isFinishing()) {
+                                Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                                intent.putExtra("phone", phone);
+                                startActivity(intent);
+                            }
                         }, 1500);
                     } else if (errorMessage != null && errorMessage.toLowerCase(Locale.ROOT).contains("device")) {
                         // Show device-not-allowed message with support numbers
@@ -319,7 +326,7 @@ public class RegisterActivity extends AppCompatActivity {
                 }
                 setLoadingState(false);
 
-                // Show user-friendly error message based on the type of failure
+                // Always show error feedback — Toast is harmless even if finishing
                 String friendlyMessage = getUserFriendlyErrorMessage(t);
                 Toast.makeText(RegisterActivity.this, friendlyMessage, Toast.LENGTH_LONG).show();
             }
@@ -367,6 +374,20 @@ public class RegisterActivity extends AppCompatActivity {
             registerButton.setText(getString(R.string.confirm));
             loadingIndicator.setVisibility(View.GONE);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Prevent memory leak: remove all pending timeout callbacks
+        if (loadingTimeoutHandler != null) {
+            loadingTimeoutHandler.removeCallbacksAndMessages(null);
+        }
+        // Cancel in-flight registration request if the activity is destroyed
+        if (registrationCall != null && !registrationCall.isCanceled()) {
+            registrationCall.cancel();
+        }
+        isRegistering = false;
     }
 
     private boolean validateFullName() {

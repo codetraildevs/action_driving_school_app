@@ -74,7 +74,7 @@ public class TestRepository {
                 entity.setImageUrl(convertToAssetUri(localExam.getExamImgUrl()));
                 entity.setTotalMarks(localExam.getQuestions().size());
                 entity.setPassMarks((int) Math.ceil(localExam.getQuestions().size() * 0.5)); // 50% to pass
-                entity.setDuration(30); // Default 30 minutes
+                entity.setDuration(localExam.getQuestions().size()); // 1 minute per question
                 entity.setFree("Free".equalsIgnoreCase(localExam.getExamType()));
                 entity.setQuestionCount(localExam.getQuestions().size());
                 entity.setLastRefreshed(System.currentTimeMillis());
@@ -155,7 +155,7 @@ public class TestRepository {
         testEntity.setImageUrl(convertToAssetUri(localExam.getExamImgUrl()));
         testEntity.setTotalMarks(localExam.getQuestions().size());
         testEntity.setPassMarks((int) Math.ceil(localExam.getQuestions().size() * 0.5));
-        testEntity.setDuration(30);
+        testEntity.setDuration(localExam.getQuestions().size()); // 1 minute per question
         testEntity.setFree("Free".equalsIgnoreCase(localExam.getExamType()));
         testEntity.setQuestionCount(localExam.getQuestions().size());
         testEntity.setLastRefreshed(System.currentTimeMillis());

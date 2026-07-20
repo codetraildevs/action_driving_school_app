@@ -5,6 +5,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
@@ -27,6 +28,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_change_password);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -45,6 +47,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
         savePasswordButton.setOnClickListener(v -> changePassword());
 
         userViewModel.getChangePasswordResult().observe(this, resource -> {
+            if (resource == null) return;
             switch (resource.status) {
                 case LOADING:
                     loadingIndicator.setVisibility(View.VISIBLE);
@@ -53,15 +56,23 @@ public class ChangePasswordActivity extends AppCompatActivity {
                 case SUCCESS:
                     loadingIndicator.setVisibility(View.GONE);
                     savePasswordButton.setEnabled(true);
-                    Toast.makeText(this, resource.data.getMessage(), Toast.LENGTH_SHORT).show();
-                    if (resource.data.isSuccess()) {
+                    if (resource.data != null) {
+                        String message = resource.data.getMessage();
+                        if (message != null) {
+                            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+                        }
+                        if (resource.data.isSuccess()) {
+                            finish();
+                        }
+                    } else {
+                        Toast.makeText(this, getString(R.string.save_changes), Toast.LENGTH_SHORT).show();
                         finish();
                     }
                     break;
                 case ERROR:
                     loadingIndicator.setVisibility(View.GONE);
                     savePasswordButton.setEnabled(true);
-                    Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, resource.message != null ? resource.message : getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show();
                     break;
             }
         });

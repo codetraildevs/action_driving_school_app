@@ -17,6 +17,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.shimmer.ShimmerFrameLayout;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -30,6 +32,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
 import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.data.models.LearningMaterial;
 import com.drivingschoolrwandaapp.database.AppDatabase;
@@ -63,6 +67,7 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
     private SwipeRefreshLayout swipeRefreshLayout;
     private ProgressBar progressBar;
     private TextView errorTextView;
+    private ShimmerFrameLayout shimmerFrameLayout;
     private UserDao userDao;
     private NotificationHelper notificationHelper;
 
@@ -96,6 +101,7 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_layout);
         progressBar = view.findViewById(R.id.progress_bar);
         errorTextView = view.findViewById(R.id.error_text_view);
+        shimmerFrameLayout = view.findViewById(R.id.shimmer_placeholder);
 
         setupRecyclerView();
         observeViewModel();
@@ -138,11 +144,15 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
         viewModel.getMaterials().observe(getViewLifecycleOwner(), materials -> {
             progressBar.setVisibility(View.GONE);
             swipeRefreshLayout.setRefreshing(false);
+            // Hide shimmer immediately when data arrives to prevent flicker
+            hideShimmer();
             if (materials != null && !materials.isEmpty()) {
                 allMaterials = materials; // Save full list
                 adapter.setMaterials(materials);
                 errorTextView.setVisibility(View.GONE);
                 recyclerView.setVisibility(View.VISIBLE);
+                // Preload thumbnails for visible items to improve scrolling smoothness
+                preloadThumbnails(materials);
             } else {
                 errorTextView.setText(getString(R.string.no_materials_found));
                 errorTextView.setVisibility(View.VISIBLE);
@@ -152,12 +162,20 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
 
         viewModel.getIsLoading().observe(getViewLifecycleOwner(), isLoading -> {
             if (isLoading) {
+                // Show shimmer skeleton on initial load (not swipe-to-refresh)
                 if (!swipeRefreshLayout.isRefreshing()) {
                     progressBar.setVisibility(View.VISIBLE);
+                    if (shimmerFrameLayout != null && (allMaterials == null || allMaterials.isEmpty())) {
+                        shimmerFrameLayout.setVisibility(View.VISIBLE);
+                        shimmerFrameLayout.startShimmer();
+                        recyclerView.setVisibility(View.GONE);
+                        errorTextView.setVisibility(View.GONE);
+                    }
                 }
             } else {
                 progressBar.setVisibility(View.GONE);
                 swipeRefreshLayout.setRefreshing(false);
+                hideShimmer();
             }
         });
 
@@ -165,6 +183,7 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
             if (error != null) {
                 progressBar.setVisibility(View.GONE);
                 swipeRefreshLayout.setRefreshing(false);
+                hideShimmer();
                 errorTextView.setText(error);
                 errorTextView.setVisibility(View.VISIBLE);
                 recyclerView.setVisibility(View.GONE);
@@ -172,7 +191,7 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
         });
 
         viewModel.getToastMessage().observe(getViewLifecycleOwner(), message -> {
-            if (message != null && !message.isEmpty()) {
+            if (message != null && !message.isEmpty() && isAdded() && getContext() != null) {
                 Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
             }
         });
@@ -194,14 +213,54 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
                     break;
                 case SUCCESS:
                     notificationHelper.showDownloadCompleteNotification(notificationId, "Download Complete", title + " has been downloaded.");
-                    Toast.makeText(getContext(), getString(R.string.download_success), Toast.LENGTH_LONG).show();
+                    if (isAdded() && getContext() != null) {
+                        Toast.makeText(getContext(), getString(R.string.download_success), Toast.LENGTH_LONG).show();
+                    }
                     break;
                 case FAILURE:
                     notificationHelper.showDownloadFailedNotification(notificationId, "Download Failed", "Failed to download " + title);
-                    Toast.makeText(getContext(), getString(R.string.download_failure), Toast.LENGTH_LONG).show();
+                    if (isAdded() && getContext() != null) {
+                        Toast.makeText(getContext(), getString(R.string.download_failure), Toast.LENGTH_LONG).show();
+                    }
                     break;
             }
         });
+    }
+
+    /**
+     * Safely hide the shimmer skeleton and stop its animation.
+     * Safe to call even if shimmer is not visible or is null.
+     */
+    private void hideShimmer() {
+        if (shimmerFrameLayout != null) {
+            shimmerFrameLayout.stopShimmer();
+            shimmerFrameLayout.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Stop shimmer animation to prevent leaks when the fragment view is destroyed
+        hideShimmer();
+    }
+
+    private void preloadThumbnails(List<LearningMaterial> materials) {
+        if (!isAdded() || materials == null) return;
+        int preloadCount = Math.min(materials.size(), 10); // Preload first 10 thumbnails
+        for (int i = 0; i < preloadCount; i++) {
+            LearningMaterial material = materials.get(i);
+            String thumbnailUrl = material.getThumbnailUrl();
+            if (thumbnailUrl != null && !thumbnailUrl.isEmpty()) {
+                String fullUrl = com.drivingschoolrwandaapp.api.ApiClient.SITE_URL + thumbnailUrl;
+                if (!fullUrl.toLowerCase(Locale.ROOT).endsWith(".svg")) {
+                    Glide.with(this)
+                            .load(fullUrl)
+                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                            .preload();
+                }
+            }
+        }
     }
 
     private LearningMaterial findMaterialById(String materialId) {
@@ -219,7 +278,9 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
     private boolean canAccessPaidContent(String action) {
         com.drivingschoolrwandaapp.database.entities.User user = userDao.getUserSync();
         if (user == null || !"ACTIVE".equalsIgnoreCase(user.getTestAccessStatus())) {
-            Toast.makeText(getContext(), getString(R.string.need_active_subscription, action), Toast.LENGTH_SHORT).show();
+            if (isAdded() && getContext() != null) {
+                Toast.makeText(getContext(), getString(R.string.need_active_subscription, action), Toast.LENGTH_SHORT).show();
+            }
             return false;
         }
 
@@ -249,7 +310,9 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
         }
 
         if (isExpired) {
-            Toast.makeText(getContext(), getString(R.string.test_access_expired_msg, action), Toast.LENGTH_SHORT).show();
+            if (isAdded() && getContext() != null) {
+                Toast.makeText(getContext(), getString(R.string.test_access_expired_msg, action), Toast.LENGTH_SHORT).show();
+            }
             return false;
         }
 
@@ -275,7 +338,9 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
         if (material.isDownloaded()) {
             openFile(material);
         } else {
-            Toast.makeText(getContext(), getString(R.string.download_first), Toast.LENGTH_SHORT).show();
+            if (isAdded() && getContext() != null) {
+                Toast.makeText(getContext(), getString(R.string.download_first), Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -306,21 +371,28 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
                 } catch (ActivityNotFoundException e) {
                     Log.e("MaterialsFragment", "No app found to open file: " + material.getFileType(), e);
                     com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
-                    Toast.makeText(getContext(), getString(R.string.no_app_found), Toast.LENGTH_SHORT).show();
+                    if (isAdded() && getContext() != null) {
+                        Toast.makeText(getContext(), getString(R.string.no_app_found), Toast.LENGTH_SHORT).show();
+                    }
                 } catch (Exception e) {
                     Log.e("MaterialsFragment", "Error opening file: " + material.getTitle(), e);
                     com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
-                    Toast.makeText(getContext(), getString(R.string.error_opening_file), Toast.LENGTH_SHORT).show();
+                    if (isAdded() && getContext() != null) {
+                        Toast.makeText(getContext(), getString(R.string.error_opening_file), Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         } else {
-            Toast.makeText(getContext(), getString(R.string.file_not_found), Toast.LENGTH_SHORT).show();
+            if (isAdded() && getContext() != null) {
+                Toast.makeText(getContext(), getString(R.string.file_not_found), Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
     private void showImageDialog(LearningMaterial material, Uri imageUri) {
+        if (!isAdded() || getActivity() == null) return;
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        LayoutInflater inflater = requireActivity().getLayoutInflater();
+        LayoutInflater inflater = getActivity().getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_material_image, null);
         builder.setView(dialogView);
 
@@ -328,7 +400,16 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
         TextView dialogTitle = dialogView.findViewById(R.id.dialog_title);
         TextView dialogDescription = dialogView.findViewById(R.id.dialog_description);
 
-        Glide.with(this).load(imageUri).into(dialogImage);
+        RequestOptions dialogOptions = new RequestOptions()
+                .placeholder(R.drawable.ic_materials)
+                .error(R.drawable.ic_error)
+                .diskCacheStrategy(DiskCacheStrategy.ALL);
+
+        Glide.with(this)
+                .load(imageUri)
+                .apply(dialogOptions)
+                .into(dialogImage);
+
         dialogTitle.setText(material.getTitle());
         dialogDescription.setText(material.getDescription());
 

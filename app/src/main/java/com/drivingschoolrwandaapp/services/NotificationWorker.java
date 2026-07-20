@@ -8,10 +8,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.AudioAttributes;
 import android.net.Uri;
-import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -31,6 +29,7 @@ import com.drivingschoolrwandaapp.ui.activities.MyApplicationsActivity;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
@@ -75,10 +74,10 @@ public class NotificationWorker extends Worker {
                         .asBitmap()
                         .load(largeIconUrl)
                         .submit()
-                        .get();
+                        .get(15, TimeUnit.SECONDS);
                 Log.d(TAG, "doWork: Large icon downloaded successfully.");
             } catch (Exception e) {
-                Log.e(TAG, "doWork: Synchronous large icon download failed.", e);
+                Log.e(TAG, "doWork: Large icon download failed (timed out or error).", e);
                 com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
             }
         }
@@ -113,9 +112,33 @@ public class NotificationWorker extends Worker {
         if (largeIcon != null) {
             notificationBuilder.setLargeIcon(largeIcon);
         } else {
-            Bitmap defaultLargeIcon = BitmapFactory.decodeResource(context.getResources(), R.drawable.logo1);
-            if (defaultLargeIcon != null) {
-                notificationBuilder.setLargeIcon(defaultLargeIcon);
+            // Load the default icon synchronously from local resources with downscaling.
+            // BitmapFactory.decodeResource is instant for bundled drawables,
+            // unlike Glide.submit().get() which adds unnecessary overhead.
+            // We use inSampleSize to keep memory usage low (~128px target).
+            try {
+                android.graphics.BitmapFactory.Options opts = new android.graphics.BitmapFactory.Options();
+                opts.inJustDecodeBounds = true;
+                android.graphics.BitmapFactory.decodeResource(
+                        context.getResources(), R.drawable.logo1, opts);
+                
+                int targetSize = 128;
+                if (opts.outWidth > targetSize || opts.outHeight > targetSize) {
+                    int sampleW = opts.outWidth / targetSize;
+                    int sampleH = opts.outHeight / targetSize;
+                    opts.inSampleSize = Math.max(sampleW, sampleH);
+                } else {
+                    opts.inSampleSize = 1;
+                }
+                opts.inJustDecodeBounds = false;
+                
+                Bitmap defaultLargeIcon = android.graphics.BitmapFactory.decodeResource(
+                        context.getResources(), R.drawable.logo1, opts);
+                if (defaultLargeIcon != null) {
+                    notificationBuilder.setLargeIcon(defaultLargeIcon);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to load default notification icon", e);
             }
         }
 
@@ -187,67 +210,66 @@ public class NotificationWorker extends Worker {
 
 
     private void createNotificationChannels() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Context context = getApplicationContext();
-            NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            if (manager == null) {
-                return;
-            }
-
-            // General Channel
-            NotificationChannel generalChannel = new NotificationChannel(
-                    context.getString(R.string.general_channel_id),
-                    context.getString(R.string.general_channel_name),
-                    NotificationManager.IMPORTANCE_HIGH
-            );
-            generalChannel.setDescription(context.getString(R.string.general_channel_description));
-            generalChannel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
-
-            // Exams Channel with Custom Sound
-            NotificationChannel examsChannel = new NotificationChannel(
-                    context.getString(R.string.exams_channel_id),
-                    context.getString(R.string.exams_channel_name),
-                    NotificationManager.IMPORTANCE_HIGH
-            );
-            examsChannel.setDescription(context.getString(R.string.exams_channel_description));
-            examsChannel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
-
-            Uri soundUri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + context.getPackageName() + "/" + R.raw.car_horn);
-            AudioAttributes audioAttributes = new AudioAttributes.Builder()
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
-                    .build();
-            examsChannel.setSound(soundUri, audioAttributes);
-
-            // Irembo Channel
-            NotificationChannel iremboChannel = new NotificationChannel(
-                    context.getString(R.string.irembo_channel_id),
-                    context.getString(R.string.irembo_channel_name),
-                    NotificationManager.IMPORTANCE_HIGH
-            );
-            iremboChannel.setDescription(context.getString(R.string.irembo_channel_description));
-            iremboChannel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
-
-            // Application Channel
-            NotificationChannel applicationChannel = new NotificationChannel(
-                    context.getString(R.string.application_channel_id),
-                    context.getString(R.string.application_channel_name),
-                    NotificationManager.IMPORTANCE_HIGH
-            );
-            applicationChannel.setDescription(context.getString(R.string.application_channel_description));
-            applicationChannel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
-
-            // Subscription Channel
-            NotificationChannel subscriptionChannel = new NotificationChannel(
-                    context.getString(R.string.subscription_channel_id),
-                    context.getString(R.string.subscription_channel_name),
-                    NotificationManager.IMPORTANCE_HIGH
-            );
-            subscriptionChannel.setDescription(context.getString(R.string.subscription_channel_description));
-            subscriptionChannel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
-
-            List<NotificationChannel> channels = Arrays.asList(generalChannel, examsChannel, iremboChannel, applicationChannel, subscriptionChannel);
-            manager.createNotificationChannels(channels);
+        // NotificationChannel is available from API 26+, and our minSdk is 27.
+        Context context = getApplicationContext();
+        NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (manager == null) {
+            return;
         }
+
+        // General Channel
+        NotificationChannel generalChannel = new NotificationChannel(
+                context.getString(R.string.general_channel_id),
+                context.getString(R.string.general_channel_name),
+                NotificationManager.IMPORTANCE_HIGH
+        );
+        generalChannel.setDescription(context.getString(R.string.general_channel_description));
+        generalChannel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+
+        // Exams Channel with Custom Sound
+        NotificationChannel examsChannel = new NotificationChannel(
+                context.getString(R.string.exams_channel_id),
+                context.getString(R.string.exams_channel_name),
+                NotificationManager.IMPORTANCE_HIGH
+        );
+        examsChannel.setDescription(context.getString(R.string.exams_channel_description));
+        examsChannel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+
+        Uri soundUri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + context.getPackageName() + "/" + R.raw.car_horn);
+        AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+                .build();
+        examsChannel.setSound(soundUri, audioAttributes);
+
+        // Irembo Channel
+        NotificationChannel iremboChannel = new NotificationChannel(
+                context.getString(R.string.irembo_channel_id),
+                context.getString(R.string.irembo_channel_name),
+                NotificationManager.IMPORTANCE_HIGH
+        );
+        iremboChannel.setDescription(context.getString(R.string.irembo_channel_description));
+        iremboChannel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+
+        // Application Channel
+        NotificationChannel applicationChannel = new NotificationChannel(
+                context.getString(R.string.application_channel_id),
+                context.getString(R.string.application_channel_name),
+                NotificationManager.IMPORTANCE_HIGH
+        );
+        applicationChannel.setDescription(context.getString(R.string.application_channel_description));
+        applicationChannel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+
+        // Subscription Channel
+        NotificationChannel subscriptionChannel = new NotificationChannel(
+                context.getString(R.string.subscription_channel_id),
+                context.getString(R.string.subscription_channel_name),
+                NotificationManager.IMPORTANCE_HIGH
+        );
+        subscriptionChannel.setDescription(context.getString(R.string.subscription_channel_description));
+        subscriptionChannel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+
+        List<NotificationChannel> channels = Arrays.asList(generalChannel, examsChannel, iremboChannel, applicationChannel, subscriptionChannel);
+        manager.createNotificationChannels(channels);
     }
 }

@@ -33,7 +33,6 @@ import com.drivingschoolrwandaapp.repository.Resource;
 import com.drivingschoolrwandaapp.ui.adapters.TestQuestionPagerAdapter;
 import com.drivingschoolrwandaapp.viewmodel.TestViewModel;
 
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -184,8 +183,7 @@ public class TestQuestionsFragment extends Fragment {
         if (pagerAdapter != null && pagerAdapter.getItemCount() > 0) {
             int current = position + 1;
             int total = pagerAdapter.getItemCount();
-            questionCounterTextView.setText(String.format(Locale.getDefault(),
-                    getString(R.string.question_counter_format), current, total));
+            questionCounterTextView.setText(getString(R.string.question_counter_format, current, total));
         }
     }
 
@@ -195,8 +193,7 @@ public class TestQuestionsFragment extends Fragment {
             int total = pagerAdapter.getItemCount();
             int percentage = (current * 100) / total;
             progressBar.setProgress(percentage);
-            progressTextView.setText(String.format(Locale.getDefault(),
-                    getString(R.string.percent_complete_format), percentage));
+            progressTextView.setText(getString(R.string.percent_complete_format, percentage));
         }
     }
 
@@ -277,9 +274,10 @@ public class TestQuestionsFragment extends Fragment {
         timer = new CountDownTimer(durationMillis, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
+                if (!isAdded()) return;
                 long minutes = TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished);
                 long seconds = TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) % 60;
-                timerTextView.setText(String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds));
+                timerTextView.setText(getString(R.string.timer_format, minutes, seconds));
 
                 // Warn when less than 5 minutes remain
                 if (millisUntilFinished < TimeUnit.MINUTES.toMillis(5)) {
@@ -289,11 +287,10 @@ public class TestQuestionsFragment extends Fragment {
 
             @Override
             public void onFinish() {
-                timerTextView.setText("00:00");
-                if (isAdded()) {
-                    Toast.makeText(getContext(), getString(R.string.time_up), Toast.LENGTH_SHORT).show();
-                    submitTest();
-                }
+                if (!isAdded()) return;
+                timerTextView.setText(R.string.timer_placeholder);
+                Toast.makeText(getContext(), getString(R.string.time_up), Toast.LENGTH_SHORT).show();
+                submitTest();
             }
         }.start();
     }

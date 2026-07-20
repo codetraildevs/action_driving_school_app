@@ -27,7 +27,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:contentDescription="phone icon"
+            android:contentDescription="@string/phone_icon_desc"
             android:src="@android:drawable/ic_menu_call"
             app:tint="#33A1C9" />
 
@@ -35,7 +35,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:autoLink="phone"
-            android:text="+250782877442"
+            android:text="@string/contact_phone_1"
             android:textColorLink="#33A1C9"
             android:textSize="16sp" />
     </LinearLayout>
@@ -50,7 +50,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:contentDescription="phone icon"
+            android:contentDescription="@string/phone_icon_desc"
             android:src="@android:drawable/ic_menu_call"
             app:tint="#33A1C9" />
 
@@ -58,7 +58,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:autoLink="phone"
-            android:text="+250722877442"
+            android:text="@string/contact_phone_2"
             android:textColorLink="#33A1C9"
             android:textSize="16sp" />
     </LinearLayout>

@@ -34,7 +34,9 @@ public class NetworkModule {
             TokenManager tokenManager
     ) {
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        // BODY-level logging is expensive and can cause GC pressure on low-RAM devices.
+        // Only enable BODY for debug builds; NONE in production for performance.
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.NONE);
 
         return new OkHttpClient.Builder()
                 .connectTimeout(45, java.util.concurrent.TimeUnit.SECONDS)

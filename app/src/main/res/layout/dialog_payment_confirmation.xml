@@ -42,7 +42,7 @@
         android:id="@+id/tv_amount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="2,000 RWF"
+        android:text="@string/default_price_rwf"
         android:textSize="32sp"
         android:textStyle="bold"
         android:layout_gravity="center_horizontal"

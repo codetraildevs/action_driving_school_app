@@ -256,9 +256,9 @@
     <string name="instructions_3_conten_1">Nugera mu Kizamini cya porovisoiri kuri mashine uzasanga ibi bibazo biri muri apulikasiyo  ari nako bimeze mu kizaminini nta kibazo bazakubaza muri mu kizamini cya porovisoiri kitari hano muri apulikasiyo, Muguhihtamo igisubizo uzakanda mu (✔️) ugakomeza kukindi kibazo  ukande ahanditse *Next* ukomeze n\'ibindi bibazo. Iyo usoje ubirangije uzakanda ahanditse "Soza ikizamini" uzahita umenya amanota ugize ako kanya ushatse wanagenzura ibyo wishe nibyo wakoze  nkuko bimeze muri iyi apulikasiyo</string>
 
     <string name="instructions4">4. KWISHURA KUGIRANGO IBIZAMINI BYOSE BIFUNGUKE</string>
-    <string name="instructions4_content_1">1. Nkuko nabisobanuye haruguru ikizamini cya mbere ni ubuntu ibindi 20 bisaba kwishyura 5000 RWF kuri 0782877442 cyangwa kuri kuri MoNo Pay: 847318 ibaruye Kuri Alexis.</string>
+    <string name="instructions4_content_1">1. Nkuko nabisobanuye haruguru ikizamini cya mbere ni ubuntu ibindi 20 bisaba kwishyura 5000 RWF kuri 0782877442 cyangwa kuri MoNo Pay: 847318 ibaruye Kuri Alexis.</string>
     <string name="instructions4_content_2">2. Iyo umaze kwishyura usubira inyuma ugategereza iminota 5 ukongera ukajya ku bizamini usanga ibyo wishyuriye byafungutse ahari akagufuri gafunze kumutuku usanga kabaye akagufuri gafunguye mu ibara ry\'icyatsi. NB: ubikora ufite connection (Internet).</string>
-    <string name="instructions_4_content_3">3. Muri apulikasiyo ushobora kwishyura make make ikizamini 1 ni 100 Rwf kigafunguka umunsi 1, iyo wishuye 1000 RWF tugufungurira ibizamini 10 bikamara iminsi 10, iyo wishyuye 2000 RWF tugufungurira ibizamin byose bikamara iminsi 25, iyo wishyuye 5000 tugufungurira ibizamini byose muri apulikasiyo kugera utsinze. </string>
+    <string name="instructions_4_content_3">3. Muri apulikasiyo ushobora kwishyura make ikizamini 1 ni 100 Rwf kigafunguka umunsi 1, iyo wishuye 1000 RWF tugufungurira ibizamini 10 bikamara iminsi 10, iyo wishyuye 2000 RWF tugufungurira ibizamin byose bikamara iminsi 25, iyo wishyuye 5000 tugufungurira ibizamini byose muri apulikasiyo kugera utsinze. </string>
     <string name="need_help">Ukeneye ubufasha Waduhamagara kuri: </string>
     <string name="support_message">Ukeneye ubufasha Waduhamagara kuri: </string>
     <string name="ok">OK</string>
@@ -371,7 +371,7 @@
     <string name="registration_success">Konte yashizweho neza! Nyamuneka injira ukomeze.</string>
     <string name="register_try_login">Iyandikisho ryanze. Niba usanzwe ufite konte, injira hano.</string>
     <string name="invalid_phone_format">Andika numero ya telefone ikoreshwa (urugero: 078xxxxxxx)</string>
-    <string name="loading">Birakoze...</string>
+    <string name="loading">Birakoze…</string>
     <string name="remember_me">Nyibuka (iminsi 30)</string>
     <string name="session_info">Igihe cya sesiyo</string>
     <string name="session_remembered">Wibukijwe iminsi 30</string>
@@ -381,5 +381,29 @@
     <!-- Device not allowed error - login -->
     <string name="device_not_allowed">Ntabwo wemerewe kwinjira ukoresheje iyi aparati. Nyamuneka waduhamagare kuri +250782877442 cyangwa +250722877442.</string>
     <string name="device_not_allowed_short">Iyi aparati ntiyemewe. Nyamuneka waduhamagare kuri +250782877442 cyangwa +250722877442 babashe gusubiza aparati yawe.</string>
+    <string name="share_menu">Sangiza</string>
+    <string name="open_in_browser">Fungura muri Navigator</string>
+
+    <!-- SetTextI18n format strings -->
+    <string name="timer_placeholder">00:00</string>
+    <string name="timer_format">%1$02d:%2$02d</string>
+    <string name="page_indicator_format">%1$d / %2$d</string>
+    <string name="file_size_mb_format">%.2f MB</string>
+    <string name="amount_with_currency_format">%1$s %2$s</string>
+    <string name="compact_score_format">%1$d/%2$d</string>
+    <string name="result_placeholder_percentage">--%</string>
+    <string name="result_placeholder_score">-- / --</string>
+    <string name="result_placeholder_status">--</string>
+    <string name="result_placeholder_zero">0</string>
+    <string name="phone_icon_desc">akarango ka telefone</string>
+    <string name="update_downloaded">Ibishya byakururwe.</string>
+    <string name="restart_action">KONGERA GUTANGIRA</string>
+    <string name="status_unknown">NTAZWI</string>
+    <string name="accass_up_to_format">Ibizamini Wemerewe Kwiga: %1$d</string>
+    <string name="expiry_date_format">Bizifunga: %1$s</string>
+
+    <!-- Device registration messages -->
+    <string name="device_already_registered">Usanzwe ufite konte kuri iyi aparati. Nyamuneka injira ukoresheje nimero ya telefone wiyandikishije cyangwa uhamagare +250782877442 cyangwa +250722877442 ubufasha.</string>
+    <string name="account_already_exists_with_help">Iyi numero ya telefone isanzwe yiyandikishije. Nyamuneka injira ukoresheje numero yawe cyangwa uhamagare +250782877442 cyangwa +250722877442 ubufasha.</string>
 
 </resources>

@@ -20,7 +20,6 @@ import com.drivingschoolrwandaapp.models.entities.TestResult;
 import com.drivingschoolrwandaapp.viewmodel.TestViewModel;
 
 import java.util.List;
-import java.util.Locale;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -91,8 +90,8 @@ public class ResultsFragment extends Fragment {
         int passRatePercentage = (passedCount * 100) / totalTests;
 
         totalTestsValue.setText(String.valueOf(totalTests));
-        averageScoreValue.setText(String.format(Locale.getDefault(), "%d%%", avgPercentage));
-        passRateValue.setText(String.format(Locale.getDefault(), "%d%%", passRatePercentage));
+        averageScoreValue.setText(getString(R.string.percentage_score, avgPercentage));
+        passRateValue.setText(getString(R.string.percentage_score, passRatePercentage));
 
         adapter.setResults(history);
     }
@@ -161,12 +160,13 @@ public class ResultsFragment extends Fragment {
                 if (result.getTestNumber() > 0) {
                     displayName = getString(R.string.exam_number_format, result.getTestNumber());
                 } else {
-                    displayName = result.getTestName();
+                    String testName = result.getTestName();
+                    displayName = testName != null ? testName : "";
                 }
                 testNameText.setText(displayName);
 
                 // Score
-                scoreText.setText(String.format(Locale.getDefault(), "%d/%d", result.getScore(), result.getTotalMarks()));
+                scoreText.setText(getString(R.string.compact_score_format, result.getScore(), result.getTotalMarks()));
 
                 // Status icon
                 if (result.isPassed()) {

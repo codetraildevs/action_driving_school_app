@@ -85,7 +85,7 @@
             android:paddingTop="2dp"
             android:paddingBottom="2dp"
             android:text="@string/free_badge"
-            android:textSize="10sp"
+            android:textSize="12sp"
             android:textStyle="bold"
             android:visibility="gone"
             app:layout_constraintTop_toTopOf="parent"

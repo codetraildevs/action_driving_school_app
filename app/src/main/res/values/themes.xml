@@ -3,7 +3,6 @@
     <style name="Base.Theme.drivingSchoolRwandaApp" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="android:statusBarColor">@color/my_primary</item>
 
         <!-- Apply Poppins Font Globally -->
         <item name="android:fontFamily">@font/montserrat</item>

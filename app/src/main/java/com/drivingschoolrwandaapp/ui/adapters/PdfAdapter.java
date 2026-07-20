@@ -24,11 +24,27 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.PdfViewHolder> {
     private final ExecutorService executorService = Executors.newFixedThreadPool(2); // Reduced threads to save memory with high-res bitmaps
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private final int screenWidth;
-    private final float renderScale = 2.0f; // Increase this for even sharper text (e.g., 2.5f or 3.0f), but consumes more RAM
+    // Lower renderScale (1.5f) for better memory performance on low-RAM devices.
+    // Original was 2.0f which creates 4x the pixels of a 1.0f render, consuming significant RAM.
+    private static final float RENDER_SCALE_HIGH_RAM = 2.0f;
+    private static final float RENDER_SCALE_LOW_RAM = 1.5f;
+    private final float renderScale;
 
-    public PdfAdapter(PdfRenderer pdfRenderer, int screenWidth) {
+    /**
+     * @param pdfRenderer The PdfRenderer instance
+     * @param screenWidth Screen width in pixels for computing render dimensions
+     * @param isLowRamDevice Whether the device has limited RAM (<=2GB). Uses lower render scale.
+     */
+    public PdfAdapter(PdfRenderer pdfRenderer, int screenWidth, boolean isLowRamDevice) {
         this.pdfRenderer = pdfRenderer;
         this.screenWidth = screenWidth;
+        this.renderScale = isLowRamDevice ? RENDER_SCALE_LOW_RAM : RENDER_SCALE_HIGH_RAM;
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView);
+        executorService.shutdownNow();
     }
 
     @NonNull
@@ -72,16 +88,34 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.PdfViewHolder> {
                     int bitmapWidth = (int) (screenWidth * renderScale);
                     int bitmapHeight = (int) (page.getHeight() * ((float) bitmapWidth / page.getWidth()));
 
+                    Bitmap bitmap = null;
                     try {
-                        Bitmap bitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
-                        page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
-                        page.close();
+                        // Cap bitmap dimensions to prevent OOM on low-RAM devices
+                        int maxDimension = 4096; // Safety cap
+                        int cappedWidth = Math.min(bitmapWidth, maxDimension);
+                        int cappedHeight = (int) (page.getHeight() * ((float) cappedWidth / page.getWidth()));
+                        cappedHeight = Math.min(cappedHeight, maxDimension);
 
+                        bitmap = Bitmap.createBitmap(cappedWidth, cappedHeight, Bitmap.Config.ARGB_8888);
+                        page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+
+                        final Bitmap finalBitmap = bitmap;
                         mainHandler.post(() -> {
-                            photoView.setImageBitmap(bitmap);
+                            // Recycle any previous bitmap to free memory immediately
+                            photoView.setImageBitmap(null);
+                            System.gc();
+                            photoView.setImageBitmap(finalBitmap);
                         });
                     } catch (OutOfMemoryError e) {
-                        Log.e("PdfAdapter", "Out of memory rendering PDF page " + position, e);
+                        Log.e("PdfAdapter", "Out of memory rendering PDF page " + position + " (size=" + bitmapWidth + "x" + bitmapHeight + ")", e);
+                        if (bitmap != null) {
+                            bitmap.recycle();
+                        }
+                        com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
+                    } catch (Exception e) {
+                        Log.e("PdfAdapter", "Error rendering PDF page " + position, e);
+                        com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
+                    } finally {
                         page.close();
                     }
                 }

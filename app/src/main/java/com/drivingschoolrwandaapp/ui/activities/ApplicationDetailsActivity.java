@@ -31,6 +31,16 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class ApplicationDetailsActivity extends AppCompatActivity {
 
     private IremboViewModel iremboViewModel;
+
+    @SuppressWarnings("deprecation")
+    @android.annotation.SuppressLint("ObsoleteSdkInt")
+    private IremboApplication getSerializableApplication() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            return getIntent().getSerializableExtra("application_details", IremboApplication.class);
+        } else {
+            return (IremboApplication) getIntent().getSerializableExtra("application_details");
+        }
+    }
     private AlertDialog loadingDialog;
 
     @Override
@@ -46,7 +56,7 @@ public class ApplicationDetailsActivity extends AppCompatActivity {
         setupObservers();
 
         if (getIntent().hasExtra("application_details")) {
-            IremboApplication application = (IremboApplication) getIntent().getSerializableExtra("application_details");
+            IremboApplication application = getSerializableApplication();
             if (application != null) {
                 setupViews(application);
             }
@@ -89,7 +99,7 @@ public class ApplicationDetailsActivity extends AppCompatActivity {
         // Header
         tvServiceName.setText(app.getTitle());
         tvReference.setText(getString(R.string.ref_format, app.getReference()));
-        tvStatus.setText(app.getStatus() != null ? app.getStatus().toUpperCase(Locale.ROOT) : "UNKNOWN");
+        tvStatus.setText(app.getStatus() != null ? app.getStatus().toUpperCase(Locale.ROOT) : getString(R.string.status_unknown));
         tvDate.setText(formatDate(app.getDate()));
         
         // Progress

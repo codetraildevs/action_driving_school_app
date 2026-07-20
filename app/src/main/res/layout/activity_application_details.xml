@@ -8,8 +8,6 @@
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:fitsSystemWindows="true"
-
         android:layout_height="wrap_content">
 
         <com.google.android.material.appbar.MaterialToolbar
@@ -160,7 +158,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Message"
+                        android:text="@string/message_label"
                         android:textAppearance="?attr/textAppearanceSubtitle1"
                         android:textStyle="bold"
                         android:layout_marginBottom="8dp"/>
@@ -169,7 +167,7 @@
                         android:id="@+id/tv_message"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="No additional message."
+                        android:text="@string/no_additional_message"
                         android:textAppearance="?attr/textAppearanceBody2"/>
 
                 </LinearLayout>

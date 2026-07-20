@@ -3,7 +3,6 @@ package com.drivingschoolrwandaapp.utils;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
-import android.os.Build;
 import androidx.core.app.NotificationCompat;
 import com.drivingschoolrwandaapp.R;
 
@@ -21,10 +20,9 @@ public class NotificationHelper {
     }
 
     private void createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_LOW);
-            notificationManager.createNotificationChannel(channel);
-        }
+        // NotificationChannel is available from API 26+, and our minSdk is 27.
+        NotificationChannel channel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_LOW);
+        notificationManager.createNotificationChannel(channel);
     }
 
     public void showProgressNotification(int notificationId, String title, String content) {

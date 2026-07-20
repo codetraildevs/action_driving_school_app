@@ -83,15 +83,21 @@ public class LoginActivity extends AppCompatActivity {
         loadingIndicator = findViewById(R.id.loading_indicator);
 
         // Restore the saved Remember Me preference
-        rememberMeCheckbox.setChecked(appPreferences.isRememberMe());
-        rememberMeCheckbox.setOnCheckedChangeListener((buttonView, isChecked) ->
-            appPreferences.setRememberMe(isChecked)
-        );
+        if (rememberMeCheckbox != null) {
+            rememberMeCheckbox.setChecked(appPreferences.isRememberMe());
+            rememberMeCheckbox.setOnCheckedChangeListener((buttonView, isChecked) ->
+                appPreferences.setRememberMe(isChecked)
+            );
+        }
 
         Button registerText = findViewById(R.id.register_text);
-        registerText.setOnClickListener(v -> {
-            startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
-        });
+        if (registerText != null) {
+            registerText.setOnClickListener(v -> {
+                if (!isFinishing()) {
+                    startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
+                }
+            });
+        }
 
         loginButton.setOnClickListener(v -> {
             // Prevent double-clicks: if a login is already in progress, ignore
@@ -123,6 +129,7 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         userViewModel.getLoginResult().observe(this, resource -> {
+            if (resource == null) return;
             switch (resource.status) {
                 case LOADING:
                     // Only show loading if we're still expecting a response
@@ -134,8 +141,8 @@ public class LoginActivity extends AppCompatActivity {
                     }
                     // Show a timeout message if loading takes too long
                     loadingTimeoutHandler.postDelayed(() -> {
-                        if (isLoading) {
-                            Toast.makeText(this, getString(R.string.request_timeout), Toast.LENGTH_LONG).show();
+                        if (isLoading && !isFinishing()) {
+                            Toast.makeText(LoginActivity.this, getString(R.string.request_timeout), Toast.LENGTH_LONG).show();
                         }
                     }, LOADING_TIMEOUT_MS);
                     break;
@@ -146,6 +153,7 @@ public class LoginActivity extends AppCompatActivity {
                     if (loadingIndicator != null) loadingIndicator.setVisibility(View.GONE);
                     if (loginButton != null) {
                         loginButton.setEnabled(true);
+                        loginButton.setText(getString(R.string.confirm));
                     }
                     if (resource.data != null && resource.data.isSuccess()) {
                         boolean rememberMe = rememberMeCheckbox != null && rememberMeCheckbox.isChecked();
@@ -160,9 +168,13 @@ public class LoginActivity extends AppCompatActivity {
                         startActivity(new Intent(this, App.class));
                         finish();
                     } else {
+                        // Login API returned success:false or no user data — always show feedback
                         String message = resource.data != null ? resource.data.getMessage() : getString(R.string.login_failed);
-                        if (message != null && (message.toLowerCase(Locale.ROOT).contains("not found") || message.toLowerCase(Locale.ROOT).contains("no account"))) {
-                            message = getString(R.string.account_not_found);
+                        if (message != null) {
+                            String lowerMsg = message.toLowerCase(Locale.ROOT);
+                            if (lowerMsg.contains("not found") || lowerMsg.contains("no account") || lowerMsg.contains("invalid")) {
+                                message = getString(R.string.account_not_found);
+                            }
                         }
                         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
                     }
@@ -176,10 +188,11 @@ public class LoginActivity extends AppCompatActivity {
                         loginButton.setEnabled(true);
                         loginButton.setText(getString(R.string.confirm));
                     }
+                    // Always show error feedback — Toast is harmless even if finishing
                     String errorMsg = resource.message;
                     if (errorMsg != null) {
                         String lowerMsg = errorMsg.toLowerCase(Locale.ROOT);
-                        if (lowerMsg.contains("not found") || lowerMsg.contains("no account") || lowerMsg.contains("does not exist") || lowerMsg.contains("not registered")) {
+                        if (lowerMsg.contains("not found") || lowerMsg.contains("no account") || lowerMsg.contains("does not exist") || lowerMsg.contains("not registered") || lowerMsg.contains("invalid")) {
                             errorMsg = getString(R.string.account_not_found);
                         } else if (lowerMsg.contains("device")) {
                             errorMsg = getString(R.string.device_not_allowed);
@@ -189,6 +202,7 @@ public class LoginActivity extends AppCompatActivity {
                         errorMsg = getString(R.string.login_failed);
                     }
                     Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show();
+                    Log.d(TAG, "Login error displayed: " + errorMsg);
                     break;
             }
         });

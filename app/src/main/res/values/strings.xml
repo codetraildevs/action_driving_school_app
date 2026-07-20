@@ -259,10 +259,10 @@
     <string name="instructions_3_conten_1">Nugera mu Kizamini cya porovisoiri kuri mashine uzasanga ibi bibazo biri muri apulikasiyo  ari nako bimeze mu kizaminini nta kibazo bazakubaza muri mu kizamini cya porovisoiri kitari hano muri apulikasiyo, Muguhihtamo igisubizo uzakanda mu (✔️) ugakomeza kukindi kibazo  ukande ahanditse *Next* ukomeze n\'ibindi bibazo. Iyo usoje ubirangije uzakanda ahanditse "Soza ikizamini" uzahita umenya amanota ugize ako kanya ushatse wanagenzura ibyo wishe nibyo wakoze  nkuko bimeze muri iyi apulikasiyo</string>
 
     <string name="instructions4">4. KWISHURA KUGIRANGO IBIZAMINI BYOSE BIFUNGUKE</string>
-    <string name="instructions4_content_1">1. Nkuko nabisobanuye haruguru ikizamini cya mbere ni ubuntu ibindi 20 bisaba kwishyura 5000 RWF kuri 0782877442 cyangwa kuri kuri MoNo Pay: 847318 ibaruye Kuri Alexis.</string>
+    <string name="instructions4_content_1">1. Nkuko nabisobanuye haruguru ikizamini cya mbere ni ubuntu ibindi 20 bisaba kwishyura 5000 RWF kuri 0782877442 cyangwa kuri MoNo Pay: 847318 ibaruye Kuri Alexis.</string>
     <string name="instructions4_content_2">2. Iyo umaze kwishyura usubira inyuma ugategereza iminota 5 ukongera ukajya ku bizamini usanga ibyo wishyuriye byafungutse ahari akagufuri gafunze kumutuku usanga kabaye akagufuri gafunguye mu ibara ry\'icyatsi. NB: ubikora ufite connection (Internet).</string>
 
-    <string name="instructions_4_content_3">3. Muri apulikasiyo ushobora kwishyura make make ikizamini 1 ni 100 Rwf kigafunguka umunsi 1, iyo wishyuye 1000 RWF tugufungurira ibizamini 10 bikamara iminsi 10, iyo wishyuye 2000 RWF tugufungurira ibizamin byose bikamara iminsi 25, iyo wishyuye 5000 tugufungurira ibizamini byose muri apulikasiyo kugera utsinze. </string>
+    <string name="instructions_4_content_3">3. Muri apulikasiyo ushobora kwishyura make ikizamini 1 ni 100 Rwf kigafunguka umunsi 1, iyo wishyuye 1000 RWF tugufungurira ibizamini 10 bikamara iminsi 10, iyo wishyuye 2000 RWF tugufungurira ibizamin byose bikamara iminsi 25, iyo wishyuye 5000 tugufungurira ibizamini byose muri apulikasiyo kugera utsinze. </string>
     <string name="need_help">Ukeneye ubufasha Waduhamagara kuri: </string>
     <string name="support_message">Ukeneye ubufasha Waduhamagara kuri: </string>
     <string name="ok">OK</string>
@@ -419,7 +419,7 @@
     <string name="no_bookmarks_yet">No bookmarks yet</string>
     <string name="need_active_subscription">You need an active subscription to %s this material.</string>
     <string name="test_access_expired_msg">Your test access has expired. You cannot %s this material.</string>
-    <string name="downloading_file">Downloading file...</string>
+    <string name="downloading_file">Downloading file…</string>
     <string name="download_failed_msg">Download failed: %s</string>
     <string name="could_not_open_link">Could not open link</string>
     <string name="invalid_link">Invalid link</string>
@@ -435,7 +435,7 @@
     <string name="registration_success">Account created successfully! Please login to continue.</string>
     <string name="register_try_login">Registration failed. If you already have an account, please log in.</string>
     <string name="invalid_phone_format">Please enter a valid phone number (e.g., 078xxxxxxx)</string>
-    <string name="loading">Loading...</string>
+    <string name="loading">Loading…</string>
     <string name="remember_me">Remember me (30 days)</string>
     <string name="session_info">Session</string>
     <string name="session_remembered">Remembered for 30 days</string>
@@ -445,5 +445,43 @@
     <!-- Device not allowed error - login -->
     <string name="device_not_allowed">You are not allowed to login from this device. Please contact support at +250782877442 or +250722877442.</string>
     <string name="device_not_allowed_short">This device is not recognized. Please contact support at +250782877442 or +250722877442 to reset your device association.</string>
+
+    <!-- Hardcoded text fixes -->
+    <string name="message_label">Message</string>
+    <string name="no_additional_message">No additional message.</string>
+    <string name="province">Intara</string>
+    <string name="district">Akarere</string>
+    <string name="an_error_occurred">An error occurred</string>
+    <string name="app_version_placeholder">Version 1.0.0</string>
+    <string name="learning_fragment">Learning Fragment</string>
+    <string name="momo_pay">MOMO Pay</string>
+    <string name="expires_na">Expires: N/A</string>
+    <string name="contact_phone_1">+250782877442</string>
+    <string name="contact_phone_2">+250722877442</string>
+    <string name="default_price_rwf">2,000 RWF</string>
+    <string name="share_menu">Share</string>
+    <string name="open_in_browser">Open in Browser</string>
+
+    <!-- SetTextI18n format strings -->
+    <string name="timer_placeholder" translatable="false">00:00</string>
+    <string name="timer_format" translatable="false">%1$02d:%2$02d</string>
+    <string name="page_indicator_format" translatable="false">%1$d / %2$d</string>
+    <string name="file_size_mb_format">%.2f MB</string>
+    <string name="amount_with_currency_format" translatable="false">%1$s %2$s</string>
+    <string name="compact_score_format">%1$d/%2$d</string>
+    <string name="result_placeholder_percentage">--%</string>
+    <string name="result_placeholder_score">-- / --</string>
+    <string name="result_placeholder_status">--</string>
+    <string name="result_placeholder_zero">0</string>
+    <string name="phone_icon_desc">phone icon</string>
+    <string name="update_downloaded">An update has just been downloaded.</string>
+    <string name="restart_action">RESTART</string>
+    <string name="status_unknown">UNKNOWN</string>
+    <string name="account_already_exists_with_help">This phone number is already registered. Please login with your phone number or call +250782877442 or +250722877442 for help.</string>
+    <string name="accass_up_to_format">Ibizamini Wemerewe Kwiga: %1$d</string>
+    <string name="expiry_date_format">Bizifunga: %1$s</string>
+
+    <!-- Device registration messages -->
+    <string name="device_already_registered">You already have an account on this device. Please login with the phone number you registered before or call +250782877442 or +250722877442 for help.</string>
 
 </resources>

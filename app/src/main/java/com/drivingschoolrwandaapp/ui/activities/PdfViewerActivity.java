@@ -5,6 +5,7 @@ import android.graphics.pdf.PdfRenderer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.app.ActivityManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -31,12 +32,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.ui.adapters.BookmarkAdapter;
 import com.drivingschoolrwandaapp.ui.adapters.PdfAdapter;
+import com.drivingschoolrwandaapp.database.entities.Bookmark;
 import com.drivingschoolrwandaapp.viewmodel.PdfViewModel;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.util.Locale;
+import java.util.List;
+
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -126,7 +131,10 @@ public class PdfViewerActivity extends AppCompatActivity {
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
-        PdfAdapter adapter = new PdfAdapter(pdfRenderer, metrics.widthPixels);
+        // Detect low-RAM devices and use lower render scale for PDF pages
+        ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        boolean isLowRamDevice = activityManager != null && activityManager.isLowRamDevice();
+        PdfAdapter adapter = new PdfAdapter(pdfRenderer, metrics.widthPixels, isLowRamDevice);
         recyclerView.setAdapter(adapter);
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -149,7 +157,7 @@ public class PdfViewerActivity extends AppCompatActivity {
     }
 
     private void updatePageIndicator(int position) {
-        pageNumberText.setText(String.format(Locale.ROOT, "%d / %d", position + 1, pdfRenderer.getPageCount()));
+        pageNumberText.setText(getString(R.string.page_indicator_format, position + 1, pdfRenderer.getPageCount()));
     }
 
     @Override
@@ -182,11 +190,13 @@ public class PdfViewerActivity extends AppCompatActivity {
         View dialogView = inflater.inflate(R.layout.dialog_add_bookmark, null);
         final EditText bookmarkNameInput = dialogView.findViewById(R.id.bookmark_name_input);
 
-        int currentPage = layoutManager.findFirstVisibleItemPosition();
+        int rawPage = layoutManager.findFirstVisibleItemPosition();
+        final int currentPage = (rawPage == RecyclerView.NO_POSITION) ? 0 : rawPage;
 
         builder.setView(dialogView)
                 .setPositiveButton(R.string.add_bookmark, (dialog, which) -> {
-                    String name = bookmarkNameInput.getText().toString().trim();
+                    String name = bookmarkNameInput != null && bookmarkNameInput.getText() != null
+                        ? bookmarkNameInput.getText().toString().trim() : "";
                     pdfViewModel.addBookmark(pdfId, currentPage, name);
                     Toast.makeText(this, getString(R.string.bookmark_added_toast), Toast.LENGTH_SHORT).show();
                 })
@@ -204,14 +214,22 @@ public class PdfViewerActivity extends AppCompatActivity {
 
         builder.setView(dialogView)
                 .setPositiveButton(R.string.go_to_page, (dialog, which) -> {
-                    String pageString = pageNumberInput.getText().toString();
-                    if (!pageString.isEmpty()) {
+                    String pageString = pageNumberInput != null && pageNumberInput.getText() != null
+                        ? pageNumberInput.getText().toString().trim() : "";
+                    if (pageString.isEmpty()) {
+                        Toast.makeText(this, getString(R.string.invalid_page_number), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    try {
                         int page = Integer.parseInt(pageString) - 1;
                         if (page >= 0 && page < pdfRenderer.getPageCount()) {
                             recyclerView.scrollToPosition(page);
                         } else {
                             Toast.makeText(this, getString(R.string.invalid_page_number), Toast.LENGTH_SHORT).show();
                         }
+                    } catch (NumberFormatException e) {
+                        Log.e("PdfViewer", "Invalid page number input: " + pageString, e);
+                        Toast.makeText(this, getString(R.string.invalid_page_number), Toast.LENGTH_SHORT).show();
                     }
                 })
                 .setNegativeButton(R.string.cancel, (dialog, which) -> dialog.cancel());
@@ -221,32 +239,43 @@ public class PdfViewerActivity extends AppCompatActivity {
     }
 
     private void showBookmarksDialog() {
-        pdfViewModel.getBookmarks(pdfId).observe(this, bookmarks -> {
-            if (bookmarks == null || bookmarks.isEmpty()) {
-                Toast.makeText(this, getString(R.string.no_bookmarks_yet), Toast.LENGTH_SHORT).show();
-                return;
+        // Use a one-shot observer to prevent stacking multiple observers
+        final LiveData<List<Bookmark>> source = pdfViewModel.getBookmarks(pdfId);
+        
+        Observer<List<Bookmark>> observer = new Observer<List<Bookmark>>() {
+            @Override
+            public void onChanged(List<Bookmark> bookmarks) {
+                source.removeObserver(this);
+                if (isFinishing()) return;
+
+                if (bookmarks == null || bookmarks.isEmpty()) {
+                    Toast.makeText(PdfViewerActivity.this, getString(R.string.no_bookmarks_yet), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(PdfViewerActivity.this);
+                LayoutInflater inflater = getLayoutInflater();
+                View dialogView = inflater.inflate(R.layout.dialog_view_bookmarks, null);
+                RecyclerView bookmarksRecyclerView = dialogView.findViewById(R.id.bookmarks_recycler_view);
+                bookmarksRecyclerView.setLayoutManager(new LinearLayoutManager(PdfViewerActivity.this));
+
+                final AlertDialog dialog = builder.setView(dialogView).create();
+
+                BookmarkAdapter adapter = new BookmarkAdapter(bookmarks, 
+                    pageNumber -> {
+                        recyclerView.scrollToPosition(pageNumber);
+                        dialog.dismiss();
+                    },
+                    bookmark -> {
+                        pdfViewModel.deleteBookmark(bookmark);
+                    });
+                bookmarksRecyclerView.setAdapter(adapter);
+
+                dialog.show();
             }
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            LayoutInflater inflater = getLayoutInflater();
-            View dialogView = inflater.inflate(R.layout.dialog_view_bookmarks, null);
-            RecyclerView bookmarksRecyclerView = dialogView.findViewById(R.id.bookmarks_recycler_view);
-            bookmarksRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-            
-            final AlertDialog dialog = builder.setView(dialogView).create();
-
-            BookmarkAdapter adapter = new BookmarkAdapter(bookmarks, 
-                pageNumber -> {
-                    recyclerView.scrollToPosition(pageNumber);
-                    dialog.dismiss();
-                },
-                bookmark -> {
-                    pdfViewModel.deleteBookmark(bookmark);
-                });
-            bookmarksRecyclerView.setAdapter(adapter);
-
-            dialog.show();
-        });
+        };
+        
+        source.observe(this, observer);
     }
 
     @Override

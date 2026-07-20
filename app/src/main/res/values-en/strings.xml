@@ -364,4 +364,27 @@ When you reach the last one, you press “Finish Exam,” and you will immediate
     <string name="result_failed">Failed</string>
     <string name="percentage_score">%d%%</string>
     <string name="exam_number_format">Exam %d</string>
+
+    <!-- SetTextI18n format strings -->
+    <string name="timer_placeholder">00:00</string>
+    <string name="timer_format">%1$02d:%2$02d</string>
+    <string name="page_indicator_format">%1$d / %2$d</string>
+    <string name="file_size_mb_format">%.2f MB</string>
+    <string name="amount_with_currency_format">%1$s %2$s</string>
+    <string name="compact_score_format">%1$d/%2$d</string>
+    <string name="result_placeholder_percentage">--%</string>
+    <string name="result_placeholder_score">-- / --</string>
+    <string name="result_placeholder_status">--</string>
+    <string name="result_placeholder_zero">0</string>
+    <string name="phone_icon_desc">phone icon</string>
+    <string name="update_downloaded">An update has just been downloaded.</string>
+    <string name="restart_action">RESTART</string>
+    <string name="status_unknown">UNKNOWN</string>
+    <string name="accass_up_to_format">Tests you have access to: %1$d</string>
+    <string name="expiry_date_format">Expires on: %1$s</string>
+
+    <!-- Device registration messages -->
+    <string name="device_already_registered">You already have an account on this device. Please login with the phone number you registered before or call +250782877442 or +250722877442 for help.</string>
+    <string name="account_already_exists_with_help">This phone number is already registered. Please login with your phone number or call +250782877442 or +250722877442 for help.</string>
+
 </resources>

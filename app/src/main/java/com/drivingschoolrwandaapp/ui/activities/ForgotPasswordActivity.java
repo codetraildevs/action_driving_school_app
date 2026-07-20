@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
@@ -33,6 +34,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_forgot_password);
 
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
@@ -50,6 +52,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         sendLinkButton.setOnClickListener(v -> validateAndSendLink());
 
         userViewModel.getForgotPasswordResult().observe(this, resource -> {
+            if (resource == null) return;
             switch (resource.status) {
                 case LOADING:
                     setLoadingState(true);
@@ -57,17 +60,21 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                 case SUCCESS:
                     setLoadingState(false);
                     if (resource.data != null && resource.data.isSuccess()) {
-                        Toast.makeText(this, resource.data.getMessage(), Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(ForgotPasswordActivity.this, OtpVerificationActivity.class);
-                        intent.putExtra("email", Objects.requireNonNull(emailField.getText()).toString().trim());
-                        startActivity(intent);
+                        String message = resource.data.getMessage();
+                        Toast.makeText(this, message != null ? message : getString(R.string.send_reset_link), Toast.LENGTH_SHORT).show();
+                        if (!isFinishing()) {
+                            String email = emailField.getText() != null ? emailField.getText().toString().trim() : "";
+                            Intent intent = new Intent(ForgotPasswordActivity.this, OtpVerificationActivity.class);
+                            intent.putExtra("email", email);
+                            startActivity(intent);
+                        }
                     } else {
                         Toast.makeText(this, resource.message != null ? resource.message : getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show();
                     }
                     break;
                 case ERROR:
                     setLoadingState(false);
-                    Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, resource.message != null ? resource.message : getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show();
                     break;
             }
         });

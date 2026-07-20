@@ -26,6 +26,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -46,17 +48,24 @@ public class LearningMaterialViewModel extends AndroidViewModel {
     private final MutableLiveData<String> toastMessage = new MutableLiveData<>();
     private final MutableLiveData<DownloadState> downloadStatus = new MutableLiveData<>();
     private final SharedPreferences sharedPreferences;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final Gson gson = new Gson();
     private final File cacheFile;
 
     private static final long EXPIRATION_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
     @Inject
-    public LearningMaterialViewModel(@NonNull Application application, LearningMaterialRepository repository) {
+    public LearningMaterialViewModel(@NonNull Application application, @NonNull LearningMaterialRepository repository) {
         super(application);
         this.repository = repository;
         this.sharedPreferences = application.getSharedPreferences("DownloadPrefs", Context.MODE_PRIVATE);
         this.cacheFile = new File(application.getCacheDir(), "materials_cache.json");
+    }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        executor.shutdownNow();
     }
 
     public LiveData<List<LearningMaterial>> getMaterials() {
@@ -88,91 +97,104 @@ public class LearningMaterialViewModel extends AndroidViewModel {
                     List<LearningMaterial> fetchedMaterials = response.body().getMaterials();
                     checkDownloadedStatus(fetchedMaterials);
                     materials.setValue(fetchedMaterials);
-                    cacheMaterials(fetchedMaterials);
+                    cacheMaterialsAsync(fetchedMaterials);
                 } else {
-                    loadFromCache("Couldn't refresh from server.");
+                    loadFromCacheAsync("Couldn't refresh from server.");
                 }
                 isLoading.setValue(false);
             }
 
             @Override
             public void onFailure(@NonNull Call<LearningMaterialResponse> call, @NonNull Throwable t) {
-                loadFromCache("You are offline. Showing downloaded content.");
+                loadFromCacheAsync("You are offline. Showing downloaded content.");
                 isLoading.setValue(false);
             }
         });
     }
 
-    private void loadFromCache(String message) {
-        if (cacheFile.exists()) {
-            try (FileReader reader = new FileReader(cacheFile)) {
-                Type listType = new TypeToken<List<LearningMaterial>>() {}.getType();
-                List<LearningMaterial> cachedMaterials = gson.fromJson(reader, listType);
-                if (cachedMaterials != null && !cachedMaterials.isEmpty()) {
-                    checkDownloadedStatus(cachedMaterials);
-                    materials.setValue(cachedMaterials);
-                    toastMessage.setValue(message);
-                } else {
-                    error.setValue("No offline content available.");
+    private void loadFromCacheAsync(String message) {
+        executor.execute(() -> {
+            if (cacheFile.exists()) {
+                try (FileReader reader = new FileReader(cacheFile)) {
+                    Type listType = new TypeToken<List<LearningMaterial>>() {}.getType();
+                    List<LearningMaterial> cachedMaterials = gson.fromJson(reader, listType);
+                    if (cachedMaterials != null && !cachedMaterials.isEmpty()) {
+                        checkDownloadedStatus(cachedMaterials);
+                        materials.postValue(cachedMaterials);
+                        toastMessage.postValue(message);
+                    } else {
+                        error.postValue("No offline content available.");
+                    }
+                } catch (IOException e) {
+                    Log.e("LearningMaterialVM", "Could not load offline content from cache", e);
+                    error.postValue("Could not load offline content.");
                 }
-            } catch (IOException e) {
-                Log.e("LearningMaterialVM", "Could not load offline content from cache", e);
-                error.setValue("Could not load offline content.");
+            } else {
+                error.postValue("No internet and no offline content available.");
             }
-        } else {
-            error.setValue("No internet and no offline content available.");
-        }
+        });
     }
 
-    private void cacheMaterials(List<LearningMaterial> materialsToCache) {
-        try (FileWriter writer = new FileWriter(cacheFile)) {
-            gson.toJson(materialsToCache, writer);
-        } catch (IOException e) {
-            Log.e("LearningMaterialVM", "Failed to cache materials to disk", e);
-        }
+    private void cacheMaterialsAsync(List<LearningMaterial> materialsToCache) {
+        executor.execute(() -> {
+            try (FileWriter writer = new FileWriter(cacheFile)) {
+                gson.toJson(materialsToCache, writer);
+            } catch (IOException e) {
+                Log.e("LearningMaterialVM", "Failed to cache materials to disk", e);
+            }
+        });
     }
 
     public void downloadLearningMaterial(LearningMaterial material) {
+        if (material == null) return;
         if (material.isDownloaded()) return;
 
-        downloadStatus.setValue(new DownloadState(DownloadState.Status.DOWNLOADING, material.getId()));
+        downloadStatus.postValue(new DownloadState(DownloadState.Status.DOWNLOADING, material.getId()));
         repository.downloadLearningMaterial(material.getId()).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    new Thread(() -> {
-                        File destinationFile = getDestinationFile(material);
-                        boolean success = writeResponseBodyToDisk(response.body(), destinationFile);
+                    executor.execute(() -> {
+                        try {
+                            File destinationFile = getDestinationFile(material);
+                            boolean success = writeResponseBodyToDisk(response.body(), destinationFile);
 
-                        if (success) {
-                            long downloadTime = System.currentTimeMillis();
-                            sharedPreferences.edit().putLong("download_" + material.getId(), downloadTime).apply();
-                            material.setDownloaded(true);
-                            material.setFileSize(destinationFile.length());
-                            long remainingHours = TimeUnit.MILLISECONDS.toHours(EXPIRATION_DURATION_MS);
-                            material.setHoursUntilExpiration(remainingHours);
-                            downloadStatus.postValue(new DownloadState(DownloadState.Status.SUCCESS, material.getId()));
-                        } else {
+                            if (success) {
+                                long downloadTime = System.currentTimeMillis();
+                                sharedPreferences.edit().putLong("download_" + material.getId(), downloadTime).apply();
+                                material.setDownloaded(true);
+                                material.setFileSize(destinationFile.length());
+                                long remainingHours = TimeUnit.MILLISECONDS.toHours(EXPIRATION_DURATION_MS);
+                                material.setHoursUntilExpiration(remainingHours);
+                                downloadStatus.postValue(new DownloadState(DownloadState.Status.SUCCESS, material.getId()));
+                            } else {
+                                downloadStatus.postValue(new DownloadState(DownloadState.Status.FAILURE, material.getId()));
+                            }
+                        } catch (Exception e) {
+                            Log.e("LearningMaterialVM", "Failed to process downloaded file", e);
                             downloadStatus.postValue(new DownloadState(DownloadState.Status.FAILURE, material.getId()));
                         }
-                    }).start();
+                    });
                 } else {
-                    downloadStatus.setValue(new DownloadState(DownloadState.Status.FAILURE, material.getId()));
+                    downloadStatus.postValue(new DownloadState(DownloadState.Status.FAILURE, material.getId()));
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                downloadStatus.setValue(new DownloadState(DownloadState.Status.FAILURE, material.getId()));
+                downloadStatus.postValue(new DownloadState(DownloadState.Status.FAILURE, material.getId()));
             }
         });
     }
 
-    private void checkDownloadedStatus(List<LearningMaterial> materials) {
-        if (materials == null) return;
+    private void checkDownloadedStatus(List<LearningMaterial> materialsList) {
+        if (materialsList == null) return;
+        // File I/O (exists, length, delete) and SharedPreferences reads are fast operations
+        // safe to run on the main thread, as they were originally. The callers handle
+        // background threading when needed (e.g., loadFromCacheAsync) and post the result.
         long currentTime = System.currentTimeMillis();
 
-        for (LearningMaterial material : materials) {
+        for (LearningMaterial material : materialsList) {
             File file = getDestinationFile(material);
             long downloadTime = sharedPreferences.getLong("download_" + material.getId(), -1);
 

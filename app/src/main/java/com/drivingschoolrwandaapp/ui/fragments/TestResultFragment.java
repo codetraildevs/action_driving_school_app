@@ -20,8 +20,6 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.viewmodel.TestViewModel;
 
-import java.util.Locale;
-
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
@@ -71,13 +69,16 @@ public class TestResultFragment extends Fragment {
 
     private void observeViewModel() {
         // Show exam name in action bar
+        if (!isAdded() || getActivity() == null) return;
         int testNumber = testViewModel.getCurrentTestNumber();
         if (testNumber > 0) {
             try {
-                String examTitle = String.format(Locale.getDefault(), getString(R.string.exam_number_format), testNumber);
-                androidx.appcompat.app.ActionBar actionBar = ((androidx.appcompat.app.AppCompatActivity) requireActivity()).getSupportActionBar();
-                if (actionBar != null) {
-                    actionBar.setTitle(examTitle);
+                String examTitle = getString(R.string.exam_number_format, testNumber);
+                if (getActivity() instanceof androidx.appcompat.app.AppCompatActivity) {
+                    androidx.appcompat.app.ActionBar actionBar = ((androidx.appcompat.app.AppCompatActivity) getActivity()).getSupportActionBar();
+                    if (actionBar != null) {
+                        actionBar.setTitle(examTitle);
+                    }
                 }
             } catch (Exception e) {
                 Log.e("TestResultFragment", "Failed to set action bar title", e);
@@ -105,17 +106,17 @@ public class TestResultFragment extends Fragment {
                     resultStatusText.setTextColor(ContextCompat.getColor(requireContext(), R.color.incorrect_answer_red));
                 }
 
-                resultScorePercentage.setText(String.format(Locale.getDefault(), "%d%%", percentage));
-                resultScoreTextView.setText(String.format(Locale.getDefault(), "%d / %d", result.getScore(), result.getTotalMarks()));
+                resultScorePercentage.setText(getString(R.string.percentage_score, percentage));
+                resultScoreTextView.setText(getString(R.string.score_details, result.getScore(), result.getTotalMarks()));
                 resultStatusText.setText(result.isPassed() ? getString(R.string.result_passed) : getString(R.string.result_failed));
                 resultStatusScore.setText(String.valueOf(result.getScore()));
             } else {
                 // Fallback: if no result yet, show placeholder
                 resultTitleTextView.setText(getString(R.string.title_test_result));
-                resultScorePercentage.setText("--%");
-                resultScoreTextView.setText("-- / --");
-                resultStatusText.setText("--");
-                resultStatusScore.setText("0");
+                resultScorePercentage.setText(R.string.result_placeholder_percentage);
+                resultScoreTextView.setText(R.string.result_placeholder_score);
+                resultStatusText.setText(R.string.result_placeholder_status);
+                resultStatusScore.setText(R.string.result_placeholder_zero);
             }
         });
     }

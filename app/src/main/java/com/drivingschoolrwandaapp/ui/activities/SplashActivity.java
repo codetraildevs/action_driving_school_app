@@ -25,11 +25,11 @@ public class SplashActivity extends AppCompatActivity {
         SplashScreen.installSplashScreen(this);
         super.onCreate(savedInstanceState);
 
-        // Initialize language settings after super.onCreate()
-        // to ensure Hilt injection and Activity initialization are complete.
+        // Load the current locale from preferences. This is essential when the user
+        // changes language from the Profile or Welcome page — the language preference
+        // is saved but MainApplication.onCreate() only runs once per process, so we
+        // must reload it here to apply the change before navigating to the next screen.
         LanguageUtils.loadAppLanguage(this);
-
-        // Channel creation is now handled by NotificationWorker to ensure it runs every time.
 
         Intent intent;
         if (tokenManager.isLoggedIn()) {

@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -28,6 +29,7 @@ public class ResetPasswordActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_reset_password);
 
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
@@ -38,9 +40,9 @@ public class ResetPasswordActivity extends AppCompatActivity {
         loadingIndicator = findViewById(R.id.loading_indicator);
 
         resetPasswordButton.setOnClickListener(v -> {
-            String newPassword = newPasswordField.getText().toString().trim();
-            String confirmPassword = confirmPasswordField.getText().toString().trim();
-            String token = getIntent().getStringExtra("token"); // Assuming token is passed via intent
+            String newPassword = newPasswordField.getText() != null ? newPasswordField.getText().toString().trim() : "";
+            String confirmPassword = confirmPasswordField.getText() != null ? confirmPasswordField.getText().toString().trim() : "";
+            String token = getIntent().getStringExtra("token");
 
             if (newPassword.isEmpty() || confirmPassword.isEmpty()) {
                 Toast.makeText(this, getString(R.string.password_empty_error), Toast.LENGTH_SHORT).show();
@@ -59,21 +61,24 @@ public class ResetPasswordActivity extends AppCompatActivity {
         });
 
         userViewModel.getResetPasswordResult().observe(this, resource -> {
+            if (resource == null) return;
             switch (resource.status) {
                 case LOADING:
-                    loadingIndicator.setVisibility(View.VISIBLE);
+                    if (loadingIndicator != null) loadingIndicator.setVisibility(View.VISIBLE);
                     break;
                 case SUCCESS:
-                    loadingIndicator.setVisibility(View.GONE);
+                    if (loadingIndicator != null) loadingIndicator.setVisibility(View.GONE);
                     Toast.makeText(this, getString(R.string.password_reset_success), Toast.LENGTH_LONG).show();
-                    Intent intent = new Intent(ResetPasswordActivity.this, LoginActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                    finish();
+                    if (!isFinishing()) {
+                        Intent intent = new Intent(ResetPasswordActivity.this, LoginActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        finish();
+                    }
                     break;
                 case ERROR:
-                    loadingIndicator.setVisibility(View.GONE);
-                    Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show();
+                    if (loadingIndicator != null) loadingIndicator.setVisibility(View.GONE);
+                    Toast.makeText(this, resource.message != null ? resource.message : getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show();
                     break;
             }
         });
