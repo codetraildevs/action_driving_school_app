@@ -42,6 +42,8 @@ public class TestViewModel extends AndroidViewModel {
     private int currentTestNumber = 0;
 
     private final MutableLiveData<Map<Integer, Integer>> selectedAnswers = new MutableLiveData<>(new HashMap<>());
+    // Snapshot of answers saved at submit time for review mode
+    private Map<Integer, Integer> savedAnswersForReview = new HashMap<>();
     private final Set<Integer> feedbackHiddenQuestions = new HashSet<>();
     
     // History of test results for Previous Tests page
@@ -137,6 +139,19 @@ public class TestViewModel extends AndroidViewModel {
         return feedbackHiddenQuestions.contains(questionId);
     }
 
+    /**
+     * Restore the saved answers from the last test submission.
+     * Used by review mode to show which answers the user selected.
+     */
+    public void restoreReviewAnswers() {
+        Map<Integer, Integer> current = selectedAnswers.getValue();
+        if (current != null) {
+            current.clear();
+            current.putAll(savedAnswersForReview);
+            selectedAnswers.setValue(current);
+        }
+    }
+
     public void calculateResult() {
         // First try stored test data (set via storeTestData when observed from fragments)
         TestWithQuestions data = loadedTestData;
@@ -151,12 +166,18 @@ public class TestViewModel extends AndroidViewModel {
         }
 
         if (data != null && data.questions != null && !data.questions.isEmpty()) {
+            // Save a snapshot of the user's answers for review mode before they get reset
+            Map<Integer, Integer> currentAnswers = selectedAnswers.getValue();
+            if (currentAnswers != null) {
+                savedAnswersForReview = new HashMap<>(currentAnswers);
+            }
+
             int correctAnswers = 0;
             int totalMarks = data.test != null ? data.test.getTotalMarks() : data.questions.size();
             int passMarks = data.test != null ? data.test.getPassMarks() : (int) Math.ceil(data.questions.size() * 0.5);
             int numberOfQuestions = data.questions.size();
 
-            Map<Integer, Integer> userAnswers = selectedAnswers.getValue();
+            Map<Integer, Integer> userAnswers = currentAnswers;
             if (userAnswers == null) return;
 
             for (com.drivingschoolrwandaapp.database.entities.QuestionWithOptions questionWithOptions : data.questions) {
@@ -176,10 +197,11 @@ public class TestViewModel extends AndroidViewModel {
             boolean isPassed = finalScore >= passMarks;
 
             int testNumber = data.test != null ? data.test.getTestNumber() : 0;
+            int resultTestId = data.test != null ? data.test.getId() : currentTestId;
             String testName = data.test != null && data.test.getTitle() != null
                 ? data.test.getTitle() : "Exam " + testNumber;
 
-            TestResult result = new TestResult(finalScore, totalMarks, isPassed, testNumber, testName);
+            TestResult result = new TestResult(finalScore, totalMarks, isPassed, testNumber, testName, resultTestId);
             testResult.setValue(result);
 
             // Add to history

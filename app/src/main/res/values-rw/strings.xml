@@ -25,11 +25,9 @@
     <string name="second_fragment_label">Dashibodi</string>
     <string name="hello_blank_fragment">Muraho</string>
     <string name="next">igikurikira</string>
-    <string name="lorem_ipsum">Lorem ipsum</string>
     <string name="recent_pdfs">PDF za vuba</string>
     <string name="featured_pdfs">PDF zatoranyijwe</string>
     <string name="empty_pdfs">Nta PDF zihari</string>
-    <string name="long_placeholder_text">Lorem ipsum…</string>
     <string name="previous">Subira Inyuma</string>
     <string name="delete">Siba</string>
     <string name="action_settings">Amabwiriza</string>
@@ -126,8 +124,6 @@
 
     <string name="english">Icyongereza</string>
     <string name="subscribe">Iyandikishe</string>
-    <string name="impano_david">Impano David</string>
-    <string name="impano_example_com">impano@example.com</string>
 
     <string name="home">Ahabanza</string>
     <string name="exams">Ibizamini</string>
@@ -201,7 +197,7 @@
     <string name="cancel">Subira Inyuma</string>
     <string name="test_passed">Watsinze!</string>
     <string name="test_failed">Watsinzwe</string>
-    <string name="score_format">Amanota yawe: %1$d / %2$d</string>
+    <string name="score_format">Amanota yawe %1$d / %2$d</string>
     <string name="error_required_field">Birakenewe</string>
     <string name="about_us_text">
           Apulikasiyo igufasha kwitegura uruhushya rwa porovisoiri Binyuze mu kwitoza ibizamin bya porovisoiri byakozwe.
@@ -405,5 +401,10 @@
     <!-- Device registration messages -->
     <string name="device_already_registered">Usanzwe ufite konte kuri iyi aparati. Nyamuneka injira ukoresheje nimero ya telefone wiyandikishije cyangwa uhamagare +250782877442 cyangwa +250722877442 ubufasha.</string>
     <string name="account_already_exists_with_help">Iyi numero ya telefone isanzwe yiyandikishije. Nyamuneka injira ukoresheje numero yawe cyangwa uhamagare +250782877442 cyangwa +250722877442 ubufasha.</string>
+    <string name="start_practice">Tangira Kwitoza</string>
+    <string name="question">Ikibazo</string>
+    <string name="test_history">Amatangazo y\'Ibizamini</string>
+    <string name="review">Subiramo</string>
+    <string name="retake">Ongera Ukore</string>
 
 </resources>

@@ -25,11 +25,9 @@
     <string name="second_fragment_label">Dashboard</string>
     <string name="hello_blank_fragment">Hello</string>
     <string name="next">Next</string>
-    <string name="lorem_ipsum">Lorem ipsum</string>
     <string name="recent_pdfs">Recent PDFs</string>
     <string name="featured_pdfs">Featured PDFs</string>
     <string name="empty_pdfs">No PDFs available</string>
-    <string name="long_placeholder_text">Lorem ipsum…</string>
     <string name="previous">Previous</string>
     <string name="delete">Delete</string>
     <string name="action_settings">Settings</string>
@@ -127,8 +125,6 @@
 
     <string name="english">English</string>
     <string name="subscribe">Subscribe</string>
-    <string name="impano_david">Impano David</string>
-    <string name="impano_example_com">impano@example.com</string>
 
     <string name="home">Home</string>
     <string name="exams">Exams</string>
@@ -359,6 +355,11 @@ When you reach the last one, you press “Finish Exam,” and you will immediate
     <string name="no_tests_yet">No Tests Yet</string>
     <string name="no_tests_yet_message">Ready to take your first test? Start practicing below!</string>
     <string name="start_practicing">Start Practicing</string>
+    <string name="start_practice">Start Practice</string>
+    <string name="question">Question</string>
+    <string name="test_history">Test History</string>
+    <string name="review">Review</string>
+    <string name="retake">Retake</string>
     <string name="score_details">Score: %1$d / %2$d</string>
     <string name="result_passed">Passed</string>
     <string name="result_failed">Failed</string>

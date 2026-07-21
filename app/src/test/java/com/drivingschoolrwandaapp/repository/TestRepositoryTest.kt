@@ -127,7 +127,7 @@ class TestRepositoryTest {
         assertEquals("file:///android_asset/json_questions_images/exam.png", entity.imageUrl)
         assertEquals(2, entity.totalMarks)
         assertEquals(1, entity.passMarks)  // ceil(2 * 0.5) = 1
-        assertEquals(30, entity.duration)
+        assertEquals(2, entity.duration)  // 1 minute per question (2 questions)
         assertEquals(false, entity.isFree)
     }
 

@@ -7,5 +7,6 @@ data class TestResult(
     val totalMarks: Int,
     @get:JvmName("isPassed") val passed: Boolean,
     val testNumber: Int = 0,
-    val testName: String = ""
+    val testName: String = "",
+    val testId: Int = 0
 )

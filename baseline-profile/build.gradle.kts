@@ -29,4 +29,6 @@ dependencies {
     implementation(libs.benchmark.macro.junit4)
     implementation(libs.uiautomator)
     implementation(libs.profileinstaller)
+    implementation(libs.junit.androidx)
+    implementation("androidx.test:runner:1.6.2")
 }

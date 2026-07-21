@@ -6,33 +6,33 @@
 
 # ─── Application & Splash (cold start critical path) ───
 Lcom/drivingschoolrwandaapp/MainApplication;
-Lcom/drivingschoolrwandaapp/MainApplication;->onCreate()V
+HSLcom/drivingschoolrwandaapp/MainApplication;->onCreate()V
 Lcom/drivingschoolrwandaapp/utils/LanguageUtils;
-Lcom/drivingschoolrwandaapp/utils/LanguageUtils;->loadAppLanguage(Landroid/content/Context;)V
+HSLcom/drivingschoolrwandaapp/utils/LanguageUtils;->loadAppLanguage(Landroid/content/Context;)V
 Lcom/drivingschoolrwandaapp/data/local/preferences/AppPreferences;
-Lcom/drivingschoolrwandaapp/data/local/preferences/AppPreferences;-><init>(Landroid/content/Context;)V
-Lcom/drivingschoolrwandaapp/data/local/preferences/AppPreferences;->getLanguage()Ljava/lang/String;
-Lcom/drivingschoolrwandaapp/data/local/preferences/AppPreferences;->setLanguage(Ljava/lang/String;)V
-Lcom/drivingschoolrwandaapp/data/local/preferences/AppPreferences;->isLanguageSet()Z
+HSLcom/drivingschoolrwandaapp/data/local/preferences/AppPreferences;-><init>(Landroid/content/Context;)V
+HSLcom/drivingschoolrwandaapp/data/local/preferences/AppPreferences;->getLanguage()Ljava/lang/String;
+HSLcom/drivingschoolrwandaapp/data/local/preferences/AppPreferences;->setLanguage(Ljava/lang/String;)V
+HSLcom/drivingschoolrwandaapp/data/local/preferences/AppPreferences;->isLanguageSet()Z
 
 # ─── SplashActivity ───
 Lcom/drivingschoolrwandaapp/ui/activities/SplashActivity;
-Lcom/drivingschoolrwandaapp/ui/activities/SplashActivity;->onCreate(Landroid/os/Bundle;)V
+HSLcom/drivingschoolrwandaapp/ui/activities/SplashActivity;->onCreate(Landroid/os/Bundle;)V
 Lcom/drivingschoolrwandaapp/data/local/preferences/TokenManager;
-Lcom/drivingschoolrwandaapp/data/local/preferences/TokenManager;->isLoggedIn()Z
+HSLcom/drivingschoolrwandaapp/data/local/preferences/TokenManager;->isLoggedIn()Z
 
 # ─── Main App Activity (EdgeToEdge, Toolbar, Nav, Drawer) ───
 Lcom/drivingschoolrwandaapp/App;
-Lcom/drivingschoolrwandaapp/App;->onCreate(Landroid/os/Bundle;)V
+HSLcom/drivingschoolrwandaapp/App;->onCreate(Landroid/os/Bundle;)V
 Landroidx/activity/EdgeToEdge;
-Landroidx/activity/EdgeToEdge;->enable(Landroid/app/Activity;)V
+HSLandroidx/activity/EdgeToEdge;->enable(Landroid/app/Activity;)V
 Landroidx/navigation/NavController;
-Landroidx/navigation/NavController;->navigate(I)Z
+HSLandroidx/navigation/NavController;->navigate(I)Z
 Landroidx/navigation/fragment/NavHostFragment;
 Landroidx/navigation/ui/NavigationUI;
-Landroidx/navigation/ui/NavigationUI;->setupWithNavController(Landroidx/appcompat/widget/Toolbar;Landroidx/navigation/NavController;Landroidx/navigation/ui/AppBarConfiguration;)V
-Landroidx/navigation/ui/NavigationUI;->setupWithNavController(Lcom/google/android/material/navigation/NavigationView;Landroidx/navigation/NavController;)V
-Landroidx/navigation/ui/NavigationUI;->setupWithNavController(Lcom/google/android/material/bottomnavigation/BottomNavigationView;Landroidx/navigation/NavController;)V
+HSLandroidx/navigation/ui/NavigationUI;->setupWithNavController(Landroidx/appcompat/widget/Toolbar;Landroidx/navigation/NavController;Landroidx/navigation/ui/AppBarConfiguration;)V
+HSLandroidx/navigation/ui/NavigationUI;->setupWithNavController(Lcom/google/android/material/navigation/NavigationView;Landroidx/navigation/NavController;)V
+HSLandroidx/navigation/ui/NavigationUI;->setupWithNavController(Lcom/google/android/material/bottomnavigation/BottomNavigationView;Landroidx/navigation/NavController;)V
 Landroidx/navigation/ui/AppBarConfiguration;
 Landroidx/navigation/ui/AppBarConfiguration$Builder;
 Landroidx/drawerlayout/widget/DrawerLayout;
@@ -42,16 +42,16 @@ Lcom/google/android/material/behavior/HideBottomViewOnScrollBehavior;
 
 # ─── UserViewModel & Profile Loading ───
 Lcom/drivingschoolrwandaapp/viewmodel/UserViewModel;
-Lcom/drivingschoolrwandaapp/viewmodel/UserViewModel;->loadProfile()V
+HSLcom/drivingschoolrwandaapp/viewmodel/UserViewModel;->loadProfile()V
 Lcom/drivingschoolrwandaapp/repository/UserRepository;
 Lcom/drivingschoolrwandaapp/database/entities/User;
-Lcom/drivingschoolrwandaapp/database/entities/User;->getFirstName()Ljava/lang/String;
-Lcom/drivingschoolrwandaapp/database/entities/User;->getLastName()Ljava/lang/String;
-Lcom/drivingschoolrwandaapp/database/entities/User;->getPhoneNumber()Ljava/lang/String;
-Lcom/drivingschoolrwandaapp/database/entities/User;->getLanguage()Ljava/lang/String;
-Lcom/drivingschoolrwandaapp/database/entities/User;->getProfilePicture()Ljava/lang/String;
-Lcom/drivingschoolrwandaapp/database/entities/User;->getTestAccessStatus()Ljava/lang/String;
-Lcom/drivingschoolrwandaapp/database/entities/User;->getTestAccessExpiresAt()Ljava/lang/String;
+HSLcom/drivingschoolrwandaapp/database/entities/User;->getFirstName()Ljava/lang/String;
+HSLcom/drivingschoolrwandaapp/database/entities/User;->getLastName()Ljava/lang/String;
+HSLcom/drivingschoolrwandaapp/database/entities/User;->getPhoneNumber()Ljava/lang/String;
+HSLcom/drivingschoolrwandaapp/database/entities/User;->getLanguage()Ljava/lang/String;
+HSLcom/drivingschoolrwandaapp/database/entities/User;->getProfilePicture()Ljava/lang/String;
+HSLcom/drivingschoolrwandaapp/database/entities/User;->getTestAccessStatus()Ljava/lang/String;
+HSLcom/drivingschoolrwandaapp/database/entities/User;->getTestAccessExpiresAt()Ljava/lang/String;
 
 # ─── Dagger Hilt (DI framework) ───
 Ldagger/hilt/android/internal/managers/ActivityComponentManager;
@@ -65,11 +65,11 @@ Ljavax/inject/Inject;
 # ─── Hilt Modules ───
 Lcom/drivingschoolrwandaapp/di/AppModule;
 Lcom/drivingschoolrwandaapp/di/DatabaseModule;
-Lcom/drivingschoolrwandaapp/di/DatabaseModule;->provideAppDatabase(Landroid/content/Context;)Lcom/drivingschoolrwandaapp/database/AppDatabase;
+HSLcom/drivingschoolrwandaapp/di/DatabaseModule;->provideAppDatabase(Landroid/content/Context;)Lcom/drivingschoolrwandaapp/database/AppDatabase;
 Lcom/drivingschoolrwandaapp/di/NetworkModule;
-Lcom/drivingschoolrwandaapp/di/NetworkModule;->provideOkHttpClient(Lcom/drivingschoolrwandaapp/data/local/preferences/TokenManager;)Lokhttp3/OkHttpClient;
-Lcom/drivingschoolrwandaapp/di/NetworkModule;->provideRetrofit(Lokhttp3/OkHttpClient;)Lretrofit2/Retrofit;
-Lcom/drivingschoolrwandaapp/di/NetworkModule;->provideApiService(Lretrofit2/Retrofit;)Lcom/drivingschoolrwandaapp/api/ApiService;
+HSLcom/drivingschoolrwandaapp/di/NetworkModule;->provideOkHttpClient(Lcom/drivingschoolrwandaapp/data/local/preferences/TokenManager;)Lokhttp3/OkHttpClient;
+HSLcom/drivingschoolrwandaapp/di/NetworkModule;->provideRetrofit(Lokhttp3/OkHttpClient;)Lretrofit2/Retrofit;
+HSLcom/drivingschoolrwandaapp/di/NetworkModule;->provideApiService(Lretrofit2/Retrofit;)Lcom/drivingschoolrwandaapp/api/ApiService;
 Lcom/drivingschoolrwandaapp/di/RepositoryModule;
 Lcom/drivingschoolrwandaapp/di/TestModule;
 
@@ -78,8 +78,8 @@ Landroidx/room/Room;
 Landroidx/room/RoomDatabase;
 Landroidx/room/RoomDatabase$Builder;
 Lcom/drivingschoolrwandaapp/database/AppDatabase;
-Lcom/drivingschoolrwandaapp/database/AppDatabase;->getDatabase(Landroid/content/Context;)Lcom/drivingschoolrwandaapp/database/AppDatabase;
-Lcom/drivingschoolrwandaapp/database/AppDatabase;->userDao()Lcom/drivingschoolrwandaapp/database/dao/UserDao;
+HSLcom/drivingschoolrwandaapp/database/AppDatabase;->getDatabase(Landroid/content/Context;)Lcom/drivingschoolrwandaapp/database/AppDatabase;
+HSLcom/drivingschoolrwandaapp/database/AppDatabase;->userDao()Lcom/drivingschoolrwandaapp/database/dao/UserDao;
 
 # ─── Retrofit / OkHttp / Gson ───
 Lretrofit2/Retrofit;
@@ -107,8 +107,8 @@ Lcom/drivingschoolrwandaapp/utils/SvgSoftwareLayerSetter;
 
 # ─── DashboardFragment (first screen user sees) ───
 Lcom/drivingschoolrwandaapp/ui/fragments/DashboardFragment;
-Lcom/drivingschoolrwandaapp/ui/fragments/DashboardFragment;->onCreateView(Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
-Lcom/drivingschoolrwandaapp/ui/fragments/DashboardFragment;->onViewCreated(Landroid/view/View;Landroid/os/Bundle;)V
+HSLcom/drivingschoolrwandaapp/ui/fragments/DashboardFragment;->onCreateView(Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
+HSLcom/drivingschoolrwandaapp/ui/fragments/DashboardFragment;->onViewCreated(Landroid/view/View;Landroid/os/Bundle;)V
 Lcom/drivingschoolrwandaapp/R$layout;
 Lcom/drivingschoolrwandaapp/R$id;
 Lcom/drivingschoolrwandaapp/R$drawable;
@@ -128,7 +128,6 @@ Lcom/drivingschoolrwandaapp/repository/PdfRepository;
 Landroidx/navigation/NavGraph;
 Landroidx/navigation/NavInflater;
 Landroidx/navigation/NavDestination;
-Lcom/drivingschoolrwandaapp/R$navigation;
 
 # ─── Material Design components used everywhere ───
 Lcom/google/android/material/bottomnavigation/BottomNavigationView;
@@ -147,9 +146,9 @@ Lcom/google/android/material/snackbar/Snackbar;
 Lcom/google/firebase/FirebaseApp;
 Lcom/google/firebase/FirebaseOptions;
 Lcom/google/firebase/crashlytics/FirebaseCrashlytics;
-Lcom/google/firebase/crashlytics/FirebaseCrashlytics;->setCrashlyticsCollectionEnabled(Z)V
-Lcom/google/firebase/crashlytics/FirebaseCrashlytics;->setUserId(Ljava/lang/String;)V
-Lcom/google/firebase/crashlytics/FirebaseCrashlytics;->recordException(Ljava/lang/Throwable;)V
+HSLcom/google/firebase/crashlytics/FirebaseCrashlytics;->setCrashlyticsCollectionEnabled(Z)V
+HSLcom/google/firebase/crashlytics/FirebaseCrashlytics;->setUserId(Ljava/lang/String;)V
+HSLcom/google/firebase/crashlytics/FirebaseCrashlytics;->recordException(Ljava/lang/Throwable;)V
 
 # ─── WorkManager (notification worker) ───
 Landroidx/work/WorkManager;
@@ -159,10 +158,10 @@ Landroidx/hilt/work/HiltWorkerFactory;
 
 # ─── SplashScreen API ───
 Landroidx/core/splashscreen/SplashScreen;
-Landroidx/core/splashscreen/SplashScreen;->installSplashScreen(Landroid/app/Activity;)Landroidx/core/splashscreen/SplashScreen;
+HSLandroidx/core/splashscreen/SplashScreen;->installSplashScreen(Landroid/app/Activity;)Landroidx/core/splashscreen/SplashScreen;
 
 # ─── Window insets (edge-to-edge) ───
 Landroidx/core/view/WindowInsetsCompat;
 Landroidx/core/view/ViewCompat;
-Landroidx/core/view/ViewCompat;->setOnApplyWindowInsetsListener(Landroid/view/View;Landroidx/core/view/OnApplyWindowInsetsListener;)V
+HSLandroidx/core/view/ViewCompat;->setOnApplyWindowInsetsListener(Landroid/view/View;Landroidx/core/view/OnApplyWindowInsetsListener;)V
 Landroidx/core/graphics/Insets;

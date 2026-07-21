@@ -12,8 +12,11 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+
 
 import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.models.entities.TestResult;
@@ -58,6 +61,17 @@ public class ResultsFragment extends Fragment {
         resultsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new TestResultAdapter();
         resultsRecyclerView.setAdapter(adapter);
+
+        // Wire up the Start Practice button in the empty state
+        com.google.android.material.button.MaterialButton startPracticeBtn = view.findViewById(R.id.start_practice_btn);
+        if (startPracticeBtn != null) {
+            startPracticeBtn.setOnClickListener(v -> {
+                if (getActivity() != null && isAdded()) {
+                    NavHostFragment.findNavController(ResultsFragment.this)
+                            .navigate(R.id.testsFragment);
+                }
+            });
+        }
 
         // Observe test result history
         testViewModel.getTestResultHistory().observe(getViewLifecycleOwner(), history -> {
@@ -141,15 +155,23 @@ public class ResultsFragment extends Fragment {
 
         class ViewHolder extends RecyclerView.ViewHolder {
             private final android.widget.ImageView statusIcon;
+            private final com.google.android.material.card.MaterialCardView statusIconContainer;
             private final TextView testNameText;
             private final TextView scoreText;
+            private final View actionButtonsRow;
+            private final com.google.android.material.button.MaterialButton btnReview;
+            private final com.google.android.material.button.MaterialButton btnRetake;
 
             ViewHolder(@NonNull View itemView) {
                 super(itemView);
                 statusIcon = itemView.findViewById(R.id.result_status_icon);
+                statusIconContainer = itemView.findViewById(R.id.status_icon_container);
                 testNameText = itemView.findViewById(R.id.result_test_name);
                 scoreText = itemView.findViewById(R.id.result_score_text);
-                // Hide date field if it exists (not in our layout)
+                actionButtonsRow = itemView.findViewById(R.id.action_buttons_row);
+                btnReview = itemView.findViewById(R.id.btn_review_test);
+                btnRetake = itemView.findViewById(R.id.btn_retake_test);
+                // Date field exists in layout but TestResult has no date data yet
                 TextView dateText = itemView.findViewById(R.id.result_date);
                 if (dateText != null) dateText.setVisibility(View.GONE);
             }
@@ -168,13 +190,52 @@ public class ResultsFragment extends Fragment {
                 // Score
                 scoreText.setText(getString(R.string.compact_score_format, result.getScore(), result.getTotalMarks()));
 
-                // Status icon
+                // Status icon and container
                 if (result.isPassed()) {
                     statusIcon.setImageResource(R.drawable.ic_check_circle);
                     statusIcon.setColorFilter(ContextCompat.getColor(itemView.getContext(), R.color.correct_answer_green));
+                    statusIconContainer.setCardBackgroundColor(
+                            ContextCompat.getColor(itemView.getContext(), R.color.colorPrimaryContainer));
                 } else {
                     statusIcon.setImageResource(R.drawable.ic_error);
                     statusIcon.setColorFilter(ContextCompat.getColor(itemView.getContext(), R.color.incorrect_answer_red));
+                    statusIconContainer.setCardBackgroundColor(
+                            ContextCompat.getColor(itemView.getContext(), R.color.colorErrorContainer));
+                }
+
+                // Show action buttons and wire them up
+                final int testId = result.getTestId();
+                final String title = result.getTestName() != null && !result.getTestName().isEmpty()
+                        ? result.getTestName() : getString(R.string.exam_number_format, result.getTestNumber());
+
+                if (testId > 0) {
+                    actionButtonsRow.setVisibility(View.VISIBLE);
+
+                    btnReview.setOnClickListener(v -> {
+                        if (getActivity() != null && isAdded()) {
+                            Bundle args = new Bundle();
+                            args.putInt("testId", testId);
+                            args.putString("title", title);
+                            args.putBoolean("isReviewMode", true);
+                            args.putBoolean("isRealTimeFeedback", true);
+                            NavHostFragment.findNavController(ResultsFragment.this)
+                                    .navigate(R.id.action_global_testQuestionsFragment, args);
+                        }
+                    });
+
+                    btnRetake.setOnClickListener(v -> {
+                        if (getActivity() != null && isAdded()) {
+                            Bundle args = new Bundle();
+                            args.putInt("testId", testId);
+                            args.putString("title", title);
+                            args.putBoolean("isReviewMode", false);
+                            args.putBoolean("isRealTimeFeedback", true);
+                            NavHostFragment.findNavController(ResultsFragment.this)
+                                    .navigate(R.id.action_global_testQuestionsFragment, args);
+                        }
+                    });
+                } else {
+                    actionButtonsRow.setVisibility(View.GONE);
                 }
             }
         }

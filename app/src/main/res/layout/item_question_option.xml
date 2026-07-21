@@ -5,12 +5,12 @@
     android:id="@+id/option_card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="10dp"
+    android:layout_marginBottom="8dp"
     android:clickable="true"
     android:focusable="true"
-    android:foreground="?attr/selectableItemBackground"
+    android:foreground="?attr/selectableItemBackground"            android:minHeight="54dp"
     app:cardCornerRadius="14dp"
-    app:cardElevation="1dp"
+    app:cardElevation="1.5dp"
     app:strokeWidth="1.5dp"
     app:strokeColor="?attr/colorOutlineVariant"
     app:cardBackgroundColor="?attr/colorSurface">
@@ -20,7 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="14dp">
+        android:padding="12dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -31,10 +31,10 @@
             <!-- Option letter indicator (A, B, C, D) -->
             <TextView
                 android:id="@+id/option_indicator"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
                 android:gravity="center"
-                android:textAppearance="?attr/textAppearanceLabelMedium"
+                android:textAppearance="?attr/textAppearanceTitleSmall"
                 android:textStyle="bold"
                 android:textColor="?attr/colorOnSurfaceVariant"
                 android:background="@drawable/option_indicator_background"
@@ -46,37 +46,37 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginStart="14dp"
+                android:layout_marginStart="12dp"
                 android:textAppearance="?attr/textAppearanceBodyLarge"
                 android:textColor="?attr/colorOnSurface"
-                android:lineSpacingExtra="3dp"
+                android:lineSpacingExtra="2dp"
+                android:lineSpacingMultiplier="1.1"
                 tools:text="This is a sample answer option." />
 
             <!-- Selection check icon -->
             <ImageView
                 android:id="@+id/option_check_icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
                 android:layout_marginStart="8dp"
                 android:visibility="gone"
                 android:src="@drawable/ic_check_circle"
                 app:tint="@color/correct_answer_green"
                 android:contentDescription="@null" />
-
         </LinearLayout>
 
+        <!-- Option image -->
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/option_image_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="10dp"
             android:visibility="gone"
             android:adjustViewBounds="true"
             android:scaleType="fitCenter"
             app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.SmallComponent"
             tools:visibility="visible"
             tools:src="@drawable/question_svgrepo_com" />
-
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>

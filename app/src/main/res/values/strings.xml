@@ -25,11 +25,9 @@
     <string name="second_fragment_label">Dashibodi</string>
     <string name="hello_blank_fragment">Muraho</string>
     <string name="next">Igikurikira</string>
-    <string name="lorem_ipsum">Lorem ipsum</string>
     <string name="recent_pdfs">PDF za vuba</string>
     <string name="featured_pdfs">PDF zatoranyijwe</string>
     <string name="empty_pdfs">Nta PDF zihari</string>
-    <string name="long_placeholder_text">Lorem ipsum…</string>
     <string name="previous">Subira Inyuma</string>
     <string name="delete">Siba</string>
     <string name="action_settings">Amabwiriza</string>
@@ -128,8 +126,6 @@
     <string name="french">Igifaransa</string>
     <string name="kinyarwanda">Ikinyarwanda</string>
     <string name="subscribe">Iyandikishe</string>
-    <string name="impano_david">Impano David</string>
-    <string name="impano_example_com">impano@example.com</string>
 
     <string name="home">Ahabanza</string>
     <string name="exams">Ibizamini</string>
@@ -203,7 +199,7 @@
     <string name="cancel">Subira Inyuma</string>
     <string name="test_passed">Watsinze!</string>
     <string name="test_failed">Watsinzwe</string>
-    <string name="score_format">Amanota yawe: %1$d / %2$d</string>
+    <string name="score_format">Amanota yawe %1$d / %2$d</string>
     <string name="error_required_field">Birakenewe</string>
     <string name="about_us_text">
           Apulikasiyo igufasha kwitegura uruhushya rwa porovisoiri Binyuze mu kwitoza ibizamin bya porovisoiri byakozwe.
@@ -358,10 +354,15 @@
     <string name="no_tests_yet">Nta Bizamini Byakozwe</string>
     <string name="no_tests_yet_message">Uraza gutangira ikizamini cyawe cya mbere? Kanda hasi utangire kwitoza!</string>
     <string name="start_practicing">Tangira Kwitoza</string>
-    <string name="score_details">Amanota: %1$d / %2$d</string>
+    <string name="start_practice">Tangira Kwitoza</string>
+    <string name="question">Ikibazo</string>
+    <string name="test_history">Amatangazo y\'Ibizamini</string>
+    <string name="review">Subiramo</string>
+    <string name="retake">Ongera Ukore</string>
+    <string name="score_details">Amanota %1$d / %2$d</string>
     <string name="result_passed">Watsinze</string>
     <string name="result_failed">Watsinzwe</string>
-    <string name="percentage_score">%%%d</string>
+    <string name="percentage_score">%d%%</string>
     <string name="exam_number_format">Ikizamini %d</string>
     <string name="instructions_4">
 100 RWF = ikizamini 1 (umunsi 1),

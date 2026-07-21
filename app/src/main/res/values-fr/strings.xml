@@ -25,11 +25,9 @@
     <string name="second_fragment_label">Tableau de bord</string>
     <string name="hello_blank_fragment">Bonjour</string>
     <string name="next">Suivant</string>
-    <string name="lorem_ipsum">Lorem ipsum</string>
     <string name="recent_pdfs">PDF récents</string>
     <string name="featured_pdfs">PDF en vedette</string>
     <string name="empty_pdfs">Aucun PDF disponible</string>
-    <string name="long_placeholder_text">Lorem ipsum…</string>
     <string name="previous">Précédent</string>
     <string name="delete">Supprimer</string>
     <string name="action_settings">Paramètres</string>
@@ -126,8 +124,6 @@
 
     <string name="english">Anglais</string>
     <string name="subscribe">S\'abonner</string>
-    <string name="impano_david">Impano David</string>
-    <string name="impano_example_com">impano@example.com</string>
 
     <string name="home">Accueil</string>
     <string name="exams">Examens</string>
@@ -401,6 +397,11 @@ Quand tu arrives à la dernière question, tu appuies sur « Terminer l’examen
     <string name="no_tests_yet">Aucun Test</string>
     <string name="no_tests_yet_message">Prêt à passer votre premier test? Commencez à vous entraîner!</string>
     <string name="start_practicing">Commencer</string>
+    <string name="start_practice">Commencer l\'entraînement</string>
+    <string name="question">Question</string>
+    <string name="test_history">Historique des Tests</string>
+    <string name="review">Réviser</string>
+    <string name="retake">Reprendre</string>
     <string name="score_details">Score: %1$d / %2$d</string>
     <string name="result_passed">Réussi</string>
     <string name="result_failed">Échoué</string>

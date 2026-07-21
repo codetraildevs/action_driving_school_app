@@ -246,7 +246,10 @@ public class TestQuestionsFragment extends Fragment {
                     updateProgress(viewPager.getCurrentItem());
                     updateNavigationButtons(viewPager.getCurrentItem());
 
-                    if (!isReviewMode) {
+                    if (isReviewMode) {
+                        // Restore the user's previously selected answers for review
+                        testViewModel.restoreReviewAnswers();
+                    } else {
                         startTimer(test.getDuration());
                     }
                 }

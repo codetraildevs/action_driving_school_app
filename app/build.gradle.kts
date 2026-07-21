@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.kotlin.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics.plugin)
@@ -18,8 +19,8 @@ android {
         applicationId = "com.drivingschoolrwandaapp"
         minSdk = 27
         targetSdk = 35
-        versionCode = 80
-        versionName = "1.2.0"
+        versionCode = 81
+        versionName = "1.2.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -80,7 +81,10 @@ android {
         jvmTarget = "17"
     }
     lint {
-        disable += setOf("ObsoleteSdkInt")
+        disable += setOf(
+            "ObsoleteSdkInt",
+            "KaptUsageInsteadOfKsp"  // Glide, Hilt, MapStruct don't support KSP yet
+        )
     }
 
     buildFeatures {
@@ -111,7 +115,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel)
     implementation(libs.androidx.lifecycle.livedata)
     implementation(libs.androidx.lifecycle.runtime)
-    kapt(libs.androidx.lifecycle.compiler)
+    ksp(libs.androidx.lifecycle.compiler)
 
     // ── Navigation ──
     implementation(libs.androidx.navigation.fragment)
@@ -119,7 +123,7 @@ dependencies {
 
     // ── Room Database ──
     implementation(libs.androidx.room.runtime)
-    kapt(libs.androidx.room.compiler)
+    ksp(libs.androidx.room.compiler)
 
     // ── WorkManager ──
     implementation(libs.androidx.work.runtime)
