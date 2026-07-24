@@ -43,6 +43,7 @@
     <string name="send_reset_link">Ohereza link yo gusubiza</string>
     <string name="welcome_back">Murakaza neza!</string>
     <string name="email_or_phone_number">Nimero ya telefone</string>
+    <string name="forgot_password_hint">Imeri cyangwa nimero ya telefone</string>
     <string name="sign_up">Iyandikishe</string>
 
     <string name="ikaze">Murakaza neza!</string>
@@ -163,7 +164,7 @@
     <string name="email_required">Imeri irakenewe</string>
     <string name="invalid_email">Imeri ntabwo iri mu buryo bwemewe</string>
     <string name="phone_required">Nimero ya telefone irakenewe</string>
-    <string name="invalid_phone">Nimero igomba kuba nibura inyuguti 10</string>
+    <string name="invalid_phone">Andika numero ya telefone ikoreshwa</string>
     <string name="dob_required">Italiki y\'amavuko irakenewe</string>
     <string name="password_required">Ijambobanga rirakenewe</string>
     <string name="password_length_error">Ijambobanga rigomba kuba nibura inyuguti 6</string>

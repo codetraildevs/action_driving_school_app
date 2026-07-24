@@ -16,6 +16,7 @@ import com.drivingschoolrwandaapp.database.entities.User;
 import com.drivingschoolrwandaapp.data.local.preferences.TokenManager;
 import com.drivingschoolrwandaapp.models.request.ForgotPasswordRequest;
 import com.drivingschoolrwandaapp.models.request.LoginRequest;
+import com.drivingschoolrwandaapp.utils.PhoneUtils;
 import com.drivingschoolrwandaapp.models.request.PasswordChangeRequest;
 import com.drivingschoolrwandaapp.models.request.ResetPasswordRequest;
 import com.drivingschoolrwandaapp.models.request.VerifyOtpRequest;
@@ -93,9 +94,12 @@ public class UserRepository {
     }
 
     public LiveData<Resource<LoginResponse>> login(String email, String password, String deviceId) {
+        // Normalise the phone number to ensure consistent format with registration
+        String normalizedPhone = PhoneUtils.normalize(email);
+        Log.d("UserRepository", "login: normalised phone " + email + " → " + normalizedPhone);
         MutableLiveData<Resource<LoginResponse>> result = new MutableLiveData<>();
         result.setValue(Resource.loading(null));
-        LoginRequest request = new LoginRequest(email, password, deviceId);
+        LoginRequest request = new LoginRequest(normalizedPhone, password, deviceId);
         apiService.login(request).enqueue(new Callback<LoginResponse>() {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {

@@ -38,11 +38,12 @@
     <string name="change_password">Change password</string>
     <string name="forgot_your_password">Forgot your password?</string>
     <string name="no_worries_enter_your_email_below_and_we_will_send_you_a_link_to_reset_it">
-        No worries! Enter your email below and we will send you a reset link.
+        No worries! Enter your email or phone number below and we will send you a reset link.
     </string>
     <string name="send_reset_link">Send reset link</string>
     <string name="welcome_back">Welcome back!</string>
     <string name="email_or_phone_number">Phone number</string>
+    <string name="forgot_password_hint">Email or phone number</string>
     <string name="sign_up">Sign up</string>
     <string name="french">French</string>
     <string name="kinyarwanda">kinyarwanda</string>
@@ -162,7 +163,7 @@
     <string name="email_required">Email is required</string>
     <string name="invalid_email">Invalid email format</string>
     <string name="phone_required">Phone number is required</string>
-    <string name="invalid_phone">Phone number must be at least 10 digits</string>
+    <string name="invalid_phone">Please enter a valid phone number</string>
     <string name="dob_required">Date of birth is required</string>
     <string name="password_required">Password is required</string>
     <string name="password_length_error">Password must be at least 6 characters</string>

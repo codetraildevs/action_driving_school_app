@@ -25,6 +25,7 @@ import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.data.local.preferences.AppPreferences;
 import com.drivingschoolrwandaapp.data.local.preferences.TokenManager;
 import com.drivingschoolrwandaapp.repository.Resource;
+import com.drivingschoolrwandaapp.utils.PhoneUtils;
 import com.drivingschoolrwandaapp.viewmodel.UserViewModel;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
@@ -106,18 +107,29 @@ public class LoginActivity extends AppCompatActivity {
                 return;
             }
 
-            String phone = emailField.getText().toString().trim();
+            String rawPhone = emailField.getText().toString().trim();
+
+            // Validate the raw input before normalization so we can show field-level errors
+            String errorKey = PhoneUtils.getValidationError(rawPhone);
+            if (errorKey != null) {
+                int resId;
+                switch (errorKey) {
+                    case "phone_required":
+                        resId = R.string.phone_required;
+                        break;
+                    default:
+                        resId = R.string.invalid_phone;
+                        break;
+                }
+                Toast.makeText(this, getString(resId), Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            String phone = PhoneUtils.normalize(rawPhone);
+            Log.d(TAG, "Normalised phone for login: " + rawPhone + " → " + phone);
+
             String password = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
             String deviceId = password;
-
-            if (phone.isEmpty()) {
-                Toast.makeText(this, getString(R.string.fill_all_fields), Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (phone.length() < 10) {
-                Toast.makeText(this, getString(R.string.invalid_phone_format), Toast.LENGTH_SHORT).show();
-                return;
-            }
 
             // Show loading state immediately on click — don't wait for the observer
             isLoading = true;
@@ -170,11 +182,14 @@ public class LoginActivity extends AppCompatActivity {
                     } else {
                         // Login API returned success:false or no user data — always show feedback
                         String message = resource.data != null ? resource.data.getMessage() : getString(R.string.login_failed);
-                        if (message != null) {
-                            String lowerMsg = message.toLowerCase(Locale.ROOT);
-                            if (lowerMsg.contains("not found") || lowerMsg.contains("no account") || lowerMsg.contains("invalid")) {
-                                message = getString(R.string.account_not_found);
-                            }
+                        if (message == null || message.isEmpty()) {
+                            message = getString(R.string.login_failed);
+                        }
+                        Log.w(TAG, "Login failed (server returned success:false): " + message);
+                        // Show the actual backend message, but map device-related errors
+                        String lowerMsg = message.toLowerCase(Locale.ROOT);
+                        if (lowerMsg.contains("device")) {
+                            message = getString(R.string.device_not_allowed);
                         }
                         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
                     }
@@ -190,16 +205,15 @@ public class LoginActivity extends AppCompatActivity {
                     }
                     // Always show error feedback — Toast is harmless even if finishing
                     String errorMsg = resource.message;
-                    if (errorMsg != null) {
-                        String lowerMsg = errorMsg.toLowerCase(Locale.ROOT);
-                        if (lowerMsg.contains("not found") || lowerMsg.contains("no account") || lowerMsg.contains("does not exist") || lowerMsg.contains("not registered") || lowerMsg.contains("invalid")) {
-                            errorMsg = getString(R.string.account_not_found);
-                        } else if (lowerMsg.contains("device")) {
-                            errorMsg = getString(R.string.device_not_allowed);
-                        }
-                    }
                     if (errorMsg == null || errorMsg.isEmpty()) {
                         errorMsg = getString(R.string.login_failed);
+                    } else {
+                        Log.w(TAG, "Login error from server: " + errorMsg);
+                        String lowerMsg = errorMsg.toLowerCase(Locale.ROOT);
+                        // Only map device errors to a user-friendly message; show everything else as-is
+                        if (lowerMsg.contains("device")) {
+                            errorMsg = getString(R.string.device_not_allowed);
+                        }
                     }
                     Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show();
                     Log.d(TAG, "Login error displayed: " + errorMsg);

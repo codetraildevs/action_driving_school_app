@@ -38,11 +38,12 @@
     <string name="change_password">Changer le mot de passe</string>
     <string name="forgot_your_password">Vous avez oublié votre mot de passe ?</string>
     <string name="no_worries_enter_your_email_below_and_we_will_send_you_a_link_to_reset_it">
-        Pas de souci ! Entrez votre e-mail ci-dessous et nous vous enverrons un lien pour le réinitialiser.
+        Pas de souci ! Entrez votre e-mail ou numéro de téléphone ci-dessous et nous vous enverrons un lien pour le réinitialiser.
     </string>
     <string name="send_reset_link">Envoyer le lien de réinitialisation</string>
     <string name="welcome_back">Bon retour !</string>
     <string name="email_or_phone_number">Numéro de téléphone</string>
+    <string name="forgot_password_hint">E-mail ou numéro de téléphone</string>
     <string name="sign_up">S\'inscrire</string>
 
     <string name="ikaze">Bienvenue !</string>
@@ -161,7 +162,7 @@
     <string name="email_required">L\'e-mail est requis</string>
     <string name="invalid_email">E-mail invalide</string>
     <string name="phone_required">Le numéro de téléphone est requis</string>
-    <string name="invalid_phone">Le numéro doit contenir au moins 10 chiffres</string>
+    <string name="invalid_phone">Veuillez entrer un numéro de téléphone valide</string>
     <string name="dob_required">La date de naissance est requise</string>
     <string name="password_required">Le mot de passe est requis</string>
     <string name="password_length_error">Le mot de passe doit contenir au moins 6 caractères</string>

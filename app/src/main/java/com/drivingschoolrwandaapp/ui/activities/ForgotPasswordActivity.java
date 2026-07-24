@@ -14,6 +14,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.drivingschoolrwandaapp.R;
+import com.drivingschoolrwandaapp.utils.PhoneUtils;
 import com.drivingschoolrwandaapp.viewmodel.UserViewModel;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -25,8 +26,8 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class ForgotPasswordActivity extends AppCompatActivity {
 
-    private TextInputEditText emailField;
-    private TextInputLayout emailLayout;
+    private TextInputEditText identifierField;
+    private TextInputLayout identifierLayout;
     private Button sendLinkButton;
     private ProgressBar loadingIndicator;
     private UserViewModel userViewModel;
@@ -44,8 +45,8 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        emailField = findViewById(R.id.email_field);
-        emailLayout = findViewById(R.id.email_layout);
+        identifierField = findViewById(R.id.email_field);
+        identifierLayout = findViewById(R.id.email_layout);
         sendLinkButton = findViewById(R.id.send_link_button);
         loadingIndicator = findViewById(R.id.loading_indicator);
 
@@ -63,7 +64,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                         String message = resource.data.getMessage();
                         Toast.makeText(this, message != null ? message : getString(R.string.send_reset_link), Toast.LENGTH_SHORT).show();
                         if (!isFinishing()) {
-                            String email = emailField.getText() != null ? emailField.getText().toString().trim() : "";
+                            String email = identifierField.getText() != null ? identifierField.getText().toString().trim() : "";
                             Intent intent = new Intent(ForgotPasswordActivity.this, OtpVerificationActivity.class);
                             intent.putExtra("email", email);
                             startActivity(intent);
@@ -81,11 +82,30 @@ public class ForgotPasswordActivity extends AppCompatActivity {
     }
 
     private void validateAndSendLink() {
-        if (!validateEmail()) {
+        String rawInput = Objects.requireNonNull(identifierField.getText()).toString().trim();
+
+        if (rawInput.isEmpty()) {
+            identifierLayout.setError(getString(R.string.error_required_field));
             return;
         }
-        String email = Objects.requireNonNull(emailField.getText()).toString().trim();
-        userViewModel.forgotPassword(email);
+
+        // Try email first
+        if (Patterns.EMAIL_ADDRESS.matcher(rawInput).matches()) {
+            identifierLayout.setError(null);
+            userViewModel.forgotPassword(rawInput);
+            return;
+        }
+
+        // Not an email — try phone number via PhoneUtils
+        String phoneError = PhoneUtils.getValidationError(rawInput);
+        if (phoneError != null) {
+            identifierLayout.setError(getString(R.string.invalid_phone));
+            return;
+        }
+
+        String normalizedPhone = PhoneUtils.normalize(rawInput);
+        identifierLayout.setError(null);
+        userViewModel.forgotPassword(normalizedPhone);
     }
 
     private void setLoadingState(boolean isLoading) {
@@ -98,19 +118,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         }
     }
 
-    private boolean validateEmail() {
-        String email = Objects.requireNonNull(emailField.getText()).toString().trim();
-        if (email.isEmpty()) {
-            emailLayout.setError("Email is required");
-            return false;
-        } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            emailLayout.setError("Invalid email format");
-            return false;
-        } else {
-            emailLayout.setError(null);
-            return true;
-        }
-    }
+
 
     @Override
     public boolean onSupportNavigateUp() {

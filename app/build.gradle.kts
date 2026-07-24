@@ -18,9 +18,9 @@ android {
     defaultConfig {
         applicationId = "com.drivingschoolrwandaapp"
         minSdk = 27
-        targetSdk = 35
-        versionCode = 82
-        versionName = "1.2.2"
+        targetSdk = 36
+        versionCode = 83
+        versionName = "1.2.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -165,6 +165,9 @@ dependencies {
 
     // ── SVG ──
     implementation(libs.androidsvg)
+
+    // ── Phone Number Handling ──
+    implementation(libs.libphonenumber)
 
     // ── Baseline Profile ──
     implementation(libs.profileinstaller)

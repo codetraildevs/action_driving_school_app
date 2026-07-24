@@ -27,6 +27,7 @@ import com.drivingschoolrwandaapp.data.local.preferences.TokenManager;
 import com.drivingschoolrwandaapp.models.entities.Device;
 import com.drivingschoolrwandaapp.models.entities.User;
 import com.drivingschoolrwandaapp.models.response.RegisterResponse;
+import com.drivingschoolrwandaapp.utils.PhoneUtils;
 import com.drivingschoolrwandaapp.viewmodel.UserViewModel;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -218,7 +219,9 @@ public class RegisterActivity extends AppCompatActivity {
             lastName = names[names.length - 1];
         }
 
-        String phone = Objects.requireNonNull(phoneField.getText()).toString().trim();
+        String rawPhone = Objects.requireNonNull(phoneField.getText()).toString().trim();
+        String phone = PhoneUtils.normalize(rawPhone);
+        Log.d(TAG, "Normalised phone for registration: " + rawPhone + " → " + phone);
         @SuppressLint("HardwareIds")
         String password = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
 
@@ -403,11 +406,19 @@ public class RegisterActivity extends AppCompatActivity {
 
     private boolean validatePhone() {
         String phone = Objects.requireNonNull(phoneField.getText()).toString().trim();
-        if (phone.isEmpty()) {
-            phoneLayout.setError(getString(R.string.phone_required));
-            return false;
-        } else if (phone.length() < 10) {
-            phoneLayout.setError(getString(R.string.invalid_phone));
+        String errorKey = PhoneUtils.getValidationError(phone);
+        if (errorKey != null) {
+            // Map the error key to a localized string resource
+            int resId;
+            switch (errorKey) {
+                case "phone_required":
+                    resId = R.string.phone_required;
+                    break;
+                default:
+                    resId = R.string.invalid_phone;
+                    break;
+            }
+            phoneLayout.setError(getString(resId));
             return false;
         } else {
             phoneLayout.setError(null);
