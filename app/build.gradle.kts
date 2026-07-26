@@ -1,10 +1,11 @@
 import java.util.Properties
 
+@file:Suppress("DEPRECATION")
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.kapt)
-    alias(libs.plugins.kotlin.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics.plugin)
@@ -13,14 +14,14 @@ plugins {
 
 android {
     namespace = "com.drivingschoolrwandaapp"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.drivingschoolrwandaapp"
         minSdk = 27
-        targetSdk = 36
-        versionCode = 83
-        versionName = "1.2.3"
+        targetSdk = 37
+        versionCode = 84
+        versionName = "1.3.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -32,10 +33,7 @@ android {
 
     bundle {
         language {
-            
-
             enableSplit = false
-
         }
     }
 
@@ -70,20 +68,23 @@ android {
             signingConfig = signingConfigs.getByName("release")
         }
         debug {
-            isDebuggable = true
         }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
     }
     lint {
+        baseline = file("lint-baseline.xml")
         disable += setOf(
             "ObsoleteSdkInt",
-            "KaptUsageInsteadOfKsp"  // Glide, Hilt, MapStruct don't support KSP yet
+            "KaptUsageInsteadOfKsp",  // Glide, Hilt, MapStruct don't support KSP yet
+            "NewerVersionAvailable"   // Retrofit 3.x has breaking API changes; others manually verified
         )
     }
 
@@ -94,7 +95,7 @@ android {
     sourceSets {
         getByName("main") {
             java {
-                srcDirs("src\\main\\java", "src\\main\\java\\api")
+                setSrcDirs(listOf("src/main/java", "src/main/java/api"))
             }
         }
     }
@@ -115,7 +116,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel)
     implementation(libs.androidx.lifecycle.livedata)
     implementation(libs.androidx.lifecycle.runtime)
-    ksp(libs.androidx.lifecycle.compiler)
+    kapt(libs.androidx.lifecycle.compiler)
 
     // ── Navigation ──
     implementation(libs.androidx.navigation.fragment)
@@ -123,7 +124,7 @@ dependencies {
 
     // ── Room Database ──
     implementation(libs.androidx.room.runtime)
-    ksp(libs.androidx.room.compiler)
+    kapt(libs.androidx.room.compiler)
 
     // ── WorkManager ──
     implementation(libs.androidx.work.runtime)

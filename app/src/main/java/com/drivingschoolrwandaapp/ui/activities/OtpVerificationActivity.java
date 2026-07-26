@@ -40,7 +40,8 @@ public class OtpVerificationActivity extends AppCompatActivity {
         loadingIndicator = findViewById(R.id.loading_indicator);
 
         verifyButton.setOnClickListener(v -> {
-            String otp = otpField.getText().toString().trim();
+            CharSequence otpText = otpField.getText();
+            String otp = otpText != null ? otpText.toString().trim() : "";
             if (otp.length() != 6) {
                 Toast.makeText(this, getString(R.string.invalid_otp), Toast.LENGTH_SHORT).show();
                 return;

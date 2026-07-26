@@ -7,30 +7,17 @@
     app:cardCornerRadius="16dp"
     android:layout_margin="8dp">
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/tv_service_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:gravity="center"
+        tools:drawableTop="@drawable/ic_car_side"
+        app:drawableTint="@color/my_primary"
+        android:drawablePadding="8dp"
         android:padding="16dp"
-        android:gravity="center">
-
-        <ImageView
-            android:id="@+id/iv_service_icon"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginBottom="8dp"
-            tools:src="@drawable/ic_car_side"
-            android:contentDescription="@null"
-            app:tint="@color/my_primary"/>
-
-        <TextView
-            android:id="@+id/tv_service_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?attr/textAppearanceBody1"
-            android:textAlignment="center"
-            tools:text="@string/provisional_license"/>
-
-    </LinearLayout>
+        android:textAppearance="?attr/textAppearanceBody1"
+        android:textAlignment="center"
+        tools:text="@string/provisional_license"/>
 
 </com.google.android.material.card.MaterialCardView>

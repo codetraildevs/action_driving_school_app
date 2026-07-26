@@ -2,6 +2,8 @@ package com.drivingschoolrwandaapp.repository;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
+
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
@@ -11,11 +13,17 @@ import androidx.lifecycle.MediatorLiveData;
 import com.drivingschoolrwandaapp.models.response.ApiResponse;
 import com.drivingschoolrwandaapp.utils.ErrorUtils;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public abstract class NetworkBoundResource<ResultType, RequestType> {
+
+    private static final ExecutorService IO_EXECUTOR = Executors.newSingleThreadExecutor();
 
     private final MediatorLiveData<Resource<ResultType>> result = new MediatorLiveData<>();
 
@@ -33,6 +41,16 @@ public abstract class NetworkBoundResource<ResultType, RequestType> {
         });
     }
 
+    private static void executeSafely(Runnable runnable) {
+        try {
+            if (!IO_EXECUTOR.isShutdown() && !IO_EXECUTOR.isTerminated()) {
+                IO_EXECUTOR.execute(runnable);
+            }
+        } catch (RejectedExecutionException e) {
+            Log.w("NetworkBoundResource", "Task rejected, executor is shutting down", e);
+        }
+    }
+
     private void fetchFromNetwork(final LiveData<ResultType> dbSource) {
         result.addSource(dbSource, newData -> result.setValue(Resource.loading(newData)));
         createCall().enqueue(new Callback<RequestType>() {
@@ -40,12 +58,12 @@ public abstract class NetworkBoundResource<ResultType, RequestType> {
             public void onResponse(@NonNull Call<RequestType> call, @NonNull Response<RequestType> response) {
                 result.removeSource(dbSource);
                 if (response.isSuccessful()) {
-                    new Thread(() -> {
+                    executeSafely(() -> {
                         saveCallResult(processResponse(response));
                         new Handler(Looper.getMainLooper()).post(() ->
                                 result.addSource(loadFromDb(), newData -> result.setValue(Resource.success(newData)))
                         );
-                    }).start();
+                    });
                 } else {
                     onFetchFailed();
                     result.addSource(dbSource, newData -> result.setValue(Resource.error(response.message(), newData)));

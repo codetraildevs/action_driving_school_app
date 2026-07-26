@@ -103,10 +103,20 @@ public class IremboFragment extends Fragment implements IremboServiceAdapter.OnI
         iremboViewModel.fetchRecentApplications();
     }
 
+    private void executeSafely(Runnable runnable) {
+        try {
+            if (!executor.isShutdown() && !executor.isTerminated()) {
+                executor.execute(runnable);
+            }
+        } catch (java.util.concurrent.RejectedExecutionException e) {
+            Log.w("IremboFragment", "Task rejected, executor is shutting down", e);
+        }
+    }
+
     private void loadLocationData() {
         Context context = getContext();
         if (context == null) return;
-        executor.execute(() -> {
+        executeSafely(() -> {
             try {
                 InputStream is = context.getAssets().open("location.json");
                 int size = is.available();
@@ -132,7 +142,11 @@ public class IremboFragment extends Fragment implements IremboServiceAdapter.OnI
         MaterialToolbar toolbar = view.findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(v ->
                 SafetyUtils.runIfActivityAttached(this, "setupToolbar",
-                        () -> getActivity().onBackPressed()));
+                        () -> {
+                            if (getActivity() != null) {
+                                getActivity().getOnBackPressedDispatcher().onBackPressed();
+                            }
+                        }));
     }
 
     private void setupRecentActivity(View view) {
@@ -402,9 +416,12 @@ public class IremboFragment extends Fragment implements IremboServiceAdapter.OnI
             Object selectedCategory = spinnerCategory.getSelectedItem();
             String category = selectedCategory != null ? selectedCategory.toString() : "";
             
-            String name = etName.getText().toString().trim();
-            String rawPhone = etPhone.getText().toString().trim();
-            String nationalId = etNationalId.getText().toString().trim();
+            CharSequence nameText = etName.getText();
+            String name = nameText != null ? nameText.toString().trim() : "";
+            CharSequence phoneText = etPhone.getText();
+            String rawPhone = phoneText != null ? phoneText.toString().trim() : "";
+            CharSequence nationalIdText = etNationalId.getText();
+            String nationalId = nationalIdText != null ? nationalIdText.toString().trim() : "";
             String description = "";
 
             if (TextUtils.isEmpty(category)) { if (getContext() != null) Toast.makeText(getContext(), getString(R.string.error_required_field), Toast.LENGTH_SHORT).show(); return; }

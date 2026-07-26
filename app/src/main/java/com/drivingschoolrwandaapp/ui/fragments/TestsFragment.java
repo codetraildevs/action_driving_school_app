@@ -358,7 +358,7 @@ public class TestsFragment extends Fragment {
     private void showPaymentInstructionsDialog(PlanOption plan) {
         if (!isAdded() || getActivity() == null) return;
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        LayoutInflater inflater = getActivity().getLayoutInflater();
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
         View dialogView = inflater.inflate(R.layout.dialog_payment_instructions, null);
         builder.setView(dialogView);
 

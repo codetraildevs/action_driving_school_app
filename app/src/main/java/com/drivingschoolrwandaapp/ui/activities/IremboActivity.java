@@ -96,9 +96,19 @@ public class IremboActivity extends AppCompatActivity implements IremboServiceAd
         locationExecutor.shutdownNow();
     }
 
+    private void executeSafely(Runnable runnable) {
+        try {
+            if (!locationExecutor.isShutdown() && !locationExecutor.isTerminated()) {
+                locationExecutor.execute(runnable);
+            }
+        } catch (java.util.concurrent.RejectedExecutionException e) {
+            Log.w("IremboActivity", "Task rejected, executor is shutting down", e);
+        }
+    }
+
     private void loadLocationData() {
         // Run file I/O on background thread to avoid ANR on main thread
-        locationExecutor.execute(() -> {
+        executeSafely(() -> {
             try {
                 InputStream is = getAssets().open("location.json");
                 int size = is.available();
@@ -299,7 +309,7 @@ public class IremboActivity extends AppCompatActivity implements IremboServiceAd
         TextInputEditText etNationalId = dialogView.findViewById(R.id.et_applicant_national_id);
 
         if (currentUser != null) {
-            etName.setText(currentUser.getFirstName() + " " + currentUser.getLastName());
+            etName.setText(getString(R.string.full_name_format, currentUser.getFirstName(), currentUser.getLastName()));
             etPhone.setText(currentUser.getPhoneNumber());
         }
 
@@ -360,9 +370,12 @@ public class IremboActivity extends AppCompatActivity implements IremboServiceAd
 
         btnCancel.setOnClickListener(v -> dialog.dismiss());
         btnSubmit.setOnClickListener(v -> {
-            String name = etName.getText().toString().trim();
-            String rawPhone = etPhone.getText().toString().trim();
-            String nationalId = etNationalId.getText().toString().trim();
+            CharSequence nameText = etName.getText();
+            String name = nameText != null ? nameText.toString().trim() : "";
+            CharSequence phoneText = etPhone.getText();
+            String rawPhone = phoneText != null ? phoneText.toString().trim() : "";
+            CharSequence nationalIdText = etNationalId.getText();
+            String nationalId = nationalIdText != null ? nationalIdText.toString().trim() : "";
 
             String province = spinnerProvince.getSelectedItem() != null ? spinnerProvince.getSelectedItem().toString() : "";
             String district = spinnerDistrict.getSelectedItem() != null ? spinnerDistrict.getSelectedItem().toString() : "";
@@ -385,8 +398,13 @@ public class IremboActivity extends AppCompatActivity implements IremboServiceAd
             if (selectedLicenseTypeId == -1) { Toast.makeText(this, getString(R.string.error_required_field), Toast.LENGTH_SHORT).show(); return; }
 
             RadioButton rbLicenseType = dialogView.findViewById(selectedLicenseTypeId);
+            if (rbLicenseType == null) {
+                Toast.makeText(this, getString(R.string.error_required_field), Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-            String licenseType = rbLicenseType.getText().toString().toUpperCase(Locale.ROOT);
+            CharSequence rbText = rbLicenseType.getText();
+            String licenseType = rbText != null ? rbText.toString().toUpperCase(Locale.ROOT) : "NEW";
             String appType = "New";
 
             IremboLicenseRequest request = new IremboLicenseRequest(
@@ -416,7 +434,7 @@ public class IremboActivity extends AppCompatActivity implements IremboServiceAd
         TextInputEditText etNationalId = dialogView.findViewById(R.id.et_national_id);
 
         if (currentUser != null) {
-            etName.setText(currentUser.getFirstName() + " " + currentUser.getLastName());
+            etName.setText(getString(R.string.full_name_format, currentUser.getFirstName(), currentUser.getLastName()));
             etPhone.setText(currentUser.getPhoneNumber());
         }
 
@@ -435,9 +453,12 @@ public class IremboActivity extends AppCompatActivity implements IremboServiceAd
             Object selectedCategory = spinnerCategory.getSelectedItem();
             String category = selectedCategory != null ? selectedCategory.toString() : "";
 
-            String name = etName.getText().toString().trim();
-            String rawPhone = etPhone.getText().toString().trim();
-            String nationalId = etNationalId.getText().toString().trim();
+            CharSequence nameText = etName.getText();
+            String name = nameText != null ? nameText.toString().trim() : "";
+            CharSequence phoneText = etPhone.getText();
+            String rawPhone = phoneText != null ? phoneText.toString().trim() : "";
+            CharSequence nationalIdText = etNationalId.getText();
+            String nationalId = nationalIdText != null ? nationalIdText.toString().trim() : "";
             String description =  "";
 
             if (TextUtils.isEmpty(category)) { Toast.makeText(this, getString(R.string.error_required_field), Toast.LENGTH_SHORT).show(); return; }

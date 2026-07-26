@@ -212,7 +212,8 @@ public class TestAdapter extends RecyclerView.Adapter<TestAdapter.TestViewHolder
             if (position != RecyclerView.NO_POSITION && onTestClickListener != null) {
                 TestEntity test = tests.get(position);
                 boolean isLocked = isTestLocked(test);
-                onTestClickListener.onTestClick(test, isLocked, testTitle.getText().toString());
+                String title = testTitle.getText() != null ? testTitle.getText().toString() : "";
+                onTestClickListener.onTestClick(test, isLocked, title);
             }
         }
 

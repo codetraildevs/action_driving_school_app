@@ -125,7 +125,11 @@ public class SingleQuestionPageFragment extends Fragment implements QuestionOpti
                             Log.e("SingleQuestionPage", "Navigation failed during translation warning", e);
                             com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
                             SafetyUtils.runIfActivityAttached(SingleQuestionPageFragment.this,
-                                    "onViewCreated", () -> getActivity().onBackPressed());
+                                    "onViewCreated", () -> {
+                                        if (getActivity() != null) {
+                                            getActivity().getOnBackPressedDispatcher().onBackPressed();
+                                        }
+                                    });
                         }
                         return; // <- Important: This stops the question from rendering
                     } else {

@@ -17,6 +17,7 @@ import com.github.chrisbanes.photoview.PhotoView;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 
 public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.PdfViewHolder> {
 
@@ -24,21 +25,31 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.PdfViewHolder> {
     private final ExecutorService executorService = Executors.newFixedThreadPool(2); // Reduced threads to save memory with high-res bitmaps
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private final int screenWidth;
+    private final boolean isLowRamDevice;
     // Lower renderScale (1.5f) for better memory performance on low-RAM devices.
     // Original was 2.0f which creates 4x the pixels of a 1.0f render, consuming significant RAM.
     private static final float RENDER_SCALE_HIGH_RAM = 2.0f;
     private static final float RENDER_SCALE_LOW_RAM = 1.5f;
+    // Lower max dimension cap on low-RAM devices to prevent OOM on large displays
+    // 4096 pixels @ ARGB_8888 = 64MB per bitmap worst case (unlikely at renderScale 2.0)
+    // 2048 pixels @ ARGB_8888 = 16MB per bitmap worst case
+    private static final int MAX_DIMENSION_HIGH_RAM = 3072;
+    private static final int MAX_DIMENSION_LOW_RAM = 2048;
     private final float renderScale;
+    private final int maxDimension;
 
     /**
      * @param pdfRenderer The PdfRenderer instance
      * @param screenWidth Screen width in pixels for computing render dimensions
-     * @param isLowRamDevice Whether the device has limited RAM (<=2GB). Uses lower render scale.
+     * @param isLowRamDevice Whether the device has limited RAM (<=2GB). Uses lower render scale
+     *                       and lower bitmap dimension cap.
      */
     public PdfAdapter(PdfRenderer pdfRenderer, int screenWidth, boolean isLowRamDevice) {
         this.pdfRenderer = pdfRenderer;
         this.screenWidth = screenWidth;
+        this.isLowRamDevice = isLowRamDevice;
         this.renderScale = isLowRamDevice ? RENDER_SCALE_LOW_RAM : RENDER_SCALE_HIGH_RAM;
+        this.maxDimension = isLowRamDevice ? MAX_DIMENSION_LOW_RAM : MAX_DIMENSION_HIGH_RAM;
     }
 
     @Override
@@ -59,6 +70,22 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.PdfViewHolder> {
         holder.bind(position);
     }
 
+    private void executeSafely(Runnable runnable) {
+        try {
+            if (!executorService.isShutdown() && !executorService.isTerminated()) {
+                executorService.execute(runnable);
+            }
+        } catch (RejectedExecutionException e) {
+            Log.w("PdfAdapter", "Task rejected, executor is shutting down", e);
+        }
+    }
+
+    @Override
+    public void onViewRecycled(@NonNull PdfViewHolder holder) {
+        super.onViewRecycled(holder);
+        holder.recycleBitmap();
+    }
+
     @Override
     public int getItemCount() {
         return pdfRenderer != null ? pdfRenderer.getPageCount() : 0;
@@ -77,10 +104,23 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.PdfViewHolder> {
             photoView.setMaximumScale(5.0f);
         }
 
+        /**
+         * Release the bitmap when the view is recycled to free memory immediately
+         * instead of waiting for GC. Prevents accumulation of rendered pages
+         * when scrolling quickly through a large PDF.
+         */
+        public void recycleBitmap() {
+            if (photoView != null) {
+                photoView.setImageBitmap(null);
+            }
+        }
+
         public void bind(int position) {
-            photoView.setImageBitmap(null); // Placeholder/Clear
+            // Clear the current image immediately so the old bitmap can be GC'd
+            // while the new one renders on a background thread.
+            photoView.setImageBitmap(null);
             
-            executorService.execute(() -> {
+            executeSafely(() -> {
                 synchronized (pdfRenderer) {
                     PdfRenderer.Page page = pdfRenderer.openPage(position);
                     
@@ -90,8 +130,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.PdfViewHolder> {
 
                     Bitmap bitmap = null;
                     try {
-                        // Cap bitmap dimensions to prevent OOM on low-RAM devices
-                        int maxDimension = 4096; // Safety cap
+                        // Cap bitmap dimensions using the per-device max dimension field
                         int cappedWidth = Math.min(bitmapWidth, maxDimension);
                         int cappedHeight = (int) (page.getHeight() * ((float) cappedWidth / page.getWidth()));
                         cappedHeight = Math.min(cappedHeight, maxDimension);

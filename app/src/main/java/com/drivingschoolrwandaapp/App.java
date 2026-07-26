@@ -408,7 +408,7 @@ public class App extends AppCompatActivity {
         ShapeableImageView ivProfile = headerView.findViewById(R.id.drawer_profile_image);
 
         if(user != null){
-            tvUserName.setText(user.getFirstName() + " " + user.getLastName() + "("+user.getLanguage()+")");
+            tvUserName.setText(getString(R.string.user_name_format, user.getFirstName(), user.getLastName(), user.getLanguage()));
             tvUserEmail.setText(user.getPhoneNumber());
 
             Glide.with(this)

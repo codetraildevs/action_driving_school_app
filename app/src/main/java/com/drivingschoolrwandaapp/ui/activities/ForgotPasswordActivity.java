@@ -19,8 +19,6 @@ import com.drivingschoolrwandaapp.viewmodel.UserViewModel;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
-import java.util.Objects;
-
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
@@ -82,7 +80,8 @@ public class ForgotPasswordActivity extends AppCompatActivity {
     }
 
     private void validateAndSendLink() {
-        String rawInput = Objects.requireNonNull(identifierField.getText()).toString().trim();
+        CharSequence identifierText = identifierField.getText();
+        String rawInput = identifierText != null ? identifierText.toString().trim() : "";
 
         if (rawInput.isEmpty()) {
             identifierLayout.setError(getString(R.string.error_required_field));
@@ -122,7 +121,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        onBackPressed();
+        getOnBackPressedDispatcher().onBackPressed();
         return true;
     }
 }

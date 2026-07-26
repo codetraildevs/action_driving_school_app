@@ -12,48 +12,15 @@
         <item name="materialButtonStyle">@style/Widget.drivingSchoolRwandaApp.Button</item>
     </style>
 
-    <style name="Theme.drivingSchoolRwandaApp.DayNight.NoActionBar" parent="Base.Theme.drivingSchoolRwandaApp" />
-
     <style name="Widget.drivingSchoolRwandaApp.Toolbar" parent="Widget.MaterialComponents.Toolbar.Primary">
         <item name="android:background">?attr/colorSurface</item>
         <item name="titleTextColor">?attr/colorOnSurface</item>
-    </style>
-
-    <style name="Widget.drivingSchoolRwandaApp.TextInputLayout"
-        parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
     </style>
 
     <!-- Custom Button Style -->
     <style name="Widget.drivingSchoolRwandaApp.Button" parent="Widget.Material3.Button">
         <item name="backgroundTint">@color/colorPrimary</item>
         <item name="android:textColor">@android:color/black</item>
-    </style>
-
-    <style name="Widget.App.BottomNavigationView" parent="Widget.Material3.BottomNavigationView">
-        <item name="materialThemeOverlay">@style/ThemeOverlay.App.BottomNavigationView</item>
-        <item name="labelVisibilityMode">labeled</item>
-        <item name="itemIconTint">@color/bottom_nav_item_tint</item>
-        <item name="itemTextColor">@color/bottom_nav_item_tint</item>
-        <item name="itemTextAppearanceActive">@style/TextAppearance.App.BottomNav.Active</item>
-        <item name="itemTextAppearanceInactive">@style/TextAppearance.App.BottomNav.Inactive</item>
-        <item name="itemRippleColor">@android:color/transparent</item>
-        <item name="itemActiveIndicatorStyle">@style/Widget.App.BottomNavigationView.ActiveIndicator</item>
-    </style>
-
-    <!-- Style for selected text to hide it - using a very small value to avoid crash -->
-    <style name="TextAppearance.App.BottomNav.Active" parent="TextAppearance.Material3.LabelMedium">
-        <item name="android:textSize">0.1sp</item>
-    </style>
-
-    <!-- Style for unselected text to make it sharper -->
-    <style name="TextAppearance.App.BottomNav.Inactive" parent="TextAppearance.Material3.LabelMedium">
-        <item name="android:textSize">11sp</item>
-    </style>
-
-    <style name="ThemeOverlay.App.BottomNavigationView" parent="">
-        <item name="colorSecondaryContainer">#33A1C9</item>
-        <item name="colorOnSecondaryContainer">#FFFFFF</item>
-        <item name="colorSurface">@color/bottom_nav_bg</item>
     </style>
 
     <!-- Modern active indicator (pill shape behind selected item) -->
@@ -66,10 +33,6 @@
 
     <style name="ShapeAppearance.App.CornerSizeCircle" parent="">
         <item name="cornerSize">50%</item>
-    </style>
-
-    <style name="ShapeAppearance.App.CornerSize16" parent="">
-        <item name="cornerSize">16dp</item>
     </style>
 
     <style name="ThemeOverlay.App.Toolbar" parent="ThemeOverlay.Material3.Light">

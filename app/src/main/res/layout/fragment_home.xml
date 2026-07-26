@@ -3,8 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="?android:attr/colorBackground">
+    android:layout_height="match_parent">
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefresh"
@@ -76,33 +75,20 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- Empty State -->
-    <LinearLayout
+    <TextView
         android:id="@+id/emptyStateLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:gravity="center"
+        app:drawableTopCompat="@drawable/ic_empty_state"
+        android:drawablePadding="@dimen/margin_medium"
+        android:text="@string/empty_pdfs"
+        android:textSize="@dimen/text_size_normal"
+        android:textColor="@color/text_secondary"
         android:visibility="gone"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <ImageView
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:src="@drawable/ic_empty_state"
-            android:alpha="0.5"
-            android:contentDescription="@null" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/empty_pdfs"
-            android:textSize="@dimen/text_size_normal"
-            android:textColor="@color/text_secondary"
-            android:layout_marginTop="@dimen/margin_medium" />
-
-    </LinearLayout>
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

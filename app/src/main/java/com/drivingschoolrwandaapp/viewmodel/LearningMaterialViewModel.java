@@ -28,6 +28,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -64,7 +65,6 @@ public class LearningMaterialViewModel extends AndroidViewModel {
 
     @Override
     protected void onCleared() {
-        super.onCleared();
         executor.shutdownNow();
     }
 
@@ -112,8 +112,18 @@ public class LearningMaterialViewModel extends AndroidViewModel {
         });
     }
 
+    private void executeSafely(Runnable runnable) {
+        try {
+            if (!executor.isShutdown() && !executor.isTerminated()) {
+                executor.execute(runnable);
+            }
+        } catch (RejectedExecutionException e) {
+            Log.w("LearningMaterialVM", "Task rejected, executor is shutting down", e);
+        }
+    }
+
     private void loadFromCacheAsync(String message) {
-        executor.execute(() -> {
+        executeSafely(() -> {
             if (cacheFile.exists()) {
                 try (FileReader reader = new FileReader(cacheFile)) {
                     Type listType = new TypeToken<List<LearningMaterial>>() {}.getType();
@@ -136,7 +146,7 @@ public class LearningMaterialViewModel extends AndroidViewModel {
     }
 
     private void cacheMaterialsAsync(List<LearningMaterial> materialsToCache) {
-        executor.execute(() -> {
+        executeSafely(() -> {
             try (FileWriter writer = new FileWriter(cacheFile)) {
                 gson.toJson(materialsToCache, writer);
             } catch (IOException e) {
@@ -154,7 +164,7 @@ public class LearningMaterialViewModel extends AndroidViewModel {
             @Override
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    executor.execute(() -> {
+                    executeSafely(() -> {
                         try {
                             File destinationFile = getDestinationFile(material);
                             boolean success = writeResponseBodyToDisk(response.body(), destinationFile);

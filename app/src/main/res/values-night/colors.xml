@@ -8,8 +8,6 @@
     
     <color name="shimmer_placeholder">#3C3C3C</color>
 
-    <color name="bottom_nav_selected">#B7EBF4</color>
-    <color name="bottom_nav_unselected">#A0A0A0</color>
     <color name="bottom_nav_bg">#1A1C1E</color>
     <color name="bottom_nav_outline">#303030</color>
 </resources>

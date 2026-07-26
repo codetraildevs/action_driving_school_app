@@ -34,7 +34,6 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
 
 import java.util.Locale;
-import java.util.Objects;
 import java.util.TimeZone;
 
 import javax.inject.Inject;
@@ -200,7 +199,8 @@ public class RegisterActivity extends AppCompatActivity {
             }
         }, LOADING_TIMEOUT_MS);
 
-        String fullName = Objects.requireNonNull(fullNameField.getText()).toString().trim();
+        CharSequence fullNameText = fullNameField.getText();
+        String fullName = fullNameText != null ? fullNameText.toString().trim() : "";
         String[] names = fullName.split("\\s+");
         String firstName = "";
         String middleName = "";
@@ -219,7 +219,8 @@ public class RegisterActivity extends AppCompatActivity {
             lastName = names[names.length - 1];
         }
 
-        String rawPhone = Objects.requireNonNull(phoneField.getText()).toString().trim();
+        CharSequence phoneText = phoneField.getText();
+        String rawPhone = phoneText != null ? phoneText.toString().trim() : "";
         String phone = PhoneUtils.normalize(rawPhone);
         Log.d(TAG, "Normalised phone for registration: " + rawPhone + " → " + phone);
         @SuppressLint("HardwareIds")
@@ -394,7 +395,8 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private boolean validateFullName() {
-        String fullName = Objects.requireNonNull(fullNameField.getText()).toString().trim();
+        CharSequence fullNameText = fullNameField.getText();
+        String fullName = fullNameText != null ? fullNameText.toString().trim() : "";
         if (fullName.isEmpty()) {
             fullNameLayout.setError(getString(R.string.first_name_required));
             return false;
@@ -405,7 +407,8 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private boolean validatePhone() {
-        String phone = Objects.requireNonNull(phoneField.getText()).toString().trim();
+        CharSequence phoneText = phoneField.getText();
+        String phone = phoneText != null ? phoneText.toString().trim() : "";
         String errorKey = PhoneUtils.getValidationError(phone);
         if (errorKey != null) {
             // Map the error key to a localized string resource

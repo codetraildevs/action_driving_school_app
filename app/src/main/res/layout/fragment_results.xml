@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorSurfaceVariant"
+
     android:orientation="vertical"
     tools:context=".ui.fragments.ResultsFragment">
 
@@ -72,8 +72,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:text="📝"
+                        android:gravity="center"                            android:text="@string/emoji_memo"
                         android:textSize="20sp" />
                 </com.google.android.material.card.MaterialCardView>
 
@@ -129,8 +128,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:text="📊"
+                        android:gravity="center"                            android:text="@string/emoji_chart"
                         android:textSize="20sp" />
                 </com.google.android.material.card.MaterialCardView>
 
@@ -186,8 +184,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:text="🏆"
+                        android:gravity="center"                            android:text="@string/emoji_trophy"
                         android:textSize="20sp" />
                 </com.google.android.material.card.MaterialCardView>
 

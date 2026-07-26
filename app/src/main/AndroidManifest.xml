@@ -76,7 +76,6 @@
         <activity
             android:name=".App"
             android:exported="false"
-            android:label="@string/app_name"
             android:theme="@style/Base.Theme.drivingSchoolRwandaApp" />
 
         <activity

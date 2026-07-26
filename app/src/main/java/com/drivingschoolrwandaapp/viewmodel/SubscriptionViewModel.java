@@ -47,6 +47,11 @@ public class SubscriptionViewModel extends AndroidViewModel {
         this.repository = repository;
     }
 
+    @Override
+    protected void onCleared() {
+        repository.shutdown();
+    }
+
     public LiveData<UserSubscription> getUserSubscription() {
         return userSubscription;
     }

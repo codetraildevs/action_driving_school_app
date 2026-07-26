@@ -79,9 +79,12 @@ public class ChangePasswordActivity extends AppCompatActivity {
     }
 
     private void changePassword() {
-        String currentPassword = currentPasswordField.getText().toString().trim();
-        String newPassword = newPasswordField.getText().toString().trim();
-        String confirmPassword = confirmPasswordField.getText().toString().trim();
+        CharSequence currentText = currentPasswordField.getText();
+        String currentPassword = currentText != null ? currentText.toString().trim() : "";
+        CharSequence newText = newPasswordField.getText();
+        String newPassword = newText != null ? newText.toString().trim() : "";
+        CharSequence confirmText = confirmPasswordField.getText();
+        String confirmPassword = confirmText != null ? confirmText.toString().trim() : "";
 
         if (currentPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()) {
             Toast.makeText(this, getString(R.string.fill_all_fields), Toast.LENGTH_SHORT).show();
@@ -98,7 +101,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        onBackPressed();
+        getOnBackPressedDispatcher().onBackPressed();
         return true;
     }
 }

@@ -1,48 +1,47 @@
 [versions]
 # ─── Kotlin & Build ───
-kotlin = "1.9.22"
-ksp = "1.9.22-1.0.17"
-agp = "8.13.2"
-hilt = "2.52"
-hilt-work = "1.2.0"
-firebase-bom = "33.6.0"
-firebase-crashlytics = "2.9.9"
-firebase-gms = "4.4.2"
+kotlin = "2.4.10"
+agp = "9.3.1"
+hilt = "2.60.1"
+hilt-work = "1.4.0"
+firebase-bom = "34.16.0"
+firebase-crashlytics = "3.0.7"
+firebase-gms = "4.5.0"
 
-# ─── AndroidX Core (original project versions) ───
+# ─── AndroidX Core ───
 appcompat = "1.7.1"
-core-ktx = "1.15.0"
-material = "1.12.0"
-constraintlayout = "2.1.4"
-swiperefreshlayout = "1.1.0"
-activity = "1.9.3"
-splashscreen = "1.0.1"
+core-ktx = "1.19.0"
+material = "1.14.0"
+constraintlayout = "2.2.1"
+swiperefreshlayout = "1.2.0"
+activity = "1.13.0"
+splashscreen = "1.2.0"
 
 # ─── Lifecycle ───
-lifecycle = "2.8.7"
+lifecycle = "2.11.0"
 
 # ─── Navigation ───
-navigation = "2.8.9"
+navigation = "2.9.8"
 
 # ─── Room ───
-room = "2.6.1"
+room = "2.8.4"
 
 # ─── Networking ───
-retrofit = "2.11.0"
-okhttp = "4.12.0"
-gson = "2.11.0"
+retrofit = "2.12.0"
+okhttp = "5.4.0"
+gson = "2.14.0"
 
 # ─── Image Loading ───
-glide = "4.16.0"
+glide = "5.0.9"
 
 # ─── DI / Compilers ───
-mapstruct = "1.5.5.Final"
+mapstruct = "1.6.3"
 
 # ─── Background Work ───
-work = "2.10.5"
+work = "2.11.2"
 
 # ─── Secure Storage ───
-security-crypto = "1.1.0-alpha06"
+security-crypto = "1.1.0"
 
 # ─── In-App Updates ───
 app-update = "2.1.0"
@@ -59,17 +58,18 @@ androidsvg = "1.4"
 # ─── Baseline Profile ───
 profileinstaller = "1.4.1"
 benchmark-macro = "1.4.1"
-uiautomator = "2.3.0"
-baselineprofile-plugin = "1.3.1"
+uiautomator = "2.4.0"
+baselineprofile-plugin = "1.4.1"
 
 # ─── Phone Number Handling ───
-libphonenumber = "8.13.52"
+libphonenumber = "9.0.35"
 
 # ─── Testing ───
 junit = "4.13.2"
-junit-androidx = "1.1.5"
-mockito = "5.16.1"
-espresso = "3.5.1"
+junit-androidx = "1.3.0"
+test-runner = "1.7.0"
+mockito = "5.23.0"
+espresso = "3.7.0"
 core-testing = "2.2.0"
 
 
@@ -154,6 +154,7 @@ libphonenumber = { group = "com.googlecode.libphonenumber", name = "libphonenumb
 # ── Testing ──
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 junit-androidx = { group = "androidx.test.ext", name = "junit", version.ref = "junit-androidx" }
+test-runner = { group = "androidx.test", name = "runner", version.ref = "test-runner" }
 mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso" }
 core-testing = { group = "androidx.arch.core", name = "core-testing", version.ref = "core-testing" }
@@ -165,7 +166,7 @@ android-library = { id = "com.android.library", version.ref = "agp" }
 android-test = { id = "com.android.test", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
-kotlin-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 google-services = { id = "com.google.gms.google-services", version.ref = "firebase-gms" }
 firebase-crashlytics-plugin = { id = "com.google.firebase.crashlytics", version.ref = "firebase-crashlytics" }

@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.drivingschoolrwandaapp.baselineprofile"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         minSdk = 27
@@ -17,8 +17,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
     }
 
     // Point to the app module being profiled
@@ -30,5 +32,5 @@ dependencies {
     implementation(libs.uiautomator)
     implementation(libs.profileinstaller)
     implementation(libs.junit.androidx)
-    implementation("androidx.test:runner:1.6.2")
+    implementation(libs.test.runner)
 }

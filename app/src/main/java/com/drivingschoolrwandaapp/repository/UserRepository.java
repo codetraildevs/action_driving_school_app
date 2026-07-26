@@ -29,6 +29,7 @@ import java.util.Locale;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -226,7 +227,7 @@ public class UserRepository {
     }
 
     public void updateUser(User user) {
-        executorService.execute(() -> userDao.insert(user));
+        executeSafely(() -> userDao.insert(user));
     }
 
     public LiveData<Resource<ApiResponse<Void>>> sleepSubscription(int languageId) {
@@ -265,7 +266,7 @@ public class UserRepository {
     }
 
     private void performLocalLogout() {
-        executorService.execute(() -> {
+        executeSafely(() -> {
             userDao.deleteAll();
             tokenManager.clearTokens();
             navigateToLogin();
@@ -328,5 +329,25 @@ public class UserRepository {
         }
         
         return dbUser;
+    }
+
+    private void executeSafely(Runnable runnable) {
+        try {
+            if (!executorService.isShutdown() && !executorService.isTerminated()) {
+                executorService.execute(runnable);
+            }
+        } catch (RejectedExecutionException e) {
+            Log.w("UserRepository", "Task rejected, executor is shutting down", e);
+        }
+    }
+
+    /**
+     * Cleanly shut down the internal executor to release the background thread.
+     * Call from the ViewModel's onCleared() when this repository is no longer needed.
+     */
+    public void shutdown() {
+        if (executorService != null && !executorService.isShutdown()) {
+            executorService.shutdown();
+        }
     }
 }

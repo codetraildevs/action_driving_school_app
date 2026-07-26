@@ -111,7 +111,7 @@ public class ApplicationDetailsActivity extends AppCompatActivity {
         }
         
         progressCompletion.setProgress(app.getCompletionPercentage());
-        tvCompletionPercentage.setText(app.getCompletionPercentage() + "%");
+        tvCompletionPercentage.setText(getString(R.string.completion_percentage_format, app.getCompletionPercentage()));
         
         // Message
         String message = app.getMessage();

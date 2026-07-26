@@ -70,6 +70,9 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
     private ShimmerFrameLayout shimmerFrameLayout;
     private UserDao userDao;
     private NotificationHelper notificationHelper;
+    // Cache the user from LiveData observation to avoid synchronous DB reads
+    // on the main thread. Populated by observeUser().
+    private com.drivingschoolrwandaapp.database.entities.User cachedUser;
 
     private List<LearningMaterial> allMaterials = new ArrayList<>();
 
@@ -134,6 +137,7 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
 
     private void observeUser() {
         userDao.getUser().observe(getViewLifecycleOwner(), user -> {
+            cachedUser = user;
             if (adapter != null) {
                 adapter.setCurrentUser(user);
             }
@@ -276,7 +280,7 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
     }
 
     private boolean canAccessPaidContent(String action) {
-        com.drivingschoolrwandaapp.database.entities.User user = userDao.getUserSync();
+        com.drivingschoolrwandaapp.database.entities.User user = cachedUser;
         if (user == null || !"ACTIVE".equalsIgnoreCase(user.getTestAccessStatus())) {
             if (isAdded() && getContext() != null) {
                 Toast.makeText(getContext(), getString(R.string.need_active_subscription, action), Toast.LENGTH_SHORT).show();
@@ -392,7 +396,7 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
     private void showImageDialog(LearningMaterial material, Uri imageUri) {
         if (!isAdded() || getActivity() == null) return;
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        LayoutInflater inflater = getActivity().getLayoutInflater();
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
         View dialogView = inflater.inflate(R.layout.dialog_material_image, null);
         builder.setView(dialogView);
 

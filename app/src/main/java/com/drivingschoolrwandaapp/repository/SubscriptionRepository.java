@@ -1,6 +1,7 @@
 package com.drivingschoolrwandaapp.repository;
 
 import android.app.Application;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
@@ -19,6 +20,7 @@ import com.drivingschoolrwandaapp.models.response.UserSubscriptionResponse;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 
 import javax.inject.Inject;
 
@@ -47,7 +49,7 @@ public class SubscriptionRepository {
             @Override
             protected void saveCallResult(SubscriptionPlansResponse item) {
                 if (item != null && item.getData() != null) {
-                    executorService.execute(() -> subscriptionPlanDao.insertAll(SubscriptionMapper.INSTANCE.toEntity(item.getData())));
+                    executeSafely(() -> subscriptionPlanDao.insertAll(SubscriptionMapper.INSTANCE.toEntity(item.getData())));
                 }
             }
 
@@ -70,7 +72,7 @@ public class SubscriptionRepository {
             @Override
             protected void saveCallResult(UserSubscriptionResponse item) {
                 if (item != null && item.getData() != null) {
-                    executorService.execute(() -> {
+                    executeSafely(() -> {
                         // Save the subscription plan first
                         if (item.getData().getSubscriptionPlan() != null) {
                             subscriptionPlanDao.insert(SubscriptionMapper.INSTANCE.toEntity(item.getData().getSubscriptionPlan()));
@@ -105,5 +107,25 @@ public class SubscriptionRepository {
 
     public void cancelSubscription(Callback<ApiResponse<Void>> callback) {
         apiService.cancelSubscription().enqueue(callback);
+    }
+
+    private void executeSafely(Runnable runnable) {
+        try {
+            if (!executorService.isShutdown() && !executorService.isTerminated()) {
+                executorService.execute(runnable);
+            }
+        } catch (RejectedExecutionException e) {
+            Log.w("SubscriptionRepo", "Task rejected, executor is shutting down", e);
+        }
+    }
+
+    /**
+     * Cleanly shut down the internal executor to release the background thread.
+     * Call from the ViewModel's onCleared() when this repository is no longer needed.
+     */
+    public void shutdown() {
+        if (executorService != null && !executorService.isShutdown()) {
+            executorService.shutdown();
+        }
     }
 }

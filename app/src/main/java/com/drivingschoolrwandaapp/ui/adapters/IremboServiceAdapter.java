@@ -3,8 +3,10 @@ package com.drivingschoolrwandaapp.ui.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.graphics.drawable.Drawable;
 import android.widget.TextView;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.drivingschoolrwandaapp.R;
@@ -36,7 +38,20 @@ public class IremboServiceAdapter extends RecyclerView.Adapter<IremboServiceAdap
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         IremboService service = services.get(position);
         holder.name.setText(service.getName());
-        holder.icon.setImageResource(service.getIconResId());
+        Drawable icon = ContextCompat.getDrawable(holder.itemView.getContext(), service.getIconResId());
+        if (icon != null) {
+            icon = icon.mutate();
+            DrawableCompat.setTint(
+                icon,
+                ContextCompat.getColor(holder.itemView.getContext(), R.color.my_primary)
+            );
+        }
+        holder.name.setCompoundDrawablesWithIntrinsicBounds(
+            null, /* start */
+            icon, /* top */
+            null, /* end */
+            null  /* bottom */
+        );
         holder.itemView.setOnClickListener(v -> listener.onItemClick(service));
     }
 
@@ -46,12 +61,10 @@ public class IremboServiceAdapter extends RecyclerView.Adapter<IremboServiceAdap
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        ImageView icon;
         TextView name;
 
         ViewHolder(View itemView) {
             super(itemView);
-            icon = itemView.findViewById(R.id.iv_service_icon);
             name = itemView.findViewById(R.id.tv_service_name);
         }
     }

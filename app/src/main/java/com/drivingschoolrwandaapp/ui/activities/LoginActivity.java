@@ -107,7 +107,8 @@ public class LoginActivity extends AppCompatActivity {
                 return;
             }
 
-            String rawPhone = emailField.getText().toString().trim();
+            CharSequence phoneText = emailField.getText();
+            String rawPhone = phoneText != null ? phoneText.toString().trim() : "";
 
             // Validate the raw input before normalization so we can show field-level errors
             String errorKey = PhoneUtils.getValidationError(rawPhone);

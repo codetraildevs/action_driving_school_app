@@ -1,29 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Base App Theme -->
-    <style name="Theme.DRIVINGSCHOOL2" parent="Theme.Material3.DayNight">
-        <item name="materialAlertDialogTheme">@style/AppTheme.MaterialAlertDialog</item>
-        <item name="alertDialogTheme">@style/AppTheme.MaterialAlertDialog</item>
-    </style>
-
-    <!-- ====================== DIALOG THEME ====================== -->
-    <style name="AppTheme.MaterialAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
-        <item name="colorPrimary">@color/my_primary</item>
-    </style>
-
-    <!-- ====================== INPUT FIELD ====================== -->
-    <style name="Widget.ReadingApp.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">wrap_content</item>
-
-        <item name="boxCornerRadiusBottomEnd">8dp</item>
-        <item name="boxCornerRadiusBottomStart">8dp</item>
-        <item name="boxCornerRadiusTopEnd">8dp</item>
-        <item name="boxCornerRadiusTopStart">8dp</item>
-    </style>
-
-
     <!-- ====================== BUTTON BASE TEXT STYLE ====================== -->
     <style name="TextAppearance.App.Button" parent="TextAppearance.Material3.LabelLarge">
         <item name="fontFamily">sans-serif</item>
@@ -33,16 +10,6 @@
     </style>
 
 
-    <!-- ====================== BUTTON SHAPES ====================== -->
-    <style name="Cut" parent="ShapeAppearance.MaterialComponents.MediumComponent">
-        <item name="cornerFamily">cut</item>
-        <item name="cornerSize">12dp</item>
-    </style>
-
-    <style name="Rounded" parent="ShapeAppearance.MaterialComponents.SmallComponent">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">16dp</item>
-    </style>
 
     <style name="ShapeAppearance.App.Button" parent="ShapeAppearance.Material3.SmallComponent">
         <item name="cornerFamily">cut</item>
@@ -50,39 +17,8 @@
     </style>
 
 
-    <!-- ====================== FILLED BUTTON ====================== -->
-    <style name="Widget.App.Button" parent="Widget.Material3.Button">
-        <item name="materialThemeOverlay">@style/ThemeOverlay.App.Button</item>
-        <item name="android:textAppearance">@style/TextAppearance.App.Button</item>
-        <item name="shapeAppearance">@style/ShapeAppearance.App.Button</item>
-
-        <!-- light primary background -->
-        <item name="backgroundTint">@color/colorPrimary</item>
-        <!-- readable contrast text -->
-        <item name="android:textColor">@color/colorOnPrimary</item>
-
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:paddingTop">12dp</item>
-        <item name="android:paddingBottom">12dp</item>
-        <item name="android:textSize">16sp</item>
-        <item name="android:insetTop">0dp</item>
-        <item name="android:insetBottom">0dp</item>
-        <item name="cornerRadius">8dp</item>
-    </style>
 
 
-    <!-- ====================== TEXT BUTTON ====================== -->
-    <style name="Widget.App.Button.TextButton" parent="Widget.Material3.Button.TextButton">
-        <item name="materialThemeOverlay">@style/ThemeOverlay.App.Button.TextButton</item>
-        <item name="android:textAppearance">@style/TextAppearance.App.Button</item>
-        <item name="shapeAppearance">@style/ShapeAppearance.App.Button</item>
-
-        <!-- readable primary-colored text -->
-        <item name="android:textColor">@color/colorOnPrimary</item>
-        <item name="colorPrimary">@color/my_primary</item>
-        <item name="colorOnContainer">@color/colorOnPrimary</item>
-    </style>
 
 
     <!-- ====================== OUTLINED BUTTON ====================== -->
@@ -103,67 +39,6 @@
         <item name="colorOnContainer">@color/colorOnPrimary</item>
     </style>
 
-    <style name="ThemeOverlay.App.Button" parent="ThemeOverlay.Material3.Button">
-        <item name="colorContainer">@color/colorPrimary</item>
-        <item name="colorOnContainer">@color/colorOnPrimary</item>
-        <item name="shapeAppearance">@style/ShapeAppearance.App.Button</item>
-    </style>
-
-
-    <!-- ====================== ICON BUTTON ====================== -->
-    <style name="Widget.App.Button.IconButton" parent="Widget.Material3.Button.IconButton.Filled" />
-
-
-    <!-- ====================== CARDS ====================== -->
-    <style name="DashboardCard" parent="Widget.MaterialComponents.CardView">
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_columnWeight">1</item>
-        <item name="android:layout_margin">8dp</item>
-        <item name="cardCornerRadius">12dp</item>
-        <item name="cardElevation">4dp</item>
-        <item name="android:clickable">true</item>
-        <item name="android:focusable">true</item>
-        <item name="android:foreground">?android:attr/selectableItemBackground</item>
-    </style>
-
-    <style name="formCard" parent="Widget.Material3.CardView.Elevated">
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_columnWeight">1</item>
-        <item name="android:layout_margin">8dp</item>
-        <item name="cardCornerRadius">12dp</item>
-        <item name="cardElevation">4dp</item>
-        <item name="android:clickable">true</item>
-        <item name="android:focusable">true</item>
-        <item name="android:foreground">?android:attr/selectableItemBackground</item>
-    </style>
-
-
-    <style name="DashboardCardContent">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:orientation">vertical</item>
-        <item name="android:gravity">center</item>
-        <item name="android:padding">16dp</item>
-    </style>
-
-    <style name="DashboardCardIcon">
-        <item name="android:layout_width">64dp</item>
-        <item name="android:layout_height">64dp</item>
-        <item name="android:layout_marginBottom">8dp</item>
-    </style>
-
-    <style name="DashboardCardText">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:textAlignment">center</item>
-        <item name="android:textColor">?attr/colorOnSurface</item>
-        <item name="android:textSize">14sp</item>
-        <item name="android:textStyle">bold</item>
-    </style>
-
-
     <!-- ====================== SPLASH ====================== -->
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">
 <!--        <item name="windowSplashScreenBackground">@color/colorPrimary</item>-->
@@ -172,14 +47,6 @@
 <!--        <item name="android:windowSplashScreenIconBackgroundColor" tools:targetApi="31">@color/colorPrimary</item>-->
 <!--        <item name="android:windowSplashScreenBrandingImage" tools:targetApi="s">@drawable/brand3</item>-->
         <item name="postSplashScreenTheme">@style/Base.Theme.drivingSchoolRwandaApp</item>
-    </style>
-
-
-    <!-- ====================== CARDVIEW DEFAULT ====================== -->
-    <style name="Widget.ReadingApp.CardView" parent="Widget.Material3.CardView.Elevated">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_margin">@dimen/margin_small</item>
     </style>
 
 </resources>

@@ -8,7 +8,7 @@
     android:paddingTop="12dp"
     android:paddingEnd="16dp"
     android:paddingBottom="12dp"
-    android:background="?attr/selectableItemBackground">
+    android:foreground="?attr/selectableItemBackground">
 
     <LinearLayout
         android:id="@+id/bookmark_text_layout"

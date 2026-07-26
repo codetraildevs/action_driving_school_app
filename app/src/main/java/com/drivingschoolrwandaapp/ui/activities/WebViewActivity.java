@@ -48,13 +48,15 @@ public class WebViewActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+
         toolbar.setNavigationOnClickListener(v -> finish());
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_layout), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, 0, systemBars.right, systemBars.bottom);
             return insets;
-        });
+        }
+);
 
         currentUrl = getIntent().getStringExtra("url");
         String title = getIntent().getStringExtra("title");
@@ -62,6 +64,7 @@ public class WebViewActivity extends AppCompatActivity {
         if (title != null) {
             getSupportActionBar().setTitle(title);
         }
+
 
         webView = findViewById(R.id.webView);
         ProgressBar progressBar = findViewById(R.id.progressBar);
@@ -73,7 +76,11 @@ public class WebViewActivity extends AppCompatActivity {
         if (currentUrl != null) {
             webView.loadUrl(currentUrl);
         }
+
+        
+        setupBackPressHandler();
     }
+
 
     @SuppressLint("SetJavaScriptEnabled")
     private void setupWebView(ProgressBar progressBar) {
@@ -95,7 +102,9 @@ public class WebViewActivity extends AppCompatActivity {
                 if (!swipeRefreshLayout.isRefreshing()) {
                     progressBar.setVisibility(View.VISIBLE);
                 }
+
             }
+
 
             @Override
             public void onPageFinished(WebView view, String url) {
@@ -105,6 +114,7 @@ public class WebViewActivity extends AppCompatActivity {
                 currentUrl = url;
             }
 
+
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString();
@@ -113,15 +123,20 @@ public class WebViewActivity extends AppCompatActivity {
                         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                         startActivity(intent);
                         return true;
-                    } catch (Exception e) {
+                    }
+ catch (Exception e) {
                         Log.e("WebView", "Error launching external intent for URL: " + url, e);
                         com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
                         return false;
                     }
+
                 }
+
                 return false;
             }
-        });
+
+        }
+);
 
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
@@ -130,13 +145,18 @@ public class WebViewActivity extends AppCompatActivity {
                 if (newProgress == 100) {
                     progressBar.setVisibility(View.GONE);
                     swipeRefreshLayout.setRefreshing(false);
-                } else {
+                }
+ else {
                     if (!swipeRefreshLayout.isRefreshing()) {
                         progressBar.setVisibility(View.VISIBLE);
                     }
+
                 }
+
             }
-        });
+
+        }
+);
 
         webView.setDownloadListener((downloadUrl, userAgent, contentDisposition, mimetype, contentLength) -> {
             try {
@@ -156,13 +176,18 @@ public class WebViewActivity extends AppCompatActivity {
                     dm.enqueue(request);
                     Toast.makeText(WebViewActivity.this, getString(R.string.downloading_file), Toast.LENGTH_SHORT).show();
                 }
-            } catch (Exception e) {
+
+            }
+ catch (Exception e) {
                 Log.e("WebView", "Download failed", e);
                 com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
                 Toast.makeText(this, getString(R.string.download_failed_msg, e.getMessage()), Toast.LENGTH_SHORT).show();
             }
-        });
+
+        }
+);
     }
+
 
     private void setupSwipeRefresh() {
         swipeRefreshLayout.setOnRefreshListener(() -> webView.reload());
@@ -176,12 +201,22 @@ public class WebViewActivity extends AppCompatActivity {
 
 
 
-    @Override
-    public void onBackPressed() {
-        if (webView != null && webView.canGoBack()) {
-            webView.goBack();
-        } else {
-            super.onBackPressed();
+
+    private void setupBackPressHandler() {
+        getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (webView != null && webView.canGoBack()) {
+                    webView.goBack();
+                }
+ else {
+                    finish();
+                }
+
+            }
+
         }
+);
     }
+
 }

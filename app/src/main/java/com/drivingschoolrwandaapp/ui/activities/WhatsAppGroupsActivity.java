@@ -69,7 +69,7 @@ public class WhatsAppGroupsActivity extends AppCompatActivity implements WhatsAp
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
-        toolbar.setNavigationOnClickListener(v -> onBackPressed());
+        toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
         progressBar = findViewById(R.id.progressBar);
         recyclerView = findViewById(R.id.rv_whatsapp_groups);

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
@@ -21,7 +22,8 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:padding="8dp">
+            android:padding="8dp"
+            tools:ignore="UseCompoundDrawables">
 
             <TextView
 
@@ -60,27 +62,15 @@
         app:cardCornerRadius="8dp"
         app:cardElevation="4dp">
 
-        <LinearLayout
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:padding="8dp">
-
-            <ImageView
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:padding="8dp"
-                android:src="@drawable/momo"
-                android:layout_marginEnd="16dp"
-                android:contentDescription="@null"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/payment_instructions_pay2"
-                android:textAppearance="?attr/textAppearanceBody1" />
-        </LinearLayout>
+            app:drawableStartCompat="@drawable/momo"
+            android:drawablePadding="16dp"
+            android:padding="8dp"
+            android:text="@string/payment_instructions_pay2"
+            android:textAppearance="?attr/textAppearanceBody1" />
 
     </com.google.android.material.card.MaterialCardView>
 
@@ -95,28 +85,15 @@
         app:cardCornerRadius="8dp"
         app:cardElevation="4dp">
 
-        <LinearLayout
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:padding="8dp">
-
-            <ImageView
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:padding="8dp"
-                android:src="@drawable/airtel"
-                android:layout_marginEnd="16dp"
-                android:contentDescription="@null"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/payment_instructions_pay3"
-                android:textAppearance="?attr/textAppearanceBody1" />
-
-        </LinearLayout>
+            app:drawableStartCompat="@drawable/airtel"
+            android:drawablePadding="16dp"
+            android:padding="8dp"
+            android:text="@string/payment_instructions_pay3"
+            android:textAppearance="?attr/textAppearanceBody1" />
     </com.google.android.material.card.MaterialCardView>
 
 </LinearLayout>

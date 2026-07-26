@@ -152,7 +152,7 @@ public class ProfileFragment extends Fragment {
     private void updateUserProfile(User user) {
         if (!isAdded() || getContext() == null) return;
         
-        profileName.setText(user.getFirstName() + " " + user.getLastName() + "("+user.getLanguage()+")");
+        profileName.setText(getString(R.string.user_name_format, user.getFirstName(), user.getLastName(), user.getLanguage()));
         profileEmail.setText(user.getPhoneNumber());
         Glide.with(this)
                 .load(user.getProfilePicture())
