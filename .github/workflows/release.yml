@@ -113,6 +113,8 @@ jobs:
         run: |
           if [[ "$GITHUB_REF" == refs/tags/* ]]; then
             TAG_VERSION="${GITHUB_REF_NAME#v}"
+            # Allow optional -buildN suffix (e.g. v1.3.0-build86) for per-build tags
+            TAG_VERSION="${TAG_VERSION%-build*}"
             BUILD_VERSION=$(grep -oP 'versionName = "\K[^"]+' app/build.gradle.kts)
             if [ "$TAG_VERSION" != "$BUILD_VERSION" ]; then
               echo "::error::Tag v$TAG_VERSION doesn't match build.gradle.kts version \"$BUILD_VERSION\""
