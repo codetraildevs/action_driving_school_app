@@ -127,6 +127,12 @@ jobs:
       - name: Run unit tests
         run: ./gradlew testDebugUnitTest
 
+      # ── Regression guard: MapStruct mapper impls must survive R8 ──
+      # Runs R8 on the release build and fails if TestMapperImpl/SubscriptionMapperImpl
+      # were stripped or renamed (previously caused a production crash at TestMapper.<clinit>).
+      - name: Verify R8 keeps MapStruct mappers
+        run: ./gradlew :app:verifyReleaseMappersKept
+
       # ── Espresso (instrumented) tests ──
       # Requires an Android emulator. The avd-target is set to a common API level
       # that works with the project's minSdk (27) and compileSdk (37).

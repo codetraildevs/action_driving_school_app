@@ -1,4 +1,5 @@
 import java.util.Properties
+import org.gradle.api.GradleException
 
 @file:Suppress("DEPRECATION")
 
@@ -193,4 +194,84 @@ dependencies {
 
 kapt {
     correctErrorTypes = true
+}
+
+/**
+ * Regression guard for the MapStruct release crash
+ * (com.drivingschoolrwandaapp.models.mappers.TestMapper.<clinit> NoSuchMethodException).
+ *
+ * Mappers.getMapper() reflectively instantiates the generated *Impl classes via their public
+ * no-arg constructor. In R8 full mode, a bare `-keep class ...mappers.**` rule keeps only the
+ * class name, so members are stripped and the app crashes at class-init. This task actually runs
+ * R8 (minifyReleaseWithR8) and fails the build if the impl classes, their members, or their
+ * class names do not survive.
+ */
+tasks.register("verifyReleaseMappersKept") {
+    group = "verification"
+    description = "Runs R8 on the release build and fails if MapStruct mapper impls (TestMapperImpl, SubscriptionMapperImpl) were stripped or renamed."
+    dependsOn("minifyReleaseWithR8")
+
+    // Add any new MapStruct mappers here — their generated *Impl classes must survive R8.
+    val implClasses = listOf(
+        "com.drivingschoolrwandaapp.models.mappers.TestMapperImpl",
+        "com.drivingschoolrwandaapp.models.mappers.SubscriptionMapperImpl"
+    )
+    val seedsFile = layout.buildDirectory.file("outputs/mapping/release/seeds.txt")
+    val mappingFile = layout.buildDirectory.file("outputs/mapping/release/mapping.txt")
+
+    doLast {
+        val seeds = seedsFile.get().asFile
+        val mapping = mappingFile.get().asFile
+        if (!seeds.isFile || !mapping.isFile) {
+            throw GradleException(
+                "MapStruct mapper retention check: R8 mapping output not found " +
+                    "(expected ${seeds.absolutePath}, ${mapping.absolutePath}). " +
+                    "Did minifyReleaseWithR8 produce outputs/mapping/release?"
+            )
+        }
+        val seedLines = seeds.readLines()
+        val mappingLines = mapping.readLines()
+        val problems = mutableListOf<String>()
+
+        for (impl in implClasses) {
+            // 1. The class must be an R8 seed (class kept at all).
+            val classKept = seedLines.any { it == impl || it.startsWith("$impl:") }
+            if (!classKept) {
+                problems += "$impl is missing from seeds.txt — R8 removed the class"
+                continue
+            }
+
+            // 2. Members must survive (the historical crash: class kept, members stripped).
+            val memberSeeds = seedLines.count { it.startsWith("$impl:") }
+            if (memberSeeds == 0) {
+                problems += "$impl has no kept members in seeds.txt — members were stripped"
+            }
+
+            // 3. The class name must not be obfuscated (identity mapping in mapping.txt).
+            val identity = "$impl -> $impl:"
+            val identityIndex = mappingLines.indexOfFirst { it.trim() == identity }
+            if (identityIndex < 0) {
+                problems += "$impl was renamed in mapping.txt — reflective lookup will fail"
+                continue
+            }
+
+            // 4. The reflectively-invoked no-arg constructor must survive
+            //    (Mappers.getMapper() throws NoSuchMethodException if it is stripped).
+            val section = mappingLines.drop(identityIndex + 1)
+                .takeWhile { !(it.trim().endsWith(":") && it.contains(" -> ")) }
+            if (section.none { it.contains("<init>") }) {
+                problems += "$impl has no <init> in its mapping.txt section — the no-arg constructor was stripped"
+            }
+        }
+
+        if (problems.isNotEmpty()) {
+            throw GradleException(
+                "MapStruct mapper retention check FAILED:\n  " +
+                    problems.joinToString("\n  ") +
+                    "\nKeep all mapper members in proguard-rules.pro, e.g. " +
+                    "-keep class com.drivingschoolrwandaapp.models.mappers.** { *; }"
+            )
+        }
+        logger.lifecycle("MapStruct mapper retention check passed: ${implClasses.joinToString()}")
+    }
 }
