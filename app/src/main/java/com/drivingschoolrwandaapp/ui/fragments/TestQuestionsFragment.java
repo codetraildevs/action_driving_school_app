@@ -44,7 +44,7 @@ public class TestQuestionsFragment extends Fragment {
     private ViewPager2 viewPager;
     private TestQuestionPagerAdapter pagerAdapter;
     private TextView timerTextView;
-    private TextView timerLabel;
+    private com.google.android.material.card.MaterialCardView timerContainer;
     private TextView questionCounterTextView;
     private TextView progressTextView;
     private ProgressBar progressBar;
@@ -96,7 +96,7 @@ public class TestQuestionsFragment extends Fragment {
 
         viewPager = view.findViewById(R.id.question_view_pager);
         timerTextView = view.findViewById(R.id.timer_text_view);
-        timerLabel = view.findViewById(R.id.timer_label);
+        timerContainer = view.findViewById(R.id.timer_container);
         questionCounterTextView = view.findViewById(R.id.question_counter_text_view);
         progressTextView = view.findViewById(R.id.progress_text_view);
         progressBar = view.findViewById(R.id.progress_bar);
@@ -116,8 +116,8 @@ public class TestQuestionsFragment extends Fragment {
             nextButton.setVisibility(View.GONE);
             submitButton.setVisibility(View.GONE);
             timerTextView.setVisibility(View.GONE);
+            if (timerContainer != null) timerContainer.setVisibility(View.GONE);
             progressBar.setVisibility(View.GONE);
-            if (timerLabel != null) timerLabel.setVisibility(View.GONE);
 
         } else {
             submitButton.setVisibility(View.VISIBLE);
@@ -250,6 +250,8 @@ public class TestQuestionsFragment extends Fragment {
                         // Restore the user's previously selected answers for review
                         testViewModel.restoreReviewAnswers();
                     } else {
+                        // Start the elapsed-time clock together with the countdown timer
+                        testViewModel.markTestStarted();
                         startTimer(test.getDuration());
                     }
                 }
@@ -273,6 +275,15 @@ public class TestQuestionsFragment extends Fragment {
         if (timer != null) {
             timer.cancel();
         }
+        if (durationMinutes <= 0) {
+            // No time limit configured: never run a countdown (a CountDownTimer with 0
+            // millis fires onFinish immediately and would auto-submit the test) and hide
+            // the timer so the header doesn't show an empty pill.
+            if (timerContainer != null) timerContainer.setVisibility(View.GONE);
+            timerTextView.setText(R.string.timer_placeholder);
+            return;
+        }
+        if (timerContainer != null) timerContainer.setVisibility(View.VISIBLE);
         long durationMillis = TimeUnit.MINUTES.toMillis(durationMinutes);
         timer = new CountDownTimer(durationMillis, 1000) {
             @Override

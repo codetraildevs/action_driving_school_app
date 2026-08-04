@@ -9,6 +9,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -71,7 +72,7 @@ public class TestsFragment extends Fragment {
     private ProgressBar progressBar;
     private TextView errorTextView;
     private LinearLayout errorLayout;
-    private Button retryButton;
+    private com.google.android.material.button.MaterialButton retryButton;
     private SwipeRefreshLayout swipeRefreshLayout;
     private AppPreferences appPreferences;
     private boolean isGridLayout = false;
@@ -405,9 +406,13 @@ public class TestsFragment extends Fragment {
         }
 
         if (icon != null) {
+            // Use the theme's toolbar icon color so the toggle stays visible in dark mode
             Drawable mutableIcon = icon.mutate();
-            mutableIcon.setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_ATOP);
-            item.setIcon(mutableIcon);
+            TypedValue typedValue = new TypedValue();
+            if (requireContext().getTheme().resolveAttribute(android.R.attr.colorControlNormal, typedValue, true)) {
+                mutableIcon.setColorFilter(typedValue.data, PorterDuff.Mode.SRC_ATOP);
+                item.setIcon(mutableIcon);
+            }
         }
     }
 

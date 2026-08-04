@@ -40,7 +40,6 @@
     <!-- ************ CUSTOM QUIZ COLORS ************ -->
     <color name="correct_answer_green">#00C853</color>
     <color name="incorrect_answer_red">#DD2C00</color>
-    <color name="selected_answer_blue">#2962FF</color>
 
 
     <!-- ************ STATUS COLORS ************ -->

@@ -44,25 +44,39 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
+            android:padding="24dp"
             android:visibility="gone"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
+            <ImageView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@drawable/ic_warning"
+                android:contentDescription="@null"
+                android:layout_marginBottom="16dp"
+                app:tint="?attr/colorError" />
+
             <TextView
                 android:id="@+id/error_text_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/error_loading_tests"
+                android:textAppearance="?attr/textAppearanceBodyLarge"
+                android:textColor="?attr/colorOnSurface"
                 android:gravity="center"
                 android:padding="16dp"/>
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/retry_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/retry" />
+                android:text="@string/retry"
+                android:textAllCaps="false"
+                app:icon="@drawable/ic_refresh"
+                app:iconGravity="textStart" />
         </LinearLayout>
 
 
