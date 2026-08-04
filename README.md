@@ -7,7 +7,7 @@
 
   [![Platform](https://img.shields.io/badge/Platform-Android-33A1C9?logo=android)]()
   [![Min SDK](https://img.shields.io/badge/minSdk-27-00C853)]()
-  [![Target SDK](https://img.shields.io/badge/targetSdk-35-2962FF)]()
+  [![Target SDK](https://img.shields.io/badge/targetSdk-37-2962FF)]()
   [![Languages](https://img.shields.io/badge/Languages-en%20|%20fr%20|%20rw-FF9800)]()
   [![License](https://img.shields.io/badge/License-Proprietary-red)]()
 
@@ -109,7 +109,7 @@ The app follows **MVVM (Model-View-ViewModel)** architecture with **Repository p
 | Pattern | Implementation |
 |---|---|
 | **DI** | Dagger Hilt (`@HiltAndroidApp`, `@AndroidEntryPoint`, `@Module`) |
-| **Networking** | Retrofit 2 + OkHttp 4 with interceptors for auth, logging, network monitoring |
+| **Networking** | Retrofit 2 + OkHttp 5 with interceptors for auth, logging, network monitoring |
 | **Auth** | JWT token-based with `TokenAuthenticator` for automatic refresh |
 | **Database** | Room (SQLite) for offline caching of questions and results |
 | **Navigation** | Jetpack Navigation Component with single-activity architecture |
@@ -132,34 +132,38 @@ The app follows **MVVM (Model-View-ViewModel)** architecture with **Repository p
 ### Android SDK & Jetpack
 | Component | Purpose |
 |---|---|
-| `appcompat:1.6.1` | Backward-compatible UI components |
-| `core-ktx:1.12.0` | Kotlin extensions for Android |
-| `material:1.12.0` | Material Design 3 components |
-| `constraintlayout:2.1.4` | Flexible layout engine |
-| `navigation-fragment-ktx:2.7.6` | Type-safe navigation |
-| `lifecycle-viewmodel:2.7.0` | MVVM ViewModel |
-| `room-runtime:2.6.1` | Local SQLite database |
-| `work-runtime:2.9.0` | Background task scheduling |
-| `swiperefreshlayout:1.1.0` | Pull-to-refresh |
-| `security-crypto:1.1.0-alpha06` | Encrypted SharedPreferences |
+| `appcompat:1.7.1` | Backward-compatible UI components |
+| `core-ktx:1.19.0` | Kotlin extensions for Android |
+| `material:1.14.0` | Material Design 3 components |
+| `constraintlayout:2.2.1` | Flexible layout engine |
+| `navigation-fragment-ktx:2.9.8` | Type-safe navigation |
+| `lifecycle-viewmodel:2.11.0` | MVVM ViewModel |
+| `room-runtime:2.8.4` | Local SQLite database |
+| `work-runtime:2.11.2` | Background task scheduling |
+| `swiperefreshlayout:1.2.0` | Pull-to-refresh |
+| `security-crypto:1.1.0` | Encrypted SharedPreferences |
 
 ### Third-Party Libraries
 | Library | Purpose |
 |---|---|
-| **Dagger Hilt 2.50** | Dependency injection |
-| **Retrofit 2.9.0** | HTTP API client |
-| **OkHttp 4.12.0** | HTTP client + interceptors |
-| **Gson 2.10.1** | JSON serialization |
-| **Glide 4.16.0** | Image loading |
-| **MapStruct 1.5.5** | Object mapping |
+| **Dagger Hilt 2.60.1** | Dependency injection |
+| **Retrofit 2.12.0** | HTTP API client |
+| **OkHttp 5.4.0** | HTTP client + interceptors |
+| **Gson 2.14.0** | JSON serialization |
+| **Glide 5.0.9** | Image loading |
+| **MapStruct 1.6.3** | Object mapping |
 | **PhotoView 2.3.0** | Pinch-to-zoom images |
+| **Shimmer 0.5.0** | Skeleton loading placeholders |
+| **AndroidSVG 1.4** | SVG vector rendering |
+| **libphonenumber 9.0.35** | Phone number parsing & formatting |
+| **Play In-App Updates 2.1.0** | In-app update prompts |
 
 ### Firebase Services
 | Service | Purpose |
 |---|---|
 | **Firebase Crashlytics** | Crash reporting |
 | **Firebase Cloud Messaging** | Push notifications |
-| **Firebase BOM 33.0.0** | Managed Firebase dependencies |
+| **Firebase BOM 34.16.0** | Managed Firebase dependencies |
 
 ---
 
@@ -169,7 +173,7 @@ The app follows **MVVM (Model-View-ViewModel)** architecture with **Repository p
 
 - **Android Studio** (Ladybug or newer recommended)
 - **JDK 17+**
-- **Android SDK** (compileSdk 36, targetSdk 35)
+- **Android SDK** (compileSdk 37, targetSdk 37)
 - **Google Services** — `google-services.json` from Firebase Console (use `google-services.json.example` as reference)
 
 ### Setup

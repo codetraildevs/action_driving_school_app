@@ -129,7 +129,7 @@ jobs:
 
       # ── Espresso (instrumented) tests ──
       # Requires an Android emulator. The avd-target is set to a common API level
-      # that works with the project's minSdk (27) and compileSdk (36).
+      # that works with the project's minSdk (27) and compileSdk (37).
       - name: Run Espresso tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
