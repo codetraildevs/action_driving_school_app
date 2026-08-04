@@ -177,6 +177,9 @@ class TestViewModelTest {
         assertEquals(20, result.score)
         assertEquals(20, result.totalMarks)
         assertTrue("Expected passed for full score", result.passed)
+        assertEquals(4, result.correctCount)
+        assertEquals(0, result.wrongCount)
+        assertEquals(0, result.skippedCount)
     }
 
     @Test
@@ -195,6 +198,9 @@ class TestViewModelTest {
         val result = viewModel.getTestResult().value!!
         assertEquals(0, result.score)
         assertFalse("Expected not passed for zero score", result.passed)
+        assertEquals(0, result.correctCount)
+        assertEquals(2, result.wrongCount)
+        assertEquals(0, result.skippedCount)
     }
 
     @Test
@@ -293,6 +299,91 @@ class TestViewModelTest {
         assertNotNull("Expected a result even with no answers selected", result)
         assertEquals(0, result!!.score)
         assertFalse("Expected not passed with zero correct", result.passed)
+        assertEquals(0, result.correctCount)
+        assertEquals(0, result.wrongCount)
+        assertEquals("Expected the unanswered question to count as skipped", 1, result.skippedCount)
+    }
+
+    @Test
+    fun `calculateResult records correct wrong and skipped breakdown`() {
+        val twq = createMultiQuestionTest(
+            totalMarks = 20, passMarks = 10,
+            correctOptionIndicesPerQuestion = listOf(0, 1, 2, 3)
+        )
+        val liveData = loadQuestionsIntoView(1)
+        liveData.setValue(Resource.success(twq))
+
+        viewModel.setAnswer(1, 1)   // q1 correct ✓
+        viewModel.setAnswer(2, 5)   // q2 wrong ✗
+        viewModel.setAnswer(3, 11)  // q3 correct ✓
+        // q4 left unanswered
+        viewModel.calculateResult()
+
+        val result = viewModel.getTestResult().value!!
+        assertEquals(2, result.correctCount)
+        assertEquals(1, result.wrongCount)
+        assertEquals(1, result.skippedCount)
+        // correct + wrong + skipped must add up to the question count
+        assertEquals(4, result.correctCount + result.wrongCount + result.skippedCount)
+    }
+
+    @Test
+    fun `calculateResult records completion date and test duration`() {
+        val twq = createMultiQuestionTest(
+            totalMarks = 20, passMarks = 10,
+            correctOptionIndicesPerQuestion = listOf(0, 1, 2, 3)
+        )
+        twq.test?.duration = 15
+        val before = System.currentTimeMillis()
+        val liveData = loadQuestionsIntoView(1)
+        liveData.setValue(Resource.success(twq))
+        // Clock starts with the countdown timer, mirroring TestQuestionsFragment
+        viewModel.markTestStarted()
+
+        viewModel.setAnswer(1, 1)   // q1 correct ✓
+        viewModel.calculateResult()
+        val after = System.currentTimeMillis()
+
+        val result = viewModel.getTestResult().value!!
+        assertTrue("Expected a completion date to be recorded", result.date in before..after)
+        assertEquals(15, result.duration)
+        // Elapsed time runs from markTestStarted() to calculateResult(), so it must be
+        // non-negative and no larger than the wall-clock span of the test run.
+        assertTrue("Expected non-negative elapsed time", result.elapsedSeconds >= 0)
+        assertTrue(
+            "Expected elapsed time within test run bounds, was ${result.elapsedSeconds}",
+            result.elapsedSeconds * 1000L <= (after - before)
+        )
+    }
+
+    @Test
+    fun `calculateResult reports zero elapsed time when test never started`() {
+        val twq = createOneQuestionTest(correctOptionIndex = 0)
+        val liveData = loadQuestionsIntoView(1)
+        liveData.setValue(Resource.success(twq))
+        // No markTestStarted() call — clock stays disarmed
+
+        viewModel.setAnswer(1, 1)
+        viewModel.calculateResult()
+
+        val result = viewModel.getTestResult().value!!
+        assertEquals("Expected zero elapsed time when test never started", 0, result.elapsedSeconds)
+    }
+
+    @Test
+    fun `loadQuestionsForTest clears a previously started clock`() {
+        val twq = createOneQuestionTest(correctOptionIndex = 0)
+        val liveData = loadQuestionsIntoView(1)
+        liveData.setValue(Resource.success(twq))
+
+        viewModel.markTestStarted()          // a previous test's clock is running...
+        viewModel.loadQuestionsForTest(2)    // ...but loading a new test must re-arm it
+
+        viewModel.setAnswer(1, 1)
+        viewModel.calculateResult()
+
+        val result = viewModel.getTestResult().value!!
+        assertEquals("Expected stale clock cleared by loadQuestionsForTest", 0, result.elapsedSeconds)
     }
 
     @Test

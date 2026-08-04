@@ -20,9 +20,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.models.entities.TestResult;
+import com.drivingschoolrwandaapp.utils.TimeFormatUtils;
 import com.drivingschoolrwandaapp.viewmodel.TestViewModel;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -135,6 +139,16 @@ public class ResultsFragment extends Fragment {
             }
         }
 
+        /**
+         * Formats the completion timestamp. The formatter is intentionally created per call:
+         * the app has an in-app language switcher, so a static field would capture a stale
+         * Locale.getDefault() and trip lint's ConstantLocale check.
+         */
+        private String formatDate(long dateMillis) {
+            return new SimpleDateFormat("MMM dd, yyyy • h:mm a", Locale.getDefault())
+                    .format(new Date(dateMillis));
+        }
+
         @NonNull
         @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -158,6 +172,8 @@ public class ResultsFragment extends Fragment {
             private final com.google.android.material.card.MaterialCardView statusIconContainer;
             private final TextView testNameText;
             private final TextView scoreText;
+            private final TextView dateText;
+            private final TextView durationText;
             private final View actionButtonsRow;
             private final com.google.android.material.button.MaterialButton btnReview;
             private final com.google.android.material.button.MaterialButton btnRetake;
@@ -171,9 +187,8 @@ public class ResultsFragment extends Fragment {
                 actionButtonsRow = itemView.findViewById(R.id.action_buttons_row);
                 btnReview = itemView.findViewById(R.id.btn_review_test);
                 btnRetake = itemView.findViewById(R.id.btn_retake_test);
-                // Date field exists in layout but TestResult has no date data yet
-                TextView dateText = itemView.findViewById(R.id.result_date);
-                if (dateText != null) dateText.setVisibility(View.GONE);
+                dateText = itemView.findViewById(R.id.result_date);
+                durationText = itemView.findViewById(R.id.result_duration);
             }
 
             void bind(TestResult result) {
@@ -189,6 +204,31 @@ public class ResultsFragment extends Fragment {
 
                 // Score
                 scoreText.setText(getString(R.string.compact_score_format, result.getScore(), result.getTotalMarks()));
+
+                // Completion date
+                long dateMillis = result.getDate();
+                if (dateMillis > 0) {
+                    dateText.setText(formatDate(dateMillis));
+                    dateText.setVisibility(View.VISIBLE);
+                } else {
+                    dateText.setVisibility(View.GONE);
+                }
+
+                // Time taken vs the test's duration limit
+                int elapsed = result.getElapsedSeconds();
+                int duration = result.getDuration();
+                if (elapsed > 0 && duration > 0) {
+                    durationText.setText(getString(R.string.result_time_format, TimeFormatUtils.formatElapsed(elapsed), duration));
+                    durationText.setVisibility(View.VISIBLE);
+                } else if (elapsed > 0) {
+                    durationText.setText(TimeFormatUtils.formatElapsed(elapsed));
+                    durationText.setVisibility(View.VISIBLE);
+                } else if (duration > 0) {
+                    durationText.setText(getString(R.string.result_duration_format, duration));
+                    durationText.setVisibility(View.VISIBLE);
+                } else {
+                    durationText.setVisibility(View.GONE);
+                }
 
                 // Status icon and container
                 if (result.isPassed()) {

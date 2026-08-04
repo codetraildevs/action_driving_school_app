@@ -49,6 +49,9 @@ public class TestViewModel extends AndroidViewModel {
     // History of test results for Previous Tests page
     private final MutableLiveData<List<TestResult>> testResultHistory = new MutableLiveData<>(new ArrayList<>());
 
+    // Timestamp captured when a test begins, used to report actual time taken
+    private long testStartTime = 0L;
+
     @Inject
     public TestViewModel(@NonNull Application application, TestRepository testRepository) {
         super(application);
@@ -89,6 +92,16 @@ public class TestViewModel extends AndroidViewModel {
         selectedAnswers.setValue(new HashMap<>());
         feedbackHiddenQuestions.clear();
         testResult.setValue(null);
+        // Clock is armed (not started) until markTestStarted() fires with the countdown timer
+        this.testStartTime = 0L;
+    }
+
+    /**
+     * Marks the moment the countdown timer actually starts for a test,
+     * so elapsed time excludes question-loading time.
+     */
+    public void markTestStarted() {
+        this.testStartTime = System.currentTimeMillis();
     }
     
     /**
@@ -173,6 +186,7 @@ public class TestViewModel extends AndroidViewModel {
             }
 
             int correctAnswers = 0;
+            int wrongAnswers = 0;
             int totalMarks = data.test != null ? data.test.getTotalMarks() : data.questions.size();
             int passMarks = data.test != null ? data.test.getPassMarks() : (int) Math.ceil(data.questions.size() * 0.5);
             int numberOfQuestions = data.questions.size();
@@ -184,12 +198,18 @@ public class TestViewModel extends AndroidViewModel {
                 Integer userAnswerId = userAnswers.get(questionWithOptions.question != null ? questionWithOptions.question.getId() : 0);
                 if (userAnswerId != null && questionWithOptions.options != null) {
                     for (com.drivingschoolrwandaapp.database.entities.QuestionOptionEntity option : questionWithOptions.options) {
-                        if (option.getId() == userAnswerId && option.isCorrect()) {
-                            correctAnswers++;
+                        if (option.getId() == userAnswerId) {
+                            if (option.isCorrect()) {
+                                correctAnswers++;
+                            } else {
+                                wrongAnswers++;
+                            }
+                            break;
                         }
                     }
                 }
             }
+            int skippedAnswers = Math.max(0, numberOfQuestions - correctAnswers - wrongAnswers);
 
             double marksPerQuestion = numberOfQuestions > 0 ? (double) totalMarks / numberOfQuestions : 0;
             int finalScore = (int) Math.round(correctAnswers * marksPerQuestion);
@@ -201,7 +221,13 @@ public class TestViewModel extends AndroidViewModel {
             String testName = data.test != null && data.test.getTitle() != null
                 ? data.test.getTitle() : "Exam " + testNumber;
 
-            TestResult result = new TestResult(finalScore, totalMarks, isPassed, testNumber, testName, resultTestId);
+            long completedAt = System.currentTimeMillis();
+            int durationLimitMinutes = data.test != null ? data.test.getDuration() : 0;
+            int elapsedSeconds = testStartTime > 0 ? (int) ((completedAt - testStartTime) / 1000) : 0;
+
+            TestResult result = new TestResult(finalScore, totalMarks, isPassed, testNumber, testName,
+                    resultTestId, completedAt, durationLimitMinutes, elapsedSeconds,
+                    correctAnswers, wrongAnswers, skippedAnswers);
             testResult.setValue(result);
 
             // Add to history

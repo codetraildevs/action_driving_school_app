@@ -80,7 +80,7 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="?attr/textAppearanceBodySmall"
                     android:textColor="?attr/colorOutline"
-                    tools:text="Today, 2:30 PM" />
+                    tools:text="Aug 4, 2026 • 2:30 PM" />
 
                 <TextView
                     android:id="@+id/result_duration"
@@ -89,9 +89,8 @@
                     android:textAppearance="?attr/textAppearanceBodySmall"
                     android:textColor="?attr/colorOutline"
                     android:layout_marginStart="12dp"
-                    android:visibility="gone"
-                    tools:text="15:00"
-                    tools:visibility="visible" />
+                    android:visibility="visible"
+                    tools:text="Time: 12:34 / 15 min" />
             </LinearLayout>
         </LinearLayout>
 

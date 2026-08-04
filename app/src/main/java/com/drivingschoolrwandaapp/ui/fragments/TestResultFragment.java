@@ -18,6 +18,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.drivingschoolrwandaapp.R;
+import com.drivingschoolrwandaapp.utils.TimeFormatUtils;
 import com.drivingschoolrwandaapp.viewmodel.TestViewModel;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -34,6 +35,12 @@ public class TestResultFragment extends Fragment {
     private ImageView resultIconImageView;
     private com.google.android.material.card.MaterialCardView scoreCircleContainer;
     private Button finishButton;
+    private com.google.android.material.card.MaterialCardView timeCard;
+    private com.google.android.material.card.MaterialCardView breakdownCard;
+    private TextView resultTimeText;
+    private TextView resultCorrectCount;
+    private TextView resultWrongCount;
+    private TextView resultSkippedCount;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -59,6 +66,12 @@ public class TestResultFragment extends Fragment {
         resultIconImageView = view.findViewById(R.id.result_icon_image_view);
         scoreCircleContainer = view.findViewById(R.id.score_circle_container);
         finishButton = view.findViewById(R.id.finish_button);
+        timeCard = view.findViewById(R.id.time_card);
+        breakdownCard = view.findViewById(R.id.breakdown_card);
+        resultTimeText = view.findViewById(R.id.result_time_text);
+        resultCorrectCount = view.findViewById(R.id.result_correct_count);
+        resultWrongCount = view.findViewById(R.id.result_wrong_count);
+        resultSkippedCount = view.findViewById(R.id.result_skipped_count);
 
         observeViewModel();
 
@@ -110,6 +123,29 @@ public class TestResultFragment extends Fragment {
                 resultScoreTextView.setText(getString(R.string.score_details, result.getScore(), result.getTotalMarks()));
                 resultStatusText.setText(result.isPassed() ? getString(R.string.result_passed) : getString(R.string.result_failed));
                 resultStatusScore.setText(String.valueOf(result.getScore()));
+
+                // Time taken vs the test's duration limit
+                int elapsed = result.getElapsedSeconds();
+                int duration = result.getDuration();
+                if (elapsed > 0 && duration > 0) {
+                    resultTimeText.setText(getString(R.string.result_time_format,
+                            TimeFormatUtils.formatElapsed(elapsed), duration));
+                    timeCard.setVisibility(View.VISIBLE);
+                } else if (elapsed > 0) {
+                    resultTimeText.setText(TimeFormatUtils.formatElapsed(elapsed));
+                    timeCard.setVisibility(View.VISIBLE);
+                } else if (duration > 0) {
+                    resultTimeText.setText(getString(R.string.result_duration_format, duration));
+                    timeCard.setVisibility(View.VISIBLE);
+                } else {
+                    timeCard.setVisibility(View.GONE);
+                }
+
+                // Score breakdown: correct / wrong / skipped
+                resultCorrectCount.setText(String.valueOf(result.getCorrectCount()));
+                resultWrongCount.setText(String.valueOf(result.getWrongCount()));
+                resultSkippedCount.setText(String.valueOf(result.getSkippedCount()));
+                breakdownCard.setVisibility(View.VISIBLE);
             } else {
                 // Fallback: if no result yet, show placeholder
                 resultTitleTextView.setText(getString(R.string.title_test_result));
@@ -117,6 +153,8 @@ public class TestResultFragment extends Fragment {
                 resultScoreTextView.setText(R.string.result_placeholder_score);
                 resultStatusText.setText(R.string.result_placeholder_status);
                 resultStatusScore.setText(R.string.result_placeholder_zero);
+                timeCard.setVisibility(View.GONE);
+                breakdownCard.setVisibility(View.GONE);
             }
         });
     }

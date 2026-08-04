@@ -286,6 +286,10 @@ Quand tu arrives à la dernière question, tu appuies sur « Terminer l’examen
     <string name="score_details">Score: %1$d / %2$d</string>
     <string name="result_passed">Réussi</string>
     <string name="result_failed">Échoué</string>
+    <string name="score_breakdown">Détail du score</string>
+    <string name="correct_answers">Correctes</string>
+    <string name="wrong_answers">Fausses</string>
+    <string name="skipped_questions">Sans réponse</string>
     <string name="percentage_score">%d%%</string>
     <string name="exam_number_format">Examen %d</string>
 
@@ -307,6 +311,8 @@ Quand tu arrives à la dernière question, tu appuies sur « Terminer l’examen
     <!-- SetTextI18n format strings -->
     <string name="file_size_mb_format">%.2f Mo</string>
     <string name="compact_score_format">%1$d/%2$d</string>
+    <string name="result_duration_format" tools:ignore="PluralsCandidate">%1$d min</string>
+    <string name="result_time_format" tools:ignore="PluralsCandidate">Temps : %1$s / %2$d min</string>
     <string name="result_placeholder_percentage">--%</string>
     <string name="result_placeholder_score">-- / --</string>
     <string name="result_placeholder_status">--</string>
