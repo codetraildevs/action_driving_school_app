@@ -50,9 +50,11 @@
 }
 
 # ─── MapStruct Generated Mappers ───
-# Keep mapper classes so Hilt injection can find them at runtime.
-# Members can be optimized by R8 since they're only called directly.
--keep class com.drivingschoolrwandaapp.models.mappers.**
+# Mappers.getMapper() reflectively instantiates the generated *Impl classes
+# via their public no-arg constructor. In R8 full mode (android.enableR8.fullMode=true)
+# a bare -keep class rule keeps only the class name, so members are stripped and
+# the app crashes with NoSuchMethodException at <clinit>. Keep all members.
+-keep class com.drivingschoolrwandaapp.models.mappers.** { *; }
 
 # ─── OkHttp dontwarn (optional platform dependencies) ───
 # OkHttp tries to load Conscrypt, BouncyCastle, and OpenJSSE on certain Android versions.
