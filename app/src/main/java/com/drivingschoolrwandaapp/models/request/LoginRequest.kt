@@ -1,7 +1,9 @@
 package com.drivingschoolrwandaapp.models.request
 
+import com.google.gson.annotations.SerializedName
+
 data class LoginRequest(
-    var identifier: String = "",
-    var password: String = "",
-    var deviceId: String = ""
+    @SerializedName("identifier") var identifier: String = "",
+    @SerializedName("password") var password: String = "",
+    @SerializedName("deviceId") var deviceId: String = ""
 )

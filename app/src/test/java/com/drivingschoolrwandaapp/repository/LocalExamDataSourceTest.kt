@@ -388,6 +388,27 @@ class LocalExamDataSourceTest {
     }
 
     @Test
+    fun `exams field as object instead of array returns empty exam list`() {
+        `when`(assetManager.open("json_exams/en_exams.json"))
+            .thenReturn(ByteArrayInputStream("{\"exams\": {}}".toByteArray()))
+
+        val exams = dataSource.loadExams("en")
+
+        assertTrue("Expected empty list when exams is not an array", exams.isEmpty())
+    }
+
+    @Test
+    fun `exam with questions as string returns empty exam list`() {
+        val malformed = "{\"exams\": [{\"quizId\":\"1\",\"questions\":\"not-a-list\"}]}"
+        `when`(assetManager.open("json_exams/en_exams.json"))
+            .thenReturn(ByteArrayInputStream(malformed.toByteArray()))
+
+        val exams = dataSource.loadExams("en")
+
+        assertTrue("Expected empty list when a question field has the wrong type", exams.isEmpty())
+    }
+
+    @Test
     fun `missing asset file returns empty exam list`() {
         mockAssetFileMissing("en")
 
@@ -454,6 +475,24 @@ class LocalExamDataSourceTest {
         val result = dataSource.loadExamByQuizId("1", "en")
 
         assertNull("Expected null when no exams loaded", result)
+    }
+
+    @Test
+    fun `loadExamByQuizId returns null for empty string quizId`() {
+        mockAssetFileForLanguage("en", listOf(LocalExam("1", "CLASS", "Exam", "img.jpg", emptyList())))
+
+        val result = dataSource.loadExamByQuizId("", "en")
+
+        assertNull("Expected null for empty quizId", result)
+    }
+
+    @Test
+    fun `loadExamByQuizId returns null for whitespace padded quizId`() {
+        mockAssetFileForLanguage("en", listOf(LocalExam("177", "RANDOM", "Exam", "img.jpg", emptyList())))
+
+        val result = dataSource.loadExamByQuizId(" 177 ", "en")
+
+        assertNull("Expected null for whitespace-padded quizId", result)
     }
 
     @Test

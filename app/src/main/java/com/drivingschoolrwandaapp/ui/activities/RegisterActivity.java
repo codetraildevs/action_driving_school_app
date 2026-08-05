@@ -27,6 +27,7 @@ import com.drivingschoolrwandaapp.data.local.preferences.TokenManager;
 import com.drivingschoolrwandaapp.models.entities.Device;
 import com.drivingschoolrwandaapp.models.entities.User;
 import com.drivingschoolrwandaapp.models.response.RegisterResponse;
+import com.drivingschoolrwandaapp.utils.InsetsUtils;
 import com.drivingschoolrwandaapp.utils.PhoneUtils;
 import com.drivingschoolrwandaapp.viewmodel.UserViewModel;
 import com.google.android.material.textfield.TextInputEditText;
@@ -69,6 +70,9 @@ public class RegisterActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
 //        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
         setContentView(R.layout.activity_register);
+
+        // Keep content clear of the transparent system bars in edge-to-edge mode
+        InsetsUtils.applySystemBarsPadding(findViewById(android.R.id.content), true, true);
 
         loadingTimeoutHandler = new Handler(Looper.getMainLooper());
 

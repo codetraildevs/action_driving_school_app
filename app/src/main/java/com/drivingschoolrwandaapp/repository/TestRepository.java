@@ -231,8 +231,8 @@ public class TestRepository {
      * Convert an asset path from the JSON file to a file:///android_asset/ URI
      * that Glide can load from Android's assets directory.
      *
-     * JSON stores paths like: "assets/json_questions_images/exam1.png"
-     * Glide expects:          "file:///android_asset/json_questions_images/exam1.png"
+     * JSON stores paths like: "json_questions_images/exam1.webp"
+     * Glide expects:          "file:///android_asset/json_questions_images/exam1.webp"
      *
      * @param imagePath The image path from JSON (may be null or empty)
      * @return The converted file:// URI, or null if the input is null/empty

@@ -406,6 +406,96 @@ class TestViewModelTest {
         assertNull("Expected null when questions list empty", viewModel.getTestResult().value)
     }
 
+    @Test
+    fun `calculateResult with question missing options counts as skipped`() {
+        val twq = createOneQuestionTest(correctOptionIndex = 0)
+        // Simulate corrupt data: question exists but options list is null
+        twq.questions!![0].options = null
+        val liveData = loadQuestionsIntoView(1)
+        liveData.setValue(Resource.success(twq))
+
+        viewModel.setAnswer(1, 1)
+        viewModel.calculateResult()
+
+        val result = viewModel.getTestResult().value!!
+        assertEquals("Question without options cannot be evaluated", 0, result.correctCount)
+        assertEquals(0, result.wrongCount)
+        assertEquals("Question without options counts as skipped", 1, result.skippedCount)
+        assertEquals(0, result.score)
+        assertFalse(result.passed)
+    }
+
+    @Test
+    fun `calculateResult with null question entity counts as skipped`() {
+        val twq = createOneQuestionTest(correctOptionIndex = 0)
+        twq.questions!![0].question = null
+        val liveData = loadQuestionsIntoView(1)
+        liveData.setValue(Resource.success(twq))
+
+        viewModel.setAnswer(1, 1)
+        viewModel.calculateResult()
+
+        val result = viewModel.getTestResult().value!!
+        assertEquals("Null question entity must not crash scoring", 0, result.correctCount)
+        assertEquals(1, result.skippedCount)
+    }
+
+    @Test
+    fun `calculateResult with answer for non existent question counts as skipped`() {
+        val twq = createOneQuestionTest(correctOptionIndex = 0)
+        val liveData = loadQuestionsIntoView(1)
+        liveData.setValue(Resource.success(twq))
+
+        // Answer a question id that is not part of this test
+        viewModel.setAnswer(99, 1)
+        viewModel.calculateResult()
+
+        val result = viewModel.getTestResult().value!!
+        assertEquals(0, result.correctCount)
+        assertEquals("Orphan answer must be ignored, question stays skipped", 1, result.skippedCount)
+    }
+
+    @Test
+    fun `loadQuestionsForTest clears a previously computed result`() {
+        val liveData = loadQuestionsIntoView(1)
+        liveData.setValue(Resource.success(createOneQuestionTest(correctOptionIndex = 0)))
+        viewModel.setAnswer(1, 1)
+        viewModel.calculateResult()
+        assertNotNull("Expected result before loading a new test", viewModel.getTestResult().value)
+
+        viewModel.loadQuestionsForTest(2)
+
+        assertNull("Loading a new test must clear the previous result", viewModel.getTestResult().value)
+    }
+
+    @Test
+    fun `calculateResult appends each submission to result history`() {
+        val liveData = loadQuestionsIntoView(1)
+        liveData.setValue(Resource.success(createOneQuestionTest(correctOptionIndex = 0)))
+
+        viewModel.setAnswer(1, 1)
+        viewModel.calculateResult()
+        viewModel.calculateResult()
+
+        val history = viewModel.getTestResultHistory().value!!
+        assertEquals("Each calculateResult call adds a history entry", 2, history.size)
+    }
+
+    @Test
+    fun `storeTestData null falls back to switchMap value`() {
+        val liveData = loadQuestionsIntoView(1)
+        liveData.setValue(Resource.success(createOneQuestionTest(correctOptionIndex = 0)))
+
+        viewModel.storeTestData(null)
+        viewModel.setAnswer(1, 1)
+        viewModel.calculateResult()
+
+        // storeTestData(null) must not poison scoring — switchMap value is used instead
+        val result = viewModel.getTestResult().value
+        assertNotNull("Expected fallback to switchMap value", result)
+        assertEquals(1, result!!.correctCount)
+    }
+
     // ---------------------------------------------------------------------------
     // Exam Question Loading
     // ---------------------------------------------------------------------------

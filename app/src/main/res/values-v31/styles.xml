@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android 12+ (API 31+) renders the launch splash natively from these platform
+         attributes — no compat library required. windowBackground stays brand-colored
+         so the window shown between splash dismissal and first frame is seamless. -->
+    <style name="Theme.App.Starting" parent="Base.Theme.drivingSchoolRwandaApp">
+        <item name="android:windowSplashScreenBackground">@color/colorPrimary</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/logo1</item>
+        <item name="android:windowSplashScreenAnimationDuration">300</item>
+        <item name="android:windowBackground">@color/colorPrimary</item>
+    </style>
+</resources>

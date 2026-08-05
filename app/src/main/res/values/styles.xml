@@ -40,13 +40,14 @@
     </style>
 
     <!-- ====================== SPLASH ====================== -->
-    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
-<!--        <item name="windowSplashScreenBackground">@color/colorPrimary</item>-->
-        <item name="windowSplashScreenAnimationDuration">300</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/logo1</item>
-<!--        <item name="android:windowSplashScreenIconBackgroundColor" tools:targetApi="31">@color/colorPrimary</item>-->
-<!--        <item name="android:windowSplashScreenBrandingImage" tools:targetApi="s">@drawable/brand3</item>-->
-        <item name="postSplashScreenTheme">@style/Base.Theme.drivingSchoolRwandaApp</item>
+    <!-- API 27-30 (no native system splash): solid branded starting window so the
+         launch doesn't flash blank white. Android 12+ (API 31+) uses the native
+         system splash defined in values-v31/styles.xml — the AndroidX SplashScreen
+         compat library was removed because it calls the Android 15-deprecated
+         edge-to-edge APIs (Window.setStatusBarColor, Window.setNavigationBarColor,
+         LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES), which Play Console flags. -->
+    <style name="Theme.App.Starting" parent="Base.Theme.drivingSchoolRwandaApp">
+        <item name="android:windowBackground">@color/colorPrimary</item>
     </style>
 
 </resources>

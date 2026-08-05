@@ -248,6 +248,7 @@ When you reach the last one, you press “Finish Exam,” and you will immediate
     <string name="test_history">Test History</string>
     <string name="review">Review</string>
     <string name="retake">Retake</string>
+    <string name="score">Score</string>
     <string name="score_details">Score: %1$d / %2$d</string>
     <string name="result_passed">Passed</string>
     <string name="result_failed">Failed</string>

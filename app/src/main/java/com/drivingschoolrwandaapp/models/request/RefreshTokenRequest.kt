@@ -1,5 +1,7 @@
 package com.drivingschoolrwandaapp.models.request
 
+import com.google.gson.annotations.SerializedName
+
 data class RefreshTokenRequest(
-    var refreshToken: String = ""
+    @SerializedName("refreshToken") var refreshToken: String = ""
 )

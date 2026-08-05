@@ -129,7 +129,7 @@
                                 android:layout_height="wrap_content"
                                 android:textAppearance="?attr/textAppearanceLabelSmall"
                                 android:textColor="?attr/colorOutline"
-                                android:text="@string/result_passed"
+                                android:text="@string/status"
                                 android:textAllCaps="true" />
 
                             <TextView
@@ -161,7 +161,7 @@
                                 android:layout_height="wrap_content"
                                 android:textAppearance="?attr/textAppearanceLabelSmall"
                                 android:textColor="?attr/colorOutline"
-                                android:text="@string/score_details"
+                                android:text="@string/score"
                                 android:textAllCaps="true" />
 
                             <TextView

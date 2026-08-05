@@ -283,6 +283,7 @@ Quand tu arrives à la dernière question, tu appuies sur « Terminer l’examen
     <string name="test_history">Historique des Tests</string>
     <string name="review">Réviser</string>
     <string name="retake">Reprendre</string>
+    <string name="score">Score</string>
     <string name="score_details">Score: %1$d / %2$d</string>
     <string name="result_passed">Réussi</string>
     <string name="result_failed">Échoué</string>

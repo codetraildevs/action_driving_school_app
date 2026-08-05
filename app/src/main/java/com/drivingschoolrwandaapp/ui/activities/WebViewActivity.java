@@ -24,12 +24,10 @@ import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.drivingschoolrwandaapp.R;
+import com.drivingschoolrwandaapp.utils.InsetsUtils;
 
 public class WebViewActivity extends AppCompatActivity {
 
@@ -51,12 +49,7 @@ public class WebViewActivity extends AppCompatActivity {
 
         toolbar.setNavigationOnClickListener(v -> finish());
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_layout), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, 0, systemBars.right, systemBars.bottom);
-            return insets;
-        }
-);
+        InsetsUtils.applySystemBarsPadding(findViewById(R.id.main_layout), false, true);
 
         currentUrl = getIntent().getStringExtra("url");
         String title = getIntent().getStringExtra("title");

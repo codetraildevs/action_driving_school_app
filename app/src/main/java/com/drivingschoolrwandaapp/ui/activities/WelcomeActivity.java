@@ -20,9 +20,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.drivingschoolrwandaapp.BuildConfig;
@@ -30,6 +27,7 @@ import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.api.ApiClient;
 import com.drivingschoolrwandaapp.data.local.preferences.AppPreferences;
 import com.drivingschoolrwandaapp.ui.adapters.WelcomeCarouselAdapter;
+import com.drivingschoolrwandaapp.utils.InsetsUtils;
 import com.drivingschoolrwandaapp.utils.LanguageUtils;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -55,16 +53,7 @@ public class WelcomeActivity extends AppCompatActivity {
 
         // Apply system bar insets to the root view to prevent content from being clipped
         // behind the transparent status bar in edge-to-edge mode.
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(
-                v.getPaddingLeft(),
-                systemBars.top,
-                v.getPaddingRight(),
-                systemBars.bottom
-            );
-            return WindowInsetsCompat.CONSUMED;
-        });
+        InsetsUtils.applySystemBarsPadding(findViewById(android.R.id.content), true, true);
 
         setupButtons();
         setupCarousel();

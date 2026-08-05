@@ -1,11 +1,13 @@
 package com.drivingschoolrwandaapp.models.request
 
+import com.google.gson.annotations.SerializedName
+
 data class IremboLicenseRequest(
-    var category: String = "",
-    var licenseType: String = "",
-    var applicationType: String = "",
-    var applicantName: String = "",
-    var applicantPhoneNumber: String = "",
-    var applicantNationalId: String = "",
-    var address: String = ""
+    @SerializedName("category") var category: String = "",
+    @SerializedName("licenseType") var licenseType: String = "",
+    @SerializedName("applicationType") var applicationType: String = "",
+    @SerializedName("applicantName") var applicantName: String = "",
+    @SerializedName("applicantPhoneNumber") var applicantPhoneNumber: String = "",
+    @SerializedName("applicantNationalId") var applicantNationalId: String = "",
+    @SerializedName("address") var address: String = ""
 )

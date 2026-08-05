@@ -22,14 +22,12 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.drivingschoolrwandaapp.R;
+import com.drivingschoolrwandaapp.utils.InsetsUtils;
 import com.drivingschoolrwandaapp.ui.adapters.BookmarkAdapter;
 import com.drivingschoolrwandaapp.ui.adapters.PdfAdapter;
 import com.drivingschoolrwandaapp.database.entities.Bookmark;
@@ -66,11 +64,7 @@ public class PdfViewerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pdf_viewer);
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+        InsetsUtils.applySystemBarsPadding(findViewById(R.id.main), true, true);
 
         pdfViewModel = new ViewModelProvider(this).get(PdfViewModel.class);
         prefs = getSharedPreferences("PdfViewerPrefs", MODE_PRIVATE);

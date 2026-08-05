@@ -4,6 +4,7 @@ import android.util.Log
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -183,6 +184,38 @@ class PhoneUtilsTest {
         assertEquals("abc", PhoneUtils.normalize("abc"))
     }
 
+    @Test
+    fun `normalize mixed letters and digits strips letters instead of returning raw`() {
+        // libphonenumber is lenient: it strips non-digit characters and formats what remains.
+        // Assert the shape (a well-formed E164) rather than the exact odd output, so the test
+        // stays valid across libphonenumber versions.
+        val normalized = PhoneUtils.normalize("0782abc")
+        assertNotEquals("0782abc", normalized)
+        assertTrue("Expected E164 shape, was $normalized", normalized.startsWith("+"))
+        assertTrue("Expected digits only after +, was $normalized", normalized.drop(1).all { it.isDigit() })
+    }
+
+    @Test
+    fun `normalize plus sign only returns raw input`() {
+        assertEquals("+", PhoneUtils.normalize("+"))
+    }
+
+    @Test
+    fun `normalize double zero only returns raw input`() {
+        assertEquals("00", PhoneUtils.normalize("00"))
+    }
+
+    @Test
+    fun `normalize absurdly long number returns raw input`() {
+        val tooLong = "+123456789012345678901234567890"
+        assertEquals(tooLong, PhoneUtils.normalize(tooLong))
+    }
+
+    @Test
+    fun `normalize emoji prefix number strips emoji and normalizes digits`() {
+        assertEquals("+250782877442", PhoneUtils.normalize("📞0782877442"))
+    }
+
     // ---------------------------------------------------------------------------
     // isValid()
     // ---------------------------------------------------------------------------
@@ -225,6 +258,26 @@ class PhoneUtilsTest {
     fun `isValid returns false for number with wrong country code`() {
         // +999 is not a valid country code
         assertFalse(PhoneUtils.isValid("+999000000000"))
+    }
+
+    @Test
+    fun `isValid returns false for mixed letters and digits`() {
+        assertFalse(PhoneUtils.isValid("0782abc"))
+    }
+
+    @Test
+    fun `isValid returns false for plus sign only`() {
+        assertFalse(PhoneUtils.isValid("+"))
+    }
+
+    @Test
+    fun `isValid returns false for double zero only`() {
+        assertFalse(PhoneUtils.isValid("00"))
+    }
+
+    @Test
+    fun `isValid returns false for absurdly long number`() {
+        assertFalse(PhoneUtils.isValid("+123456789012345678901234567890"))
     }
 
     // ── Edge cases ──
@@ -315,6 +368,26 @@ class PhoneUtilsTest {
     @Test
     fun `getValidationError random text returns invalid_phone`() {
         assertEquals("invalid_phone", PhoneUtils.getValidationError("not-a-phone"))
+    }
+
+    @Test
+    fun `getValidationError mixed letters and digits returns invalid_phone`() {
+        assertEquals("invalid_phone", PhoneUtils.getValidationError("0782abc"))
+    }
+
+    @Test
+    fun `getValidationError plus sign only returns invalid_phone`() {
+        assertEquals("invalid_phone", PhoneUtils.getValidationError("+"))
+    }
+
+    @Test
+    fun `getValidationError double zero only returns invalid_phone`() {
+        assertEquals("invalid_phone", PhoneUtils.getValidationError("00"))
+    }
+
+    @Test
+    fun `getValidationError absurdly long number returns invalid_phone`() {
+        assertEquals("invalid_phone", PhoneUtils.getValidationError("+123456789012345678901234567890"))
     }
 
     // ---------------------------------------------------------------------------

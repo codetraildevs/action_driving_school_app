@@ -244,6 +244,7 @@
     <string name="test_history">Amatangazo y\'Ibizamini</string>
     <string name="review">Subiramo</string>
     <string name="retake">Ongera Ukore</string>
+    <string name="score">Amanota</string>
     <string name="score_details">Amanota %1$d / %2$d</string>
     <string name="result_passed">Watsinze</string>
     <string name="result_failed">Watsinzwe</string>

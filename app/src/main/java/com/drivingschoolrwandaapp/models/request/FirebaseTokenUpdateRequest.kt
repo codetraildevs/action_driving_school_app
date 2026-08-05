@@ -1,6 +1,8 @@
 package com.drivingschoolrwandaapp.models.request
 
+import com.google.gson.annotations.SerializedName
+
 data class FirebaseTokenUpdateRequest(
-    var oldToken: String = "",
-    var newToken: String = ""
+    @SerializedName("oldToken") var oldToken: String = "",
+    @SerializedName("newToken") var newToken: String = ""
 )

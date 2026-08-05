@@ -25,6 +25,7 @@ import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.data.local.preferences.AppPreferences;
 import com.drivingschoolrwandaapp.data.local.preferences.TokenManager;
 import com.drivingschoolrwandaapp.repository.Resource;
+import com.drivingschoolrwandaapp.utils.InsetsUtils;
 import com.drivingschoolrwandaapp.utils.PhoneUtils;
 import com.drivingschoolrwandaapp.viewmodel.UserViewModel;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -56,6 +57,9 @@ public class LoginActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
 //        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
         setContentView(R.layout.activity_login);
+
+        // Keep content clear of the transparent system bars in edge-to-edge mode
+        InsetsUtils.applySystemBarsPadding(findViewById(android.R.id.content), true, true);
 
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
         tokenManager = new TokenManager(this);

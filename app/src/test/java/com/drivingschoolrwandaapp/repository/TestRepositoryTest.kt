@@ -249,6 +249,31 @@ class TestRepositoryTest {
         assertEquals(Resource.Status.ERROR, resource.status)
     }
 
+    @Test
+    fun `getTests with non-numeric quizId falls back to list index`() {
+        val exam = LocalExam("not-a-number", "RANDOM", "Test", "", emptyList())
+        `when`(localExamDataSource.loadExams("en")).thenReturn(listOf(exam))
+
+        val resource = repository.getTests(false).value!!
+
+        assertEquals(Resource.Status.SUCCESS, resource.status)
+        assertEquals("Non-numeric quizId should fall back to index 0", 0, resource.data!![0].id)
+    }
+
+    @Test
+    fun `getTests with exam that has no questions maps zero marks`() {
+        val exam = LocalExam("1", "RANDOM", "Empty Exam", "", emptyList())
+        `when`(localExamDataSource.loadExams("en")).thenReturn(listOf(exam))
+
+        val resource = repository.getTests(false).value!!
+
+        assertEquals(Resource.Status.SUCCESS, resource.status)
+        assertEquals(0, resource.data!![0].totalMarks)
+        assertEquals(0, resource.data!![0].passMarks)
+        assertEquals(0, resource.data!![0].duration)
+        assertEquals(0, resource.data!![0].questionCount)
+    }
+
     // ---------------------------------------------------------------------------
     // getTestWithQuestions — Success Paths
     // ---------------------------------------------------------------------------
@@ -349,6 +374,46 @@ class TestRepositoryTest {
         assertEquals("Second", resource.data!!.test!!.title)
     }
 
+    @Test
+    fun `getTestWithQuestions with empty question exam returns success with empty questions`() {
+        val exam = LocalExam("1", "RANDOM", "Empty Quiz", "", emptyList())
+        `when`(localExamDataSource.loadExams("en")).thenReturn(listOf(exam))
+        `when`(localExamDataSource.loadExamByQuizId("1", "en")).thenReturn(exam)
+
+        val resource = repository.getTestWithQuestions(1).value!!
+
+        assertEquals(Resource.Status.SUCCESS, resource.status)
+        assertTrue("Expected empty questions list", resource.data!!.questions!!.isEmpty())
+    }
+
+    @Test
+    fun `getTestWithQuestions with correct answer not matching any option marks first option`() {
+        val questions = listOf(
+            LocalQuestion(
+                question = "Q?",
+                option1 = "A",
+                option2 = "B",
+                option3 = "C",
+                option4 = "D",
+                correctAnswer = "Z", // Not among A/B/C/D
+                questionImgUrl = ""
+            )
+        )
+        val exam = LocalExam("1", "RANDOM", "Quiz", "", questions)
+        `when`(localExamDataSource.loadExams("en")).thenReturn(listOf(exam))
+        `when`(localExamDataSource.loadExamByQuizId("1", "en")).thenReturn(exam)
+
+        val resource = repository.getTestWithQuestions(1).value!!
+        val options = resource.data!!.questions!![0].options!!
+
+        assertEquals(4, options.size)
+        // getCorrectOptionIndex() coerces -1 to 0 when the answer matches nothing
+        assertEquals(true, options[0].isCorrect)
+        assertEquals(false, options[1].isCorrect)
+        assertEquals(false, options[2].isCorrect)
+        assertEquals(false, options[3].isCorrect)
+    }
+
     // ---------------------------------------------------------------------------
     // getTestWithQuestions — Error Paths
     // ---------------------------------------------------------------------------
@@ -362,6 +427,28 @@ class TestRepositoryTest {
 
         assertEquals(Resource.Status.ERROR, resource.status)
         assertNotNull("Expected error message", resource.message)
+        assertTrue("Error should mention exam not found", resource.message!!.contains("not found"))
+    }
+
+    @Test
+    fun `getTestWithQuestions returns error when testId is zero`() {
+        `when`(localExamDataSource.loadExams("en")).thenReturn(emptyList())
+        `when`(localExamDataSource.loadExamByQuizId("0", "en")).thenReturn(null)
+
+        val resource = repository.getTestWithQuestions(0).value!!
+
+        assertEquals(Resource.Status.ERROR, resource.status)
+        assertTrue("Error should mention exam not found", resource.message!!.contains("not found"))
+    }
+
+    @Test
+    fun `getTestWithQuestions returns error when testId is negative`() {
+        `when`(localExamDataSource.loadExams("en")).thenReturn(emptyList())
+        `when`(localExamDataSource.loadExamByQuizId("-1", "en")).thenReturn(null)
+
+        val resource = repository.getTestWithQuestions(-1).value!!
+
+        assertEquals(Resource.Status.ERROR, resource.status)
         assertTrue("Error should mention exam not found", resource.message!!.contains("not found"))
     }
 
