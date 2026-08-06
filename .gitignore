@@ -42,6 +42,7 @@ Thumbs.db
 *.apk
 *.aab
 *.hprof
+*.zip
 
 # Security (keystore / signing)
 *.jks
