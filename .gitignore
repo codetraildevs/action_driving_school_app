@@ -14,8 +14,9 @@
 .cxx
 local.properties
 
-# Assets (exam data)
-assets/
+# Stale root-level assets copy (pre-WebP exam data, unused by the app).
+# The real exam data lives in app/src/main/assets and IS tracked.
+/assets/
 
 # IDE configs
 .idea/
