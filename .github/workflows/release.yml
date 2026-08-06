@@ -53,32 +53,32 @@ jobs:
           else
             echo "::warning::GOOGLE_SERVICES_JSON secret not set — using placeholder"
             cat > app/google-services.json << 'EOF'
-            {
-              "project_info": {
-                "project_number": "000000000000",
-                "project_id": "placeholder-project",
-                "storage_bucket": "placeholder-project.appspot.com"
-              },
-              "client": [{
-                "client_info": {
-                  "mobilesdk_app_id": "1:000000000000:android:placeholder",
-                  "android_client_info": {
-                    "package_name": "com.drivingschoolrwandaapp"
-                  }
-                },
-                "oauth_client": [],
-                "api_key": [{
-                  "current_key": "PLACEHOLDER_API_KEY"
-                }],
-                "services": {
-                  "appinvite_service": {
-                    "other_platform_oauth_client": []
-                  }
+          {
+            "project_info": {
+              "project_number": "000000000000",
+              "project_id": "placeholder-project",
+              "storage_bucket": "placeholder-project.appspot.com"
+            },
+            "client": [{
+              "client_info": {
+                "mobilesdk_app_id": "1:000000000000:android:placeholder",
+                "android_client_info": {
+                  "package_name": "com.drivingschoolrwandaapp"
                 }
+              },
+              "oauth_client": [],
+              "api_key": [{
+                "current_key": "PLACEHOLDER_API_KEY"
               }],
-              "configuration_version": "1"
-            }
-            EOF
+              "services": {
+                "appinvite_service": {
+                  "other_platform_oauth_client": []
+                }
+              }
+            }],
+            "configuration_version": "1"
+          }
+          EOF
           fi
 
       - name: Decode upload keystore
