@@ -22,8 +22,8 @@ android {
         applicationId = "com.drivingschoolrwandaapp"
         minSdk = 27
         targetSdk = 37
-        versionCode = 92
-        versionName = "1.3.1"
+        versionCode = 93
+        versionName = "1.4.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
