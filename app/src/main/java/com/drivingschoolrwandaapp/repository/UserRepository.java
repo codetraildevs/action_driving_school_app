@@ -101,7 +101,7 @@ public class UserRepository {
         Log.d("UserRepository", "login: normalised phone " + email + " → " + normalizedPhone);
         MutableLiveData<Resource<LoginResponse>> result = new MutableLiveData<>();
         result.setValue(Resource.loading(null));
-        LoginRequest request = new LoginRequest(normalizedPhone, password, deviceId);
+        LoginRequest request = new LoginRequest(normalizedPhone, password, deviceId, LoginRequest.CLIENT_TYPE_ANDROID_APP);
         apiService.login(request).enqueue(new Callback<LoginResponse>() {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {

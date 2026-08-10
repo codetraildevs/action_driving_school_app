@@ -323,7 +323,7 @@ class UserRepositoryTest {
     }
 
     @Test
-    fun `login passes normalized phone password and deviceId in request`() {
+    fun `login passes normalized phone password deviceId and android clientType in request`() {
         val requestCaptor = ArgumentCaptor.forClass(com.drivingschoolrwandaapp.models.request.LoginRequest::class.java)
         val call = mockCall<LoginResponse>()
         `when`(apiService.login(requestCaptor.capture())).thenReturn(call)
@@ -334,6 +334,10 @@ class UserRepositoryTest {
         assertEquals("+250700000000", request.identifier)
         assertEquals("pass", request.password)
         assertEquals("dev-1", request.deviceId)
+        // The app always identifies itself as the Android client so the backend
+        // can allow phone-only (shared) admin login while still requiring the
+        // real password from the web console.
+        assertEquals("android_app", request.clientType)
     }
 
     // ---------------------------------------------------------------------------

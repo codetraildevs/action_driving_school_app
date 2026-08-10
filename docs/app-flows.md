@@ -24,6 +24,7 @@ flowchart TD
 **Key points**
 - **One shared login, role-based landing** — there is exactly one login (user + admin use the same `LoginActivity`); after login the user is routed to the app that matches their role. There is **no in-app switching** between the user app and the admin console: the drawer has no “Admin Console” entry and the admin console has no “Open User App” link. To use the other experience, log out and log back in.
 - **Registration is student-only** — `POST /api/auth/register` always creates role 5 (`STUDENT_ROLE_ID`); a client-supplied `role` is ignored. There is no admin registration path.
+- **Admin login is phone-only on Android** — the app tags every `POST /api/auth/login` with `clientType: "android_app"`; the backend uses this marker to allow admins to sign in with their phone number + device ID on the phone (shared admin login), while the web console still requires the real password.
 - The role is persisted via `TokenManager.saveRole` and refreshed on every profile load (`UserRepository.mapUser`), so a server-side role change applies without re-login (the next launch lands in the right app).
 
 ## Admin flow
