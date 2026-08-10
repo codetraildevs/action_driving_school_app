@@ -22,8 +22,8 @@ android {
         applicationId = "com.drivingschoolrwandaapp"
         minSdk = 27
         targetSdk = 37
-        versionCode = 93
-        versionName = "1.4.0"
+        versionCode = 94
+        versionName = "1.5.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -272,13 +272,25 @@ tasks.register("verifyReleaseMappersKept") {
         "com.drivingschoolrwandaapp.models.mappers.TestMapperImpl",
         "com.drivingschoolrwandaapp.models.mappers.SubscriptionMapperImpl"
     )
-    // Retrofit reflects on this interface to build the request proxy.
-    val apiServiceInterface = "com.drivingschoolrwandaapp.api.ApiService"
+    // Retrofit reflects on these interfaces to build the request proxies.
+    val apiServiceInterfaces = listOf(
+        "com.drivingschoolrwandaapp.api.ApiService",
+        "com.drivingschoolrwandaapp.api.AdminApiService"
+    )
     // Gson serializes/deserializes these LIVE request/response DTOs via field reflection.
     // Add new request/response models here. NOTE: only add classes that are actually used at
     // runtime — R8 legitimately removes dead classes, and listing one here would fail the build.
     val gsonModelClasses = listOf(
         "com.drivingschoolrwandaapp.models.response.ApiResponse",
+        "com.drivingschoolrwandaapp.models.entities.AdminDashboardResponse",
+        "com.drivingschoolrwandaapp.models.entities.AdminDashboardStats",
+        "com.drivingschoolrwandaapp.models.entities.AdminUsersResponse",
+        "com.drivingschoolrwandaapp.models.entities.AdminUser",
+        "com.drivingschoolrwandaapp.models.entities.AdminRequest",
+        "com.drivingschoolrwandaapp.models.entities.AdminUserDetailResponse",
+        "com.drivingschoolrwandaapp.models.entities.AdminUserDetail",
+        "com.drivingschoolrwandaapp.models.entities.AdminUserSubscription",
+        "com.drivingschoolrwandaapp.models.entities.AdminSubscriptionPlan",
         "com.drivingschoolrwandaapp.models.response.IremboPaymentResponse",
         "com.drivingschoolrwandaapp.models.response.LoginResponse",
         "com.drivingschoolrwandaapp.models.response.RegisterResponse",
@@ -343,16 +355,18 @@ tasks.register("verifyReleaseMappersKept") {
             }
         }
 
-        // ── 2. Retrofit ApiService interface ──
-        if (!isClassKept(apiServiceInterface)) {
-            problems += "$apiServiceInterface is missing from seeds.txt — R8 removed the interface Retrofit reflects on"
-        } else {
-            val memberSeeds = seedLines.count { it.startsWith("$apiServiceInterface:") }
-            if (memberSeeds == 0) {
-                problems += "$apiServiceInterface has no kept members in seeds.txt — endpoint methods were stripped"
-            }
-            if (!isIdentityMapped(apiServiceInterface)) {
-                problems += "$apiServiceInterface was renamed in mapping.txt — Retrofit proxy generation will fail"
+        // ── 2. Retrofit service interfaces ──
+        for (apiServiceInterface in apiServiceInterfaces) {
+            if (!isClassKept(apiServiceInterface)) {
+                problems += "$apiServiceInterface is missing from seeds.txt — R8 removed the interface Retrofit reflects on"
+            } else {
+                val memberSeeds = seedLines.count { it.startsWith("$apiServiceInterface:") }
+                if (memberSeeds == 0) {
+                    problems += "$apiServiceInterface has no kept members in seeds.txt — endpoint methods were stripped"
+                }
+                if (!isIdentityMapped(apiServiceInterface)) {
+                    problems += "$apiServiceInterface was renamed in mapping.txt — Retrofit proxy generation will fail"
+                }
             }
         }
 
@@ -384,7 +398,7 @@ tasks.register("verifyReleaseMappersKept") {
         }
         logger.lifecycle(
             "Release reflection guard passed: mappers=${implClasses.joinToString()}, " +
-                "api=$apiServiceInterface, models=${gsonModelClasses.size} classes"
+                "api=${apiServiceInterfaces.joinToString()}, models=${gsonModelClasses.size} classes"
         )
     }
 }

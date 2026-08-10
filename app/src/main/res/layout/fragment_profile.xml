@@ -62,6 +62,25 @@
             app:layout_constraintTop_toBottomOf="@id/profile_name"
             tools:text="@string/default_email" />
 
+        <TextView
+            android:id="@+id/profile_role_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_badge"
+            android:fontFamily="@font/montserrat_semibold"
+            android:gravity="center"
+            android:paddingStart="12dp"
+            android:paddingTop="4dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="4dp"
+            android:textSize="12sp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/profile_email"
+            tools:text="@string/role_student" />
+
         <!-- Subscription Status Card -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/access_status_card"
@@ -73,7 +92,8 @@
             app:cardCornerRadius="12dp"
             app:cardElevation="4dp"
 
-            app:layout_constraintTop_toBottomOf="@id/profile_email"
+            app:layout_constraintTop_toBottomOf="@id/profile_role_badge"
+            app:layout_goneMarginTop="24dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 

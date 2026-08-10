@@ -23,6 +23,7 @@ import com.drivingschoolrwandaapp.models.request.VerifyOtpRequest;
 import com.drivingschoolrwandaapp.models.response.ApiResponse;
 import com.drivingschoolrwandaapp.models.response.LoginResponse;
 import com.drivingschoolrwandaapp.ui.activities.LoginActivity;
+import com.drivingschoolrwandaapp.utils.RoleUtils;
 import com.google.gson.Gson;
 
 import java.util.Locale;
@@ -303,7 +304,7 @@ public class UserRepository {
         }.getAsLiveData();
     }
 
-    private com.drivingschoolrwandaapp.database.entities.User mapUser(com.drivingschoolrwandaapp.models.entities.User networkUser) {
+    com.drivingschoolrwandaapp.database.entities.User mapUser(com.drivingschoolrwandaapp.models.entities.User networkUser) {
         com.drivingschoolrwandaapp.database.entities.User dbUser = new com.drivingschoolrwandaapp.database.entities.User();
         dbUser.setId(networkUser.getId());
         dbUser.setFirstName(networkUser.getFirstName());
@@ -315,6 +316,18 @@ public class UserRepository {
         dbUser.setActive(networkUser.isActive());
         dbUser.setProfilePicture(networkUser.getProfilePicture());
         dbUser.setRoleId(networkUser.getRole());
+        // Keep the persisted role in sync with the server: a role change made in the
+        // web admin console takes effect on the next profile load, without a re-login.
+        // Only known role ids (1-10) are synced so a malformed response that omits
+        // the role (Gson leaves it at 0) never wipes a valid stored admin role.
+        // NOTE: the Room user still records whatever the server sent, so a malformed
+        // role=0 would hide the drawer admin entry while TokenManager keeps granting
+        // access — a deliberate fail-safe, since real demotions always carry a valid
+        // role id and sync correctly. Runs on the background executor; apply() is safe.
+        if (networkUser.getRole() >= RoleUtils.ROLE_SUPER_ADMIN
+                && networkUser.getRole() <= RoleUtils.ROLE_GUEST) {
+            tokenManager.saveRole(networkUser.getRole());
+        }
         dbUser.setLanguageId(networkUser.getLanguageId());
         dbUser.setTimezoneId(1); // Placeholder
         dbUser.setCreatedAt(networkUser.getCreatedAt());

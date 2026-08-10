@@ -41,8 +41,9 @@
 -keepattributes Signature, InnerClasses, EnclosingMethod
 -keepattributes RuntimeVisibleAnnotations, RuntimeVisibleParameterAnnotations
 
-# Keep the ApiService interface — DO NOT allow obfuscation (methods must keep original names for Retrofit reflection)
+# Keep the Retrofit service interfaces — DO NOT allow obfuscation (methods must keep original names for Retrofit reflection)
 -keep interface com.drivingschoolrwandaapp.api.ApiService
+-keep interface com.drivingschoolrwandaapp.api.AdminApiService
 
 # Keep all service method return types (response types) from being obfuscated
 -keepclassmembers interface * {

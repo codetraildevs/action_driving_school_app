@@ -285,4 +285,55 @@
     <string name="review">Subiramo</string>
     <string name="retake">Ongera Ukore</string>
 
+    <!-- Admin console -->
+    <string name="admin_title">Akarongo k\'ubuyobozi</string>
+    <string name="admin_dashboard">Ibyibanze</string>
+    <string name="admin_users">Abakoresha</string>
+    <string name="admin_requests">Ibyifuzo</string>
+    <string name="admin_settings">Igenamiterere</string>
+    <string name="admin_welcome">Murakaza neza ku rwego rw\'abayobozi</string>
+    <string name="admin_total_users">Abakoresha bose</string>
+    <string name="admin_active_users">Abakora (iminsi 30)</string>
+    <string name="admin_total_subscriptions">Kwiyandikisha</string>
+    <string name="admin_total_content">Ibirimo</string>
+    <string name="admin_recent_activity">Ibikorwa biheruka</string>
+    <string name="admin_no_activity">Nta bikorwa biheruka</string>
+    <string name="admin_load_failed">Hari ikosa ryabaye. Ongera ugerageze.</string>
+    <string name="admin_empty_users">Nta bakoresha babonetse</string>
+    <string name="admin_empty_requests">Nta byifuzo bibonetse</string>
+    <string name="admin_retry">Ongera ugerageze</string>
+    <string name="admin_logout">Sohoka</string>
+    <string name="admin_console_link">Fungura akarongo ka web</string>
+    <string name="admin_version">Verisiyo</string>
+    <string name="version_format">Verisiyo %s</string>
+    <string name="admin_console_desc">Cungura abakoresha, kwiyandikisha, ibirimo n\'ibyifuzo ukoresheje akarongo ka web.</string>
+
+    <!-- Role names -->
+    <string name="role_super_admin">Umuyobozi Mukuru</string>
+    <string name="role_admin">Umuyobozi</string>
+    <string name="role_content_manager">Umucunga ibirimo</string>
+    <string name="role_teacher">Umwarimu</string>
+    <string name="role_student">Umunyeshuri</string>
+    <string name="role_premium_user">Umukoresha wa Premium</string>
+    <string name="role_free_user">Umukoresha W\'ubusa</string>
+    <string name="role_moderator">Umugenzuzi</string>
+    <string name="role_support_staff">Abakozi b\'inkunga</string>
+    <string name="role_guest">Umusuwagi</string>
+
+    <!-- Admin user detail dialog -->
+    <string name="admin_subscription">Kwiyandikisha</string>
+    <string name="admin_sub_start">Itangira</string>
+    <string name="admin_sub_end">Irarangira</string>
+    <string name="admin_no_subscription">Nta kwiyandikisha</string>
+    <string name="admin_sub_active">Ikora</string>
+    <string name="admin_sub_expired">Yashize</string>
+    <string name="admin_user_active">Ikora</string>
+    <string name="admin_user_inactive">Ntibikora</string>
+    <string name="admin_no_requests">Nta byifuzo</string>
+    <string name="admin_close">Funga</string>
+    <string name="admin_search_users">Shakisha abakoresha…</string>
+    <string name="admin_search_requests">Shakisha ibyifuzo…</string>
+    <string name="admin_no_matching_users">Nta bakoresha bahuye n\'ibyo ushakisha</string>
+    <string name="admin_no_matching_requests">Nta byifuzo bihuye n\'ibyo ushakisha</string>
+    <string name="admin_last_updated">Byavugururwa nyuma: %1$s</string>
 </resources>

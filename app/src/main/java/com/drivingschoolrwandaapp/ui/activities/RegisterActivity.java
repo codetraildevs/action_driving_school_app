@@ -83,8 +83,10 @@ public class RegisterActivity extends AppCompatActivity {
         if (appPreferences.isDeviceRegistered() || tokenManager.isLoggedIn()) {
             Intent intent;
             if (tokenManager.isLoggedIn()) {
-                // Already logged in - go to main app
-                intent = new Intent(RegisterActivity.this, App.class);
+                // Already logged in - go to the right home for this user's role
+                intent = com.drivingschoolrwandaapp.utils.RoleUtils.isAdminRole(tokenManager.getRoleId())
+                        ? new Intent(RegisterActivity.this, AdminActivity.class)
+                        : new Intent(RegisterActivity.this, App.class);
             } else {
                 // Device has an account but not logged in - go to login
                 Toast.makeText(this, getString(R.string.device_already_registered), Toast.LENGTH_LONG).show();
@@ -150,9 +152,17 @@ public class RegisterActivity extends AppCompatActivity {
                             resource.data.getRefreshToken(),
                             true
                         );
-                        Log.d(TAG, "Login after registration successful.");
+                        // There is NO admin registration: the backend always creates a
+                        // Student (role 5), so a freshly registered account always lands
+                        // in the user app. The role is still persisted for consistency,
+                        // but it can never route here to the admin console.
+                        int roleId = resource.data.getUser() != null ? resource.data.getUser().getRole() : 0;
+                        tokenManager.saveRole(roleId);
+                        Log.d(TAG, "Login after registration successful (role=" + roleId + ").");
                         Toast.makeText(RegisterActivity.this, getString(R.string.login_successful_redirect), Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(RegisterActivity.this, App.class));
+                        Intent destination = new Intent(RegisterActivity.this, App.class);
+                        destination.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(destination);
                         finish();
                     } else {
                         String message = resource.data != null ? resource.data.getMessage() : getString(R.string.login_failed);

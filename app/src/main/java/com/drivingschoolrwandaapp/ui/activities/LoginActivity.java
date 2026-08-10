@@ -66,9 +66,12 @@ public class LoginActivity extends AppCompatActivity {
         appPreferences = new AppPreferences(this);
         loadingTimeoutHandler = new Handler(Looper.getMainLooper());
 
-        // If already logged in, redirect to main app (one account per device)
+        // If already logged in, redirect based on role — admins go to the admin
+        // console, everyone else to the user app (no in-app switching).
         if (tokenManager.isLoggedIn()) {
-            Intent intent = new Intent(LoginActivity.this, App.class);
+            Intent intent = com.drivingschoolrwandaapp.utils.RoleUtils.isAdminRole(tokenManager.getRoleId())
+                    ? new Intent(LoginActivity.this, AdminActivity.class)
+                    : new Intent(LoginActivity.this, App.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();
@@ -180,9 +183,16 @@ public class LoginActivity extends AppCompatActivity {
                             resource.data.getRefreshToken(),
                             rememberMe
                         );
-                        Log.d(TAG, "Login successful (rememberMe=" + rememberMe + ").");
+                        // Persist the role so the app can route admins to the admin console.
+                        int roleId = resource.data.getUser() != null ? resource.data.getUser().getRole() : 0;
+                        tokenManager.saveRole(roleId);
+                        Log.d(TAG, "Login successful (rememberMe=" + rememberMe + ", role=" + roleId + ").");
                         Toast.makeText(this, getString(R.string.login_successful_redirect), Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(this, App.class));
+                        Intent destination = com.drivingschoolrwandaapp.utils.RoleUtils.isAdminRole(roleId)
+                                ? new Intent(LoginActivity.this, AdminActivity.class)
+                                : new Intent(LoginActivity.this, App.class);
+                        destination.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(destination);
                         finish();
                     } else {
                         // Login API returned success:false or no user data — always show feedback

@@ -20,6 +20,7 @@ public class TokenManager {
     private static final String KEY_REFRESH_TOKEN = "refresh_token";
     private static final String KEY_TOKEN_EXPIRY = "token_expiry";
     private static final String KEY_REMEMBER_ME = "remember_me";
+    private static final String KEY_ROLE_ID = "role_id";
 
     private final SharedPreferences encryptedPreferences;
 
@@ -94,8 +95,22 @@ public class TokenManager {
         editor.remove(KEY_ACCESS_TOKEN);
         editor.remove(KEY_REFRESH_TOKEN);
         editor.remove(KEY_TOKEN_EXPIRY);
+        editor.remove(KEY_ROLE_ID);
         editor.apply();
         Log.d(TAG, "Tokens cleared");
+    }
+
+    /**
+     * Persists the signed-in user's role id (see {@code RoleUtils}) so the app
+     * can route admins to the admin console on later launches.
+     */
+    public void saveRole(int roleId) {
+        encryptedPreferences.edit().putInt(KEY_ROLE_ID, roleId).apply();
+    }
+
+    /** Returns the persisted role id, or 0 if not set (regular user). */
+    public int getRoleId() {
+        return encryptedPreferences.getInt(KEY_ROLE_ID, 0);
     }
 
     public boolean isLoggedIn() {

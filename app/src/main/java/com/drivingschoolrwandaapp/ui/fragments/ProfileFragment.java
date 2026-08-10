@@ -26,6 +26,7 @@ import com.drivingschoolrwandaapp.data.local.preferences.AppPreferences;
 import com.drivingschoolrwandaapp.data.local.preferences.TokenManager;
 import com.drivingschoolrwandaapp.database.entities.User;
 import com.drivingschoolrwandaapp.utils.LanguageUtils;
+import com.drivingschoolrwandaapp.utils.RoleUtils;
 import com.drivingschoolrwandaapp.viewmodel.UserViewModel;
 import com.google.android.material.imageview.ShapeableImageView;
 
@@ -46,6 +47,7 @@ public class ProfileFragment extends Fragment {
     private TextView tvExpiryDate;
     private TextView tvPendingMessage;
     private TextView tvSessionStatus;
+    private TextView profileRoleBadge;
 
     private ProgressBar progressBar;
     private AppPreferences appPreferences;
@@ -77,6 +79,7 @@ public class ProfileFragment extends Fragment {
         tvExpiryDate = view.findViewById(R.id.tv_expiry_date);
         tvPendingMessage = view.findViewById(R.id.tv_pending_message);
         tvSessionStatus = view.findViewById(R.id.tv_session_status);
+        profileRoleBadge = view.findViewById(R.id.profile_role_badge);
 
         progressBar = view.findViewById(R.id.progress_bar);
 
@@ -154,6 +157,24 @@ public class ProfileFragment extends Fragment {
         
         profileName.setText(getString(R.string.user_name_format, user.getFirstName(), user.getLastName(), user.getLanguage()));
         profileEmail.setText(user.getPhoneNumber());
+
+        // Show the user's role as a badge under the name (hidden for unknown roles).
+        // Admins get the primary-tinted badge, everyone else the neutral one.
+        if (profileRoleBadge != null) {
+            if (user.getRoleId() > 0) {
+                profileRoleBadge.setText(getString(RoleUtils.getRoleNameRes(user.getRoleId())));
+                if (RoleUtils.isAdminRole(user.getRoleId())) {
+                    profileRoleBadge.setTextColor(ContextCompat.getColor(requireContext(), R.color.my_primary));
+                    profileRoleBadge.setBackgroundResource(R.drawable.bg_badge_admin);
+                } else {
+                    profileRoleBadge.setTextColor(ContextCompat.getColor(requireContext(), R.color.colorOnSurface));
+                    profileRoleBadge.setBackgroundResource(R.drawable.bg_badge);
+                }
+                profileRoleBadge.setVisibility(View.VISIBLE);
+            } else {
+                profileRoleBadge.setVisibility(View.GONE);
+            }
+        }
         Glide.with(this)
                 .load(user.getProfilePicture())
                 .placeholder(R.drawable.ic_profile)

@@ -328,4 +328,55 @@ Quand tu arrives à la dernière question, tu appuies sur « Terminer l’examen
     <string name="device_already_registered">Vous avez déjà un compte sur cet appareil. Veuillez vous connecter avec le numéro de téléphone que vous avez utilisé lors de l\'inscription ou appelez le +250782877442 ou +250722877442 pour obtenir de l\'aide.</string>
     <string name="account_already_exists_with_help">Ce numéro de téléphone est déjà inscrit. Veuillez vous connecter avec votre numéro ou appelez le +250782877442 ou +250722877442 pour obtenir de l\'aide.</string>
 
+    <!-- Admin console -->
+    <string name="admin_title">Console d\'administration</string>
+    <string name="admin_dashboard">Tableau de bord</string>
+    <string name="admin_users">Utilisateurs</string>
+    <string name="admin_requests">Demandes</string>
+    <string name="admin_settings">Paramètres</string>
+    <string name="admin_welcome">Bienvenue sur la console d\'administration</string>
+    <string name="admin_total_users">Total utilisateurs</string>
+    <string name="admin_active_users">Actifs (30j)</string>
+    <string name="admin_total_subscriptions">Abonnements</string>
+    <string name="admin_total_content">Contenus</string>
+    <string name="admin_recent_activity">Activité récente</string>
+    <string name="admin_no_activity">Aucune activité récente</string>
+    <string name="admin_load_failed">Une erreur est survenue. Vérifiez votre connexion et réessayez.</string>
+    <string name="admin_empty_users">Aucun utilisateur trouvé</string>
+    <string name="admin_empty_requests">Aucune demande trouvée</string>
+    <string name="admin_retry">Réessayer</string>
+    <string name="admin_logout">Se déconnecter</string>
+    <string name="admin_console_link">Ouvrir la console web</string>
+    <string name="admin_version">Version</string>
+    <string name="version_format">Version %s</string>
+    <string name="admin_console_desc">Gérez les utilisateurs, abonnements, contenus et demandes depuis la console d\'administration web complète.</string>
+
+    <!-- Role names -->
+    <string name="role_super_admin">Super administrateur</string>
+    <string name="role_admin">Administrateur</string>
+    <string name="role_content_manager">Gestionnaire de contenu</string>
+    <string name="role_teacher">Enseignant</string>
+    <string name="role_student">Étudiant</string>
+    <string name="role_premium_user">Utilisateur Premium</string>
+    <string name="role_free_user">Utilisateur gratuit</string>
+    <string name="role_moderator">Modérateur</string>
+    <string name="role_support_staff">Personnel d\'assistance</string>
+    <string name="role_guest">Invité</string>
+
+    <!-- Admin user detail dialog -->
+    <string name="admin_subscription">Abonnement</string>
+    <string name="admin_sub_start">Début</string>
+    <string name="admin_sub_end">Fin</string>
+    <string name="admin_no_subscription">Aucun abonnement</string>
+    <string name="admin_sub_active">Actif</string>
+    <string name="admin_sub_expired">Expiré</string>
+    <string name="admin_user_active">Actif</string>
+    <string name="admin_user_inactive">Inactif</string>
+    <string name="admin_no_requests">Aucune demande</string>
+    <string name="admin_close">Fermer</string>
+    <string name="admin_search_users">Rechercher des utilisateurs…</string>
+    <string name="admin_search_requests">Rechercher des demandes…</string>
+    <string name="admin_no_matching_users">Aucun utilisateur ne correspond à votre recherche</string>
+    <string name="admin_no_matching_requests">Aucune demande ne correspond à votre recherche</string>
+    <string name="admin_last_updated">Dernière mise à jour : %1$s</string>
 </resources>

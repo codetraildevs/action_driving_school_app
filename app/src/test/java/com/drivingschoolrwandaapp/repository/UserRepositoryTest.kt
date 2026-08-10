@@ -646,4 +646,40 @@ class UserRepositoryTest {
         assertEquals(Resource.Status.ERROR, result.value!!.status)
         assertNotNull("Expected a friendly error message", result.value!!.message)
     }
+
+    // ---------------------------------------------------------------------------
+    // mapUser — persisted role sync (called by getProfile's success path)
+    //
+    // The full getProfile success path needs a main looper (Robolectric), so the
+    // role-sync behaviour is verified directly through the package-private mapUser.
+    // ---------------------------------------------------------------------------
+
+    @Test
+    fun `mapUser persists a valid role to the token manager`() {
+        val networkUser = NetworkUser(id = 7, firstName = "Alice", role = 2)
+
+        val dbUser = repository.mapUser(networkUser)
+
+        assertEquals(2, dbUser.roleId)
+        verify(tokenManager).saveRole(2)
+    }
+
+    @Test
+    fun `mapUser does not wipe stored role when the response omits it`() {
+        val networkUser = NetworkUser(id = 7, firstName = "Alice", role = 0)
+
+        repository.mapUser(networkUser)
+
+        // role 0 is not a known role id — the persisted admin role must survive.
+        verify(tokenManager, never()).saveRole(anyInt())
+    }
+
+    @Test
+    fun `mapUser syncs a student role downgrade`() {
+        val networkUser = NetworkUser(id = 7, firstName = "Alice", role = 5)
+
+        repository.mapUser(networkUser)
+
+        verify(tokenManager).saveRole(5)
+    }
 }

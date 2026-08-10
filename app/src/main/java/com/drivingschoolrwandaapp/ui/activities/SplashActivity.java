@@ -33,8 +33,12 @@ public class SplashActivity extends AppCompatActivity {
 
         Intent intent;
         if (tokenManager.isLoggedIn()) {
-
-            intent = new Intent(SplashActivity.this, App.class);
+            // Route admins to the admin console, everyone else to the user app.
+            if (com.drivingschoolrwandaapp.utils.RoleUtils.isAdminRole(tokenManager.getRoleId())) {
+                intent = new Intent(SplashActivity.this, AdminActivity.class);
+            } else {
+                intent = new Intent(SplashActivity.this, App.class);
+            }
         } else {
 
             intent = new Intent(SplashActivity.this, WelcomeActivity.class);
