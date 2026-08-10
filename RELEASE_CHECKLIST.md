@@ -6,6 +6,7 @@
 
 ## 1. Prerequisites
 
+- [ ] **Backend deployed with the `clientType` login logic** — the production backend must run the build that accepts `clientType` on `POST /api/auth/login` (admins sign in phone-only from the app; the web console still requires the real password). The archive `backend-deploy.tar.gz` contains it — see `docs/redeploy-backend-cpanel.md`. Verify with a curl login probe before rollout.
 - [ ] **Keystore present** — `app/upload-keystore.jks` exists (PKCS12 format)
 - [ ] **Gradle version catalog ready** — `gradle/libs.versions.toml` is the single source of truth for all dependency versions
 - [ ] **`keystore.properties` present** at project root (`DRIVINGSCHOOL2/keystore.properties`) with:
@@ -114,6 +115,8 @@ Paste the relevant language into the "What's New" field for each locale in Play 
 #### English
 
 ```
+- Admins can now sign in on their phone with just their phone number (shared admin login)
+- Web console logins still require the real password
 - Improved exam UI with clearer option indicators and real-time feedback
 - Enhanced results screen with summary statistics and scrollable history
 - Progress bar and percentage tracking during exams
@@ -125,6 +128,8 @@ Paste the relevant language into the "What's New" field for each locale in Play 
 #### Français
 
 ```
+- Les administrateurs peuvent désormais se connecter depuis leur téléphone avec uniquement leur numéro (connexion admin partagée)
+- Les connexions depuis la console web exigent toujours le vrai mot de passe
 - Interface d'examen améliorée avec des indicateurs d'options plus clairs
 - Écran des résultats amélioré avec statistiques et historique
 - Barre de progression et suivi en pourcentage pendant les examens
@@ -136,6 +141,8 @@ Paste the relevant language into the "What's New" field for each locale in Play 
 #### Kinyarwanda
 
 ```
+- Abayobozi bashobora ubu kwinjira muri telefone bakoresheje numero yabo gusa (kwinjira rusange kw'umuyobozi) — nta ijambobanga risabwa
+- Kwinjira binyuze muri konsole ya web bikomeje gusaba ijambobanga nyawe
 - Ikiganiro cy'ikizamini cyarushijeho kuba cyiza
 - Urubuga rw'ibisubizo rwarushijeho hamwe n'imibare n'amateka
 - Umurongo w'amajyambere n'indanganturo y'ijanisha mugihe cy'ikizamini
