@@ -15,11 +15,17 @@ tar -czf "$OUT" \
   --exclude='./.env' \
   --exclude='./uploads' \
   --exclude='./.git' \
-  --exclude='*.log' \
-  --exclude='./tsconfig.tsbuildinfo' \
+  --exclude='./.vscode' \
+  --exclude='./mine' \
   --exclude='./lib/generated' \
   --exclude='./public/uploads' \
-  --exclude='./public/*.zip' \
+  --exclude='./deploy-cron.sh' \
+  --exclude='./.gitignore' \
+  --exclude='./*.md' \
+  --exclude='./*.py' \
+  --exclude='*.log' \
+  --exclude='*.zip' \
+  --exclude='./tsconfig.tsbuildinfo' \
   .
 
 echo "Created $(cd .. && pwd)/backend-deploy.tar.gz"
