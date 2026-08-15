@@ -34,6 +34,10 @@ model User {
   pendingLanguageId            Int?                          @map("pendingLanguage")
   timezoneId                   Int                           @map("userTimezone")    @default(1)
 
+  // Hot query support: admin users list filters by is_active and sorts by created_at
+  @@index([isActive, createdAt])
+  @@index([createdAt])
+
   role                         UserRole                      @relation(fields: [roleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   language                     Language                      @relation("language", fields: [languageId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   Pendinglanguage              Language?                     @relation("pendingLanguage", fields: [pendingLanguageId], references: [id], onDelete: Restrict, onUpdate: Cascade)
@@ -111,6 +115,7 @@ model Device {
   sessions        Session[]
   LoginAttempts   LoginAttempts[]
 
+  @@index([userId])
   @@map("devices")
 }
 
@@ -179,6 +184,8 @@ model LoginAttempts {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   device      Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
+  // Hot query support: login attempts looked up by user
+  @@index([userId])
   @@map("loginAttemps")
 }
 
@@ -195,6 +202,9 @@ model Session {
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   device    Device    @relation(fields: [deviceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
+  // Hot query support: device-binding checks look up sessions by user / device
+  @@index([userId])
+  @@index([deviceId])
   @@map("sessions")
 }
 
@@ -461,6 +471,8 @@ model UserActivity {
 
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
+  // Hot query support: activity log filters by user + sorts by created_at
+  @@index([userId, createdAt])
   @@map("user_activities")
 }
 
@@ -745,6 +757,10 @@ model UserSubscriptionRequest {
   user               User              @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userTestAccess     UserTestAccess?   @relation(fields: [userTestAccessId], references: [id], onDelete: SetNull, onUpdate: Cascade)
 
+  // Hot query support: SSE/pending-requests poll by status + sort by created_at
+  @@index([status, createdAt])
+  @@index([createdAt])
+  @@index([userId])
   @@map("user_subscriptions_request")
 }
 
