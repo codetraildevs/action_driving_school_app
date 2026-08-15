@@ -47,13 +47,6 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="4dp"/>
-
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:text="@string/category"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="4dp"/>
@@ -114,21 +107,14 @@
 
 
 
-            <LinearLayout
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_submit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_horizontal">
-
-
-
-                <Button
-                    android:id="@+id/btn_submit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/submit_text"
-                    android:layout_marginStart="8dp"/>
-            </LinearLayout>
+                android:layout_marginTop="16dp"
+                android:text="@string/submit_text"
+                android:textSize="15sp"
+                android:textStyle="bold" />
 
         </LinearLayout>
     </ScrollView>

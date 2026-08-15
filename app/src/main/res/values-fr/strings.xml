@@ -149,6 +149,13 @@
     <string name="payment_instructions_pay3">3. Envoyez l\'argent au 0722877442</string>
 
     <string name="ihavepaid">Commencer les examens</string>
+    <string name="irembo_service_subtitle">Faites votre demande en ligne</string>
+    <string name="payment_title">Paiement</string>
+    <string name="payment_methods_title">Méthodes de paiement</string>
+    <string name="payment_method_mtn">MTN Mobile Money</string>
+    <string name="payment_method_airtel">Airtel Money</string>
+    <string name="payment_dialog_subtitle">Choisissez l\'une des méthodes ci-dessous, puis appuyez sur \"Commencer les examens\" une fois le paiement effectué.</string>
+    <string name="subscription_choose_plan">Choisissez l\'option qui vous convient</string>
 
     <string name="request_access_confirm">Demander</string>
 

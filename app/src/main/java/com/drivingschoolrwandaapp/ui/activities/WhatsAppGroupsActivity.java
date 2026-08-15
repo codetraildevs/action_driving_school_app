@@ -88,9 +88,8 @@ public class WhatsAppGroupsActivity extends AppCompatActivity implements WhatsAp
 
     private void setupViewModel() {
         viewModel = new ViewModelProvider(this).get(WhatsAppViewModel.class);
-    }
-
-    private void fetchGroups() {
+        // Register the observer ONCE — the ViewModel owns a single LiveData, so
+        // re-fetching must only re-trigger the request, never stack observers.
         viewModel.getWhatsAppGroups().observe(this, resource -> {
             if (resource == null) return;
             switch (resource.status) {
@@ -111,6 +110,10 @@ public class WhatsAppGroupsActivity extends AppCompatActivity implements WhatsAp
                     break;
             }
         });
+    }
+
+    private void fetchGroups() {
+        viewModel.fetchWhatsAppGroups();
     }
 
     private void showLoading() {

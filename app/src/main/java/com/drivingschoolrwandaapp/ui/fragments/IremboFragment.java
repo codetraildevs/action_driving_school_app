@@ -43,6 +43,7 @@ import com.drivingschoolrwandaapp.ui.adapters.IremboServiceAdapter;
 import com.drivingschoolrwandaapp.ui.adapters.RecentActivityAdapter;
 import com.drivingschoolrwandaapp.viewmodel.IremboViewModel;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.textfield.TextInputEditText;
 
 import org.json.JSONException;
@@ -168,7 +169,7 @@ public class IremboFragment extends Fragment implements IremboServiceAdapter.OnI
 
         List<IremboService> services = new ArrayList<>();
         services.add(new IremboService(getString(R.string.provisional_license), R.drawable.ic_car_side));
-        services.add(new IremboService(getString((R.string.speacial_request)), R.drawable.ic_edit_document));
+        services.add(new IremboService(getString(R.string.special_irembo_service), R.drawable.ic_edit_document));
 
         IremboServiceAdapter adapter = new IremboServiceAdapter(services, this);
         recyclerView.setAdapter(adapter);
@@ -382,6 +383,8 @@ public class IremboFragment extends Fragment implements IremboServiceAdapter.OnI
         });
 
         dialog.show();
+        // Long form: keep it within the screen so fields stay reachable.
+        com.drivingschoolrwandaapp.utils.PaymentUtils.capDialogHeight(dialog, 0.9f);
     }
 
     private void showIremboSpecialDialog() {
@@ -442,6 +445,8 @@ public class IremboFragment extends Fragment implements IremboServiceAdapter.OnI
         });
 
         dialog.show();
+        // Long form: keep it within the screen so fields stay reachable.
+        com.drivingschoolrwandaapp.utils.PaymentUtils.capDialogHeight(dialog, 0.9f);
     }
     
     private void showPaymentConfirmationDialog(IremboPaymentResponse paymentDetails) {
@@ -456,9 +461,12 @@ public class IremboFragment extends Fragment implements IremboServiceAdapter.OnI
         }
 
         TextView tvAmount = dialogView.findViewById(R.id.tv_amount);
-        
-        TextView btnPayMtn = dialogView.findViewById(R.id.payment_method_1);
-        TextView btnPayAirtel = dialogView.findViewById(R.id.payment_method_2);
+
+        // payment_method_1/2 are MaterialCardView rows in layout_payment_methods,
+        // so they must be cast to MaterialCardView — casting them to TextView
+        // throws ClassCastException the moment this dialog opens.
+        MaterialCardView btnPayMtn = dialogView.findViewById(R.id.payment_method_1);
+        MaterialCardView btnPayAirtel = dialogView.findViewById(R.id.payment_method_2);
         Button btnCancel = dialogView.findViewById(R.id.btn_cancel);
 
         NumberFormat format = NumberFormat.getNumberInstance(Locale.US);
@@ -502,5 +510,7 @@ public class IremboFragment extends Fragment implements IremboServiceAdapter.OnI
         btnCancel.setOnClickListener(v -> dialog.dismiss());
 
         dialog.show();
+        // Keep the dialog within the screen so every method stays reachable.
+        com.drivingschoolrwandaapp.utils.PaymentUtils.capDialogHeight(dialog, 0.8f);
     }
 }

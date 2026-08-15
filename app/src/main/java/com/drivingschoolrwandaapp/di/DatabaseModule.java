@@ -5,6 +5,7 @@ import android.content.Context;
 import com.drivingschoolrwandaapp.database.AppDatabase;
 import com.drivingschoolrwandaapp.database.dao.PdfDao;
 import com.drivingschoolrwandaapp.database.dao.TestDao;
+import com.drivingschoolrwandaapp.database.dao.TestResultDao;
 import com.drivingschoolrwandaapp.database.dao.UserDao;
 
 import javax.inject.Singleton;
@@ -45,5 +46,10 @@ public class DatabaseModule {
     @Provides
     public PdfDao providePdfDao(AppDatabase appDatabase) {
         return appDatabase.pdfDao();
+    }
+
+    @Provides
+    public TestResultDao provideTestResultDao(AppDatabase appDatabase) {
+        return appDatabase.testResultDao();
     }
 }

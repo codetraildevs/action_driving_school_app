@@ -416,6 +416,8 @@ public class IremboActivity extends AppCompatActivity implements IremboServiceAd
         });
 
         dialog.show();
+        // Long form: keep it within the screen so fields stay reachable.
+        PaymentUtils.capDialogHeight(dialog, 0.9f);
     }
 
     private void showIremboSpecialDialog() {
@@ -478,6 +480,8 @@ public class IremboActivity extends AppCompatActivity implements IremboServiceAd
         });
 
         dialog.show();
+        // Long form: keep it within the screen so fields stay reachable.
+        PaymentUtils.capDialogHeight(dialog, 0.9f);
     }
 
     private void showPaymentConfirmationDialog(IremboPaymentResponse paymentDetails) {
@@ -508,6 +512,8 @@ public class IremboActivity extends AppCompatActivity implements IremboServiceAd
         });
 
         dialog.show();
+        // Keep the dialog within the screen so every method stays reachable.
+        PaymentUtils.capDialogHeight(dialog, 0.8f);
     }
 
     @Override

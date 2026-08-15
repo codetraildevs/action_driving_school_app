@@ -2,10 +2,14 @@ package com.drivingschoolrwandaapp.utils;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.util.DisplayMetrics;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -20,6 +24,30 @@ public class PaymentUtils {
 
     private static final int CALL_PHONE_PERMISSION_REQUEST_CODE = 456;
     private static String ussdToCall;
+
+    /**
+     * Caps the dialog window height to a fraction of the screen so long payment
+     * content (instructions + methods) stays reachable on small devices.
+     * The dialog layout uses a weighted ScrollView, so when the window is
+     * clamped the body scrolls instead of being cut off.
+     *
+     * @param dialog           the dialog whose window should be capped (call after {@code show()})
+     * @param maxScreenFraction maximum window height as a fraction of the screen height (e.g. 0.8)
+     */
+    public static void capDialogHeight(Dialog dialog, float maxScreenFraction) {
+        if (dialog == null || dialog.getWindow() == null) return;
+        Window window = dialog.getWindow();
+        DisplayMetrics dm = dialog.getContext().getResources().getDisplayMetrics();
+        int maxHeight = (int) (dm.heightPixels * maxScreenFraction);
+        View decor = window.getDecorView();
+        decor.post(() -> {
+            if (window.isActive() && decor.getHeight() > maxHeight) {
+                WindowManager.LayoutParams lp = window.getAttributes();
+                lp.height = maxHeight;
+                window.setAttributes(lp);
+            }
+        });
+    }
 
     public static void setupPaymentMethods(View rootView, Fragment fragment, String amount) {
         MaterialCardView paymentMethod1 = rootView.findViewById(R.id.payment_method_1);

@@ -266,7 +266,14 @@ public class LearningMaterialViewModel extends AndroidViewModel {
                 outputStream.flush();
             }
 
-            if (fileSize != 0 && fileSizeDownloaded == fileSize) {
+            // Only require an exact size match when the server actually told us the
+            // expected length. When the response is gzip/compressed (OkHttp reports
+            // contentLength() == -1 after transparent decompression) or sent with
+            // chunked transfer-encoding, contentLength() is -1/0 even though the
+            // whole file arrived. Treating that as a failure made every download
+            // "fail" on cPanel-hosted servers behind compression middleware.
+            boolean lengthKnown = fileSize > 0;
+            if (fileSizeDownloaded > 0 && (!lengthKnown || fileSizeDownloaded == fileSize)) {
                 return true;
             } else {
                 if (destinationFile.exists()) {

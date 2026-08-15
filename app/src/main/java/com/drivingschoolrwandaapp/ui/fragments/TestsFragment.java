@@ -53,6 +53,7 @@ import com.drivingschoolrwandaapp.repository.Resource;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.card.MaterialCardView;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -376,9 +377,23 @@ public class TestsFragment extends Fragment {
 
         PaymentUtils.setupPaymentMethods(dialogView, this, price);
 
+        // Show the selected plan's price prominently in the dialog header.
+        TextView tvPaymentAmount = dialogView.findViewById(R.id.tv_payment_amount);
+        if (tvPaymentAmount != null) {
+            String formatted;
+            try {
+                formatted = NumberFormat.getNumberInstance(Locale.getDefault()).format(Long.parseLong(price));
+            } catch (NumberFormatException e) {
+                formatted = price;
+            }
+            tvPaymentAmount.setText(getString(R.string.amount_with_currency_format, formatted, "RWF"));
+        }
+
         Button btnDone = dialogView.findViewById(R.id.btn_done);
         btnDone.setOnClickListener(v -> dialog.dismiss());
         dialog.show();
+        // Keep the dialog within the screen so every method stays reachable.
+        PaymentUtils.capDialogHeight(dialog, 0.8f);
     }
 
     @Override
@@ -472,11 +487,22 @@ public class TestsFragment extends Fragment {
             holder.cardView.setCardElevation(isSelected ? 8 : 2);
 
             holder.itemView.setOnClickListener(v -> {
+                int clickedPosition = holder.getBindingAdapterPosition();
+                // Guard against detached/animating rows: getBindingAdapterPosition()
+                // returns NO_POSITION (-1), and notifyItemChanged(-1) would throw
+                // IndexOutOfBoundsException ("Inconsistency detected. Invalid item
+                // position -1") — a real crash Google Play flagged in this adapter.
+                if (clickedPosition == RecyclerView.NO_POSITION) return;
+
                 int previousSelected = selectedPosition;
-                selectedPosition = holder.getAdapterPosition();
-                notifyItemChanged(previousSelected);
+                selectedPosition = clickedPosition;
+                // On the first selection previousSelected is NO_POSITION (-1); only
+                // rebind the previously selected row when there actually was one.
+                if (previousSelected != RecyclerView.NO_POSITION) {
+                    notifyItemChanged(previousSelected);
+                }
                 notifyItemChanged(selectedPosition);
-                listener.onPlanSelected(plan);
+                listener.onPlanSelected(plans.get(clickedPosition));
             });
         }
 

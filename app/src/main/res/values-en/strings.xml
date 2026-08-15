@@ -137,7 +137,14 @@
     <string name="payment_instructions_pay2">2. Send money to 0782877442</string>
     <string name="payment_instructions_pay3">3. Send money to 0722877442</string>
     <string name="ihavepaid">Start tests</string>
+    <string name="irembo_service_subtitle">Apply online via Irembo</string>
     <string name="request_access_confirm">Request</string>
+    <string name="payment_title">Payment</string>
+    <string name="payment_methods_title">Payment methods</string>
+    <string name="payment_method_mtn">MTN Mobile Money</string>
+    <string name="payment_method_airtel">Airtel Money</string>
+    <string name="payment_dialog_subtitle">Choose one of the methods below, then tap "Start tests" once the payment is done.</string>
+    <string name="subscription_choose_plan">Choose the option that suits you</string>
     <string name="dafault_name">John Doe</string>
     <string name="default_email">johndoe@example.com</string>
     <string name="subscrition_status">Subscription Status: </string>
