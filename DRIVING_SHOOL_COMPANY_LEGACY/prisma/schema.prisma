@@ -876,6 +876,8 @@ model IremboDrivingLicenseRequest {
   user                 User          @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@index([userId])
+  // Hot query support: per-user pending counts in the admin requests page
+  @@index([userId, status])
   @@index([applicantNationalId])
   @@index([status])
   @@index([category])
@@ -904,6 +906,8 @@ model IremboSpecialRequest {
   user           User          @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@index([userId])
+  // Hot query support: per-user pending counts in the admin requests page
+  @@index([userId, status])
   @@index([nationalId])
   @@index([status])
   @@map("irembo_special_requests")
