@@ -79,3 +79,6 @@ docs/*.sql
 
 # docs/app-flows.md is referenced from README.md, so keep it despite the *.md rule
 !docs/app-flows.md
+
+# Firebase service account (keep out of git)
+firebase-service-account.json
