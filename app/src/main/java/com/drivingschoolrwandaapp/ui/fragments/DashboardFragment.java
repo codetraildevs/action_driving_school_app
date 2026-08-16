@@ -70,6 +70,17 @@ public class DashboardFragment extends Fragment {
             );
         }
 
+        // The "Tests effectués" subtitle inside the Exams card opens the test history.
+        android.widget.TextView previousTestsSubtitle = view.findViewById(R.id.previous_tests_subtitle);
+        if (previousTestsSubtitle != null) {
+            previousTestsSubtitle.setOnClickListener(v -> {
+                if (isAdded()) {
+                    NavHostFragment.findNavController(DashboardFragment.this)
+                            .navigate(R.id.action_dashboardFragment_to_resultsFragment);
+                }
+            });
+        }
+
         MaterialCardView learningMaterialsCard = view.findViewById(R.id.learning_materials_card);
         if (learningMaterialsCard != null) {
             learningMaterialsCard.setOnClickListener(v ->

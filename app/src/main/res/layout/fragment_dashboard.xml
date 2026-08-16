@@ -56,11 +56,15 @@
                         android:gravity="center"/>
 
                     <TextView
+                        android:id="@+id/previous_tests_subtitle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/title_tests"
                         android:textSize="12sp"
-                        android:gravity="center"/>
+                        android:gravity="center"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:paddingVertical="6dp"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

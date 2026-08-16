@@ -444,6 +444,13 @@ public class TestsFragment extends Fragment {
             }
             return true;
         }
+        if (item.getItemId() == R.id.action_test_history) {
+            if (isAdded()) {
+                NavHostFragment.findNavController(this)
+                        .navigate(R.id.action_testsFragment_to_resultsFragment);
+            }
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 

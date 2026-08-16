@@ -27,6 +27,10 @@
             android:id="@+id/action_dashboardFragment_to_iremboActivity"
             app:popUpToInclusive="false"
             app:destination="@id/iremboActivity" />
+        <action
+            android:id="@+id/action_dashboardFragment_to_resultsFragment"
+            app:popUpToInclusive="false"
+            app:destination="@id/resultsFragment" />
 
     </fragment>
 
@@ -39,7 +43,17 @@
             android:id="@+id/action_testsFragment_to_testQuestionsFragment"
             app:popUpToInclusive="false"
             app:destination="@id/testQuestionsFragment" />
+        <action
+            android:id="@+id/action_testsFragment_to_resultsFragment"
+            app:popUpToInclusive="false"
+            app:destination="@id/resultsFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/resultsFragment"
+        android:name="com.drivingschoolrwandaapp.ui.fragments.ResultsFragment"
+        android:label="@string/test_history"
+        tools:layout="@layout/fragment_results" />
 
 
     <fragment
