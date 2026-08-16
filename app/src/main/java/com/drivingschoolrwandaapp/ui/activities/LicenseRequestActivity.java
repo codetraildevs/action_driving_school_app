@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -160,8 +159,15 @@ public class LicenseRequestActivity extends BaseIremboFormActivity {
             return;
         }
 
-        CharSequence rbText = rbLicenseType.getText();
-        String licenseType = rbText != null ? rbText.toString().toUpperCase(Locale.ROOT) : "NEW";
+        // Map the selected radio to a clean server value instead of its
+        // localized label (e.g. the Kinyarwanda radio text would otherwise
+        // be stored verbatim in the database).
+        String licenseType;
+        if (selectedLicenseTypeId == R.id.rb_full) {
+            licenseType = "FULL";
+        } else {
+            licenseType = "NEW";
+        }
         String appType = "New";
 
         IremboLicenseRequest request = new IremboLicenseRequest(
