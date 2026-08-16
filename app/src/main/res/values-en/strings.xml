@@ -241,7 +241,7 @@ When you reach the last one, you press “Finish Exam,” and you will immediate
     <string name="_0">0%</string>
     <string name="open_group">Open Group</string>
     <string name="learning_materials_dashboard">Learning Materials</string>
-    <string name="all_services">Request Exam Access Code</string>
+    <string name="all_services">All Services</string>
     <string name="whatsapp_group_text">Join WhatsApp groups</string>
     <string name="provisional_license">Provisional or Permanent License</string>
     <string name="provisional_license_text">Provisional License</string>

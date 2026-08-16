@@ -270,7 +270,7 @@ Quand tu arrives à la dernière question, tu appuies sur « Terminer l’examen
     <string name="_0">0%</string>
     <string name="open_group">Ouvrir le groupe</string>
     <string name="learning_materials_dashboard">Supports pédagogiques</string>
-    <string name="all_services">Demander un code d’accès à l’examen</string>
+    <string name="all_services">Tous les services</string>
     <string name="whatsapp_group_text">Rejoindre les groupes WhatsApp</string>
     <string name="provisional_license">Permis provisoire ou permanent</string>
     <string name="provisional_license_text">Permis provisoire</string>
