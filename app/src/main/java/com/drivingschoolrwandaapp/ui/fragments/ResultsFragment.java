@@ -179,8 +179,6 @@ public class ResultsFragment extends Fragment {
             private final TextView scoreText;
             private final TextView dateText;
             private final TextView durationText;
-            private final View actionButtonsRow;
-            private final com.google.android.material.button.MaterialButton btnReview;
             private final com.google.android.material.button.MaterialButton btnRetake;
 
             ViewHolder(@NonNull View itemView) {
@@ -189,8 +187,6 @@ public class ResultsFragment extends Fragment {
                 statusIconContainer = itemView.findViewById(R.id.status_icon_container);
                 testNameText = itemView.findViewById(R.id.result_test_name);
                 scoreText = itemView.findViewById(R.id.result_score_text);
-                actionButtonsRow = itemView.findViewById(R.id.action_buttons_row);
-                btnReview = itemView.findViewById(R.id.btn_review_test);
                 btnRetake = itemView.findViewById(R.id.btn_retake_test);
                 dateText = itemView.findViewById(R.id.result_date);
                 durationText = itemView.findViewById(R.id.result_duration);
@@ -248,26 +244,13 @@ public class ResultsFragment extends Fragment {
                             ContextCompat.getColor(itemView.getContext(), R.color.colorErrorContainer));
                 }
 
-                // Show action buttons and wire them up
+                // Show the Retake action and wire it up (Review was removed for a compact card)
                 final int testId = result.getTestId();
                 final String title = result.getTestName() != null && !result.getTestName().isEmpty()
                         ? result.getTestName() : getString(R.string.exam_number_format, result.getTestNumber());
 
-                if (testId > 0) {
-                    actionButtonsRow.setVisibility(View.VISIBLE);
-
-                    btnReview.setOnClickListener(v -> {
-                        if (getActivity() != null && isAdded()) {
-                            Bundle args = new Bundle();
-                            args.putInt("testId", testId);
-                            args.putString("title", title);
-                            args.putBoolean("isReviewMode", true);
-                            args.putBoolean("isRealTimeFeedback", true);
-                            NavHostFragment.findNavController(ResultsFragment.this)
-                                    .navigate(R.id.action_global_testQuestionsFragment, args);
-                        }
-                    });
-
+                if (testId > 0 && btnRetake != null) {
+                    btnRetake.setVisibility(View.VISIBLE);
                     btnRetake.setOnClickListener(v -> {
                         if (getActivity() != null && isAdded()) {
                             Bundle args = new Bundle();
@@ -279,8 +262,8 @@ public class ResultsFragment extends Fragment {
                                     .navigate(R.id.action_global_testQuestionsFragment, args);
                         }
                     });
-                } else {
-                    actionButtonsRow.setVisibility(View.GONE);
+                } else if (btnRetake != null) {
+                    btnRetake.setVisibility(View.GONE);
                 }
             }
         }

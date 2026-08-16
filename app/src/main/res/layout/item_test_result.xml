@@ -10,22 +10,22 @@
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground"
-    app:cardCornerRadius="18dp"
-    app:cardElevation="3dp"
+    app:cardCornerRadius="14dp"
+    app:cardElevation="2dp"
     app:strokeWidth="0dp"
     app:cardBackgroundColor="?attr/colorSurface">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:padding="12dp">
 
         <!-- Status Icon -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/status_icon_container"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            app:cardCornerRadius="24dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            app:cardCornerRadius="20dp"
             app:cardElevation="0dp"
             app:strokeWidth="0dp"
             app:cardBackgroundColor="?attr/colorPrimaryContainer"
@@ -34,8 +34,8 @@
 
             <ImageView
                 android:id="@+id/result_status_icon"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
                 android:layout_gravity="center"
                 android:scaleType="fitCenter"
                 android:contentDescription="@null"
@@ -49,7 +49,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginStart="14dp"
+            android:layout_marginStart="12dp"
             android:layout_marginEnd="8dp"
             android:gravity="center_vertical"
             app:layout_constraintTop_toTopOf="parent"
@@ -72,7 +72,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:layout_marginTop="4dp">
+                android:layout_marginTop="2dp">
 
                 <TextView
                     android:id="@+id/result_date"
@@ -98,10 +98,10 @@
         <TextView
             android:id="@+id/result_score_text"
             android:layout_width="wrap_content"
-            android:layout_height="40dp"
+            android:layout_height="36dp"
             android:gravity="center"
-            android:paddingHorizontal="14dp"
-            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:paddingHorizontal="12dp"
+            android:textAppearance="?attr/textAppearanceTitleSmall"
             android:textStyle="bold"
             android:textColor="?attr/colorOnPrimaryContainer"
             android:background="@drawable/option_indicator_background"
@@ -111,47 +111,24 @@
             app:layout_constraintEnd_toEndOf="parent"
             tools:text="18/20" />
 
-        <!-- Action buttons row -->
-        <LinearLayout
-            android:id="@+id/action_buttons_row"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="end"
-            android:layout_marginTop="12dp"
+        <!-- Retake button (Review was removed for a compact card) -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_retake_test"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:text="@string/retake"
+            android:textAllCaps="false"
+            android:textSize="12sp"
+            android:layout_marginTop="8dp"
             android:visibility="gone"
+            app:cornerRadius="16dp"
+            app:icon="@drawable/ic_refresh"
+            app:iconGravity="textStart"
+            app:iconSize="16dp"
             app:layout_constraintTop_toBottomOf="@id/status_icon_container"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            tools:visibility="visible">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_review_test"
-                android:layout_width="wrap_content"
-                android:layout_height="34dp"
-                android:text="@string/review"
-                android:textAllCaps="false"
-                android:textSize="12sp"
-                app:cornerRadius="17dp"
-                app:icon="@drawable/ic_search"
-                app:iconGravity="textStart"
-                app:iconSize="16dp"
-                style="@style/Widget.Material3.Button.TonalButton" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_retake_test"
-                android:layout_width="wrap_content"
-                android:layout_height="34dp"
-                android:text="@string/retake"
-                android:textAllCaps="false"
-                android:textSize="12sp"
-                android:layout_marginStart="8dp"
-                app:cornerRadius="17dp"
-                app:icon="@drawable/ic_refresh"
-                app:iconGravity="textStart"
-                app:iconSize="16dp"
-                style="@style/Widget.Material3.Button.TonalButton" />
-        </LinearLayout>
+            style="@style/Widget.Material3.Button.TonalButton"
+            tools:visibility="visible" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
