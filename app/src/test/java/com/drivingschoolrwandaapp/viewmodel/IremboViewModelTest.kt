@@ -16,6 +16,7 @@ import org.junit.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.any
+import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import retrofit2.Call
@@ -41,9 +42,16 @@ class IremboViewModelTest {
     private lateinit var apiService: ApiService
     private lateinit var viewModel: IremboViewModel
 
+    // The ViewModel resolves user-facing errors via Application.getString().
+    // Stub it to a fixed value so the assertions verify the localized message
+    // path rather than a hardcoded English string.
+    private val localizedError = "localized_error"
+
     private fun setUpViewModel() {
         apiService = mock(ApiService::class.java)
-        viewModel = IremboViewModel(mock(Application::class.java), apiService)
+        val application = mock(Application::class.java)
+        `when`(application.getString(anyInt())).thenReturn(localizedError)
+        viewModel = IremboViewModel(application, apiService)
     }
 
     private fun sampleApplication(number: String): IremboApplication {
@@ -99,7 +107,7 @@ class IremboViewModelTest {
         callback.onResponse(call, response)
 
         assertEquals(Resource.Status.ERROR, viewModel.getRecentApplications().value?.status)
-        assertEquals("Failed to fetch recent applications", viewModel.getRecentApplications().value?.message)
+        assertEquals(localizedError, viewModel.getRecentApplications().value?.message)
     }
 
     @Test
@@ -181,7 +189,7 @@ class IremboViewModelTest {
         callback.onResponse(call, response)
 
         assertEquals(Resource.Status.ERROR, viewModel.getLicenseRequestStatus().value?.status)
-        assertEquals("Failed to submit request", viewModel.getLicenseRequestStatus().value?.message)
+        assertEquals(localizedError, viewModel.getLicenseRequestStatus().value?.message)
     }
 
     @Test
@@ -244,7 +252,7 @@ class IremboViewModelTest {
         callback.onResponse(call, response)
 
         assertEquals(Resource.Status.ERROR, viewModel.getSpecialRequestStatus().value?.status)
-        assertEquals("Failed to submit request", viewModel.getSpecialRequestStatus().value?.message)
+        assertEquals(localizedError, viewModel.getSpecialRequestStatus().value?.message)
     }
 
     @Test
@@ -287,7 +295,7 @@ class IremboViewModelTest {
         callback.onResponse(call, response)
 
         assertEquals(Resource.Status.ERROR, viewModel.getApplicationDetails().value?.status)
-        assertEquals("Application not found or error occurred", viewModel.getApplicationDetails().value?.message)
+        assertEquals(localizedError, viewModel.getApplicationDetails().value?.message)
     }
 
     @Test

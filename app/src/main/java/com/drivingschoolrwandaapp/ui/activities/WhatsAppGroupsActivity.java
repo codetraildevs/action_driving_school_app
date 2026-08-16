@@ -102,7 +102,7 @@ public class WhatsAppGroupsActivity extends AppCompatActivity implements WhatsAp
                         allGroups = resource.data;
                         adapter.setGroups(allGroups);
                     } else {
-                        showError("No active WhatsApp groups found.");
+                        showError(getString(R.string.no_whatsapp_groups));
                     }
                     break;
                 case ERROR:
@@ -132,7 +132,7 @@ public class WhatsAppGroupsActivity extends AppCompatActivity implements WhatsAp
         progressBar.setVisibility(View.GONE);
         recyclerView.setVisibility(View.GONE);
         layoutError.setVisibility(View.VISIBLE);
-        tvErrorMessage.setText(message != null ? message : "An unknown error occurred");
+        tvErrorMessage.setText(message != null ? message : getString(R.string.unknown_error));
     }
 
     @Override

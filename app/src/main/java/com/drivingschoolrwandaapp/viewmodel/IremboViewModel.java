@@ -69,7 +69,8 @@ public class IremboViewModel extends AndroidViewModel {
                                 recentApplications.setValue(Resource.success(allData));
                             }
                         } else {
-                            recentApplications.setValue(Resource.error("Failed to fetch recent applications", null));
+                            recentApplications.setValue(Resource.error(
+                                    getApplication().getString(com.drivingschoolrwandaapp.R.string.irembo_fetch_failed), null));
                         }
                     }
 
@@ -89,7 +90,8 @@ public class IremboViewModel extends AndroidViewModel {
                         if (response.isSuccessful() && response.body() != null) {
                             licenseRequestStatus.setValue(Resource.success(response.body().getData()));
                         } else {
-                            licenseRequestStatus.setValue(Resource.error("Failed to submit request", null));
+                            licenseRequestStatus.setValue(Resource.error(
+                                    getApplication().getString(com.drivingschoolrwandaapp.R.string.irembo_submit_failed), null));
                         }
                     }
 
@@ -109,7 +111,8 @@ public class IremboViewModel extends AndroidViewModel {
                         if (response.isSuccessful() && response.body() != null) {
                             specialRequestStatus.setValue(Resource.success(response.body().getData()));
                         } else {
-                            specialRequestStatus.setValue(Resource.error("Failed to submit request", null));
+                            specialRequestStatus.setValue(Resource.error(
+                                    getApplication().getString(com.drivingschoolrwandaapp.R.string.irembo_submit_failed), null));
                         }
                     }
 
@@ -129,7 +132,8 @@ public class IremboViewModel extends AndroidViewModel {
                         if (response.isSuccessful() && response.body() != null) {
                             applicationDetails.setValue(Resource.success(response.body().getData()));
                         } else {
-                            applicationDetails.setValue(Resource.error("Application not found or error occurred", null));
+                            applicationDetails.setValue(Resource.error(
+                                    getApplication().getString(com.drivingschoolrwandaapp.R.string.irembo_application_not_found), null));
                         }
                     }
 

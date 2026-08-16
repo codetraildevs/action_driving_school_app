@@ -325,12 +325,12 @@ public class App extends AppCompatActivity {
                 // Already granted
             } else if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
                 new AlertDialog.Builder(this)
-                        .setTitle("Notification Permission Needed")
-                        .setMessage("This app uses notifications to alert you about important updates. Please grant the permission to receive them.")
-                        .setPositiveButton("OK", (dialog, which) -> {
+                        .setTitle(getString(R.string.notification_permission_title))
+                        .setMessage(getString(R.string.notification_permission_message))
+                        .setPositiveButton(getString(R.string.ok), (dialog, which) -> {
                             requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
                         })
-                        .setNegativeButton("No, thanks", (dialog, which) -> dialog.dismiss())
+                        .setNegativeButton(getString(R.string.no_thanks), (dialog, which) -> dialog.dismiss())
                         .create()
                         .show();
             } else {

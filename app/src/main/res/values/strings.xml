@@ -89,6 +89,12 @@
     <string name="fill_all_fields">Nyamuneka wuzuze ibice byose</string>
     <string name="passwords_not_match">Amaijambobanga ntahura</string>
     <string name="something_went_wrong">Habaye ikibazo</string>
+    <string name="unknown_error">Habayemo ikibazo kitazwi</string>
+    <string name="no_whatsapp_groups">Nta matsinda ya WhatsApp akora abonetse.</string>
+    <string name="national_id_16_digits">Agomba kuba imibare 16</string>
+    <string name="irembo_fetch_failed">Kubona ibisabwa bya vuba ntibyashobotse</string>
+    <string name="irembo_submit_failed">Kohereza ubusabe ntibyakunze</string>
+    <string name="irembo_application_not_found">Ubusabe ntibubonetse cyangwa habaye ikibazo</string>
     <string name="invalid_otp">Shyiramo OTP y\'inyuguti 6 yujuje ibisabwa</string>
     <string name="terms_of_service">Amategeko y\'Akazi</string>
     <string name="registration_failed">Iyandikisho ryanze. Gerageza kongera.</string>
@@ -105,6 +111,16 @@
     <string name="download_success">Gukurura byarangiye!</string>
     <string name="download_failure">Gukurura byanze.</string>
     <string name="download_failure_reason">Gukurura byanze: %1$s</string>
+    <string name="downloading">Gukurura</string>
+    <string name="downloading_material">Gukurura %1$s</string>
+    <string name="download_complete">Gukurura byarangiye</string>
+    <string name="download_complete_message">%1$s byakururwe.</string>
+    <string name="download_failed_title">Gukurura byanze</string>
+    <string name="downloading_file">Gukurura dosiye...</string>
+    <string name="ok">OK</string>
+    <string name="no_thanks">Oya, urakoze</string>
+    <string name="notification_permission_title">Uruhushya rwa notifikasiyo rurakenewe</string>
+    <string name="notification_permission_message">Iyi apulikasiyo ikoresha notifikasiyo kugira ngo ikubere amakuru y\'ingenzi. Nyamuneka ube uruhushya kugira ngo uzakire.</string>
     <string name="download_first">Dosiye ntabwo yakururwa. Nyamuneka ibanze uyikure.</string>
     <string name="no_app_found">Nta porogaramu ishobora gufungura ubu bwoko bwa dosiye.</string>
     <string name="error_opening_file">Ntibishoboka gufungura dosiye.</string>
@@ -312,7 +328,7 @@
     <string name="no_bookmarks_yet">No bookmarks yet</string>
     <string name="need_active_subscription">You need an active subscription to %s this material.</string>
     <string name="test_access_expired_msg">Your test access has expired. You cannot %s this material.</string>
-    <string name="downloading_file">Downloading file…</string>
+
     <string name="download_failed_msg">Download failed: %s</string>
     <string name="could_not_open_link">Could not open link</string>
     <string name="invalid_link">Invalid link</string>

@@ -392,7 +392,7 @@ public class IremboActivity extends AppCompatActivity implements IremboServiceAd
             if (phoneError != null) { etPhone.setError(getString(R.string.invalid_phone)); return; }
             String phone = PhoneUtils.normalize(rawPhone);
             if (TextUtils.isEmpty(nationalId)) { etNationalId.setError(getString(R.string.error_required_field)); return; }
-            if (nationalId.length() != 16) { etNationalId.setError("Must be 16 digits"); return; }
+            if (nationalId.length() != 16) { etNationalId.setError(getString(R.string.national_id_16_digits)); return; }
             if (TextUtils.isEmpty(province) || TextUtils.isEmpty(district)) { Toast.makeText(this, getString(R.string.please_select_location), Toast.LENGTH_SHORT).show(); return; }
             if (TextUtils.isEmpty(category)) { Toast.makeText(this, getString(R.string.error_required_field), Toast.LENGTH_SHORT).show(); return; }
             if (selectedLicenseTypeId == -1) { Toast.makeText(this, getString(R.string.error_required_field), Toast.LENGTH_SHORT).show(); return; }
@@ -470,7 +470,7 @@ public class IremboActivity extends AppCompatActivity implements IremboServiceAd
             if (phoneError != null) { etPhone.setError(getString(R.string.invalid_phone)); return; }
             String phone = PhoneUtils.normalize(rawPhone);
             if (TextUtils.isEmpty(nationalId)) { etNationalId.setError(getString(R.string.error_required_field)); return; }
-            if (nationalId.length() != 16) { etNationalId.setError("Must be 16 digits"); return; }
+            if (nationalId.length() != 16) { etNationalId.setError(getString(R.string.national_id_16_digits)); return; }
 
             IremboSpecialRequest request = new IremboSpecialRequest(
                     serviceName, category, name, phone, nationalId, description
