@@ -64,7 +64,7 @@ public class SpecialRequestActivity extends BaseIremboFormActivity {
     }
 
     private void submit() {
-        String serviceName = "";
+        String serviceName = getString(R.string.special_irembo_service);
         CharSequence categoryText = actvCategory.getText();
         String category = categoryText != null ? categoryText.toString().trim() : "";
 

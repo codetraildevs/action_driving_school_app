@@ -252,6 +252,8 @@ Quand tu arrives à la dernière question, tu appuies sur « Terminer l’examen
     <string name="service_name">Nom du Service</string>
     <string name="special_irembo_service">Service Irembo Spécial (BUSANZA)</string>
     <string name="my_applications">Mes Demandes</string>
+    <string name="no_applications_found">Aucune demande trouvée</string>
+    <string name="no_applications_found_subtitle">Essayez une autre référence ou modifiez le filtre</string>
     <string name="all">Tout</string>
     <string name="pending">En attente</string>
     <string name="payment_required">Paiement Requis</string>

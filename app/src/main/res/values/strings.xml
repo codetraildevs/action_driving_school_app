@@ -224,6 +224,8 @@
     <string name="service_name">Izina rya Serivisi</string>
     <string name="special_irembo_service">Serivisi Yihariye ya Irembo (BUSANZA)</string>
     <string name="my_applications">Ubusabe Bwanjye</string>
+    <string name="no_applications_found">Nta bisabe bibonetse</string>
+    <string name="no_applications_found_subtitle">Koresha ubusabe bwawe cyangwa uhindure iyungurura</string>
     <string name="all">Byose</string>
     <string name="pending">Bitegerejwe</string>
     <string name="provisional_license_text">Uruhushya rw\'Agateganyo</string>
