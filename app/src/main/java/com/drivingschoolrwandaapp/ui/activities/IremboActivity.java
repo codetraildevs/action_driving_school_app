@@ -10,11 +10,17 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.core.content.ContextCompat;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -40,6 +46,8 @@ import com.drivingschoolrwandaapp.utils.PaymentUtils;
 import com.drivingschoolrwandaapp.viewmodel.IremboViewModel;
 import com.drivingschoolrwandaapp.viewmodel.UserViewModel;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.textfield.TextInputEditText;
 
 import org.json.JSONException;
@@ -143,10 +151,60 @@ public class IremboActivity extends AppCompatActivity implements IremboServiceAd
             String appNumber = etApplicationNumber.getText() != null ? etApplicationNumber.getText().toString().trim() : "";
             if (TextUtils.isEmpty(appNumber)) {
                 etApplicationNumber.setError(getString(R.string.error_required_field));
+                hideTrackResult();
                 return;
             }
             iremboViewModel.fetchApplicationDetails(appNumber);
         });
+    }
+
+    private void showTrackLoading() {
+        LinearLayout container = findViewById(R.id.track_result_container);
+        ProgressBar progress = findViewById(R.id.track_result_progress);
+        MaterialCardView card = findViewById(R.id.track_result_card);
+        if (container == null || progress == null || card == null) return;
+        container.setVisibility(View.VISIBLE);
+        progress.setVisibility(View.VISIBLE);
+        card.setVisibility(View.GONE);
+    }
+
+    private void showTrackResult(boolean found, String title, String message) {
+        LinearLayout container = findViewById(R.id.track_result_container);
+        ProgressBar progress = findViewById(R.id.track_result_progress);
+        MaterialCardView card = findViewById(R.id.track_result_card);
+        ImageView icon = findViewById(R.id.track_result_icon);
+        FrameLayout iconContainer = findViewById(R.id.track_result_icon_container);
+        TextView tvTitle = findViewById(R.id.track_result_title);
+        TextView tvMessage = findViewById(R.id.track_result_message);
+        if (container == null || card == null || icon == null || tvTitle == null || tvMessage == null) return;
+
+        container.setVisibility(View.VISIBLE);
+        progress.setVisibility(View.GONE);
+        card.setVisibility(View.VISIBLE);
+
+        tvTitle.setText(title);
+        tvMessage.setText(message);
+
+        if (found) {
+            icon.setImageResource(R.drawable.ic_check_circle);
+            icon.setColorFilter(ContextCompat.getColor(this, R.color.correct_answer_green));
+            if (iconContainer != null) {
+                iconContainer.setBackgroundResource(R.drawable.bg_payment_logo);
+            }
+        } else {
+            icon.setImageResource(R.drawable.ic_error);
+            icon.setColorFilter(ContextCompat.getColor(this, R.color.incorrect_answer_red));
+            if (iconContainer != null) {
+                iconContainer.setBackgroundResource(R.drawable.bg_payment_logo);
+            }
+        }
+    }
+
+    private void hideTrackResult() {
+        LinearLayout container = findViewById(R.id.track_result_container);
+        if (container != null) {
+            container.setVisibility(View.GONE);
+        }
     }
 
     private void setupRecentActivity() {
@@ -247,17 +305,30 @@ public class IremboActivity extends AppCompatActivity implements IremboServiceAd
             if (resource == null) return;
              if (resource.status == Resource.Status.LOADING) {
                  showLoadingDialog();
+                 showTrackLoading();
              } else if (resource.status == Resource.Status.SUCCESS) {
                  hideLoadingDialog();
                  if (resource.data != null && !isFinishing()) {
+                     hideTrackResult();
                      Intent intent = new Intent(this, ApplicationDetailsActivity.class);
                      intent.putExtra("application_details", resource.data);
                      startActivity(intent);
+                 } else if (!isFinishing()) {
+                     // Server replied success but no details: treat as not found.
+                     showTrackResult(false, getString(R.string.application_not_found_title),
+                             getString(R.string.irembo_application_not_found));
                  }
              } else if (resource.status == Resource.Status.ERROR) {
                  hideLoadingDialog();
-                 if (!isFinishing()) {                    Toast.makeText(this, getString(R.string.error_format, resource.message != null ? resource.message : getString(R.string.something_went_wrong)), Toast.LENGTH_LONG).show();
-                }
+                 if (!isFinishing()) {
+                     String message = resource.message != null ? resource.message : getString(R.string.something_went_wrong);
+                     if (message.contains(getString(R.string.irembo_application_not_found))
+                             || message.toLowerCase(Locale.ROOT).contains("not found")) {
+                         showTrackResult(false, getString(R.string.application_not_found_title), message);
+                     } else {
+                         showTrackResult(false, getString(R.string.track_failed_title), message);
+                     }
+                 }
              }
          });
 
@@ -295,13 +366,14 @@ public class IremboActivity extends AppCompatActivity implements IremboServiceAd
     }
 
     private void showIremboLicenseDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        BottomSheetDialog dialog = new BottomSheetDialog(this);
         LayoutInflater inflater = getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_irembo_license, null);
-        builder.setView(dialogView);
-        AlertDialog dialog = builder.create();
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        dialog.setContentView(dialogView);
+
+        View btnClose = dialogView.findViewById(R.id.btn_close);
+        if (btnClose != null) {
+            btnClose.setOnClickListener(v -> dialog.dismiss());
         }
 
         TextInputEditText etName = dialogView.findViewById(R.id.et_applicant_name);
@@ -416,18 +488,17 @@ public class IremboActivity extends AppCompatActivity implements IremboServiceAd
         });
 
         dialog.show();
-        // Long form: keep it within the screen so fields stay reachable.
-        PaymentUtils.capDialogHeight(dialog, 0.9f);
     }
 
     private void showIremboSpecialDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        BottomSheetDialog dialog = new BottomSheetDialog(this);
         LayoutInflater inflater = getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_irembo_special, null);
-        builder.setView(dialogView);
-        AlertDialog dialog = builder.create();
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        dialog.setContentView(dialogView);
+
+        View btnClose = dialogView.findViewById(R.id.btn_close);
+        if (btnClose != null) {
+            btnClose.setOnClickListener(v -> dialog.dismiss());
         }
 
         Spinner spinnerCategory = dialogView.findViewById(R.id.spinner_category);
@@ -480,8 +551,6 @@ public class IremboActivity extends AppCompatActivity implements IremboServiceAd
         });
 
         dialog.show();
-        // Long form: keep it within the screen so fields stay reachable.
-        PaymentUtils.capDialogHeight(dialog, 0.9f);
     }
 
     private void showPaymentConfirmationDialog(IremboPaymentResponse paymentDetails) {

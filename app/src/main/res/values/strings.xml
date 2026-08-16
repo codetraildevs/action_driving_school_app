@@ -95,6 +95,8 @@
     <string name="irembo_fetch_failed">Kubona ibisabwa bya vuba ntibyashobotse</string>
     <string name="irembo_submit_failed">Kohereza ubusabe ntibyakunze</string>
     <string name="irembo_application_not_found">Ubusabe ntibubonetse cyangwa habaye ikibazo</string>
+    <string name="application_not_found_title">Ubusabe ntibubonetse</string>
+    <string name="track_failed_title">Kurikirana ntibyakunze</string>
     <string name="invalid_otp">Shyiramo OTP y\'inyuguti 6 yujuje ibisabwa</string>
     <string name="terms_of_service">Amategeko y\'Akazi</string>
     <string name="registration_failed">Iyandikisho ryanze. Gerageza kongera.</string>

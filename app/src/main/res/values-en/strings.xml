@@ -94,6 +94,8 @@
     <string name="irembo_fetch_failed">Failed to fetch recent applications</string>
     <string name="irembo_submit_failed">Failed to submit request</string>
     <string name="irembo_application_not_found">Application not found or an error occurred</string>
+    <string name="application_not_found_title">Application not found</string>
+    <string name="track_failed_title">Unable to track application</string>
     <string name="invalid_otp">Enter a valid 6-digit OTP</string>
     <string name="terms_of_service">Terms of Service</string>
     <string name="registration_failed">Registration failed. Please try again.</string>

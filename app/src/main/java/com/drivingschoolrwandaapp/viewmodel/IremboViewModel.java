@@ -124,23 +124,26 @@ public class IremboViewModel extends AndroidViewModel {
     }
 
     public void fetchApplicationDetails(String applicationNumber) {
-        applicationDetails.setValue(Resource.loading(null));
-        apiService.getIremboApplicationByNumber(applicationNumber)
-                .enqueue(new Callback<ApiResponse<IremboApplication>>() {
-                    @Override
-                    public void onResponse(Call<ApiResponse<IremboApplication>> call, Response<ApiResponse<IremboApplication>> response) {
-                        if (response.isSuccessful() && response.body() != null) {
-                            applicationDetails.setValue(Resource.success(response.body().getData()));
-                        } else {
-                            applicationDetails.setValue(Resource.error(
-                                    getApplication().getString(com.drivingschoolrwandaapp.R.string.irembo_application_not_found), null));
-                        }
-                    }
+        applicationDetails.setValue(Resource.loading(null));                apiService.getIremboApplicationByNumber(applicationNumber)
+                        .enqueue(new Callback<ApiResponse<IremboApplication>>() {
+                            @Override
+                            public void onResponse(Call<ApiResponse<IremboApplication>> call, Response<ApiResponse<IremboApplication>> response) {
+                                if (response.isSuccessful() && response.body() != null) {
+                                    applicationDetails.setValue(Resource.success(response.body().getData()));
+                                } else if (response.code() == 404) {
+                                    // Server explicitly reports the application does not exist.
+                                    applicationDetails.setValue(Resource.error(
+                                            getApplication().getString(com.drivingschoolrwandaapp.R.string.irembo_application_not_found), null));
+                                } else {
+                                    applicationDetails.setValue(Resource.error(
+                                            getApplication().getString(com.drivingschoolrwandaapp.R.string.irembo_fetch_failed), null));
+                                }
+                            }
 
-                    @Override
-                    public void onFailure(Call<ApiResponse<IremboApplication>> call, Throwable t) {
-                        applicationDetails.setValue(Resource.error(ErrorUtils.getUserFriendlyMessage(t), null));
-                    }
-                });
+                            @Override
+                            public void onFailure(Call<ApiResponse<IremboApplication>> call, Throwable t) {
+                                applicationDetails.setValue(Resource.error(ErrorUtils.getUserFriendlyMessage(t), null));
+                            }
+                        });
     }
 }

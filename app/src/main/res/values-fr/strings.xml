@@ -95,6 +95,8 @@
     <string name="irembo_fetch_failed">Échec du chargement des demandes récentes</string>
     <string name="irembo_submit_failed">Échec de l\'envoi de la demande</string>
     <string name="irembo_application_not_found">Demande introuvable ou une erreur s\'est produite</string>
+    <string name="application_not_found_title">Demande introuvable</string>
+    <string name="track_failed_title">Impossible de suivre la demande</string>
     <string name="invalid_otp">Entrez un OTP valide à 6 chiffres</string>
     <string name="terms_of_service">Conditions d\'utilisation</string>
     <string name="registration_failed">Échec de l\'inscription. Veuillez réessayer.</string>
