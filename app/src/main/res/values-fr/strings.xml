@@ -104,6 +104,7 @@
     <string name="no_materials_found">Aucun document trouvé.</string>
     <string name="download_success">Téléchargement terminé !</string>
     <string name="download_failure">Échec du téléchargement.</string>
+    <string name="download_failure_reason">Échec du téléchargement : %1$s</string>
     <string name="download_first">Impossible d\'ouvrir le fichier. Veuillez d\'abord le télécharger.</string>
     <string name="no_app_found">Aucune application ne peut ouvrir ce type de fichier.</string>
     <string name="error_opening_file">Impossible d\'ouvrir le fichier.</string>

@@ -144,7 +144,11 @@ public class ProfileFragment extends Fragment {
                     break;
                 case ERROR:
                     if (progressBar != null) progressBar.setVisibility(View.GONE);
-                    if (isAdded() && getContext() != null) {
+                    // When offline (or the server is unreachable) the profile shown is the
+                    // cached copy from the local database. Only bother the user with an
+                    // error toast when there is genuinely nothing to display — otherwise the
+                    // refresh failure is expected and the saved content is still useful.
+                    if (resource.getData() == null && isAdded() && getContext() != null) {
                         Toast.makeText(getContext(), resource.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                     break;

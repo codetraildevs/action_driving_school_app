@@ -222,9 +222,15 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
                     }
                     break;
                 case FAILURE:
-                    notificationHelper.showDownloadFailedNotification(notificationId, "Download Failed", "Failed to download " + title);
+                    // Prefer the real server/network reason (e.g. "File not found on
+                    // server") so a failed download isn't a mystery to the user.
+                    String reason = downloadState.getMessage();
+                    String failureMessage = (reason != null && !reason.isEmpty())
+                            ? getString(R.string.download_failure_reason, reason)
+                            : getString(R.string.download_failure);
+                    notificationHelper.showDownloadFailedNotification(notificationId, "Download Failed", failureMessage);
                     if (isAdded() && getContext() != null) {
-                        Toast.makeText(getContext(), getString(R.string.download_failure), Toast.LENGTH_LONG).show();
+                        Toast.makeText(getContext(), failureMessage, Toast.LENGTH_LONG).show();
                     }
                     break;
             }

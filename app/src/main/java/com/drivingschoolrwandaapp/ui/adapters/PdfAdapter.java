@@ -119,7 +119,28 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.PdfViewHolder> {
             // Clear the current image immediately so the old bitmap can be GC'd
             // while the new one renders on a background thread.
             photoView.setImageBitmap(null);
-            
+
+            // PhotoView with layout_height="wrap_content" measures its height to
+            // the bitmap's full pixel height, but draws the image scaled to fit
+            // the view width — leaving a large blank area below every rendered
+            // page. Pin the view height to the page's aspect ratio (screen-width
+            // based) so the rendered page fills the view exactly.
+            synchronized (pdfRenderer) {
+                PdfRenderer.Page page = pdfRenderer.openPage(position);
+                try {
+                    float pageAspect = page.getHeight() / (float) page.getWidth();
+                    int viewWidth = photoView.getWidth() > 0 ? photoView.getWidth() : screenWidth;
+                    int targetHeight = (int) (viewWidth * pageAspect);
+                    ViewGroup.LayoutParams lp = photoView.getLayoutParams();
+                    if (lp != null && lp.height != targetHeight) {
+                        lp.height = targetHeight;
+                        photoView.requestLayout();
+                    }
+                } finally {
+                    page.close();
+                }
+            }
+
             executeSafely(() -> {
                 synchronized (pdfRenderer) {
                     PdfRenderer.Page page = pdfRenderer.openPage(position);
@@ -136,6 +157,11 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.PdfViewHolder> {
                         cappedHeight = Math.min(cappedHeight, maxDimension);
 
                         bitmap = Bitmap.createBitmap(cappedWidth, cappedHeight, Bitmap.Config.ARGB_8888);
+                        // Fill with opaque white BEFORE rendering: PdfRenderer leaves
+                        // unpainted/transparent page areas as the bitmap's initial
+                        // content, and a transparent bitmap would let the app's
+                        // cyan window background show through the page.
+                        bitmap.eraseColor(android.graphics.Color.WHITE);
                         page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
 
                         final Bitmap finalBitmap = bitmap;

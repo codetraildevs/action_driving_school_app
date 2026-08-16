@@ -10,9 +10,11 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.data.models.LearningMaterial;
 import com.drivingschoolrwandaapp.data.models.LearningMaterialResponse;
 import com.drivingschoolrwandaapp.repository.LearningMaterialRepository;
+import com.drivingschoolrwandaapp.utils.ErrorUtils;
 import com.drivingschoolrwandaapp.utils.FileUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -186,15 +188,48 @@ public class LearningMaterialViewModel extends AndroidViewModel {
                         }
                     });
                 } else {
-                    downloadStatus.postValue(new DownloadState(DownloadState.Status.FAILURE, material.getId()));
+                    downloadStatus.postValue(new DownloadState(DownloadState.Status.FAILURE, material.getId(),
+                            extractErrorMessage(response)));
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                downloadStatus.postValue(new DownloadState(DownloadState.Status.FAILURE, material.getId()));
+                downloadStatus.postValue(new DownloadState(DownloadState.Status.FAILURE, material.getId(),
+                        ErrorUtils.getUserFriendlyMessage(t)));
             }
         });
+    }
+
+    /**
+     * Reads a user-facing error message from a failed download response
+     * (e.g. "File not found on server"), falling back to a generic message.
+     */
+    private String extractErrorMessage(Response<?> response) {
+        if (response != null && response.errorBody() != null) {
+            try {
+                String body = response.errorBody().string();
+                if (body != null && !body.trim().isEmpty()) {
+                    try {
+                        com.google.gson.JsonObject json = com.google.gson.JsonParser.parseString(body).getAsJsonObject();
+                        if (json.has("error") && json.get("error").isJsonPrimitive()) {
+                            String serverMessage = json.get("error").getAsString();
+                            if (serverMessage != null && !serverMessage.trim().isEmpty()) {
+                                return serverMessage.trim();
+                            }
+                        }
+                    } catch (Exception ignored) {
+                        // Not JSON — fall through to the raw body if short enough.
+                    }
+                    if (body.length() <= 120) {
+                        return body.trim();
+                    }
+                }
+            } catch (IOException e) {
+                Log.e("LearningMaterialVM", "Failed to read download error body", e);
+            }
+        }
+        return getApplication().getString(R.string.download_failure);
     }
 
     private void checkDownloadedStatus(List<LearningMaterial> materialsList) {

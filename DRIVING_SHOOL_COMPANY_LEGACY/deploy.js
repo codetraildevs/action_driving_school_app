@@ -96,6 +96,17 @@ function extractFixArchives() {
   const candidates = [
     { file: 'components-fix.tar.gz', extract: (f) => `tar -xzf "${f}" -C .`, rename: true },
     { file: 'components-fix.zip', extract: (f) => `unzip -o "${f}" -d .`, rename: true },
+    // Restores the server's public/uploads/ folder (files/learning-materials/
+    // thumbnails) that a previous deploy wiped. Extracted with the server's own
+    // unzip (File Manager's extractor silently drops files from large archives),
+    // so every missing upload comes back. The gazette PDFs uploaded Jan 2026 are
+    // NOT in this archive — they must be re-uploaded via the admin console.
+    { file: 'uploads-restore.zip', extract: (f) => `unzip -o "${f}" -d .`, rename: true },
+    // The 3 gazette PDFs restored from the owner's local copies, named exactly
+    // as the DB expects (1768631656325-5wd1wt0xhu3.pdf etc.) so downloads work
+    // with zero database changes. Restored from the machine; sizes differ from
+    // the originals (older versions of the same documents).
+    { file: 'gazette-pdfs.zip', extract: (f) => `unzip -o "${f}" -d .`, rename: true },
   ];
   // Fallback: if components/ui is still missing, pull just ./components out of
   // the full deploy archive (in case File Manager's extractor dropped it).
@@ -144,6 +155,50 @@ function parseDatabaseUrl(url) {
     password: decodeURIComponent(u.password),
     database: u.pathname ? decodeURIComponent(u.pathname.slice(1)) : undefined,
   };
+}
+
+// --- Missing uploads check --------------------------------------------------
+// Every deploy should end with all DB-referenced uploads present on disk.
+// If a deploy ever wipes public/uploads (or a file was never uploaded to the
+// server), downloads break with a 404 "File not found on server" while the
+// database still lists the file. This check reports exactly which stored
+// paths are missing so the problem can't go unnoticed again.
+// Purely informational: it never fails the deploy.
+function checkMissingUploads() {
+  return new Promise((resolve) => {
+    try {
+      const envFile = path.join(__dirname, '.env');
+      const env = fs.readFileSync(envFile, 'utf8');
+      const m = env.match(/^DATABASE_URL\s*=\s*"?([^"\n]+)"?/m);
+      if (!m) { resolve(); return; }
+      const { PrismaClient } = require(path.join(__dirname, 'lib', 'generated', 'prisma'));
+      const { PrismaMariaDb } = require(path.join(__dirname, 'node_modules', '@prisma', 'adapter-mariadb'));
+      const adapter = new PrismaMariaDb(parseDatabaseUrl(m[1]));
+      const p = new PrismaClient({ adapter });
+      p.file.findMany({ select: { id: true, name: true, filePath: true } })
+        .then((files) => {
+          const missing = (files || []).filter((f) => {
+            if (!f.filePath) return false;
+            const diskPath = path.join(process.cwd(), 'public', f.filePath);
+            return !fs.existsSync(diskPath);
+          });
+          if (missing.length) {
+            console.log('\n⚠ MISSING UPLOAD FILES (' + missing.length + '):');
+            for (const f of missing) {
+              console.log('  - file#' + f.id + ' "' + f.name + '" → ' + f.filePath + ' NOT on disk');
+            }
+            console.log('  Downloads for these will fail with 404. Restore public/' + ' or re-upload via the admin console.');
+          } else {
+            console.log('UPLOADS CHECK: all ' + (files || []).length + ' DB-referenced files present on disk ✓');
+          }
+        })
+        .catch((e) => { console.log('UPLOADS CHECK: could not run — ' + String((e && e.message) || e).split('\n')[0]); })
+        .finally(() => p.$disconnect().catch(() => {}).finally(resolve));
+    } catch (e) {
+      console.log('UPLOADS CHECK: could not run — ' + String((e && e.message) || e).split('\n')[0]);
+      resolve();
+    }
+  });
 }
 
 // --- DB connectivity check --------------------------------------------------
@@ -198,7 +253,9 @@ try {
   fs.closeSync(fs.openSync(path.join(__dirname, 'tmp', 'restart.txt'), 'a')); // touch
   console.log('App restart triggered (tmp/restart.txt touched).');
 
-  dbCheck().finally(() => {
+  dbCheck()
+    .then(() => checkMissingUploads())
+    .finally(() => {
     console.log('\n========================================');
     console.log('  ✅ DEPLOY COMPLETE');
     console.log('========================================');

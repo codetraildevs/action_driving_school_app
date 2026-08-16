@@ -103,6 +103,7 @@
     <string name="no_materials_found">No materials found.</string>
     <string name="download_success">Download complete!</string>
     <string name="download_failure">Download failed.</string>
+    <string name="download_failure_reason">Download failed: %1$s</string>
     <string name="download_first">File not downloaded. Please download it first.</string>
     <string name="no_app_found">No app can open this file type.</string>
     <string name="error_opening_file">Cannot open file.</string>

@@ -104,6 +104,7 @@
     <string name="no_materials_found">Nta bikoresho bibonetse.</string>
     <string name="download_success">Gukurura byarangiye!</string>
     <string name="download_failure">Gukurura byanze.</string>
+    <string name="download_failure_reason">Gukurura byanze: %1$s</string>
     <string name="download_first">Dosiye ntabwo yakururwa. Nyamuneka ibanze uyikure.</string>
     <string name="no_app_found">Nta porogaramu ishobora gufungura ubu bwoko bwa dosiye.</string>
     <string name="error_opening_file">Ntibishoboka gufungura dosiye.</string>
