@@ -301,6 +301,7 @@ Quand tu arrives à la dernière question, tu appuies sur « Terminer l’examen
     <string name="question_counter_format" tools:ignore="PluralsCandidate">Question %1$d sur %2$d</string>
     <string name="percent_complete_format" tools:ignore="PluralsCandidate">%d%% terminé</string>
     <string name="previous_tests_summary">Vos Résultats</string>
+    <string name="previous_tests_subtitle">Suivez vos scores, votre moyenne et votre taux de réussite</string>
     <string name="total_tests">Total des Tests</string>
     <string name="average_score">Score Moyen</string>
     <string name="pass_rate">Taux de Réussite</string>

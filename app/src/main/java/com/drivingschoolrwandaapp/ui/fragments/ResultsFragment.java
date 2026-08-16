@@ -40,6 +40,7 @@ public class ResultsFragment extends Fragment {
     private TextView totalTestsValue;
     private TextView averageScoreValue;
     private TextView passRateValue;
+    private TextView historyHeader;
     private TestResultAdapter adapter;
 
     @Nullable
@@ -60,6 +61,7 @@ public class ResultsFragment extends Fragment {
         totalTestsValue = view.findViewById(R.id.total_tests_value);
         averageScoreValue = view.findViewById(R.id.average_score_value);
         passRateValue = view.findViewById(R.id.pass_rate_value);
+        historyHeader = view.findViewById(R.id.history_header);
 
         // Setup RecyclerView
         resultsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -91,6 +93,9 @@ public class ResultsFragment extends Fragment {
         emptyState.setVisibility(View.GONE);
         summaryContainer.setVisibility(View.VISIBLE);
         resultsRecyclerView.setVisibility(View.VISIBLE);
+        if (historyHeader != null) {
+            historyHeader.setVisibility(View.VISIBLE);
+        }
 
         // Calculate summary stats
         int totalTests = history.size();

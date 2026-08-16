@@ -302,6 +302,7 @@
     <string name="account_already_exists_with_help">Iyi numero ya telefone isanzwe yiyandikishije. Nyamuneka injira ukoresheje numero yawe cyangwa uhamagare +250782877442 cyangwa +250722877442 ubufasha.</string>
     <string name="start_practice">Tangira Kwitoza</string>
     <string name="test_history">Amatangazo y\'Ibizamini</string>
+    <string name="previous_tests_subtitle">Reba amanota yawe, ikigereranyo n\'icyipimo cyo gutsinda</string>
     <string name="review">Subiramo</string>
     <string name="retake">Ongera Ukore</string>
 

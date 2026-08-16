@@ -260,6 +260,7 @@
     <string name="question_counter_format" tools:ignore="PluralsCandidate">Ikibazo %1$d kuri %2$d</string>
     <string name="percent_complete_format" tools:ignore="PluralsCandidate">%%%d byuzuye</string>
     <string name="previous_tests_summary">Ibisubizo Byawe</string>
+    <string name="previous_tests_subtitle">Reba amanota yawe, ikigereranyo n\'icyipimo cyo gutsinda</string>
     <string name="total_tests">Ibizamini Byose</string>
     <string name="average_score">Amanota Rusange</string>
     <string name="pass_rate">Icyipimo Cyo Gustsinza</string>

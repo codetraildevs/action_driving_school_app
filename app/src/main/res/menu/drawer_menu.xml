@@ -14,6 +14,10 @@
             android:icon="@drawable/ic_start_exam"
             android:title="@string/exams4" />
         <item
+            android:id="@+id/resultsFragment"
+            android:icon="@drawable/ic_history"
+            android:title="@string/test_history" />
+        <item
             android:id="@+id/materialsFragment"
             android:icon="@drawable/ic_learning_materials"
             android:title="@string/learning_materials" />
