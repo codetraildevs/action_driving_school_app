@@ -1,9 +1,8 @@
 package com.drivingschoolrwandaapp.ui.activities;
 
 import android.text.TextUtils;
-import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.Spinner;
+import android.widget.AutoCompleteTextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -20,7 +19,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class SpecialRequestActivity extends BaseIremboFormActivity {
 
-    private Spinner spinnerCategory;
+    private AutoCompleteTextView actvCategory;
     private TextInputEditText etName;
     private TextInputEditText etPhone;
     private TextInputEditText etNationalId;
@@ -32,7 +31,7 @@ public class SpecialRequestActivity extends BaseIremboFormActivity {
 
     @Override
     protected void onFormViewsReady() {
-        spinnerCategory = findViewById(R.id.spinner_category);
+        actvCategory = findViewById(R.id.actv_category);
         etName = findViewById(R.id.et_applicant_name);
         etPhone = findViewById(R.id.et_applicant_phone);
         etNationalId = findViewById(R.id.et_national_id);
@@ -55,9 +54,9 @@ public class SpecialRequestActivity extends BaseIremboFormActivity {
 
     private void setupCategorySpinner() {
         String[] categories = {"A"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categories);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerCategory.setAdapter(adapter);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                R.layout.item_dropdown_menu, categories);
+        actvCategory.setAdapter(adapter);
     }
 
     private void setupSubmit() {
@@ -66,8 +65,8 @@ public class SpecialRequestActivity extends BaseIremboFormActivity {
 
     private void submit() {
         String serviceName = "";
-        Object selectedCategory = spinnerCategory.getSelectedItem();
-        String category = selectedCategory != null ? selectedCategory.toString() : "";
+        CharSequence categoryText = actvCategory.getText();
+        String category = categoryText != null ? categoryText.toString().trim() : "";
 
         CharSequence nameText = etName.getText();
         String name = nameText != null ? nameText.toString().trim() : "";

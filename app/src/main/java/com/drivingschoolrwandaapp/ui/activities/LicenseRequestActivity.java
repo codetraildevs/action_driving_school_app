@@ -5,9 +5,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -37,9 +37,9 @@ public class LicenseRequestActivity extends BaseIremboFormActivity {
     private TextInputEditText etName;
     private TextInputEditText etPhone;
     private TextInputEditText etNationalId;
-    private Spinner spinnerProvince;
-    private Spinner spinnerDistrict;
-    private Spinner spinnerCategory;
+    private AutoCompleteTextView actvProvince;
+    private AutoCompleteTextView actvDistrict;
+    private AutoCompleteTextView actvCategory;
     private RadioGroup rgLicenseType;
 
     @Override
@@ -52,9 +52,9 @@ public class LicenseRequestActivity extends BaseIremboFormActivity {
         etName = findViewById(R.id.et_applicant_name);
         etPhone = findViewById(R.id.et_applicant_phone);
         etNationalId = findViewById(R.id.et_applicant_national_id);
-        spinnerProvince = findViewById(R.id.spinner_province);
-        spinnerDistrict = findViewById(R.id.spinner_district);
-        spinnerCategory = findViewById(R.id.spinner_category);
+        actvProvince = findViewById(R.id.actv_province);
+        actvDistrict = findViewById(R.id.actv_district);
+        actvCategory = findViewById(R.id.actv_category);
         rgLicenseType = findViewById(R.id.rg_license_type);
 
         setupLocationSpinners();
@@ -77,7 +77,7 @@ public class LicenseRequestActivity extends BaseIremboFormActivity {
     private void setupLocationSpinners() {
         if (locationData == null) {
             // location.json may still be loading; try again shortly
-            spinnerProvince.postDelayed(this::setupLocationSpinners, 200);
+            actvProvince.postDelayed(this::setupLocationSpinners, 200);
             return;
         }
 
@@ -88,42 +88,36 @@ public class LicenseRequestActivity extends BaseIremboFormActivity {
         }
         Collections.sort(provinces);
 
-        ArrayAdapter<String> provinceAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, provinces);
-        provinceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerProvince.setAdapter(provinceAdapter);
+        ArrayAdapter<String> provinceAdapter = new ArrayAdapter<>(this,
+                R.layout.item_dropdown_menu, provinces);
+        actvProvince.setAdapter(provinceAdapter);
 
-        spinnerProvince.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String selectedProvince = provinces.get(position);
-                List<String> districts = new ArrayList<>();
-                try {
-                    JSONObject districtsObj = locationData.getJSONObject(selectedProvince);
-                    Iterator<String> districtKeys = districtsObj.keys();
-                    while (districtKeys.hasNext()) {
-                        districts.add(districtKeys.next());
-                    }
-                    Collections.sort(districts);
-                } catch (JSONException e) {
-                    Log.e("LicenseRequest", "Error loading districts for province", e);
+        actvProvince.setOnItemClickListener((AdapterView<?> parent, View view, int position, long id) -> {
+            String selectedProvince = provinces.get(position);
+            List<String> districts = new ArrayList<>();
+            try {
+                JSONObject districtsObj = locationData.getJSONObject(selectedProvince);
+                Iterator<String> districtKeys = districtsObj.keys();
+                while (districtKeys.hasNext()) {
+                    districts.add(districtKeys.next());
                 }
-
-                ArrayAdapter<String> districtAdapter = new ArrayAdapter<>(LicenseRequestActivity.this, android.R.layout.simple_spinner_item, districts);
-                districtAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                spinnerDistrict.setAdapter(districtAdapter);
+                Collections.sort(districts);
+            } catch (JSONException e) {
+                Log.e("LicenseRequest", "Error loading districts for province", e);
             }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
+            ArrayAdapter<String> districtAdapter = new ArrayAdapter<>(LicenseRequestActivity.this,
+                    R.layout.item_dropdown_menu, districts);
+            actvDistrict.setAdapter(districtAdapter);
+            actvDistrict.setText("");
         });
     }
 
     private void setupCategorySpinner() {
         String[] categories = {"A", "B", "C", "D"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categories);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerCategory.setAdapter(adapter);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                R.layout.item_dropdown_menu, categories);
+        actvCategory.setAdapter(adapter);
     }
 
     private void setupSubmit() {
@@ -138,12 +132,14 @@ public class LicenseRequestActivity extends BaseIremboFormActivity {
         CharSequence nationalIdText = etNationalId.getText();
         String nationalId = nationalIdText != null ? nationalIdText.toString().trim() : "";
 
-        String province = spinnerProvince.getSelectedItem() != null ? spinnerProvince.getSelectedItem().toString() : "";
-        String district = spinnerDistrict.getSelectedItem() != null ? spinnerDistrict.getSelectedItem().toString() : "";
+        CharSequence provinceText = actvProvince.getText();
+        String province = provinceText != null ? provinceText.toString().trim() : "";
+        CharSequence districtText = actvDistrict.getText();
+        String district = districtText != null ? districtText.toString().trim() : "";
         String address = province + ", " + district;
 
-        Object selectedCategory = spinnerCategory.getSelectedItem();
-        String category = selectedCategory != null ? selectedCategory.toString() : "";
+        CharSequence categoryText = actvCategory.getText();
+        String category = categoryText != null ? categoryText.toString().trim() : "";
 
         int selectedLicenseTypeId = rgLicenseType.getCheckedRadioButtonId();
 
