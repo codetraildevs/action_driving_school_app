@@ -105,6 +105,12 @@
             android:name=".ui.activities.MyApplicationsActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.activities.LicenseRequestActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.activities.SpecialRequestActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.activities.ApplicationDetailsActivity"
             android:exported="false" />
             
