@@ -9,6 +9,8 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -98,6 +100,13 @@ public class TestsFragment extends Fragment {
     private LinearLayout dialogPendingLayout;
     private TextView dialogPendingText;
 
+    // While the request modal is in its pending state, poll the profile so the
+    // modal closes by itself the moment the admin grants access — no manual
+    // refresh needed. Polling stops as soon as the modal is dismissed.
+    private static final long ACCESS_POLL_INTERVAL_MS = 15_000L;
+    private final Handler accessPollHandler = new Handler(Looper.getMainLooper());
+    private final Runnable accessPollRunnable = this::pollForAccess;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -138,6 +147,7 @@ public class TestsFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        stopAccessPolling();
         if (requestAccessDialog != null && requestAccessDialog.isShowing()) {
             requestAccessDialog.dismiss();
         }
@@ -148,6 +158,7 @@ public class TestsFragment extends Fragment {
 
     /** Dismisses the request/payment modals once the requested exam is unlocked. */
     private void dismissAccessModals() {
+        stopAccessPolling();
         if (requestAccessDialog != null && requestAccessDialog.isShowing()) {
             requestAccessDialog.dismiss();
         }
@@ -172,6 +183,27 @@ public class TestsFragment extends Fragment {
         if (dialogPendingText != null && message != null) {
             dialogPendingText.setText(message);
         }
+        startAccessPolling();
+    }
+
+    /**
+     * Polls the profile every few seconds while the request modal is pending.
+     * The user observer dismisses the modal as soon as the exam unlocks.
+     */
+    private void pollForAccess() {
+        if (!isAdded() || requestedTest == null) return;
+        if (requestAccessDialog == null || !requestAccessDialog.isShowing()) return;
+        userViewModel.loadProfile();
+        accessPollHandler.postDelayed(accessPollRunnable, ACCESS_POLL_INTERVAL_MS);
+    }
+
+    private void startAccessPolling() {
+        accessPollHandler.removeCallbacks(accessPollRunnable);
+        accessPollHandler.postDelayed(accessPollRunnable, ACCESS_POLL_INTERVAL_MS);
+    }
+
+    private void stopAccessPolling() {
+        accessPollHandler.removeCallbacks(accessPollRunnable);
     }
 
     private void setupRecyclerView() {
