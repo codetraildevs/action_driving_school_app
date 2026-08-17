@@ -17,7 +17,10 @@ import com.drivingschoolrwandaapp.models.response.ApiResponse;
 import com.drivingschoolrwandaapp.models.response.IremboPaymentResponse;
 import com.drivingschoolrwandaapp.repository.Resource;
 
+import org.json.JSONObject;
+
 import java.util.List;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -56,6 +59,64 @@ public class IremboViewModel extends AndroidViewModel {
 
     public LiveData<Resource<IremboApplication>> getApplicationDetails() {
         return applicationDetails;
+    }
+
+    /**
+     * True if the user already has an in-progress (PENDING/PROCESSING/ACTION)
+     * request of the given service type ("DRIVING_LICENSE" or "SPECIAL").
+     * Uses the last known applications list, so it works offline too; the
+     * server still re-checks authoritatively on submit.
+     */
+    public boolean hasActiveIremboRequest(String type) {
+        if (type == null) return false;
+        List<IremboApplication> apps = iremboCache.getCachedRecentApplicationsOrEmpty();
+        for (IremboApplication app : apps) {
+            if (type.equalsIgnoreCase(app.getType()) && isActiveStatus(app.getStatus())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isActiveStatus(String status) {
+        if (status == null) return false;
+        String s = status.trim().toUpperCase(Locale.ROOT);
+        return s.equals("PENDING") || s.equals("PROCESSING") || s.equals("ACTION");
+    }
+
+    /**
+     * Maps a failed submit response to a localized, user-facing message.
+     *
+     * The server's raw error text is English-only, so it is never shown
+     * verbatim. Known patterns (e.g. a duplicate-request 409) are mapped to a
+     * translated string; anything else falls back to the localized generic
+     * "failed to submit" message.
+     */
+    private String extractServerError(Response<?> response) {
+        try {
+            if (response != null && response.errorBody() != null) {
+                String body = response.errorBody().string();
+                if (body != null && !body.isEmpty()) {
+                    JSONObject obj = new JSONObject(body);
+                    String serverMessage = obj.optString("error", null);
+                    if (serverMessage == null) {
+                        serverMessage = obj.optString("message", null);
+                    }
+                    if (serverMessage != null) {
+                        String lower = serverMessage.toLowerCase(Locale.ROOT);
+                        if (lower.contains("already")
+                                || lower.contains("duplicate")
+                                || lower.contains("active request")
+                                || lower.contains("pending")) {
+                            return getApplication().getString(
+                                    com.drivingschoolrwandaapp.R.string.request_already_sent_message);
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
     }
 
     /**
@@ -103,7 +164,7 @@ public class IremboViewModel extends AndroidViewModel {
                                 recentApplications.setValue(Resource.success(cached));
                             }
                         } else {
-                            recentApplications.setValue(Resource.error(ErrorUtils.getUserFriendlyMessage(t), null));
+                            recentApplications.setValue(Resource.error(ErrorUtils.getUserFriendlyMessage(getApplication(), t), null));
                         }
                     }
                 });
@@ -118,14 +179,16 @@ public class IremboViewModel extends AndroidViewModel {
                         if (response.isSuccessful() && response.body() != null) {
                             licenseRequestStatus.setValue(Resource.success(response.body().getData()));
                         } else {
+                            String serverError = extractServerError(response);
                             licenseRequestStatus.setValue(Resource.error(
-                                    getApplication().getString(com.drivingschoolrwandaapp.R.string.irembo_submit_failed), null));
+                                    serverError != null ? serverError
+                                            : getApplication().getString(com.drivingschoolrwandaapp.R.string.irembo_submit_failed), null));
                         }
                     }
 
                     @Override
                     public void onFailure(Call<ApiResponse<IremboPaymentResponse>> call, Throwable t) {
-                        licenseRequestStatus.setValue(Resource.error(ErrorUtils.getUserFriendlyMessage(t), null));
+                        licenseRequestStatus.setValue(Resource.error(ErrorUtils.getUserFriendlyMessage(getApplication(), t), null));
                     }
                 });
     }
@@ -139,14 +202,16 @@ public class IremboViewModel extends AndroidViewModel {
                         if (response.isSuccessful() && response.body() != null) {
                             specialRequestStatus.setValue(Resource.success(response.body().getData()));
                         } else {
+                            String serverError = extractServerError(response);
                             specialRequestStatus.setValue(Resource.error(
-                                    getApplication().getString(com.drivingschoolrwandaapp.R.string.irembo_submit_failed), null));
+                                    serverError != null ? serverError
+                                            : getApplication().getString(com.drivingschoolrwandaapp.R.string.irembo_submit_failed), null));
                         }
                     }
 
                     @Override
                     public void onFailure(Call<ApiResponse<IremboPaymentResponse>> call, Throwable t) {
-                        specialRequestStatus.setValue(Resource.error(ErrorUtils.getUserFriendlyMessage(t), null));
+                        specialRequestStatus.setValue(Resource.error(ErrorUtils.getUserFriendlyMessage(getApplication(), t), null));
                     }
                 });
     }
@@ -178,7 +243,7 @@ public class IremboViewModel extends AndroidViewModel {
                         if (cached != null) {
                             applicationDetails.setValue(Resource.success(cached));
                         } else {
-                            applicationDetails.setValue(Resource.error(ErrorUtils.getUserFriendlyMessage(t), null));
+                            applicationDetails.setValue(Resource.error(ErrorUtils.getUserFriendlyMessage(getApplication(), t), null));
                         }
                     }
                 });

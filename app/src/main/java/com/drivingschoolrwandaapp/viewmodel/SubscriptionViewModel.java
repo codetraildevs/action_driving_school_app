@@ -8,6 +8,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.database.entities.UserSubscriptionWithPlan;
 import com.drivingschoolrwandaapp.models.mappers.SubscriptionMapper;
 import com.drivingschoolrwandaapp.utils.ErrorUtils;
@@ -127,14 +128,14 @@ public class SubscriptionViewModel extends AndroidViewModel {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     newSubscriptionSuccess.setValue(plan);
                 } else {
-                    handleApiError(response, "Failed to subscribe. Please try again.");
+                    handleApiError(response, getApplication().getString(R.string.subscribe_failed));
                 }
                 isLoading.setValue(false);
             }
 
             @Override
             public void onFailure(@NonNull Call<UserSubscriptionResponse> call, @NonNull Throwable t) {
-                error.setValue(ErrorUtils.getUserFriendlyMessage(t));
+                error.setValue(ErrorUtils.getUserFriendlyMessage(getApplication(), t));
                 isLoading.setValue(false);
             }
         });
@@ -149,14 +150,14 @@ public class SubscriptionViewModel extends AndroidViewModel {
                     requestAccessSuccess.setValue(true);
                     requestAccessMessage.setValue(response.body().getMessage());
                 } else {
-                    handleApiError(response, "Failed to request access.");
+                    handleApiError(response, getApplication().getString(R.string.request_access_failed));
                 }
                 isLoading.setValue(false);
             }
 
             @Override
             public void onFailure(@NonNull Call<ApiResponse<Void>> call, @NonNull Throwable t) {
-                error.setValue(ErrorUtils.getUserFriendlyMessage(t));
+                error.setValue(ErrorUtils.getUserFriendlyMessage(getApplication(), t));
                 isLoading.setValue(false);
             }
         });
@@ -170,14 +171,14 @@ public class SubscriptionViewModel extends AndroidViewModel {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     fetchUserSubscription(); // Refresh user subscription
                 } else {
-                    handleApiError(response, "Failed to cancel subscription");
+                    handleApiError(response, getApplication().getString(R.string.cancel_subscription_failed));
                 }
                 isLoading.setValue(false);
             }
 
             @Override
             public void onFailure(@NonNull Call<ApiResponse<Void>> call, @NonNull Throwable t) {
-                error.setValue(ErrorUtils.getUserFriendlyMessage(t));
+                error.setValue(ErrorUtils.getUserFriendlyMessage(getApplication(), t));
                 isLoading.setValue(false);
             }
         });

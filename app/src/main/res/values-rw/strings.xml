@@ -96,6 +96,22 @@
     <string name="irembo_submit_failed">Kohereza ubusabe ntibyakunze</string>
     <string name="irembo_application_not_found">Ubusabe ntibubonetse cyangwa habaye ikibazo</string>
     <string name="application_not_found_title">Ubusabe ntibubonetse</string>
+    <string name="request_already_sent_title">Gusaba kwawe kwaratwoherejwe</string>
+    <string name="request_already_sent_message">Usanzwe ufite gusaba gukora kuri iyi serivisi. Tegereza ko gutunganywa mbere yo kohereza indi.</string>
+    <string name="request_pending_message">Ubusabe bwawe bwoherejwe. Iyo umuyobozi abwemeye, ibizamini byawe bizafunguka ubwabyo - komeza ureke uru rukurikirane rugaragara kugeza icyo gihe.</string>
+    <string name="error_unknown">Habaye ikibazo kitazwi. Ongera ugerageze.</string>
+    <string name="error_secure_connection">Ntibishoboka gushinga umurongo w\'umutekano. Vugurura porogaramu maze ugerageze.</string>
+    <string name="error_connection_interrupted">Umurongo wabujijwe. Ongera ugerageze.</string>
+    <string name="whatsapp_fetch_failed">Gushyiramo amatsinda ya WhatsApp ntibyakunze.</string>
+    <string name="subscribe_failed">Kwiyandikisha byanze. Ongera ugerageze.</string>
+    <string name="request_access_failed">Gusaba uburenganzira byanze.</string>
+    <string name="cancel_subscription_failed">Guhagarika kwiyandikisha byanze.</string>
+    <string name="refresh_failed">Kuvugurura biva kuri seriveri ntibyakunze.</string>
+    <string name="offline_showing_downloaded">Nta interineti. Reba ibyo wamanuye.</string>
+    <string name="no_offline_content">Nta byandikishijwe mu porogaramu bihari.</string>
+    <string name="could_not_load_offline_content">Ntibishoboka gushyiramo ibyandikishijwe.</string>
+    <string name="no_internet_no_offline">Nta interineti kandi nta byandikishijwe bihari.</string>
+    <string name="exam_not_found">Ikizamini ntikibonetse kuri ID: %1$d</string>
     <string name="track_failed_title">Kurikirana ntibyakunze</string>
     <string name="invalid_otp">Shyiramo OTP y\'inyuguti 6 yujuje ibisabwa</string>
     <string name="terms_of_service">Amategeko y\'imikorere yacu</string>
@@ -359,4 +375,5 @@
     <string name="admin_no_matching_users">Nta bakoresha bahuye n\'ibyo ushakisha</string>
     <string name="admin_no_matching_requests">Nta byifuzo bihuye n\'ibyo ushakisha</string>
     <string name="admin_last_updated">Byavugururwa nyuma: %1$s</string>
+    <string name="share_via">Sangiza ukoresheje</string>
 </resources>

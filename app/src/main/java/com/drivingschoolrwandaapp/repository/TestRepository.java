@@ -49,12 +49,14 @@ public class TestRepository {
 
     private final LocalExamDataSource localExamDataSource;
     private final AppPreferences appPreferences;
+    private final Context context;
     private final ExecutorService executorService;
 
     @Inject
     public TestRepository(LocalExamDataSource localExamDataSource, @ApplicationContext Context context) {
         this.localExamDataSource = localExamDataSource;
         this.appPreferences = new AppPreferences(context);
+        this.context = context.getApplicationContext();
         this.executorService = Executors.newSingleThreadExecutor();
     }
 
@@ -95,7 +97,7 @@ public class TestRepository {
                 result.postValue(Resource.success(testEntities));
             } catch (Exception e) {
                 reportQuietly(TAG, "Error loading local exams", e);
-                result.postValue(Resource.<List<TestEntity>>error(ErrorUtils.getUserFriendlyMessage(e), null));
+                result.postValue(Resource.<List<TestEntity>>error(ErrorUtils.getUserFriendlyMessage(context, e), null));
             }
         });
 
@@ -130,7 +132,8 @@ public class TestRepository {
                 }
 
                 if (localExam == null) {
-                    result.postValue(Resource.<TestWithQuestions>error("Exam not found for ID: " + testId, null));
+                    result.postValue(Resource.<TestWithQuestions>error(
+                            context.getString(com.drivingschoolrwandaapp.R.string.exam_not_found, testId), null));
                     return;
                 }
 
@@ -148,7 +151,7 @@ public class TestRepository {
                 result.postValue(Resource.success(testWithQuestions));
             } catch (Exception e) {
                 reportQuietly(TAG, "Error loading local exam questions", e);
-                result.postValue(Resource.<TestWithQuestions>error(ErrorUtils.getUserFriendlyMessage(e), null));
+                result.postValue(Resource.<TestWithQuestions>error(ErrorUtils.getUserFriendlyMessage(context, e), null));
             }
         });
 

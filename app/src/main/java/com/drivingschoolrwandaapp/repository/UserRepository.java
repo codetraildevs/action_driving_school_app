@@ -281,7 +281,7 @@ public class UserRepository {
     }
 
     public LiveData<Resource<com.drivingschoolrwandaapp.database.entities.User>> getProfile() {
-        return new NetworkBoundResource<com.drivingschoolrwandaapp.database.entities.User, ApiResponse<com.drivingschoolrwandaapp.models.entities.User>>() {
+        return new NetworkBoundResource<com.drivingschoolrwandaapp.database.entities.User, ApiResponse<com.drivingschoolrwandaapp.models.entities.User>>(context) {
             @Override
             protected void saveCallResult(@NonNull ApiResponse<com.drivingschoolrwandaapp.models.entities.User> item) {
                 if (item.getData() != null) {

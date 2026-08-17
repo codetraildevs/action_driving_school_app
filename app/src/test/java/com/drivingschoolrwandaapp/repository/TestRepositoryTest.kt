@@ -18,6 +18,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.MockedStatic
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
@@ -60,6 +62,10 @@ class TestRepositoryTest {
             .thenReturn(sharedPreferences)
         // Return English as the current language
         `when`(sharedPreferences.getString("language_code", "rw")).thenReturn("en")
+        // The repository resolves user-facing messages through the context
+        `when`(context.getApplicationContext()).thenReturn(context)
+        `when`(context.getString(anyInt())).thenReturn("Something went wrong")
+        `when`(context.getString(anyInt(), any())).thenReturn("Exam not found")
 
         repository = TestRepository(localExamDataSource, context)
     }

@@ -46,12 +46,19 @@ class SubscriptionViewModelTest {
     private lateinit var repository: SubscriptionRepository
     private lateinit var viewModel: SubscriptionViewModel
 
+    // The ViewModel resolves user-facing errors via Application.getString().
+    // Stub it to a fixed value so assertions verify the localized message
+    // path rather than a hardcoded English string.
+    private val localizedError = "localized_error"
+
     private val plan = SubscriptionPlan(id = 7, planName = "Monthly", amount = "5000", duration = 30)
 
     @Before
     fun setUp() {
         repository = mock(SubscriptionRepository::class.java)
-        viewModel = SubscriptionViewModel(mock(Application::class.java), repository)
+        val application = mock(Application::class.java)
+        `when`(application.getString(anyInt())).thenReturn(localizedError)
+        viewModel = SubscriptionViewModel(application, repository)
     }
 
     // ---------------------------------------------------------------------------
@@ -99,7 +106,7 @@ class SubscriptionViewModelTest {
 
         invokeResponse(callback, successful = false)
 
-        assertEquals("Failed to subscribe. Please try again.", viewModel.getError().value)
+        assertEquals(localizedError, viewModel.getError().value)
         assertFalse(viewModel.getIsLoading().value!!)
         assertNull("No success event on failure", viewModel.getNewSubscriptionSuccess().value)
     }
@@ -115,7 +122,7 @@ class SubscriptionViewModelTest {
         val body = UserSubscriptionResponse(success = false, data = null)
         invokeResponse(callback, successful = true, body = body)
 
-        assertEquals("Failed to subscribe. Please try again.", viewModel.getError().value)
+        assertEquals(localizedError, viewModel.getError().value)
         assertNull(viewModel.getNewSubscriptionSuccess().value)
     }
 
@@ -129,10 +136,7 @@ class SubscriptionViewModelTest {
 
         invokeFailure(callback, RuntimeException("timeout"))
 
-        assertEquals(
-            "Request timed out. The server is not responding. Please try again later.",
-            viewModel.getError().value
-        )
+        assertEquals(localizedError, viewModel.getError().value)
         assertFalse(viewModel.getIsLoading().value!!)
     }
 
@@ -187,7 +191,7 @@ class SubscriptionViewModelTest {
 
         callback.onResponse(call, response)
 
-        assertEquals("Failed to subscribe. Please try again.", viewModel.getError().value)
+        assertEquals(localizedError, viewModel.getError().value)
     }
 
     @Test
@@ -200,7 +204,7 @@ class SubscriptionViewModelTest {
 
         invokeResponse(callback, successful = false)
 
-        assertEquals("Failed to subscribe. Please try again.", viewModel.getError().value)
+        assertEquals(localizedError, viewModel.getError().value)
     }
 
     @Test
@@ -232,7 +236,7 @@ class SubscriptionViewModelTest {
 
         invokeResponse(callback, successful = false)
 
-        assertEquals("Failed to request access.", viewModel.getError().value)
+        assertEquals(localizedError, viewModel.getError().value)
         assertNull("No success event on failure", viewModel.getRequestAccessSuccess().value)
         assertFalse(viewModel.getIsLoading().value!!)
     }
@@ -247,7 +251,7 @@ class SubscriptionViewModelTest {
 
         invokeResponse(callback, successful = true, body = ApiResponse<Void>(success = false))
 
-        assertEquals("Failed to request access.", viewModel.getError().value)
+        assertEquals(localizedError, viewModel.getError().value)
         assertNull("No success event on failure", viewModel.getRequestAccessSuccess().value)
     }
 
@@ -261,10 +265,7 @@ class SubscriptionViewModelTest {
 
         invokeFailure(callback, RuntimeException("connection refused"))
 
-        assertEquals(
-            "Connection failed. Please check your internet connection and try again.",
-            viewModel.getError().value
-        )
+        assertEquals(localizedError, viewModel.getError().value)
         assertFalse(viewModel.getIsLoading().value!!)
     }
 
@@ -300,7 +301,7 @@ class SubscriptionViewModelTest {
 
         invokeResponse(callback, successful = false)
 
-        assertEquals("Failed to cancel subscription", viewModel.getError().value)
+        assertEquals(localizedError, viewModel.getError().value)
         assertFalse(viewModel.getIsLoading().value!!)
     }
 
@@ -314,10 +315,7 @@ class SubscriptionViewModelTest {
 
         invokeFailure(callback, RuntimeException("unable to resolve host"))
 
-        assertEquals(
-            "Connection failed. Please check your internet connection and try again.",
-            viewModel.getError().value
-        )
+        assertEquals(localizedError, viewModel.getError().value)
         assertFalse(viewModel.getIsLoading().value!!)
     }
 

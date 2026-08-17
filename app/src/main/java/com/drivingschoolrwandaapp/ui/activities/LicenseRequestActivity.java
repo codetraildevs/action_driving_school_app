@@ -159,6 +159,12 @@ public class LicenseRequestActivity extends BaseIremboFormActivity {
             return;
         }
 
+        // Block duplicates: a user may only have one active license request.
+        if (iremboViewModel.hasActiveIremboRequest("DRIVING_LICENSE")) {
+            showAlreadyRequestedDialog();
+            return;
+        }
+
         // Map the selected radio to a clean server value instead of its
         // localized label (e.g. the Kinyarwanda radio text would otherwise
         // be stored verbatim in the database).

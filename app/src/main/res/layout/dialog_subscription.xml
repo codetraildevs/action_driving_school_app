@@ -49,6 +49,7 @@
         android:layout_marginBottom="16dp" />
 
     <FrameLayout
+        android:id="@+id/confirm_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp">
@@ -70,5 +71,46 @@
             android:layout_gravity="center"
             android:visibility="gone" />
     </FrameLayout>
+
+    <!-- Pending state: shown after a request is sent so the modal stays open
+         (and blocks duplicate requests) until the admin grants access. -->
+    <LinearLayout
+        android:id="@+id/pending_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:paddingTop="8dp"
+        android:paddingBottom="16dp"
+        android:visibility="gone">
+
+        <ProgressBar
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminateTint="@color/my_primary" />
+
+        <TextView
+            android:id="@+id/pending_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/waiting_for_approval"
+            android:textColor="@color/colorOnSurface"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/pending_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:lineSpacingMultiplier="1.1"
+            android:text="@string/request_pending_message"
+            android:textColor="@color/colorOnSurfaceVariant"
+            android:textSize="14sp" />
+
+    </LinearLayout>
 
 </LinearLayout>

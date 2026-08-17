@@ -74,6 +74,9 @@ public abstract class BaseIremboFormActivity extends AppCompatActivity {
         onFormViewsReady();
 
         userViewModel.loadProfile();
+        // Keep the cached applications fresh so the duplicate-request
+        // pre-check below reflects the latest server state.
+        iremboViewModel.fetchRecentApplications();
     }
 
     @Override
@@ -151,6 +154,16 @@ public abstract class BaseIremboFormActivity extends AppCompatActivity {
         if (loadingDialog != null && loadingDialog.isShowing()) {
             loadingDialog.dismiss();
         }
+    }
+
+    /** Shows a clear message when the user already has an active request for this service. */
+    protected void showAlreadyRequestedDialog() {
+        if (isFinishing()) return;
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.request_already_sent_title)
+                .setMessage(R.string.request_already_sent_message)
+                .setPositiveButton(android.R.string.ok, null)
+                .show();
     }
 
     protected void showPaymentConfirmationDialog(IremboPaymentResponse paymentDetails) {

@@ -85,6 +85,12 @@ public class SpecialRequestActivity extends BaseIremboFormActivity {
         if (TextUtils.isEmpty(nationalId)) { etNationalId.setError(getString(R.string.error_required_field)); return; }
         if (nationalId.length() != 16) { etNationalId.setError(getString(R.string.national_id_16_digits)); return; }
 
+        // Block duplicates: a user may only have one active special request.
+        if (iremboViewModel.hasActiveIremboRequest("SPECIAL")) {
+            showAlreadyRequestedDialog();
+            return;
+        }
+
         IremboSpecialRequest request = new IremboSpecialRequest(
                 serviceName, category, name, phone, nationalId, description
         );

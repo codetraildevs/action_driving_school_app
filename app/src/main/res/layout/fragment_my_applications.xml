@@ -81,42 +81,72 @@
                     android:layout_height="wrap_content"
                     android:text="@string/chip_all"
                     style="@style/Widget.MaterialComponents.Chip.Choice"
-                    android:checked="true"/>
+                    android:checked="true"
+                    app:checkedIconVisible="false"
+                    app:chipBackgroundColor="@color/chip_filter_background"
+                    android:textColor="@color/chip_filter_text"
+                    app:chipStrokeColor="@color/my_primary"
+                    app:chipStrokeWidth="1dp"/>
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_pending"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/chip_pending"
-                    style="@style/Widget.MaterialComponents.Chip.Choice"/>
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    app:checkedIconVisible="false"
+                    app:chipBackgroundColor="@color/chip_filter_background"
+                    android:textColor="@color/chip_filter_text"
+                    app:chipStrokeColor="@color/my_primary"
+                    app:chipStrokeWidth="1dp"/>
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_processing"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/chip_processing"
-                    style="@style/Widget.MaterialComponents.Chip.Choice"/>
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    app:checkedIconVisible="false"
+                    app:chipBackgroundColor="@color/chip_filter_background"
+                    android:textColor="@color/chip_filter_text"
+                    app:chipStrokeColor="@color/my_primary"
+                    app:chipStrokeWidth="1dp"/>
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_action"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/chip_action"
-                    style="@style/Widget.MaterialComponents.Chip.Choice"/>
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    app:checkedIconVisible="false"
+                    app:chipBackgroundColor="@color/chip_filter_background"
+                    android:textColor="@color/chip_filter_text"
+                    app:chipStrokeColor="@color/my_primary"
+                    app:chipStrokeWidth="1dp"/>
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_approved"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/chip_approved"
-                    style="@style/Widget.MaterialComponents.Chip.Choice"/>
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    app:checkedIconVisible="false"
+                    app:chipBackgroundColor="@color/chip_filter_background"
+                    android:textColor="@color/chip_filter_text"
+                    app:chipStrokeColor="@color/my_primary"
+                    app:chipStrokeWidth="1dp"/>
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_rejected"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/chip_rejected"
-                    style="@style/Widget.MaterialComponents.Chip.Choice"/>
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    app:checkedIconVisible="false"
+                    app:chipBackgroundColor="@color/chip_filter_background"
+                    android:textColor="@color/chip_filter_text"
+                    app:chipStrokeColor="@color/my_primary"
+                    app:chipStrokeWidth="1dp"/>
 
             </com.google.android.material.chip.ChipGroup>
 

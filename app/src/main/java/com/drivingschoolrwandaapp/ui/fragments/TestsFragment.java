@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -79,12 +80,23 @@ public class TestsFragment extends Fragment {
     private boolean isGridLayout = false;
 
     private BottomSheetDialog requestAccessDialog;
+    private AlertDialog paymentInstructionsDialog;
     private User currentUser;
+    // The exam the user asked access for — used to dismiss the request modal
+    // automatically once that exam actually unlocks.
+    private TestEntity requestedTest;
     private final Set<Integer> downloadingTests = new HashSet<>();
     private final Set<Integer> completedTests = new HashSet<>();
 
     private int selectedDays = -1;
     private PlanOption selectedPlan;
+
+    // Views inside the request-access bottom sheet (kept as fields so the
+    // pending state can be shown from the ViewModel observers).
+    private RecyclerView dialogOptionsRecyclerView;
+    private FrameLayout dialogConfirmContainer;
+    private LinearLayout dialogPendingLayout;
+    private TextView dialogPendingText;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -128,6 +140,37 @@ public class TestsFragment extends Fragment {
         super.onDestroyView();
         if (requestAccessDialog != null && requestAccessDialog.isShowing()) {
             requestAccessDialog.dismiss();
+        }
+        if (paymentInstructionsDialog != null && paymentInstructionsDialog.isShowing()) {
+            paymentInstructionsDialog.dismiss();
+        }
+    }
+
+    /** Dismisses the request/payment modals once the requested exam is unlocked. */
+    private void dismissAccessModals() {
+        if (requestAccessDialog != null && requestAccessDialog.isShowing()) {
+            requestAccessDialog.dismiss();
+        }
+        if (paymentInstructionsDialog != null && paymentInstructionsDialog.isShowing()) {
+            paymentInstructionsDialog.dismiss();
+        }
+        requestedTest = null;
+    }
+
+    /** Switches the request bottom sheet to its "waiting for approval" state. */
+    private void showPendingState(String message) {
+        if (requestAccessDialog == null || !requestAccessDialog.isShowing()) return;
+        if (dialogOptionsRecyclerView != null) {
+            dialogOptionsRecyclerView.setVisibility(View.GONE);
+        }
+        if (dialogConfirmContainer != null) {
+            dialogConfirmContainer.setVisibility(View.GONE);
+        }
+        if (dialogPendingLayout != null) {
+            dialogPendingLayout.setVisibility(View.VISIBLE);
+        }
+        if (dialogPendingText != null && message != null) {
+            dialogPendingText.setText(message);
         }
     }
 
@@ -226,15 +269,20 @@ public class TestsFragment extends Fragment {
                 currentUser = resource.data;
                 testAdapter.setCurrentUser(currentUser);
                 downloadUnlockedTests();
+                // Once the requested exam is unlocked the modal has served its
+                // purpose and can close by itself.
+                if (requestedTest != null && !testAdapter.isTestLocked(requestedTest)) {
+                    dismissAccessModals();
+                }
             }
         });
 
         subscriptionViewModel.getRequestAccessSuccess().observe(getViewLifecycleOwner(), success -> {
             if (success != null && success) {
-                if (requestAccessDialog != null && requestAccessDialog.isShowing()) {
-                    requestAccessDialog.dismiss();
-                }
                 if (isAdded()) {
+                    // Keep the modal open in its pending state instead of hiding
+                    // it — it closes by itself once access is granted.
+                    showPendingState(getString(R.string.request_pending_message));
                     userViewModel.loadProfile();
                     subscriptionViewModel.doneShowingRequestAccessDialog();
                     showPaymentInstructionsDialog(selectedPlan);
@@ -244,7 +292,25 @@ public class TestsFragment extends Fragment {
 
         subscriptionViewModel.getError().observe(getViewLifecycleOwner(), error -> {
             if (error != null && !error.isEmpty()) {
-                 if (requestAccessDialog != null && requestAccessDialog.isShowing()) {
+                if (isDuplicateRequestError(error)) {
+                    // The user already has a pending request — keep the modal
+                    // open (pending state) so they can't stack more requests and
+                    // it closes once access is granted.
+                    showPendingState(getString(R.string.request_pending_message));
+                    userViewModel.loadProfile();
+                    return;
+                }
+                if (isAlreadyHasAccessError(error)) {
+                    // Profile is stale: the server says access already exists.
+                    if (requestAccessDialog != null && requestAccessDialog.isShowing()) {
+                        requestAccessDialog.dismiss();
+                    }
+                    if (isAdded()) {
+                        userViewModel.loadProfile();
+                    }
+                    return;
+                }
+                if (requestAccessDialog != null && requestAccessDialog.isShowing()) {
                     requestAccessDialog.dismiss();
                 }
                 if (isAdded() && getContext() != null) {
@@ -298,13 +364,35 @@ public class TestsFragment extends Fragment {
         }
     }
 
+    /**
+     * True when the server rejected the request because the user already has a
+     * pending one (the 409 duplicate-request guard).
+     */
+    private boolean isDuplicateRequestError(String error) {
+        if (error == null) return false;
+        String lower = error.toLowerCase(Locale.ROOT);
+        return lower.contains("pending request") || lower.contains("pending")
+                || lower.contains("already have a pending");
+    }
+
+    /** True when the server says the user already has active access to this plan. */
+    private boolean isAlreadyHasAccessError(String error) {
+        if (error == null) return false;
+        String lower = error.toLowerCase(Locale.ROOT);
+        return lower.contains("already have access") || lower.contains("already has access");
+    }
+
     private void showRequestAccessDialog(TestEntity test) {
         requestAccessDialog = new BottomSheetDialog(requireContext());
         requestAccessDialog.setContentView(R.layout.dialog_subscription);
+        requestedTest = test;
 
         Button btnConfirm = requestAccessDialog.findViewById(R.id.btn_confirm);
         ProgressBar dialogProgressBar = requestAccessDialog.findViewById(R.id.dialog_progress_bar);
-        RecyclerView rvOptions = requestAccessDialog.findViewById(R.id.rv_subscription_options);
+        dialogOptionsRecyclerView = requestAccessDialog.findViewById(R.id.rv_subscription_options);
+        dialogConfirmContainer = requestAccessDialog.findViewById(R.id.confirm_container);
+        dialogPendingLayout = requestAccessDialog.findViewById(R.id.pending_layout);
+        dialogPendingText = requestAccessDialog.findViewById(R.id.pending_text);
 
         selectedDays = -1;
         selectedPlan = null;
@@ -319,8 +407,8 @@ public class TestsFragment extends Fragment {
             btnConfirm.setEnabled(true);
         });
 
-        rvOptions.setLayoutManager(new GridLayoutManager(getContext(), 2));
-        rvOptions.setAdapter(adapter);
+        dialogOptionsRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        dialogOptionsRecyclerView.setAdapter(adapter);
 
         btnConfirm.setOnClickListener(v -> {
             if (selectedDays != -1) {
@@ -365,6 +453,7 @@ public class TestsFragment extends Fragment {
         builder.setView(dialogView);
 
         AlertDialog dialog = builder.create();
+        paymentInstructionsDialog = dialog;
         dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
         String price = "2000"; // default price

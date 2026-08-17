@@ -202,6 +202,28 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Browse Services (kept above Recent Activity so the service
+                 cards stay reachable even when the recent list grows long) -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:text="@string/browse_services"
+                android:textColor="@color/colorOnSurface"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_browse_services"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:nestedScrollingEnabled="false"
+                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                app:spanCount="2"
+                tools:listitem="@layout/item_irembo_service"
+                tools:itemCount="2" />
+
             <!-- Recent Activity -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -234,30 +256,9 @@
                 android:id="@+id/rv_recent_activity"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
                 android:nestedScrollingEnabled="false"
                 tools:listitem="@layout/item_recent_activity"
                 tools:itemCount="1" />
-
-            <!-- Browse Services -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:text="@string/browse_services"
-                android:textColor="@color/colorOnSurface"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_browse_services"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false"
-                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                app:spanCount="2"
-                tools:listitem="@layout/item_irembo_service"
-                tools:itemCount="2" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

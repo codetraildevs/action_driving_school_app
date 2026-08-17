@@ -143,10 +143,7 @@ class IremboViewModelTest {
         callback.onFailure(call, RuntimeException("timeout"))
 
         assertEquals(Resource.Status.ERROR, viewModel.getRecentApplications().value?.status)
-        assertEquals(
-            "Request timed out. The server is not responding. Please try again later.",
-            viewModel.getRecentApplications().value?.message
-        )
+        assertEquals(localizedError, viewModel.getRecentApplications().value?.message)
     }
 
     @Test
@@ -206,10 +203,7 @@ class IremboViewModelTest {
         callback.onFailure(call, RuntimeException("network is unreachable"))
 
         assertEquals(Resource.Status.ERROR, viewModel.getLicenseRequestStatus().value?.status)
-        assertEquals(
-            "Connection failed. Please check your internet connection and try again.",
-            viewModel.getLicenseRequestStatus().value?.message
-        )
+        assertEquals(localizedError, viewModel.getLicenseRequestStatus().value?.message)
     }
 
     @Test
@@ -269,10 +263,7 @@ class IremboViewModelTest {
         callback.onFailure(call, RuntimeException("connection refused"))
 
         assertEquals(Resource.Status.ERROR, viewModel.getSpecialRequestStatus().value?.status)
-        assertEquals(
-            "Connection failed. Please check your internet connection and try again.",
-            viewModel.getSpecialRequestStatus().value?.message
-        )
+        assertEquals(localizedError, viewModel.getSpecialRequestStatus().value?.message)
     }
 
     // ---------------------------------------------------------------------------
@@ -331,10 +322,7 @@ class IremboViewModelTest {
         callback.onFailure(call, RuntimeException("socket timeout"))
 
         assertEquals(Resource.Status.ERROR, viewModel.getApplicationDetails().value?.status)
-        assertEquals(
-            "Request timed out. The server is not responding. Please try again later.",
-            viewModel.getApplicationDetails().value?.message
-        )
+        assertEquals(localizedError, viewModel.getApplicationDetails().value?.message)
     }
 
     @Test

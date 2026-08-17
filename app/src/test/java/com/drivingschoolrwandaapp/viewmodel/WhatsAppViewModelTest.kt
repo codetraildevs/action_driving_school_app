@@ -13,6 +13,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.mock
@@ -40,7 +41,9 @@ class WhatsAppViewModelTest {
     @Before
     fun setUp() {
         repository = mock(WhatsAppRepository::class.java)
-        viewModel = WhatsAppViewModel(mock(Application::class.java), repository)
+        val application = mock(Application::class.java)
+        `when`(application.getString(anyInt())).thenReturn("localized_error")
+        viewModel = WhatsAppViewModel(application, repository)
     }
 
     /**

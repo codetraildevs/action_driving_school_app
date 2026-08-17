@@ -9,6 +9,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.models.entities.WhatsAppGroup;
 import com.drivingschoolrwandaapp.repository.Resource;
 import com.drivingschoolrwandaapp.repository.WhatsAppRepository;
@@ -45,7 +46,7 @@ public class WhatsAppViewModel extends AndroidViewModel {
         Resource<List<WhatsAppGroup>> current = groups.getValue();
         if (current != null && current.status == Resource.Status.LOADING) {
             groups.setValue(Resource.error(ErrorUtils.getUserFriendlyMessage(
-                    new java.io.IOException("timeout")), null));
+                    getApplication(), new java.io.IOException("timeout")), null));
         }
     };
 
@@ -117,10 +118,10 @@ public class WhatsAppViewModel extends AndroidViewModel {
                     if (response.body() != null) {
                         groups.setValue(Resource.success(response.body()));
                     } else {
-                        groups.setValue(Resource.error("No groups found", null));
+                        groups.setValue(Resource.error(getApplication().getString(R.string.no_whatsapp_groups), null));
                     }
                 } else {
-                    groups.setValue(Resource.error("Failed to fetch groups: " + response.message(), null));
+                    groups.setValue(Resource.error(getApplication().getString(R.string.whatsapp_fetch_failed), null));
                 }
             }
 
@@ -130,7 +131,7 @@ public class WhatsAppViewModel extends AndroidViewModel {
                 if (handler != null) {
                     handler.removeCallbacks(timeoutRunnable);
                 }
-                groups.setValue(Resource.error(ErrorUtils.getUserFriendlyMessage(t), null));
+                groups.setValue(Resource.error(ErrorUtils.getUserFriendlyMessage(getApplication(), t), null));
             }
         });
 

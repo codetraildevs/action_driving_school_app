@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
@@ -101,14 +102,14 @@ public class LearningMaterialViewModel extends AndroidViewModel {
                     materials.setValue(fetchedMaterials);
                     cacheMaterialsAsync(fetchedMaterials);
                 } else {
-                    loadFromCacheAsync("Couldn't refresh from server.");
+                    loadFromCacheAsync(getApplication().getString(R.string.refresh_failed));
                 }
                 isLoading.setValue(false);
             }
 
             @Override
             public void onFailure(@NonNull Call<LearningMaterialResponse> call, @NonNull Throwable t) {
-                loadFromCacheAsync("You are offline. Showing downloaded content.");
+                loadFromCacheAsync(getApplication().getString(R.string.offline_showing_downloaded));
                 isLoading.setValue(false);
             }
         });
@@ -135,14 +136,14 @@ public class LearningMaterialViewModel extends AndroidViewModel {
                         materials.postValue(cachedMaterials);
                         toastMessage.postValue(message);
                     } else {
-                        error.postValue("No offline content available.");
+                        error.postValue(getApplication().getString(R.string.no_offline_content));
                     }
                 } catch (IOException e) {
                     Log.e("LearningMaterialVM", "Could not load offline content from cache", e);
-                    error.postValue("Could not load offline content.");
+                    error.postValue(getApplication().getString(R.string.could_not_load_offline_content));
                 }
             } else {
-                error.postValue("No internet and no offline content available.");
+                error.postValue(getApplication().getString(R.string.no_internet_no_offline));
             }
         });
     }
@@ -196,14 +197,17 @@ public class LearningMaterialViewModel extends AndroidViewModel {
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
                 downloadStatus.postValue(new DownloadState(DownloadState.Status.FAILURE, material.getId(),
-                        ErrorUtils.getUserFriendlyMessage(t)));
+                        ErrorUtils.getUserFriendlyMessage(getApplication(), t)));
             }
         });
     }
 
     /**
-     * Reads a user-facing error message from a failed download response
-     * (e.g. "File not found on server"), falling back to a generic message.
+     * Reads a user-facing error message from a failed download response.
+     *
+     * The server's raw error text is English-only, so it is never shown
+     * verbatim. Known patterns are mapped to a translated string; anything
+     * else falls back to the localized generic download-failure message.
      */
     private String extractErrorMessage(Response<?> response) {
         if (response != null && response.errorBody() != null) {
@@ -215,14 +219,15 @@ public class LearningMaterialViewModel extends AndroidViewModel {
                         if (json.has("error") && json.get("error").isJsonPrimitive()) {
                             String serverMessage = json.get("error").getAsString();
                             if (serverMessage != null && !serverMessage.trim().isEmpty()) {
-                                return serverMessage.trim();
+                                String lower = serverMessage.toLowerCase(Locale.ROOT);
+                                if (lower.contains("not found")) {
+                                    return getApplication().getString(R.string.file_not_found);
+                                }
+                                return getApplication().getString(R.string.download_failure);
                             }
                         }
                     } catch (Exception ignored) {
-                        // Not JSON — fall through to the raw body if short enough.
-                    }
-                    if (body.length() <= 120) {
-                        return body.trim();
+                        // Not JSON — fall through to the localized generic message.
                     }
                 }
             } catch (IOException e) {

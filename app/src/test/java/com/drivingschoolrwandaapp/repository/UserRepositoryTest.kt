@@ -628,8 +628,9 @@ class UserRepositoryTest {
         `when`(response.message()).thenReturn("Unauthorized")
         captor.value.onResponse(mockCall(), response)
 
+        // Raw HTTP status text is not shown — a localized generic message is used instead.
         assertEquals(Resource.Status.ERROR, result.value!!.status)
-        assertEquals("Unauthorized", result.value!!.message)
+        assertEquals("Something went wrong", result.value!!.message)
     }
 
     @Test

@@ -183,7 +183,7 @@ public class App extends AppCompatActivity {
                 Intent shareIntent = new Intent(Intent.ACTION_SEND);
                 shareIntent.setType("text/plain");
                 shareIntent.putExtra(Intent.EXTRA_TEXT, ApiClient.PLAYSTORE_LINK);
-                startActivity(Intent.createChooser(shareIntent, "Share via"));
+                startActivity(Intent.createChooser(shareIntent, getString(R.string.share_via)));
                 drawerLayout.close();
                 return true;
             } else if (item.getItemId() == R.id.nav_whatsapp) {
