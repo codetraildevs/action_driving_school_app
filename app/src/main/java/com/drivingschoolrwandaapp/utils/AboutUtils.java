@@ -27,7 +27,8 @@ public final class AboutUtils {
         View dialogView = inflater.inflate(R.layout.dialog_about_us, null);
 
         TextView versionTv = dialogView.findViewById(R.id.versionTv);
-        versionTv.setText(activity.getString(R.string.version_format, BuildConfig.VERSION_NAME));
+        versionTv.setText(activity.getString(R.string.version_format,
+                BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE));
         builder.setView(dialogView);
 
         AlertDialog dialog = builder.create();

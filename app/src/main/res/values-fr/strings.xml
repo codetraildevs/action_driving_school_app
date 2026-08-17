@@ -437,7 +437,7 @@ Quand tu arrives à la dernière question, tu appuies sur « Terminer l’examen
     <string name="admin_logout">Se déconnecter</string>
     <string name="admin_console_link">Ouvrir la console web</string>
     <string name="admin_version">Version</string>
-    <string name="version_format">Version %s</string>
+    <string name="version_format">Version %1$s (%2$d)</string>
     <string name="admin_console_desc">Gérez les utilisateurs, abonnements, contenus et demandes depuis la console d\'administration web complète.</string>
 
     <!-- Role names -->

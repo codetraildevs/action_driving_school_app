@@ -323,7 +323,7 @@
     <string name="subscription_channel_description">Amatangazo y\'uko kwiyandikisha kwawe kumeze.</string>
 
     <!-- Hardcoded string replacements for lint warnings -->
-    <string name="version_format">Version %s</string>
+    <string name="version_format">Verisiyo %1$s (%2$d)</string>
     <string name="ref_format">Ref: %s</string>
     <string name="applied_format">Byakozwe: %s</string>
     <string name="page_format">Urupapuro %d</string>

@@ -60,7 +60,8 @@ public class WelcomeActivity extends AppCompatActivity {
 
         TextView termsPolicyText = findViewById(R.id.terms_policy_text);
         versionTv = findViewById(R.id.versionTv);
-        versionTv.setText(getString(R.string.version_format, BuildConfig.VERSION_NAME));
+        versionTv.setText(getString(R.string.version_format,
+                BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE));
         makeTermsAndPolicyClickable(termsPolicyText);
 
         // Show disclaimer only on first launch

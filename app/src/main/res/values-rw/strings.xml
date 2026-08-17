@@ -344,7 +344,7 @@
     <string name="admin_logout">Sohoka</string>
     <string name="admin_console_link">Fungura akarongo ka web</string>
     <string name="admin_version">Verisiyo</string>
-    <string name="version_format">Verisiyo %s</string>
+    <string name="version_format">Verisiyo %1$s (%2$d)</string>
     <string name="admin_console_desc">Cungura abakoresha, kwiyandikisha, ibirimo n\'ibyifuzo ukoresheje akarongo ka web.</string>
 
     <!-- Role names -->

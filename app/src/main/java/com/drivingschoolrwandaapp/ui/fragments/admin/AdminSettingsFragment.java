@@ -40,7 +40,8 @@ public class AdminSettingsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        ((TextView) view.findViewById(R.id.version_text)).setText(BuildConfig.VERSION_NAME);
+        ((TextView) view.findViewById(R.id.version_text)).setText(getString(R.string.version_format,
+                BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE));
 
         view.findViewById(R.id.open_console_button).setOnClickListener(v -> {
             Intent intent = new Intent(requireContext(), WebViewActivity.class);
