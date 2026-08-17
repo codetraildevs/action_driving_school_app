@@ -173,21 +173,6 @@
 
     </LinearLayout>
 
-    <!-- Submit as a floating action button in the bottom-right corner, above
-         the previous/next navigation bar. In review mode it is hidden. -->
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-        android:id="@+id/submit_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/bottom_navigation_container"
-        android:layout_alignParentEnd="true"
-        android:layout_margin="16dp"
-        android:text="@string/submit"
-        android:textColor="?attr/colorOnPrimaryContainer"
-        android:textStyle="bold"
-        app:icon="@drawable/ic_check_circle"
-        app:iconTint="?attr/colorOnPrimaryContainer" />
-
     <FrameLayout
         android:id="@+id/bottom_navigation_container"
         android:layout_width="match_parent"
@@ -203,6 +188,23 @@
             android:gravity="center_horizontal"
             android:padding="8dp"
             android:background="?attr/colorSurface">
+
+            <!-- Submit sits in the bottom bar, above Previous/Next, so it never
+                 covers the question options. Hidden in review mode. -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/submit_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/submit"
+                android:textColor="?attr/colorOnPrimary"
+                android:textAllCaps="true"
+                android:textStyle="bold"
+                android:paddingVertical="10dp"
+                app:backgroundTint="?attr/colorPrimary"
+                app:cornerRadius="12dp"
+                app:icon="@drawable/ic_check_circle"
+                app:iconGravity="textStart"
+                app:iconTint="?attr/colorOnPrimary" />
 
             <LinearLayout
                 android:id="@+id/navigation_buttons"
