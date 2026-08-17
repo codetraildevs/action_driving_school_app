@@ -331,6 +331,7 @@
     <string name="no_details_available">Nta bisobanuro byongera bihari.</string>
     <string name="waiting_for_approval">Gutegereza kwemezwa</string>
     <string name="request_pending_message">Ubusabe bwawe bwoherejwe. Iyo umuyobozi abwemeye, ibizamini byawe bizafunguka ubwabyo - komeza ureke uru rukurikirane rugaragara kugeza icyo gihe.</string>
+    <string name="request_sent_button">Ubusabe bwoherejwe</string>
     <string name="action_required_text">Igikorwa Girakenewe</string>
     <string name="access_expired">Uburenganzira Bwarangiye</string>
     <string name="active_status">GIKORA</string>

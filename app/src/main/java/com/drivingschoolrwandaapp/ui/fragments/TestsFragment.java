@@ -94,9 +94,11 @@ public class TestsFragment extends Fragment {
     private PlanOption selectedPlan;
 
     // Views inside the request-access bottom sheet (kept as fields so the
-    // pending state can be shown from the ViewModel observers).
+    // sent state can be shown from the ViewModel observers).
     private RecyclerView dialogOptionsRecyclerView;
     private FrameLayout dialogConfirmContainer;
+    private Button dialogConfirmButton;
+    private ProgressBar dialogProgressBar;
     private LinearLayout dialogPendingLayout;
     private TextView dialogPendingText;
 
@@ -168,14 +170,27 @@ public class TestsFragment extends Fragment {
         requestedTest = null;
     }
 
-    /** Switches the request bottom sheet to its "waiting for approval" state. */
-    private void showPendingState(String message) {
+    /**
+     * Marks the request as sent: keeps the payment options and instructions
+     * visible (the sheet no longer hides them behind a spinner) but disables
+     * the confirm button so no duplicate request can be sent. The sheet stays
+     * open until access is granted, then auto-closes.
+     */
+    private void showRequestSentState(String message) {
         if (requestAccessDialog == null || !requestAccessDialog.isShowing()) return;
+        // Keep the payment ways visible — only block re-sending.
         if (dialogOptionsRecyclerView != null) {
-            dialogOptionsRecyclerView.setVisibility(View.GONE);
+            dialogOptionsRecyclerView.setVisibility(View.VISIBLE);
         }
         if (dialogConfirmContainer != null) {
-            dialogConfirmContainer.setVisibility(View.GONE);
+            dialogConfirmContainer.setVisibility(View.VISIBLE);
+        }
+        if (dialogProgressBar != null) {
+            dialogProgressBar.setVisibility(View.GONE);
+        }
+        if (dialogConfirmButton != null) {
+            dialogConfirmButton.setEnabled(false);
+            dialogConfirmButton.setText(getString(R.string.request_sent_button));
         }
         if (dialogPendingLayout != null) {
             dialogPendingLayout.setVisibility(View.VISIBLE);
@@ -312,9 +327,9 @@ public class TestsFragment extends Fragment {
         subscriptionViewModel.getRequestAccessSuccess().observe(getViewLifecycleOwner(), success -> {
             if (success != null && success) {
                 if (isAdded()) {
-                    // Keep the modal open in its pending state instead of hiding
-                    // it — it closes by itself once access is granted.
-                    showPendingState(getString(R.string.request_pending_message));
+                    // Keep the sheet open with the payment ways visible — it
+                    // closes by itself once access is granted.
+                    showRequestSentState(getString(R.string.request_pending_message));
                     userViewModel.loadProfile();
                     subscriptionViewModel.doneShowingRequestAccessDialog();
                     showPaymentInstructionsDialog(selectedPlan);
@@ -325,15 +340,19 @@ public class TestsFragment extends Fragment {
         subscriptionViewModel.getError().observe(getViewLifecycleOwner(), error -> {
             if (error != null && !error.isEmpty()) {
                 if (isDuplicateRequestError(error)) {
-                    // The user already has a pending request — keep the modal
-                    // open (pending state) so they can't stack more requests and
-                    // it closes once access is granted.
-                    showPendingState(getString(R.string.request_pending_message));
+                    // The user already has a pending request — keep the sheet
+                    // open with the payment ways visible but confirm disabled,
+                    // and it closes once access is granted.
+                    showRequestSentState(getString(R.string.request_pending_message));
                     userViewModel.loadProfile();
                     return;
                 }
                 if (isAlreadyHasAccessError(error)) {
-                    // Profile is stale: the server says access already exists.
+                    // Profile is stale: the server says access already exists,
+                    // so payment instructions are no longer needed.
+                    if (paymentInstructionsDialog != null && paymentInstructionsDialog.isShowing()) {
+                        paymentInstructionsDialog.dismiss();
+                    }
                     if (requestAccessDialog != null && requestAccessDialog.isShowing()) {
                         requestAccessDialog.dismiss();
                     }
@@ -420,7 +439,8 @@ public class TestsFragment extends Fragment {
         requestedTest = test;
 
         Button btnConfirm = requestAccessDialog.findViewById(R.id.btn_confirm);
-        ProgressBar dialogProgressBar = requestAccessDialog.findViewById(R.id.dialog_progress_bar);
+        dialogConfirmButton = btnConfirm;
+        dialogProgressBar = requestAccessDialog.findViewById(R.id.dialog_progress_bar);
         dialogOptionsRecyclerView = requestAccessDialog.findViewById(R.id.rv_subscription_options);
         dialogConfirmContainer = requestAccessDialog.findViewById(R.id.confirm_container);
         dialogPendingLayout = requestAccessDialog.findViewById(R.id.pending_layout);
@@ -443,14 +463,36 @@ public class TestsFragment extends Fragment {
         dialogOptionsRecyclerView.setAdapter(adapter);
 
         btnConfirm.setOnClickListener(v -> {
-            if (selectedDays != -1) {
+            if (selectedDays != -1 && selectedPlan != null) {
+                // Remember the price so the payment instructions keep the right
+                // USSD amount if the user reopens the sheet while it is pending.
+                String priceDigits = selectedPlan.price.replaceAll("[^\\d]", "");
+                if (!priceDigits.isEmpty()) {
+                    appPreferences.setLastRequestedPlanPrice(priceDigits);
+                }
                 dialogProgressBar.setVisibility(View.VISIBLE);
                 btnConfirm.setEnabled(false);
                 subscriptionViewModel.requestTestAccess(test.getTestNumber(), selectedDays, testAdapter.currentLanguageId);
+                // Show the payment instructions (MoMo / Airtel USSD codes)
+                // right away, so the user always sees how to pay even if the
+                // server rejects the request as a duplicate / already pending.
+                showPaymentInstructionsDialog(selectedPlan);
             }
         });
 
         requestAccessDialog.show();
+
+        // If a request for this access is already in flight (the backend sets
+        // the profile's test-access status to PENDING when one is created),
+        // open the sheet in the "sent" state: payment ways visible, confirm
+        // disabled, so the user cannot stack another request. Also bring up
+        // the payment instructions (MoMo / Airtel USSD codes) again so the
+        // user who hasn't paid yet still knows how to complete payment.
+        if (currentUser != null
+                && "PENDING".equalsIgnoreCase(currentUser.getTestAccessStatus())) {
+            showRequestSentState(getString(R.string.request_pending_message));
+            showPaymentInstructionsDialog(null);
+        }
     }
 
     private List<PlanOption> parsePlans(String instructions) {
@@ -479,6 +521,10 @@ public class TestsFragment extends Fragment {
 
     private void showPaymentInstructionsDialog(PlanOption plan) {
         if (!isAdded() || getActivity() == null) return;
+        // Never stack a second payment dialog while one is already visible.
+        if (paymentInstructionsDialog != null && paymentInstructionsDialog.isShowing()) {
+            return;
+        }
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         LayoutInflater inflater = LayoutInflater.from(requireContext());
         View dialogView = inflater.inflate(R.layout.dialog_payment_instructions, null);
@@ -488,7 +534,10 @@ public class TestsFragment extends Fragment {
         paymentInstructionsDialog = dialog;
         dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
-        String price = "2000"; // default price
+        // Use the selected plan's price; when reopening while a request is
+        // pending there is no plan selected in this session, so fall back to
+        // the price the user last requested.
+        String price = appPreferences.getLastRequestedPlanPrice();
         if (plan != null) {
             String extractedPrice = plan.price.replaceAll("[^\\d]", "");
             if (!extractedPrice.isEmpty()) {

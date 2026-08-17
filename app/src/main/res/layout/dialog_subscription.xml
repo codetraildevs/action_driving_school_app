@@ -72,8 +72,9 @@
             android:visibility="gone" />
     </FrameLayout>
 
-    <!-- Pending state: shown after a request is sent so the modal stays open
-         (and blocks duplicate requests) until the admin grants access. -->
+    <!-- Sent state: after a request is sent the payment options stay visible
+         but the confirm button is disabled so the user cannot send a duplicate.
+         The sheet stays open until the admin grants access (then it auto-closes). -->
     <LinearLayout
         android:id="@+id/pending_layout"
         android:layout_width="match_parent"
@@ -84,27 +85,11 @@
         android:paddingBottom="16dp"
         android:visibility="gone">
 
-        <ProgressBar
-            style="?android:attr/progressBarStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:indeterminateTint="@color/my_primary" />
-
-        <TextView
-            android:id="@+id/pending_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/waiting_for_approval"
-            android:textColor="@color/colorOnSurface"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
         <TextView
             android:id="@+id/pending_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:drawablePadding="8dp"
             android:gravity="center"
             android:lineSpacingMultiplier="1.1"
             android:text="@string/request_pending_message"

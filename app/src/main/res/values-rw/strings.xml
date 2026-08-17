@@ -99,6 +99,7 @@
     <string name="request_already_sent_title">Gusaba kwawe kwaratwoherejwe</string>
     <string name="request_already_sent_message">Usanzwe ufite gusaba gukora kuri iyi serivisi. Tegereza ko gutunganywa mbere yo kohereza indi.</string>
     <string name="request_pending_message">Ubusabe bwawe bwoherejwe. Iyo umuyobozi abwemeye, ibizamini byawe bizafunguka ubwabyo - komeza ureke uru rukurikirane rugaragara kugeza icyo gihe.</string>
+    <string name="request_sent_button">Ubusabe bwoherejwe</string>
     <string name="error_unknown">Habaye ikibazo kitazwi. Ongera ugerageze.</string>
     <string name="error_secure_connection">Ntibishoboka gushinga umurongo w\'umutekano. Vugurura porogaramu maze ugerageze.</string>
     <string name="error_connection_interrupted">Umurongo wabujijwe. Ongera ugerageze.</string>

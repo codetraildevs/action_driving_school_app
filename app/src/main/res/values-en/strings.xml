@@ -103,6 +103,7 @@
     <string name="no_details_available">No additional details available.</string>
     <string name="waiting_for_approval">Waiting for approval</string>
     <string name="request_pending_message">Your request has been sent. Once an admin approves it, your exams will unlock automatically - keep this screen open until then.</string>
+    <string name="request_sent_button">Request Sent</string>
     <string name="action_required_text">Action Required</string>
     <string name="access_expired">Access Expired</string>
     <string name="active_status">ACTIVE</string>

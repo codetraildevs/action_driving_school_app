@@ -155,6 +155,7 @@
     <string name="update_flow_failed">Échec de la mise à jour ! Code de résultat : %d</string>
     <string name="waiting_for_approval">En attente d\'approbation</string>
     <string name="request_pending_message">Votre demande a \'été envoyée. Dès qu\'un administrateur l\'approuve, vos examens se débloqueront automatiquement - gardez cet écran ouvert jusque-là.</string>
+    <string name="request_sent_button">Demande envoyée</string>
     <string name="general_channel_name">Annonces générales</string>
     <string name="general_channel_description">Notifications pour les annonces générales et les mises à jour.</string>
     <string name="exams_channel_name">Examens</string>
