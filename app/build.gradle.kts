@@ -113,6 +113,9 @@ android {
             excludes += "**/libdatastore_shared_counter.so"
         }
     }
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
     sourceSets {
         getByName("main") {
             java {
@@ -196,8 +199,12 @@ dependencies {
 
     // ── Firebase ──
     implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.messaging)
+
+    // ── Play Integrity (anti-fraud; AdMob policy requirement) ──
+    implementation(libs.play.integrity)
 
     // ── Testing ──
     testImplementation(libs.junit)

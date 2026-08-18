@@ -11,6 +11,7 @@ import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.database.entities.User;
 import com.drivingschoolrwandaapp.models.request.IremboSpecialRequest;
 import com.drivingschoolrwandaapp.repository.Resource;
+import com.drivingschoolrwandaapp.utils.AnalyticsUtils;
 import com.drivingschoolrwandaapp.utils.PhoneUtils;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -94,6 +95,7 @@ public class SpecialRequestActivity extends BaseIremboFormActivity {
         IremboSpecialRequest request = new IremboSpecialRequest(
                 serviceName, category, name, phone, nationalId, description
         );
+        AnalyticsUtils.logIremboRequestSubmitted(this, "special_service");
         iremboViewModel.submitSpecialRequest(request);
     }
 

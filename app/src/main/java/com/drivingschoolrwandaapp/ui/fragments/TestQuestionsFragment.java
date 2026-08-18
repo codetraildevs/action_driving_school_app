@@ -31,6 +31,7 @@ import com.drivingschoolrwandaapp.models.entities.TestQuestion;
 import com.drivingschoolrwandaapp.models.mappers.TestMapper;
 import com.drivingschoolrwandaapp.repository.Resource;
 import com.drivingschoolrwandaapp.ui.adapters.TestQuestionPagerAdapter;
+import com.drivingschoolrwandaapp.utils.AnalyticsUtils;
 import com.drivingschoolrwandaapp.viewmodel.TestViewModel;
 
 import java.util.concurrent.TimeUnit;
@@ -257,6 +258,10 @@ public class TestQuestionsFragment extends Fragment {
                     } else {
                         // Start the elapsed-time clock together with the countdown timer
                         testViewModel.markTestStarted();
+                        AnalyticsUtils.logExamStarted(getContext(),
+                                testViewModel.getTestId() != null ? testViewModel.getTestId() : 0,
+                                testViewModel.getCurrentTestNumber(),
+                                testViewModel.getCurrentTestName());
                         startTimer(test.getDuration());
                     }
                 }

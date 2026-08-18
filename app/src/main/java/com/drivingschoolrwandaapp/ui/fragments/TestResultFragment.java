@@ -18,6 +18,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.drivingschoolrwandaapp.R;
+import com.drivingschoolrwandaapp.utils.AnalyticsUtils;
 import com.drivingschoolrwandaapp.utils.TimeFormatUtils;
 import com.drivingschoolrwandaapp.viewmodel.TestViewModel;
 
@@ -101,6 +102,19 @@ public class TestResultFragment extends Fragment {
         
         testViewModel.getTestResult().observe(getViewLifecycleOwner(), result -> {
             if (result != null) {
+                AnalyticsUtils.logExamCompleted(
+                        getContext(),
+                        testViewModel.getTestId() != null ? testViewModel.getTestId() : 0,
+                        testViewModel.getCurrentTestNumber(),
+                        testViewModel.getCurrentTestName(),
+                        result.getScore(),
+                        result.getTotalMarks(),
+                        result.isPassed(),
+                        result.getCorrectCount(),
+                        result.getWrongCount(),
+                        result.getSkippedCount(),
+                        result.getElapsedSeconds());
+
                 int percentage = (result.getTotalMarks() > 0)
                         ? (result.getScore() * 100) / result.getTotalMarks()
                         : 0;

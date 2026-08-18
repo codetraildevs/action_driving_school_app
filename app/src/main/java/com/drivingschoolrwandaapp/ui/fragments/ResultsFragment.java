@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.models.entities.TestResult;
+import com.drivingschoolrwandaapp.utils.AnalyticsUtils;
 import com.drivingschoolrwandaapp.utils.TimeFormatUtils;
 import com.drivingschoolrwandaapp.viewmodel.TestViewModel;
 
@@ -47,6 +48,12 @@ public class ResultsFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_results, container, false);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        AnalyticsUtils.logScreenView(getContext(), "results");
     }
 
     @Override

@@ -46,6 +46,7 @@ import com.drivingschoolrwandaapp.database.entities.TestEntity;
 import com.drivingschoolrwandaapp.database.entities.TestWithQuestions;
 import com.drivingschoolrwandaapp.database.entities.User;
 import com.drivingschoolrwandaapp.ui.adapters.TestAdapter;
+import com.drivingschoolrwandaapp.utils.AnalyticsUtils;
 import com.drivingschoolrwandaapp.utils.GridSpacingItemDecoration;
 import com.drivingschoolrwandaapp.utils.PaymentUtils;
 import com.drivingschoolrwandaapp.utils.SafetyUtils;
@@ -470,6 +471,8 @@ public class TestsFragment extends Fragment {
                 if (!priceDigits.isEmpty()) {
                     appPreferences.setLastRequestedPlanPrice(priceDigits);
                 }
+                AnalyticsUtils.logSubscriptionRequested(
+                        getContext(), test.getTestNumber(), selectedDays, priceDigits);
                 dialogProgressBar.setVisibility(View.VISIBLE);
                 btnConfirm.setEnabled(false);
                 subscriptionViewModel.requestTestAccess(test.getTestNumber(), selectedDays, testAdapter.currentLanguageId);
@@ -564,6 +567,14 @@ public class TestsFragment extends Fragment {
         dialog.show();
         // Keep the dialog within the screen so every method stays reachable.
         PaymentUtils.capDialogHeight(dialog, 0.8f);
+
+        AnalyticsUtils.logPaymentInstructionsViewed(getContext());
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        AnalyticsUtils.logScreenView(getContext(), "tests");
     }
 
     @Override

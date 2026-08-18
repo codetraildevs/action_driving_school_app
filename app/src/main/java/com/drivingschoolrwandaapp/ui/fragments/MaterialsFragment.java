@@ -40,6 +40,7 @@ import com.drivingschoolrwandaapp.database.AppDatabase;
 import com.drivingschoolrwandaapp.database.dao.UserDao;
 import com.drivingschoolrwandaapp.ui.activities.PdfViewerActivity;
 import com.drivingschoolrwandaapp.ui.adapters.LearningMaterialAdapter;
+import com.drivingschoolrwandaapp.utils.AnalyticsUtils;
 import com.drivingschoolrwandaapp.utils.FileUtils;
 import com.drivingschoolrwandaapp.utils.NotificationHelper;
 import com.drivingschoolrwandaapp.viewmodel.LearningMaterialViewModel;
@@ -92,6 +93,12 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_materials, container, false);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        AnalyticsUtils.logScreenView(getContext(), "materials");
     }
 
     @Override

@@ -40,6 +40,7 @@ import com.drivingschoolrwandaapp.data.local.preferences.AppPreferences;
 import com.drivingschoolrwandaapp.database.entities.User;
 import com.drivingschoolrwandaapp.ui.activities.WhatsAppGroupsActivity;
 import com.drivingschoolrwandaapp.utils.AboutUtils;
+import com.drivingschoolrwandaapp.utils.AnalyticsUtils;
 import com.drivingschoolrwandaapp.viewmodel.UserViewModel;
 
 import com.google.android.gms.tasks.Task;
@@ -161,6 +162,7 @@ public class App extends AppCompatActivity {
                 // Set Crashlytics user identifier for crash tracking
                 if (resource.data.getPhoneNumber() != null) {
                     FirebaseCrashlytics.getInstance().setUserId(resource.data.getPhoneNumber());
+                    AnalyticsUtils.setUser(App.this, resource.data.getPhoneNumber(), null);
                 }
                 FirebaseCrashlytics.getInstance().setCustomKey("user_name", resource.data.getFirstName() + " " + resource.data.getLastName());
                 FirebaseCrashlytics.getInstance().setCustomKey("language_id", resource.data.getLanguageId());

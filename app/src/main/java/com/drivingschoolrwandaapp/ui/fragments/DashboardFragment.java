@@ -28,6 +28,7 @@ import com.drivingschoolrwandaapp.repository.Resource;
 import com.drivingschoolrwandaapp.ui.activities.ApplicationDetailsActivity;
 import com.drivingschoolrwandaapp.ui.activities.IremboActivity;
 import com.drivingschoolrwandaapp.ui.activities.WhatsAppGroupsActivity;
+import com.drivingschoolrwandaapp.utils.AnalyticsUtils;
 import com.drivingschoolrwandaapp.utils.LanguageUtils;
 import com.drivingschoolrwandaapp.viewmodel.IremboViewModel;
 import com.drivingschoolrwandaapp.viewmodel.UserViewModel;
@@ -56,6 +57,12 @@ public class DashboardFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_dashboard, container, false);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        AnalyticsUtils.logScreenView(getContext(), "dashboard");
     }
 
     @Override

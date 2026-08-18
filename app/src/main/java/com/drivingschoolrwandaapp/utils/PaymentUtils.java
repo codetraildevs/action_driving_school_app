@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.drivingschoolrwandaapp.R;
+import com.drivingschoolrwandaapp.utils.AnalyticsUtils;
 import com.google.android.material.card.MaterialCardView;
 
 public class PaymentUtils {
@@ -58,9 +59,18 @@ public class PaymentUtils {
         String numberUssd = "*182*1*1*0785460748*" + amount + "#";
         String airtelUssd = "*182*1*1*0726656615*" + amount + "#";
 
-        if(paymentMethod1 != null) paymentMethod1.setOnClickListener(v -> dialUssd(fragment, momoPayUssd));
-        if(paymentMethod2 != null) paymentMethod2.setOnClickListener(v -> dialUssd(fragment, numberUssd));
-        if (paymentMethod3 != null) paymentMethod3.setOnClickListener(v -> dialUssd(fragment, airtelUssd));
+        if(paymentMethod1 != null) paymentMethod1.setOnClickListener(v -> {
+            AnalyticsUtils.logPaymentMethodSelected(fragment.getContext(), "momo_pay", amount);
+            dialUssd(fragment, momoPayUssd);
+        });
+        if(paymentMethod2 != null) paymentMethod2.setOnClickListener(v -> {
+            AnalyticsUtils.logPaymentMethodSelected(fragment.getContext(), "mtn", amount);
+            dialUssd(fragment, numberUssd);
+        });
+        if (paymentMethod3 != null) paymentMethod3.setOnClickListener(v -> {
+            AnalyticsUtils.logPaymentMethodSelected(fragment.getContext(), "airtel", amount);
+            dialUssd(fragment, airtelUssd);
+        });
     }
 
     public static void setupPaymentMethods(View rootView, Activity activity, String amount) {
@@ -72,9 +82,18 @@ public class PaymentUtils {
         String numberUssd = "*182*1*1*0785460748*" + amount + "#";
         String airtelUssd = "*182*1*1*0726656615*" + amount + "#";
 
-        if(paymentMethod1 != null) paymentMethod1.setOnClickListener(v -> dialUssd(activity, momoPayUssd));
-        if(paymentMethod2 != null) paymentMethod2.setOnClickListener(v -> dialUssd(activity, numberUssd));
-        if (paymentMethod3 != null) paymentMethod3.setOnClickListener(v -> dialUssd(activity, airtelUssd));
+        if(paymentMethod1 != null) paymentMethod1.setOnClickListener(v -> {
+            AnalyticsUtils.logPaymentMethodSelected(activity, "momo_pay", amount);
+            dialUssd(activity, momoPayUssd);
+        });
+        if(paymentMethod2 != null) paymentMethod2.setOnClickListener(v -> {
+            AnalyticsUtils.logPaymentMethodSelected(activity, "mtn", amount);
+            dialUssd(activity, numberUssd);
+        });
+        if (paymentMethod3 != null) paymentMethod3.setOnClickListener(v -> {
+            AnalyticsUtils.logPaymentMethodSelected(activity, "airtel", amount);
+            dialUssd(activity, airtelUssd);
+        });
     }
 
     private static void dialUssd(Fragment fragment, String ussd) {

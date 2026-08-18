@@ -25,6 +25,7 @@ import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.data.local.preferences.AppPreferences;
 import com.drivingschoolrwandaapp.data.local.preferences.TokenManager;
 import com.drivingschoolrwandaapp.database.entities.User;
+import com.drivingschoolrwandaapp.utils.AnalyticsUtils;
 import com.drivingschoolrwandaapp.utils.LanguageUtils;
 import com.drivingschoolrwandaapp.utils.RoleUtils;
 import com.drivingschoolrwandaapp.viewmodel.UserViewModel;
@@ -105,6 +106,7 @@ public class ProfileFragment extends Fragment {
         super.onResume();
         // Refresh session expiry display when user returns to this tab
         updateSessionInfo();
+        AnalyticsUtils.logScreenView(getContext(), "profile");
     }
 
     private void setupMenu() {

@@ -17,6 +17,7 @@ import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.database.entities.User;
 import com.drivingschoolrwandaapp.models.request.IremboLicenseRequest;
 import com.drivingschoolrwandaapp.repository.Resource;
+import com.drivingschoolrwandaapp.utils.AnalyticsUtils;
 import com.drivingschoolrwandaapp.utils.PhoneUtils;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -180,6 +181,7 @@ public class LicenseRequestActivity extends BaseIremboFormActivity {
                 category, licenseType, appType, name, phone, nationalId, address
         );
 
+        AnalyticsUtils.logIremboRequestSubmitted(this, "driving_license");
         iremboViewModel.submitLicenseRequest(request);
     }
 

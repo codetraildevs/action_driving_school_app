@@ -7,6 +7,7 @@ hilt-work = "1.4.0"
 firebase-bom = "34.17.0"
 firebase-crashlytics = "3.0.7"
 firebase-gms = "4.5.0"
+play-integrity = "1.6.0"
 
 # ─── AndroidX Core ───
 appcompat = "1.7.1"
@@ -143,8 +144,12 @@ uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", versi
 
 # ── Firebase ──
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
+firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
+
+# ── Play (AdMob-prep: Integrity API) ──
+play-integrity = { group = "com.google.android.play", name = "integrity", version.ref = "play-integrity" }
 
 # ── Phone Number Handling ──
 libphonenumber = { group = "com.googlecode.libphonenumber", name = "libphonenumber", version.ref = "libphonenumber" }
