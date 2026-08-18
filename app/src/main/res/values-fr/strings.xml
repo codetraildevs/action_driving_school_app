@@ -224,13 +224,13 @@
     <string name="payment_instructions_text">
         Les tests de cette application sont les mêmes que ceux de l\'examen provisoire.
         Pour débloquer tous les tests, payez via MOMO PAY, Mobile Money ou Tigo Cash
-        (847318, 0782877442, 0722877442).
+        (644209, 0785460748, 0726656615).
         Compte au nom de Alexis :
     </string>
 
-    <string name="payment_instructions_pay1">1. Tapez *182*8*1*847318#</string>
-    <string name="payment_instructions_pay2">2. Envoyez l\'argent au 0782877442</string>
-    <string name="payment_instructions_pay3">3. Envoyez l\'argent au 0722877442</string>
+    <string name="payment_instructions_pay1">1. Tapez *182*8*1*644209#</string>
+    <string name="payment_instructions_pay2">2. Envoyez l\'argent au 0785460748</string>
+    <string name="payment_instructions_pay3">3. Envoyez l\'argent au 0726656615</string>
 
     <string name="ihavepaid">Commencer les examens</string>
     <string name="irembo_service_subtitle">Faites votre demande en ligne</string>
@@ -274,7 +274,7 @@ Quand tu arrives à la dernière question, tu appuies sur « Terminer l’examen
     <string name="instructions_3_conten_1">Lors de l\'examen provisoire, les questions seront identiques à celles de l\'application. Sélectionnez les réponses et cliquez sur \"Suivant\" jusqu\'à la fin.</string>
 
     <string name="instructions4">4. PAIEMENT POUR DÉBLOQUER LES TESTS</string>
-    <string name="instructions4_content_1">1. Le premier test est gratuit. Les 20 autres coûtent 5000 RWF à envoyer au 0782877442 ou via MoMo Pay: 847318 au nom de Alexis.</string>
+    <string name="instructions4_content_1">1. Le premier test est gratuit. Les 20 autres coûtent 5000 RWF à envoyer au 0785460748 ou via MoMo Pay: 644209 au nom de Alexis.</string>
     <string name="instructions4_content_2">2. Une fois le paiement effectué, attendez 5 minutes et retournez dans les tests : les cadenas deviendront verts (ouverts).</string>
 
     <string name="instructions_4_content_3">3. Vous pouvez payer par test :

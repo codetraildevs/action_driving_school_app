@@ -284,7 +284,7 @@ class PaymentUtilsTest {
     fun `onRequestPermissionsResult with granted result dials the pending ussd`() {
         stubPermission(PackageManager.PERMISSION_GRANTED)
         stubDialFramework()
-        setUssdToCall("*182*1*1*0782877442*500#")
+        setUssdToCall("*182*1*1*0785460748*500#")
 
         PaymentUtils.onRequestPermissionsResult(
             fragment,
@@ -320,7 +320,7 @@ class PaymentUtilsTest {
     fun `onRequestPermissionsResult activity overload dials when granted`() {
         stubPermission(PackageManager.PERMISSION_GRANTED)
         stubDialFramework()
-        setUssdToCall("*182*8*1*847318*500#")
+        setUssdToCall("*182*8*1*644209*500#")
 
         PaymentUtils.onRequestPermissionsResult(
             activity,

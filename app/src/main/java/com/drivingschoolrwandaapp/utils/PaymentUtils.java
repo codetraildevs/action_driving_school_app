@@ -54,9 +54,9 @@ public class PaymentUtils {
         MaterialCardView paymentMethod2 = rootView.findViewById(R.id.payment_method_2);
         MaterialCardView paymentMethod3 = rootView.findViewById(R.id.payment_method_3);
 
-        String momoPayUssd = "*182*8*1*847318*" + amount + "#";
-        String numberUssd = "*182*1*1*0782877442*" + amount + "#";
-        String airtelUssd = "*182*1*1*0722877442*" + amount + "#";
+        String momoPayUssd = "*182*8*1*644209*" + amount + "#";
+        String numberUssd = "*182*1*1*0785460748*" + amount + "#";
+        String airtelUssd = "*182*1*1*0726656615*" + amount + "#";
 
         if(paymentMethod1 != null) paymentMethod1.setOnClickListener(v -> dialUssd(fragment, momoPayUssd));
         if(paymentMethod2 != null) paymentMethod2.setOnClickListener(v -> dialUssd(fragment, numberUssd));
@@ -68,9 +68,9 @@ public class PaymentUtils {
         MaterialCardView paymentMethod2 = rootView.findViewById(R.id.payment_method_2);
         MaterialCardView paymentMethod3 = rootView.findViewById(R.id.payment_method_3);
 
-        String momoPayUssd = "*182*8*1*847318*" + amount + "#";
-        String numberUssd = "*182*1*1*0782877442*" + amount + "#";
-        String airtelUssd = "*182*1*1*0722877442*" + amount + "#";
+        String momoPayUssd = "*182*8*1*644209*" + amount + "#";
+        String numberUssd = "*182*1*1*0785460748*" + amount + "#";
+        String airtelUssd = "*182*1*1*0726656615*" + amount + "#";
 
         if(paymentMethod1 != null) paymentMethod1.setOnClickListener(v -> dialUssd(activity, momoPayUssd));
         if(paymentMethod2 != null) paymentMethod2.setOnClickListener(v -> dialUssd(activity, numberUssd));
