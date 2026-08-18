@@ -4,6 +4,17 @@
         <!-- Customize your light theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
 
+        <!--
+            Explicitly opt into the non-deprecated display-cutout mode.
+            LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES (the implicit default for
+            edge-to-edge apps) is deprecated in Android 15; LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+            is its replacement and matches what edge-to-edge enforcement already applies
+            on API 35+. Declaring it here keeps the app's intent explicit and avoids
+            relying on the deprecated default. (Ignored below API 28, where cutouts
+            are not supported.)
+        -->
+        <item name="android:windowLayoutInDisplayCutoutMode">always</item>
+
         <!-- Apply Poppins Font Globally -->
         <item name="android:fontFamily">@font/montserrat</item>
         <item name="fontFamily">@font/montserrat</item>
