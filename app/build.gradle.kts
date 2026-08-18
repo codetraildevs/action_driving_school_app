@@ -103,6 +103,16 @@ android {
         viewBinding = true
         buildConfig = true
     }
+    packaging {
+        jniLibs {
+            // libdatastore_shared_counter.so is a stripped DataStore helper that
+            // Firebase pulls in transitively. The app has no first-party native
+            // code and never uses DataStore multi-process mode, so this .so is
+            // dead weight that triggers the Play Console "native code without
+            // debug symbols" warning. Excluding it removes the warning entirely.
+            excludes += "**/libdatastore_shared_counter.so"
+        }
+    }
     sourceSets {
         getByName("main") {
             java {
