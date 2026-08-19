@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.hilt.work.HiltWorkerFactory;
 import androidx.work.Configuration;
 
+import com.drivingschoolrwandaapp.utils.AdManager;
 import com.drivingschoolrwandaapp.utils.LanguageUtils;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
@@ -28,6 +29,9 @@ public class MainApplication extends Application implements Configuration.Provid
         // Initialize Firebase Crashlytics (fatal crashes are captured automatically)
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true);
         Log.d("MainApplication", "Firebase Crashlytics initialized");
+
+        // Initialize AdMob SDK
+        AdManager.initialize(this);
     }
 
     @NonNull

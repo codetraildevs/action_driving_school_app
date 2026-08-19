@@ -8,6 +8,7 @@ firebase-bom = "34.17.0"
 firebase-crashlytics = "3.0.7"
 firebase-gms = "4.5.0"
 play-integrity = "1.6.0"
+play-services-ads = "24.0.0"
 
 # ─── AndroidX Core ───
 appcompat = "1.7.1"
@@ -150,6 +151,9 @@ firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging
 
 # ── Play (AdMob-prep: Integrity API) ──
 play-integrity = { group = "com.google.android.play", name = "integrity", version.ref = "play-integrity" }
+
+# ── AdMob ──
+play-services-ads = { group = "com.google.android.gms", name = "play-services-ads", version.ref = "play-services-ads" }
 
 # ── Phone Number Handling ──
 libphonenumber = { group = "com.googlecode.libphonenumber", name = "libphonenumber", version.ref = "libphonenumber" }

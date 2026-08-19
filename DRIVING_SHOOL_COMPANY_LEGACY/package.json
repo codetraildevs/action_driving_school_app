@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev ",
     "prebuild": "node prebuild.js",
-    "build": "next build --experimental-build-mode compile",
+    "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
     "export": "next export"

@@ -241,6 +241,11 @@
     <string name="payment_method_airtel">Airtel Money</string>
     <string name="payment_dialog_subtitle">Choose one of the methods below, then tap "Start tests" once the payment is done.</string>
     <string name="subscription_choose_plan">Choose the option that suits you</string>
+    <string name="dsrw_ad_btn">Watch Ad for Free Access</string>
+    <string name="dsrw_ad_subtitle">Watch a short video to get temporary access to exams</string>
+    <string name="dsrw_ad_reward_title">Thank You!</string>
+    <string name="dsrw_ad_reward_msg">You earned temporary exam access. Good luck!</string>
+    <string name="dsrw_ad_error">Ad failed to load. Please try again.</string>
     <string name="dafault_name">John Doe</string>
     <string name="default_email">johndoe@example.com</string>
     <string name="subscrition_status">Subscription Status: </string>

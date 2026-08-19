@@ -240,6 +240,11 @@
     <string name="payment_method_airtel">Airtel Money</string>
     <string name="payment_dialog_subtitle">Choisissez l\'une des méthodes ci-dessous, puis appuyez sur \"Commencer les examens\" une fois le paiement effectué.</string>
     <string name="subscription_choose_plan">Choisissez l\'option qui vous convient</string>
+    <string name="dsrw_ad_btn">Regarder une pub pour un accès gratuit</string>
+    <string name="dsrw_ad_subtitle">Regardez une courte vidéo pour un accès temporaire aux examens</string>
+    <string name="dsrw_ad_reward_title">Merci !</string>
+    <string name="dsrw_ad_reward_msg">Vous avez gagné un accès temporaire aux examens. Bonne chance !</string>
+    <string name="dsrw_ad_error">La pub a échoué. Veuillez réessayer.</string>
 
     <string name="request_access_confirm">Demander</string>
 

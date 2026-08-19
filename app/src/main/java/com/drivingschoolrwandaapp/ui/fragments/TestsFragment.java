@@ -46,6 +46,7 @@ import com.drivingschoolrwandaapp.database.entities.TestEntity;
 import com.drivingschoolrwandaapp.database.entities.TestWithQuestions;
 import com.drivingschoolrwandaapp.database.entities.User;
 import com.drivingschoolrwandaapp.ui.adapters.TestAdapter;
+import com.drivingschoolrwandaapp.utils.AdManager;
 import com.drivingschoolrwandaapp.utils.AnalyticsUtils;
 import com.drivingschoolrwandaapp.utils.GridSpacingItemDecoration;
 import com.drivingschoolrwandaapp.utils.PaymentUtils;
@@ -145,6 +146,14 @@ public class TestsFragment extends Fragment {
 
         testViewModel.refreshTests();
         userViewModel.loadProfile();
+
+        // Load AdMob banner
+        FrameLayout adContainer = view.findViewById(R.id.ad_container);
+        if (adContainer != null && getActivity() != null) {
+            AdManager.showBanner(getActivity(), adContainer, null);
+            // Pre-load rewarded ad for free exam access
+            AdManager.loadRewardedAd(getActivity());
+        }
     }
 
     @Override
@@ -482,6 +491,37 @@ public class TestsFragment extends Fragment {
                 showPaymentInstructionsDialog(selectedPlan);
             }
         });
+
+        // Watch Ad button — grant free temporary access if the ad plays to completion
+        com.google.android.material.button.MaterialButton btnWatchAd = requestAccessDialog.findViewById(R.id.btn_watch_ad);
+        if (btnWatchAd != null) {
+            // Disable button if no ad is loaded yet
+            btnWatchAd.setEnabled(AdManager.isRewardedAdReady());
+            btnWatchAd.setOnClickListener(w -> {
+                if (getActivity() == null) return;
+                AdManager.showRewardedAdIfReady(getActivity(), new AdManager.RewardedAdCallback() {
+                    @Override
+                    public void onRewardEarned(@NonNull com.google.android.gms.ads.rewarded.RewardItem reward) {
+                        // User watched the full ad — grant 1-day temporary access
+                        if (!isAdded()) return;
+                        subscriptionViewModel.requestTestAccess(test.getTestNumber(), 1, testAdapter.currentLanguageId);
+                        Toast.makeText(requireContext(), getString(R.string.dsrw_ad_reward_msg), Toast.LENGTH_LONG).show();
+                        if (requestAccessDialog != null && requestAccessDialog.isShowing()) {
+                            requestAccessDialog.dismiss();
+                        }
+                        // Refresh profile to pick up the new access
+                        userViewModel.loadProfile();
+                    }
+
+                    @Override
+                    public void onAdFailedToShow() {
+                        if (isAdded()) {
+                            Toast.makeText(requireContext(), getString(R.string.dsrw_ad_error), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            });
+        }
 
         requestAccessDialog.show();
 

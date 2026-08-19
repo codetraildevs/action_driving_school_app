@@ -28,8 +28,11 @@ import com.drivingschoolrwandaapp.repository.Resource;
 import com.drivingschoolrwandaapp.ui.activities.ApplicationDetailsActivity;
 import com.drivingschoolrwandaapp.ui.activities.IremboActivity;
 import com.drivingschoolrwandaapp.ui.activities.WhatsAppGroupsActivity;
+import com.drivingschoolrwandaapp.utils.AdManager;
 import com.drivingschoolrwandaapp.utils.AnalyticsUtils;
 import com.drivingschoolrwandaapp.utils.LanguageUtils;
+
+import android.widget.FrameLayout;
 import com.drivingschoolrwandaapp.viewmodel.IremboViewModel;
 import com.drivingschoolrwandaapp.viewmodel.UserViewModel;
 import com.google.android.material.button.MaterialButton;
@@ -127,6 +130,16 @@ public class DashboardFragment extends Fragment {
         setupMenu();
         observeViewModels();
         userViewModel.loadProfile();
+
+        // Load AdMob banner
+        FrameLayout adContainer = view.findViewById(R.id.ad_container);
+        if (adContainer != null && getActivity() != null) {
+            AdManager.showBanner(getActivity(), adContainer, null);
+            // Pre-load interstitial for exam submission
+            AdManager.loadInterstitial(getActivity());
+            // Pre-load rewarded ad for free exam access
+            AdManager.loadRewardedAd(getActivity());
+        }
     }
 
     private void observeViewModels() {

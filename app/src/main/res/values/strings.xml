@@ -179,6 +179,11 @@
     <string name="payment_method_airtel">Airtel Money</string>
     <string name="payment_dialog_subtitle">Hitamo uburyo bumwe muri ubu bukurikira, hanyuma ukande ahanditse \"Tangira ibizamini\" umaze kwishyura.</string>
     <string name="subscription_choose_plan">Hitamo uburyo bukunze</string>
+    <string name="dsrw_ad_btn">Reba Ad kubwira ubuntu</string>
+    <string name="dsrw_ad_subtitle">Reba video igufite kugira ngo uhabwe urwego rwo kwinjira mu bikoresho byibizamini</string>
+    <string name="dsrw_ad_reward_title">Urakoze!</string>
+    <string name="dsrw_ad_reward_msg">Wabonye urwego rwo kwinjira mu bikoresho byibizamini. Egera!</string>
+    <string name="dsrw_ad_error">Kubonesha ad byanze. Ongera ugerageze.</string>
     <string name="dafault_name">John Doe</string>
     <string name="default_email">johndoe@example.com</string>
     <string name="subscrition_status">Uko Ifabuguzi Ryawe Rihagaze: </string>

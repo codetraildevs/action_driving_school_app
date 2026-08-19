@@ -206,6 +206,9 @@ dependencies {
     // ── Play Integrity (anti-fraud; AdMob policy requirement) ──
     implementation(libs.play.integrity)
 
+    // ── AdMob ──
+    implementation(libs.play.services.ads)
+
     // ── Testing ──
     testImplementation(libs.junit)
     testImplementation(libs.mockito.core)

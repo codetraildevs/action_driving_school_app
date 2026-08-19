@@ -40,8 +40,11 @@ import com.drivingschoolrwandaapp.database.AppDatabase;
 import com.drivingschoolrwandaapp.database.dao.UserDao;
 import com.drivingschoolrwandaapp.ui.activities.PdfViewerActivity;
 import com.drivingschoolrwandaapp.ui.adapters.LearningMaterialAdapter;
+import com.drivingschoolrwandaapp.utils.AdManager;
 import com.drivingschoolrwandaapp.utils.AnalyticsUtils;
 import com.drivingschoolrwandaapp.utils.FileUtils;
+
+import android.widget.FrameLayout;
 import com.drivingschoolrwandaapp.utils.NotificationHelper;
 import com.drivingschoolrwandaapp.viewmodel.LearningMaterialViewModel;
 import com.drivingschoolrwandaapp.viewmodel.DownloadState;
@@ -120,6 +123,12 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
         swipeRefreshLayout.setOnRefreshListener(() -> viewModel.fetchLearningMaterials(1, 10));
 
         viewModel.fetchLearningMaterials(1, 10);
+
+        // Load AdMob banner
+        FrameLayout adContainer = view.findViewById(R.id.ad_container);
+        if (adContainer != null && getActivity() != null) {
+            AdManager.showBanner(getActivity(), adContainer, null);
+        }
     }
 
     private void setupRecyclerView() {

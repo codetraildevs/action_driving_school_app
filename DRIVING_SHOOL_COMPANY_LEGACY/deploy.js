@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+// @ts-nocheck
 /**
  * One-click deploy for cPanel hosts WITHOUT shell/terminal access.
  *
@@ -25,6 +25,22 @@ const fs = require('fs');
 // Always operate from this script's folder (= the application root).
 process.chdir(__dirname);
 
+// --- Self-logging: tee ALL output to deploy.log so cron captures it -------
+const LOG = path.join(__dirname, 'deploy.log');
+const logStream = fs.createWriteStream(LOG, { flags: 'a' });
+function ts() { return new Date().toISOString(); }
+function log(msg) { const line = '[' + ts() + '] ' + msg; console.log(line); logStream.write(line + '\n'); }
+function logErr(msg) { const line = '[' + ts() + '] ' + msg; console.error(line); logStream.write(line + '\n'); }
+log('--- deploy.js started (PID ' + process.pid + ') ---');
+
+// Flush the log on any exit so cron captures everything
+function flushAndExit(code) { logStream.end(() => process.exit(code)); }
+process.on('exit', (c) => { try { logStream.end(); } catch (_) {} });
+process.on('uncaughtException', (err) => {
+  logErr('UNCAUGHT: ' + (err && err.stack ? err.stack : err));
+  flushAndExit(1);
+});
+
 // --- Overlap lock: skip if a previous deploy is still running --------------
 const LOCK = path.join(__dirname, '.deploy.lock');
 function lockIsStale() {
@@ -38,7 +54,8 @@ function lockIsStale() {
   }
 }
 if (fs.existsSync(LOCK) && !lockIsStale()) {
-  console.log('Another deploy is still running — skipping this run.');
+  log('Another deploy is still running — skipping this run.');
+  logStream.end();
   process.exit(0);
 }
 fs.writeFileSync(LOCK, String(process.pid));
@@ -60,15 +77,17 @@ function run(cmd, label) {
   execSync(cmd, { stdio: 'inherit', shell: true });
 }
 
-// --- Kill stray Node daemons -----------------------------------------------
-// A `next dev` / `next start` started from the panel's script dropdown keeps
-// running (the UI warns it cannot be stopped) and eats the account's
-// process/thread quota — the cause of spawn EAGAIN and Prisma "timer has gone
-// away" panics on this host. Kill every node/npm process except this script
-// and the Passenger-served app (cmdline contains server.js).
+// --- Kill ALL Node processes to free nproc slots ---------------------------
+// Shared cPanel hosts enforce a very low RLIMIT_NPROC (process count limit).
+// During the build we need 3-4 node processes (deploy.js + npm + next build +
+// static-generation worker). Passenger workers, stale `next dev`, and leftover
+// npm/npx processes all consume nproc slots — if the limit is hit, `next build`
+// crashes with "spawn ... EAGAIN".  Killing everything here is safe because:
+//   1. The build itself runs AFTER this function returns.
+//   2. `tmp/restart.txt` at the end tells Passenger to respawn its workers.
 function killStrayNodeProcesses() {
   try {
-    const out = execSync("ps -eo pid,cmd | grep -iE 'node|npm' | grep -v grep", { encoding: 'utf8', shell: true });
+    const out = execSync("ps -eo pid,cmd | grep -iE 'node|npm|npx' | grep -v grep", { encoding: 'utf8', shell: true });
     const me = process.pid;
     const killed = [];
     for (const line of out.trim().split('\n')) {
@@ -76,10 +95,9 @@ function killStrayNodeProcesses() {
       if (!m) continue;
       const pid = parseInt(m[1], 10);
       if (pid === me) continue;
-      if (m[2].includes('server.js')) continue; // keep Passenger's app
       try { process.kill(pid, 'SIGKILL'); killed.push(pid); } catch (_) { /* already gone */ }
     }
-    if (killed.length) console.log('Killed stray node processes: ' + killed.join(', '));
+    if (killed.length) console.log('Freed nproc slots — killed ' + killed.length + ' processes: ' + killed.join(', '));
     else console.log('No stray node processes found.');
   } catch (e) {
     console.log('Stray-process check skipped: ' + e.message);
@@ -243,33 +261,39 @@ try {
   // build (a killed process prints NOTHING to the log — exactly what happened
   // when the build died right after "Creating an optimized production build").
   const buildEnv = Object.assign({}, process.env, {
-    NODE_OPTIONS: '--max-old-space-size=1024',
+    NODE_OPTIONS: '--max-old-space-size=768',
+    SWC_THREAD_COUNT: '1',
+    RAYON_NUM_THREADS: '1',
+    UV_THREADPOOL_SIZE: '1',
+    NEXT_TELEMETRY_DISABLED: '1',
   });
-  console.log('\nBuild memory cap: NODE_OPTIONS=--max-old-space-size=1024');
+  log('\nBuild memory cap: NODE_OPTIONS=--max-old-space-size=768');
   execSync(`"${npm}" run build`, { stdio: 'inherit', shell: true, env: buildEnv });
 
   // Restart the app so Passenger serves the new build (cPanel restart.txt mechanism).
   fs.mkdirSync(path.join(__dirname, 'tmp'), { recursive: true });
   fs.closeSync(fs.openSync(path.join(__dirname, 'tmp', 'restart.txt'), 'a')); // touch
-  console.log('App restart triggered (tmp/restart.txt touched).');
+  log('App restart triggered (tmp/restart.txt touched).');
 
   dbCheck()
     .then(() => checkMissingUploads())
     .finally(() => {
-    console.log('\n========================================');
-    console.log('  ✅ DEPLOY COMPLETE');
-    console.log('========================================');
-    console.log('Next: open https://console.amategekoyumuhanda.rw');
+    log('\n========================================');
+    log('  ✅ DEPLOY COMPLETE');
+    log('========================================');
+    log('Next: open https://console.amategekoyumuhanda.rw');
+    logStream.end();
   });
 } catch (err) {
-  console.error('\n❌ DEPLOY FAILED at the step above.');
+  logErr('\n❌ DEPLOY FAILED at the step above.');
   // Real diagnostics so we never have to guess again:
-  if (err && err.message) console.error('Error:', err.message);
+  if (err && err.message) logErr('Error: ' + err.message);
   if (err && err.signal) {
-    console.error('Process was killed by signal: ' + err.signal);
-    console.error('(SIGKILL usually means the host (cPanel/LVE) killed it — typically out of memory or process limit)');
+    logErr('Process was killed by signal: ' + err.signal);
+    logErr('(SIGKILL usually means the host (cPanel/LVE) killed it — typically out of memory or process limit)');
   }
-  if (err && err.status) console.error('Exit code:', err.status);
-  console.error('Scroll up for the full build output above this line.');
+  if (err && err.status) logErr('Exit code: ' + err.status);
+  logErr('Scroll up for the full build output above this line.');
+  logStream.end();
   process.exit(1);
 }

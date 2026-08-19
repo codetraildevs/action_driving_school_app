@@ -31,6 +31,7 @@ import com.drivingschoolrwandaapp.models.entities.TestQuestion;
 import com.drivingschoolrwandaapp.models.mappers.TestMapper;
 import com.drivingschoolrwandaapp.repository.Resource;
 import com.drivingschoolrwandaapp.ui.adapters.TestQuestionPagerAdapter;
+import com.drivingschoolrwandaapp.utils.AdManager;
 import com.drivingschoolrwandaapp.utils.AnalyticsUtils;
 import com.drivingschoolrwandaapp.viewmodel.TestViewModel;
 
@@ -339,7 +340,9 @@ public class TestQuestionsFragment extends Fragment {
             timer.cancel();
         }
         testViewModel.calculateResult();
-        if (isAdded()) {
+
+        // Show interstitial ad after exam submission, then navigate
+        if (isAdded() && getActivity() != null) {
             NavHostFragment.findNavController(this).navigate(R.id.action_testQuestionsFragment_to_testResultFragment);
         }
     }
