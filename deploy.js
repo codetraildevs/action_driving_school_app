@@ -67,19 +67,28 @@ function run(cmd, label) {
 // and the Passenger-served app (cmdline contains server.js).
 function killStrayNodeProcesses() {
   try {
-    const out = execSync("ps -eo pid,cmd | grep -iE 'node|npm' | grep -v grep", { encoding: 'utf8', shell: true });
+    // Kill ALL node/npm processes except this script and the Passenger app
+    const out = execSync("ps -eo pid,ppid,cmd", { encoding: 'utf8', shell: true });
     const me = process.pid;
+    const ppid = process.ppid;
     const killed = [];
     for (const line of out.trim().split('\n')) {
-      const m = line.trim().match(/^(\d+)\s+(.*)$/);
-      if (!m) continue;
-      const pid = parseInt(m[1], 10);
-      if (pid === me) continue;
-      if (m[2].includes('server.js')) continue; // keep Passenger's app
+      const parts = line.trim().match(/^(\d+)\s+(\d+)\s+(.*)$/);
+      if (!parts) continue;
+      const pid = parseInt(parts[1], 10);
+      const parentPid = parseInt(parts[2], 10);
+      const cmd = parts[3];
+      if (pid === me || parentPid === me) continue; // skip self and children
+      if (cmd.includes('server.js')) continue; // keep Passenger's app
+      if (cmd.includes('deploy.js')) continue; // keep this script
+      if (/grep|ps\s/.test(cmd)) continue; // skip system tools
+      if (/sshd|bash|sh\s/.test(cmd)) continue; // keep shell sessions
       try { process.kill(pid, 'SIGKILL'); killed.push(pid); } catch (_) { /* already gone */ }
     }
-    if (killed.length) console.log('Killed stray node processes: ' + killed.join(', '));
-    else console.log('No stray node processes found.');
+    if (killed.length) console.log('Killed stray processes: ' + killed.join(', '));
+    else console.log('No stray processes found.');
+    // Also try to free memory
+    try { execSync('sync', { shell: true }); } catch (_) {}
   } catch (e) {
     console.log('Stray-process check skipped: ' + e.message);
   }
@@ -286,28 +295,87 @@ try {
   // The cPanel File Manager can leave directories owned by root. This breaks
   // next build (EACCES scandir). Fix the whole project tree at once.
   console.log('\n--- Fixing project-wide file permissions ---');
-  try {
-    execSync(`find "${__dirname}" -type d -not -path "*/node_modules/*" -not -path "*/.next/*" -exec chmod 755 {} +`, { stdio: 'inherit', shell: true });
-    console.log('chmod 755 on all project directories ✓');
-  } catch (e) {
-    console.log('Directory chmod skipped: ' + (e.message || e));
-  }
+  // chmod on files first (files are easier to fix than root-owned dirs)
   try {
     execSync(`find "${__dirname}" -type f -not -path "*/node_modules/*" -not -path "*/.next/*" -exec chmod 644 {} +`, { stdio: 'inherit', shell: true });
     console.log('chmod 644 on all project files ✓');
   } catch (e) {
-    console.log('File chmod skipped: ' + (e.message || e));
+    console.log('File chmod: some files skipped (root-owned)');
+  }
+  // Fix known root-owned directories individually
+  const rootOwnedDirs = [
+    'app/api/admin/analytics/dashboard',
+    'app/api/admin/analytics/reports',
+    'app/users/delete-account',
+    'app/api/admin/analytics',
+    'app/api/admin/privacy-policies',
+    'app/api/admin/ratings',
+    'app/api/admin/requests',
+    'app/api/admin/subscriptions',
+    'app/api/admin/system-settings',
+    'app/api/admin/terms-of-service',
+    'app/api/admin/user-activities',
+    'app/api/admin/user-ratings',
+    'app/api/admin/users',
+    'app/api/admin/whatsapp-groups',
+    'app/api/auth/change-password',
+    'app/api/auth/forgot-password',
+    'app/api/auth/login',
+    'app/api/auth/logout',
+    'app/api/auth/refresh',
+    'app/api/auth/register',
+    'app/api/auth/reset-password',
+    'app/api/auth/verify-otp',
+    'app/api/auth/[...nextauth]',
+    'app/api/integrity/verify',
+    'app/api/irembo/applications',
+    'app/api/irembo/driving',
+    'app/api/irembo/special',
+    'app/api/users/delete',
+    'app/api/users/profile',
+    'app/api/users/[id]',
+    'components/examples/profile-page',
+  ];
+  let fixedDirs = 0;
+  for (const d of rootOwnedDirs) {
+    const fullPath = path.join(__dirname, d);
+    try {
+      fs.chmodSync(fullPath, 0o755);
+      fixedDirs++;
+    } catch (_) {
+      // Try via shell (sometimes works even when Node fs fails)
+      try {
+        execSync(`chmod 755 "${fullPath}"`, { shell: true });
+        fixedDirs++;
+      } catch (_) {}
+    }
+  }
+  // Also try generic find for remaining dirs
+  try {
+    execSync(`find "${__dirname}" -type d -not -path "*/node_modules/*" -not -path "*/.next/*" -exec chmod 755 {} +`, { stdio: 'inherit', shell: true });
+    console.log('chmod 755 on all project directories ✓');
+  } catch (e) {
+    console.log('Directory chmod: some dirs skipped (root-owned). Fixed ' + fixedDirs + ' known dirs manually.');
   }
   console.log('--- End project-wide permission fix ---\n');
 
-  // Cap Node's heap so a shared-host memory limit cannot silently kill the
-  // build (a killed process prints NOTHING to the log — exactly what happened
-  // when the build died right after "Creating an optimized production build").
-  const buildEnv = Object.assign({}, process.env, {
-    NODE_OPTIONS: '--max-old-space-size=1024',
-  });
-  console.log('\nBuild memory cap: NODE_OPTIONS=--max-old-space-size=1024');
-  execSync(`"${npm}" run build`, { stdio: 'inherit', shell: true, env: buildEnv });
+  // --- Build (or use pre-built .next) ---------------------------------------
+  // Shared hosting has too low a thread/process quota for `next build`.
+  // The user builds locally and uploads the .next folder via File Manager.
+  const nextDir = path.join(__dirname, '.next');
+  if (fs.existsSync(nextDir)) {
+    console.log('\n✅ Using pre-built .next folder (build locally, upload via File Manager)');
+    console.log('   Skipping npm run build — the server does not have enough threads.');
+  } else {
+    console.log('\n⚠ .next folder not found. Building on server (may fail on shared hosts)...');
+    const buildEnv = Object.assign({}, process.env, {
+      NODE_OPTIONS: '--max-old-space-size=512',
+      NEXT_TELEMETRY_DISABLED: '1',
+      NEXT_WORKER_COUNT: '1',
+      RAYON_NUM_THREADS: '1',
+    });
+    execSync(`"${npm}" run build`, { stdio: 'inherit', shell: true, env: buildEnv });
+  }
 
   // Restart the app so Passenger serves the new build (cPanel restart.txt mechanism).
   fs.mkdirSync(path.join(__dirname, 'tmp'), { recursive: true });
