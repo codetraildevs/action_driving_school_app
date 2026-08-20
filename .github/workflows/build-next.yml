@@ -2,31 +2,35 @@ name: Build .next for production
 
 on:
   workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build'
+        required: false
+        default: 'master'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: feature/role-based-app
 
       - name: List files
-        run: ls -la
+        run: ls -la && ls -la DRIVING_SHOOL_COMPANY_LEGACY/ 2>&1 || echo "Directory not found"
 
       - uses: actions/setup-node@v4
         with:
           node-version: 22
 
       - name: Install dependencies
-        working-directory: DRIVING_SHOOL_COMPANY_LEGACY
-        run: npm install --legacy-peer-deps
+        run: cd DRIVING_SHOOL_COMPANY_LEGACY && npm install --legacy-peer-deps
 
       - name: Generate Prisma
-        working-directory: DRIVING_SHOOL_COMPANY_LEGACY
-        run: npx prisma generate
+        run: cd DRIVING_SHOOL_COMPANY_LEGACY && npx prisma generate
 
       - name: Build Next.js
-        working-directory: DRIVING_SHOOL_COMPANY_LEGACY
-        run: npm run build
+        run: cd DRIVING_SHOOL_COMPANY_LEGACY && npm run build
         env:
           NODE_OPTIONS: '--max-old-space-size=4096'
 
