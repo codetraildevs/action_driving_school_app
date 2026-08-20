@@ -1,0 +1,35 @@
+name: Build .next for production
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        working-directory: DRIVING_SHOOL_COMPANY_LEGACY
+        run: npm install --legacy-peer-deps
+
+      - name: Generate Prisma
+        working-directory: DRIVING_SHOOL_COMPANY_LEGACY
+        run: npx prisma generate
+
+      - name: Build Next.js
+        working-directory: DRIVING_SHOOL_COMPANY_LEGACY
+        run: npm run build
+        env:
+          NODE_OPTIONS: '--max-old-space-size=4096'
+
+      - name: Upload .next artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: next-build
+          path: DRIVING_SHOOL_COMPANY_LEGACY/.next
+          retention-days: 3
