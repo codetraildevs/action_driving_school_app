@@ -34,9 +34,15 @@ jobs:
         env:
           NODE_OPTIONS: '--max-old-space-size=4096'
 
+      - name: Verify .next exists
+        run: ls -la DRIVING_SHOOL_COMPANY_LEGACY/.next/ | head -5
+
+      - name: Zip .next
+        run: cd DRIVING_SHOOL_COMPANY_LEGACY && tar czf /tmp/next-build.tar.gz --exclude='.next/cache' .next
+
       - name: Upload .next artifact
         uses: actions/upload-artifact@v4
         with:
           name: next-build
-          path: DRIVING_SHOOL_COMPANY_LEGACY/.next
+          path: /tmp/next-build.tar.gz
           retention-days: 3
