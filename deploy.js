@@ -359,23 +359,23 @@ try {
   }
   console.log('--- End project-wide permission fix ---\n');
 
-  // --- Build (or use pre-built .next) ---------------------------------------
-  // Shared hosting has too low a thread/process quota for `next build`.
-  // The user builds locally and uploads the .next folder via File Manager.
+  // --- Build on server ---------------------------------------------------
+  // Delete stale .next from previous builds (may contain Windows binaries).
   const nextDir = path.join(__dirname, '.next');
   if (fs.existsSync(nextDir)) {
-    console.log('\n✅ Using pre-built .next folder (build locally, upload via File Manager)');
-    console.log('   Skipping npm run build — the server does not have enough threads.');
-  } else {
-    console.log('\n⚠ .next folder not found. Building on server (may fail on shared hosts)...');
-    const buildEnv = Object.assign({}, process.env, {
-      NODE_OPTIONS: '--max-old-space-size=512',
-      NEXT_TELEMETRY_DISABLED: '1',
-      NEXT_WORKER_COUNT: '1',
-      RAYON_NUM_THREADS: '1',
-    });
-    execSync(`"${npm}" run build`, { stdio: 'inherit', shell: true, env: buildEnv });
+    console.log('\nRemoving previous .next build...');
+    rmrf(nextDir);
+    console.log('Deleted .next ✓');
   }
+  console.log('\nBuilding on server...');
+  const buildEnv = Object.assign({}, process.env, {
+    NODE_OPTIONS: '--max-old-space-size=1024',
+    NEXT_TELEMETRY_DISABLED: '1',
+    NEXT_WORKER_COUNT: '1',
+    RAYON_NUM_THREADS: '1',
+  });
+  console.log('Build caps: NODE_OPTIONS=--max-old-space-size=1024, RAYON_NUM_THREADS=1');
+  execSync(`"${npm}" run build`, { stdio: 'inherit', shell: true, env: buildEnv });
 
   // Restart the app so Passenger serves the new build (cPanel restart.txt mechanism).
   fs.mkdirSync(path.join(__dirname, 'tmp'), { recursive: true });

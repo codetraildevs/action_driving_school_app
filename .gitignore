@@ -71,8 +71,6 @@ local-db/
 # Deployment archives
 *.tar.gz
 
-# Legacy Next.js web app — contains .env secrets & build output; never tracked
-DRIVING_SHOOL_COMPANY_LEGACY/
 
 # Production database dumps (may contain real user data)
 docs/*.sql
