@@ -1,0 +1,7 @@
+# App-Ads.txt — IAB Tech Lab spec
+# https://iabtechlab.com/app-ads-txt/
+#
+# This file declares authorized sellers for this app's ad inventory.
+# See: https://support.google.com/admob/answer/10188444
+
+google.com, pub-2864387622629553, DIRECT, f08c47fec0942fa0
