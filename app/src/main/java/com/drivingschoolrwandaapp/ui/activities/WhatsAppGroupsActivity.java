@@ -26,6 +26,7 @@ import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.models.entities.WhatsAppGroup;
 import com.drivingschoolrwandaapp.repository.Resource;
 import com.drivingschoolrwandaapp.ui.adapters.WhatsAppGroupAdapter;
+import com.drivingschoolrwandaapp.utils.AdManager;
 import com.drivingschoolrwandaapp.viewmodel.WhatsAppViewModel;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
@@ -58,7 +59,13 @@ public class WhatsAppGroupsActivity extends AppCompatActivity implements WhatsAp
         initViews();
         setupRecyclerView();
         setupViewModel();
-        
+
+        // Load AdMob banner
+        android.widget.FrameLayout adContainer = findViewById(R.id.ad_container);
+        if (adContainer != null) {
+            AdManager.showBanner(this, adContainer, null);
+        }
+
         fetchGroups();
     }
 

@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.models.IremboApplication;
 import com.drivingschoolrwandaapp.repository.Resource;
+import com.drivingschoolrwandaapp.utils.AdManager;
 import com.drivingschoolrwandaapp.viewmodel.IremboViewModel;
 import com.google.android.material.appbar.MaterialToolbar;
 
@@ -51,6 +52,12 @@ public class ApplicationDetailsActivity extends AppCompatActivity {
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+
+        // Load AdMob banner
+        android.widget.FrameLayout adContainer = findViewById(R.id.ad_container);
+        if (adContainer != null) {
+            AdManager.showBanner(this, adContainer, null);
+        }
 
         iremboViewModel = new ViewModelProvider(this).get(IremboViewModel.class);
         setupObservers();

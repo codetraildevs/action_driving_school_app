@@ -25,6 +25,7 @@ import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.data.local.preferences.AppPreferences;
 import com.drivingschoolrwandaapp.data.local.preferences.TokenManager;
 import com.drivingschoolrwandaapp.database.entities.User;
+import com.drivingschoolrwandaapp.utils.AdManager;
 import com.drivingschoolrwandaapp.utils.AnalyticsUtils;
 import com.drivingschoolrwandaapp.utils.LanguageUtils;
 import com.drivingschoolrwandaapp.utils.RoleUtils;
@@ -90,6 +91,12 @@ public class ProfileFragment extends Fragment {
 
         // Display session expiry info
         updateSessionInfo();
+
+        // Load AdMob banner
+        android.widget.FrameLayout adContainer = view.findViewById(R.id.ad_container);
+        if (adContainer != null && getActivity() != null) {
+            AdManager.showBanner(getActivity(), adContainer, null);
+        }
 
         View changeLanguageButton = view.findViewById(R.id.change_language_button);
         if (changeLanguageButton != null) {

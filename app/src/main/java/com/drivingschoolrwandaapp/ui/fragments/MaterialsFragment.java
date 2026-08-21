@@ -44,6 +44,7 @@ import com.drivingschoolrwandaapp.utils.AdManager;
 import com.drivingschoolrwandaapp.utils.AnalyticsUtils;
 import com.drivingschoolrwandaapp.utils.FileUtils;
 
+import android.widget.Button;
 import android.widget.FrameLayout;
 import com.drivingschoolrwandaapp.utils.NotificationHelper;
 import com.drivingschoolrwandaapp.viewmodel.LearningMaterialViewModel;
@@ -77,6 +78,10 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
     // Cache the user from LiveData observation to avoid synchronous DB reads
     // on the main thread. Populated by observeUser().
     private com.drivingschoolrwandaapp.database.entities.User cachedUser;
+
+    // The material the user tried to access — used by the Watch Ad reward flow.
+    private LearningMaterial pendingMaterial;
+    private String pendingAction;
 
     private List<LearningMaterial> allMaterials = new ArrayList<>();
 
@@ -309,9 +314,7 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
     private boolean canAccessPaidContent(String action) {
         com.drivingschoolrwandaapp.database.entities.User user = cachedUser;
         if (user == null || !"ACTIVE".equalsIgnoreCase(user.getTestAccessStatus())) {
-            if (isAdded() && getContext() != null) {
-                Toast.makeText(getContext(), getString(R.string.need_active_subscription, action), Toast.LENGTH_SHORT).show();
-            }
+            showWatchAdDialog(action);
             return false;
         }
 
@@ -341,19 +344,64 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
         }
 
         if (isExpired) {
-            if (isAdded() && getContext() != null) {
-                Toast.makeText(getContext(), getString(R.string.test_access_expired_msg, action), Toast.LENGTH_SHORT).show();
-            }
+            showWatchAdDialog(action);
             return false;
         }
 
         return true;
     }
 
+    /**
+     * Shows a dialog offering the user to watch a rewarded ad for temporary
+     * access to the material. If the ad plays to completion, the material
+     * is opened directly.
+     */
+    private void showWatchAdDialog(String action) {
+        if (!isAdded() || getActivity() == null || getContext() == null) return;
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle(getString(R.string.need_active_subscription, action));
+        builder.setMessage(getString(R.string.dsrw_ad_subtitle));
+
+        builder.setPositiveButton(getString(R.string.dsrw_ad_btn), (dialog, which) -> {
+            if (getActivity() == null) return;
+            AdManager.loadRewardedAd(requireContext());
+            AdManager.showRewardedAdIfReady(getActivity(), new AdManager.RewardedAdCallback() {
+                @Override
+                public void onRewardEarned(@NonNull com.google.android.gms.ads.rewarded.RewardItem reward) {
+                    if (!isAdded()) return;
+                    Toast.makeText(requireContext(), getString(R.string.watch_ad_material_reward_msg), Toast.LENGTH_LONG).show();
+                    // Grant temporary access and perform the action
+                    if (pendingMaterial != null) {
+                        if ("download".equals(pendingAction)) {
+                            viewModel.downloadLearningMaterial(pendingMaterial);
+                        } else if ("view".equals(pendingAction)) {
+                            openFile(pendingMaterial);
+                        }
+                    }
+                }
+
+                @Override
+                public void onAdFailedToShow() {
+                    if (isAdded()) {
+                        Toast.makeText(requireContext(), getString(R.string.dsrw_ad_error), Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        });
+
+        builder.setNegativeButton(android.R.string.cancel, null);
+        builder.show();
+    }
+
     @Override
     public void onDownloadButtonClick(LearningMaterial material) {
-        if (!material.isPublic() && !canAccessPaidContent("download")) {
-            return;
+        if (!material.isPublic()) {
+            pendingMaterial = material;
+            pendingAction = "download";
+            if (!canAccessPaidContent("download")) {
+                return;
+            }
         }
 
         // Permission is not required for writing to app's internal storage
@@ -362,8 +410,12 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
 
     @Override
     public void onItemClick(LearningMaterial material) {
-        if (!material.isPublic() && !canAccessPaidContent("view")) {
-            return;
+        if (!material.isPublic()) {
+            pendingMaterial = material;
+            pendingAction = "view";
+            if (!canAccessPaidContent("view")) {
+                return;
+            }
         }
 
         if (material.isDownloaded()) {

@@ -54,6 +54,10 @@ public final class AdManager {
     private static InterstitialAd interstitialAd;
     private static RewardedAd rewardedAd;
 
+    // Minimum interval between interstitial shows (AdMob policy: no back-to-back ads)
+    private static long lastInterstitialShowTime = 0;
+    private static final long INTERSTITIAL_COOLDOWN_MS = 60_000; // 60 seconds
+
     private AdManager() { /* static utility */ }
 
     // ────────────────────────────────────────────────────────────────────────────────────
@@ -178,12 +182,19 @@ public final class AdManager {
      * @return {@code true} if the ad was shown, {@code false} otherwise
      */
     public static boolean showInterstitialIfReady(@NonNull Activity activity) {
-        if (interstitialAd != null) {
-            interstitialAd.show(activity);
-            return true;
+        if (interstitialAd == null) {
+            Log.d(TAG, "Interstitial not ready yet");
+            return false;
         }
-        Log.d(TAG, "Interstitial not ready yet");
-        return false;
+        // Enforce cooldown: don't show interstitials back-to-back
+        long now = System.currentTimeMillis();
+        if (now - lastInterstitialShowTime < INTERSTITIAL_COOLDOWN_MS) {
+            Log.d(TAG, "Interstitial cooldown active — skipping");
+            return false;
+        }
+        lastInterstitialShowTime = now;
+        interstitialAd.show(activity);
+        return true;
     }
 
     // ────────────────────────────────────────────────────────────────────────────────────

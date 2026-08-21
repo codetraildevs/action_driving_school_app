@@ -242,15 +242,20 @@ public class TestsFragment extends Fragment {
             if (isLocked) {
                 showRequestAccessDialog(test);
             } else {
-                Bundle args = new Bundle();
-                args.putInt("testId", test.getId());
-                args.putString("title", title);
-                args.putBoolean("isRealTimeFeedback", true);
-                args.putBoolean("isFree", test.isFree());
-                NavHostFragment.findNavController(this)
-                        .navigate(R.id.action_global_testQuestionsFragment, args);
+                navigateToExam(test, title);
             }
         });
+    }
+
+    private void navigateToExam(TestEntity test, String title) {
+        if (!isAdded() || getActivity() == null) return;
+        Bundle args = new Bundle();
+        args.putInt("testId", test.getId());
+        args.putString("title", title);
+        args.putBoolean("isRealTimeFeedback", true);
+        args.putBoolean("isFree", test.isFree());
+        NavHostFragment.findNavController(this)
+                .navigate(R.id.action_global_testQuestionsFragment, args);
     }
 
     private void updateLayoutManager() {

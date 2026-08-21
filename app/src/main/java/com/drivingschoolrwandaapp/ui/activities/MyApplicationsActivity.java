@@ -18,6 +18,7 @@ import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.models.IremboApplication;
 import com.drivingschoolrwandaapp.repository.Resource;
 import com.drivingschoolrwandaapp.ui.adapters.MyApplicationsAdapter;
+import com.drivingschoolrwandaapp.utils.AdManager;
 import com.drivingschoolrwandaapp.viewmodel.IremboViewModel;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.chip.ChipGroup;
@@ -47,6 +48,12 @@ public class MyApplicationsActivity extends AppCompatActivity {
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+
+        // Load AdMob banner
+        android.widget.FrameLayout adContainer = findViewById(R.id.ad_container);
+        if (adContainer != null) {
+            AdManager.showBanner(this, adContainer, null);
+        }
 
         RecyclerView recyclerView = findViewById(R.id.rv_my_applications);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));

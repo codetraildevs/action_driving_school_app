@@ -184,6 +184,8 @@
     <string name="dsrw_ad_reward_title">Urakoze!</string>
     <string name="dsrw_ad_reward_msg">Wabonye urwego rwo kwinjira mu bikoresho byibizamini. Egera!</string>
     <string name="dsrw_ad_error">Kubonesha ad byanze. Ongera ugerageze.</string>
+    <string name="watch_ad_for_material">Reba Ad kubona iki gikoresho</string>
+    <string name="watch_ad_material_reward_msg">Wabonye urwego rwo kubona iki gikoresho!</string>
     <string name="dafault_name">John Doe</string>
     <string name="default_email">johndoe@example.com</string>
     <string name="subscrition_status">Uko Ifabuguzi Ryawe Rihagaze: </string>

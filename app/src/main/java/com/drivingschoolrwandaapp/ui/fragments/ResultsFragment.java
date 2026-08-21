@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.models.entities.TestResult;
+import com.drivingschoolrwandaapp.utils.AdManager;
 import com.drivingschoolrwandaapp.utils.AnalyticsUtils;
 import com.drivingschoolrwandaapp.utils.TimeFormatUtils;
 import com.drivingschoolrwandaapp.viewmodel.TestViewModel;
@@ -100,6 +101,12 @@ public class ResultsFragment extends Fragment {
         emptyState.setVisibility(View.GONE);
         summaryContainer.setVisibility(View.VISIBLE);
         resultsRecyclerView.setVisibility(View.VISIBLE);
+
+        // Load AdMob banner only when there are results (policy: no ads on empty screens)
+        android.widget.FrameLayout adContainer = getView() != null ? getView().findViewById(R.id.ad_container) : null;
+        if (adContainer != null && getActivity() != null) {
+            AdManager.showBanner(getActivity(), adContainer, null);
+        }
         if (historyHeader != null) {
             historyHeader.setVisibility(View.VISIBLE);
         }

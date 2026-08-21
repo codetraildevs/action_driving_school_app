@@ -102,16 +102,33 @@ public class DashboardFragment extends Fragment {
         if (iremboServiceCard != null) {
             iremboServiceCard.setOnClickListener(v -> {
                 if (!isAdded() || getActivity() == null) return;
-                Intent intent = new Intent(getActivity(), IremboActivity.class);
-                startActivity(intent);
+                // Show interstitial before Irembo if ready
+                if (AdManager.showInterstitialIfReady(getActivity())) {
+                    new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                        if (isAdded() && getActivity() != null) {
+                            startActivity(new Intent(getActivity(), IremboActivity.class));
+                        }
+                    }, 500);
+                } else {
+                    startActivity(new Intent(getActivity(), IremboActivity.class));
+                }
             });
         }
 
         MaterialCardView whatsappGroupCard = view.findViewById(R.id.whatsapp_group_card);
         if (whatsappGroupCard != null) {
             whatsappGroupCard.setOnClickListener(v -> {
-                Intent intent = new Intent(requireContext(), WhatsAppGroupsActivity.class);
-                startActivity(intent);
+                if (!isAdded() || getActivity() == null) return;
+                // Show interstitial before WhatsApp groups if ready
+                if (AdManager.showInterstitialIfReady(getActivity())) {
+                    new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                        if (isAdded() && getContext() != null) {
+                            startActivity(new Intent(getContext(), WhatsAppGroupsActivity.class));
+                        }
+                    }, 500);
+                } else {
+                    startActivity(new Intent(requireContext(), WhatsAppGroupsActivity.class));
+                }
             });
         }
 

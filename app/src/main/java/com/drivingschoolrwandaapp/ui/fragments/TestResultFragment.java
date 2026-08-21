@@ -18,6 +18,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.drivingschoolrwandaapp.R;
+import com.drivingschoolrwandaapp.utils.AdManager;
 import com.drivingschoolrwandaapp.utils.AnalyticsUtils;
 import com.drivingschoolrwandaapp.utils.TimeFormatUtils;
 import com.drivingschoolrwandaapp.viewmodel.TestViewModel;
@@ -75,6 +76,12 @@ public class TestResultFragment extends Fragment {
         resultSkippedCount = view.findViewById(R.id.result_skipped_count);
 
         observeViewModel();
+
+        // Load AdMob banner
+        android.widget.FrameLayout adContainer = view.findViewById(R.id.ad_container);
+        if (adContainer != null && getActivity() != null) {
+            AdManager.showBanner(getActivity(), adContainer, null);
+        }
 
         finishButton.setOnClickListener(v -> {
             NavHostFragment.findNavController(this).popBackStack(R.id.testsFragment, false);
