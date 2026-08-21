@@ -208,6 +208,7 @@ dependencies {
 
     // ── AdMob ──
     implementation(libs.play.services.ads)
+    implementation(libs.user.messaging.platform)
 
     // ── Testing ──
     testImplementation(libs.junit)

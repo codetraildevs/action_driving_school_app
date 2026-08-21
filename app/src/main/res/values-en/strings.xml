@@ -248,6 +248,7 @@
     <string name="dsrw_ad_error">Ad failed to load. Please try again.</string>
     <string name="watch_ad_for_material">Watch Ad to access this material</string>
     <string name="watch_ad_material_reward_msg">You earned temporary access to this material!</string>
+    <string name="privacy_options">Privacy Options</string>
     <string name="dafault_name">John Doe</string>
     <string name="default_email">johndoe@example.com</string>
     <string name="subscrition_status">Subscription Status: </string>

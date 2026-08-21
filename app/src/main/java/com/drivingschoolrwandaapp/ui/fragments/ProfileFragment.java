@@ -30,6 +30,7 @@ import com.drivingschoolrwandaapp.utils.AnalyticsUtils;
 import com.drivingschoolrwandaapp.utils.LanguageUtils;
 import com.drivingschoolrwandaapp.utils.RoleUtils;
 import com.drivingschoolrwandaapp.viewmodel.UserViewModel;
+import com.google.android.ump.UserMessagingPlatform;
 import com.google.android.material.imageview.ShapeableImageView;
 
 import java.text.ParseException;
@@ -127,6 +128,17 @@ public class ProfileFragment extends Fragment {
             public boolean onMenuItemSelected(@NonNull MenuItem menuItem) {
                 if (menuItem.getItemId() == R.id.action_logout) {
                     userViewModel.logout();
+                    return true;
+                }
+                if (menuItem.getItemId() == R.id.action_privacy_options) {
+                    if (getActivity() != null) {
+                        UserMessagingPlatform.showPrivacyOptionsForm(getActivity(),
+                                formError -> {
+                                    if (formError != null) {
+                                        Log.w("ProfileFragment", "Privacy options form error: " + formError.getMessage());
+                                    }
+                                });
+                    }
                     return true;
                 }
                 return false;

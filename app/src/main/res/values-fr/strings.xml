@@ -247,6 +247,7 @@
     <string name="dsrw_ad_error">La pub a échoué. Veuillez réessayer.</string>
     <string name="watch_ad_for_material">Regarder une pub pour accéder à ce document</string>
     <string name="watch_ad_material_reward_msg">Vous avez gagné un accès temporaire à ce document !</string>
+    <string name="privacy_options">Options de confidentialité</string>
 
     <string name="request_access_confirm">Demander</string>
 

@@ -41,6 +41,7 @@ import com.drivingschoolrwandaapp.database.entities.User;
 import com.drivingschoolrwandaapp.ui.activities.WhatsAppGroupsActivity;
 import com.drivingschoolrwandaapp.utils.AboutUtils;
 import com.drivingschoolrwandaapp.utils.AnalyticsUtils;
+import com.drivingschoolrwandaapp.utils.ConsentHelper;
 import com.drivingschoolrwandaapp.viewmodel.UserViewModel;
 
 import com.google.android.gms.tasks.Task;
@@ -91,6 +92,15 @@ public class App extends AppCompatActivity {
         EdgeToEdge.enable(this);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
         setContentView(R.layout.activity_app);
+
+        // Request GDPR/UMP consent before showing any ads
+        ConsentHelper.requestConsent(this, canShowAds -> {
+            if (canShowAds) {
+                Log.d("App", "Consent obtained — ads enabled");
+            } else {
+                Log.d("App", "Consent denied or pending — ads disabled");
+            }
+        });
 
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
 

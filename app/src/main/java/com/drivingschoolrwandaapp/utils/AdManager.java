@@ -89,6 +89,11 @@ public final class AdManager {
     public static void showBanner(@NonNull Activity activity,
                                   @NonNull FrameLayout container,
                                   @Nullable String adUnitId) {
+        // Don't show ads until consent is obtained (GDPR compliance)
+        if (!ConsentHelper.canShowAds()) {
+            Log.d(TAG, "Banner skipped — consent not yet obtained");
+            return;
+        }
         AdView adView = new AdView(activity);
         adView.setAdUnitId(adUnitId != null ? adUnitId : BANNER_AD_UNIT_ID);
         adView.setAdSize(AdSize.BANNER);
@@ -182,6 +187,11 @@ public final class AdManager {
      * @return {@code true} if the ad was shown, {@code false} otherwise
      */
     public static boolean showInterstitialIfReady(@NonNull Activity activity) {
+        // Don't show ads until consent is obtained (GDPR compliance)
+        if (!ConsentHelper.canShowAds()) {
+            Log.d(TAG, "Interstitial skipped — consent not yet obtained");
+            return false;
+        }
         if (interstitialAd == null) {
             Log.d(TAG, "Interstitial not ready yet");
             return false;
@@ -262,6 +272,12 @@ public final class AdManager {
      */
     public static boolean showRewardedAdIfReady(@NonNull Activity activity,
                                                 @Nullable RewardedAdCallback callback) {
+        // Don't show ads until consent is obtained (GDPR compliance)
+        if (!ConsentHelper.canShowAds()) {
+            Log.d(TAG, "Rewarded ad skipped — consent not yet obtained");
+            if (callback != null) callback.onAdFailedToShow();
+            return false;
+        }
         if (rewardedAd != null) {
             rewardedAd.setFullScreenContentCallback(new FullScreenContentCallback() {
                 @Override
