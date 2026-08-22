@@ -251,6 +251,17 @@ function dbCheck() {
 try {
   killStrayNodeProcesses();
   extractFixArchives();
+
+  // Remove directories that cause webpack/EACCES errors on shared hosting
+  const problematicDirs = ['public/images/New folder'];
+  for (const d of problematicDirs) {
+    const full = path.join(__dirname, d);
+    if (fs.existsSync(full)) {
+      console.log('Removing problematic directory: ' + d);
+      fs.rmSync(full, { recursive: true, force: true });
+    }
+  }
+
   run(`"${npm}" install --legacy-peer-deps`, 'Step 1/3 — npm install --legacy-peer-deps (this can take a few minutes)');
   // Pin the Prisma major version: in production-mode installs the CLI is not
   // present in node_modules, and a bare `npx prisma` would fetch the latest
@@ -261,13 +272,13 @@ try {
   // build (a killed process prints NOTHING to the log — exactly what happened
   // when the build died right after "Creating an optimized production build").
   const buildEnv = Object.assign({}, process.env, {
-    NODE_OPTIONS: '--max-old-space-size=768',
+    NODE_OPTIONS: '--max-old-space-size=1024',
     SWC_THREAD_COUNT: '1',
     RAYON_NUM_THREADS: '1',
     UV_THREADPOOL_SIZE: '1',
     NEXT_TELEMETRY_DISABLED: '1',
   });
-  log('\nBuild memory cap: NODE_OPTIONS=--max-old-space-size=768');
+  log('\nBuild memory cap: NODE_OPTIONS=--max-old-space-size=1024');
   execSync(`"${npm}" run build`, { stdio: 'inherit', shell: true, env: buildEnv });
 
   // Restart the app so Passenger serves the new build (cPanel restart.txt mechanism).

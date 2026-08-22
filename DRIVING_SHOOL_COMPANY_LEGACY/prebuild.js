@@ -183,6 +183,168 @@ patchNextFlightPluginForWindows();
 patchNextCompiledGlobForWindows();
 patchNftHomeGlobForWindows();
 
+// --- Ensure tsconfig.json has @/* path alias ----------------------------------
+// The webpack config function in next.config.mjs can't be serialized when
+// workerThreads is true (DataCloneError), so we remove the webpack alias and
+// instead rely on Next.js's native tsconfig path resolution.
+function ensureTsconfigAlias() {
+  const tsconfigPath = path.join(__dirname, 'tsconfig.json');
+  if (!fs.existsSync(tsconfigPath)) {
+    console.log('[prebuild] tsconfig.json not found — skipping @/* alias');
+    return;
+  }
+  let ts;
+  try {
+    ts = JSON.parse(fs.readFileSync(tsconfigPath, 'utf8'));
+  } catch (e) {
+    console.log('[prebuild] tsconfig.json parse error: ' + e.message);
+    return;
+  }
+  if (!ts.compilerOptions) ts.compilerOptions = {};
+  if (!ts.compilerOptions.paths) ts.compilerOptions.paths = {};
+  if (ts.compilerOptions.paths['@/*']) {
+    console.log('[prebuild] tsconfig @/* paths already configured ✓');
+    return;
+  }
+  ts.compilerOptions.paths['@/*'] = ['./*'];
+  if (!ts.compilerOptions.baseUrl) ts.compilerOptions.baseUrl = '.';
+  fs.writeFileSync(tsconfigPath, JSON.stringify(ts, null, 2) + '\n', 'utf8');
+  console.log('[prebuild] patched tsconfig.json with @/* paths ✓');
+}
+ensureTsconfigAlias();
+
+// --- Force all routes dynamic to avoid EAGAIN worker crash on shared hosts -
+// On cPanel shared hosting with tight nproc limits, Next.js cannot spawn the
+// worker thread needed for static page generation. Adding
+//   export const dynamic = 'force-dynamic'
+// to the root app/layout.tsx tells Next.js to render ALL routes at request
+// time, completely skipping static generation — and the worker.
+function ensureForceDynamicLayout() {
+  const appDir = path.join(__dirname, 'app');
+  if (!fs.existsSync(appDir)) {
+    console.log('[prebuild] app/ directory not found — skipping force-dynamic layout');
+    return;
+  }
+  // Check all possible layout file extensions
+  const layoutExts = ['tsx', 'ts', 'jsx', 'js'];
+  let layoutFile = null;
+  for (const ext of layoutExts) {
+    const candidate = path.join(appDir, 'layout.' + ext);
+    if (fs.existsSync(candidate)) { layoutFile = candidate; break; }
+  }
+
+  if (layoutFile) {
+    let src = fs.readFileSync(layoutFile, 'utf8');
+    if (src.includes('force-dynamic')) {
+      console.log('[prebuild] root layout already has force-dynamic ✓');
+      return;
+    }
+    // Prepend the dynamic export right after any 'use client' directive
+    const useClientRe = /^(\s*['"]use client['"]\s*;?\s*)/m;
+    const m = src.match(useClientRe);
+    if (m) {
+      src = src.replace(useClientRe, m[1] + "\nexport const dynamic = 'force-dynamic';\n");
+    } else {
+      src = "export const dynamic = 'force-dynamic';\n\n" + src;
+    }
+    fs.writeFileSync(layoutFile, src, 'utf8');
+    console.log('[prebuild] patched root layout with force-dynamic ✓');
+  } else {
+    // No layout exists — create a minimal one
+    const content = "export const dynamic = 'force-dynamic';\n\n" +
+      'export default function RootLayout({ children }) {\n' +
+      '  return children;\n' +
+      '}\n';
+    fs.writeFileSync(path.join(appDir, 'layout.tsx'), content, 'utf8');
+    console.log('[prebuild] created root layout.tsx with force-dynamic ✓');
+  }
+}
+ensureForceDynamicLayout();
+
+// --- Force-dynamic for Pages Router pages (if any exist on the server) ------
+// Scan pages/ directory and inject getServerSideProps into any page that
+// doesn't already have one, so no page triggers static generation.
+function ensurePagesRouterDynamic() {
+  const pagesDir = path.join(__dirname, 'pages');
+  if (!fs.existsSync(pagesDir)) {
+    console.log('[prebuild] pages/ directory not found — skipping Pages Router patch');
+    return;
+  }
+  function walk(dir) {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const e of entries) {
+      const full = path.join(dir, e.name);
+      if (e.isDirectory()) { walk(full); continue; }
+      if (!/\.(tsx?|jsx?)$/.test(e.name)) continue;
+      // Skip internal Next.js files and API routes
+      if (/_app\.|_document\.|_error\.|_not-found\.|api\//.test(full)) continue;
+      let src = fs.readFileSync(full, 'utf8');
+      if (src.includes('getServerSideProps')) continue;
+      // If it has getStaticProps, rename it to getServerSideProps
+      if (src.includes('getStaticProps')) {
+        src = src.replace(/getStaticProps/g, 'getServerSideProps');
+        // Also remove getStaticPaths (not needed with getServerSideProps)
+        if (src.includes('getStaticPaths')) {
+          src = src.replace(/export\s+(const|async\s+function)\s+getStaticPaths/g,
+            '// @ts-ignore — removed by prebuild\nconst _removed_getStaticPaths');
+        }
+        fs.writeFileSync(full, src, 'utf8');
+        console.log('[prebuild] patched ' + path.relative(__dirname, full) + ' — replaced getStaticProps → getServerSideProps');
+      } else {
+        // No data-fetching method — inject a minimal getServerSideProps
+        src += '\n\nexport async function getServerSideProps() { return { props: {} }; }\n';
+        fs.writeFileSync(full, src, 'utf8');
+        console.log('[prebuild] patched ' + path.relative(__dirname, full) + ' — added getServerSideProps');
+      }
+    }
+  }
+  walk(pagesDir);
+}
+ensurePagesRouterDynamic();
+
+// --- Patch next build to skip worker thread creation on shared hosts ----------
+// On cPanel shared hosting with tight nproc/thread limits, the jest-worker
+// pool inside next build cannot spawn even a single worker thread
+// (ERR_WORKER_INIT_FAILED / EAGAIN). This patches next/dist/build/index.js
+// to replace the real worker with an in-process mock that tells Next.js
+// "every page is dynamic, nothing is static" — so no static generation
+// worker is ever created.
+function patchBuildSkipWorker() {
+  const buildIdx = path.join(__dirname, 'node_modules', 'next', 'dist', 'build', 'index.js');
+  if (!fs.existsSync(buildIdx)) {
+    console.log('[prebuild] next/dist/build/index.js not found — skipping worker patch');
+    return;
+  }
+  let src = fs.readFileSync(buildIdx, 'utf8');
+  // Already patched?
+  if (src.includes('/*shared-hosting-no-worker*/')) {
+    console.log('[prebuild] next build already patched (no-worker) ✓');
+    return;
+  }
+  // Locate the createStaticWorker call — it uses variable indentation so match
+  // the pattern flexibly.
+  const workerCallRe = /(\s*)const worker = createStaticWorker\(config, \{\s*debuggerPortOffset: -1\s*\}\s*\);/;
+  const m = src.match(workerCallRe);
+  if (!m) {
+    console.log('[prebuild] could not locate createStaticWorker call — skipping worker patch');
+    return;
+  }
+  const indent = m[1]; // e.g. '            '
+  const mock = [
+    indent + '/*shared-hosting-no-worker*/',
+    indent + 'const worker = {',
+    indent + '  isPageStatic: async () => ({ isStatic: false, hasStaticProps: false, hasServerProps: false, prerenderedRoutes: null, prerenderFallbackMode: null, appConfig: { dynamic: "force-dynamic" } }),',
+    indent + '  hasCustomGetInitialProps: async () => false,',
+    indent + '  getDefinedNamedExports: async () => [],',
+    indent + '  end: async () => ({ forceExited: false }),',
+    indent + '};',
+  ].join('\n');
+  src = src.replace(workerCallRe, mock);
+  fs.writeFileSync(buildIdx, src, 'utf8');
+  console.log('[prebuild] patched next build — worker replaced with in-process mock ✓');
+}
+patchBuildSkipWorker();
+
 const cardTsx = path.join(__dirname, 'components', 'ui', 'card.tsx');
 
 if (fs.existsSync(cardTsx)) {
@@ -193,7 +355,7 @@ if (fs.existsSync(cardTsx)) {
     const ts = JSON.parse(fs.readFileSync(path.join(__dirname, 'tsconfig.json'), 'utf8'));
     const p = ts.compilerOptions && ts.compilerOptions.paths;
     const ok = p && Array.isArray(p['@/*']);
-    console.log('[prebuild] tsconfig @/* paths: ' + (ok ? 'CONFIGURED ✓' : 'MISSING ⚠ (webpack alias in next.config.mjs will handle it)'));
+    console.log('[prebuild] tsconfig @/* paths: ' + (ok ? 'CONFIGURED ✓' : 'MISSING \u2014 prebuild will inject this'));
   } catch (e) {
     console.log('[prebuild] tsconfig.json unreadable: ' + e.message);
   }

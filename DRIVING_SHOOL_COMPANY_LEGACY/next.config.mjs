@@ -13,9 +13,6 @@ const nextConfig = {
   // on Windows, e.g. scandir 'C:\Users\HP\Cookies'). Pin the tracing root to the
   // app itself so the build only ever looks inside this project.
   outputFileTracingRoot: __dirname,
-  // Turbopack reads tsconfig.json paths natively (@/* → ./*), so no webpack
-  // alias is needed.  The PrismaPlugin (webpack-only) is replaced by
-  // serverExternalPackages which works with both Turbopack and webpack tracing.
   serverExternalPackages: ['prisma', '@prisma/client', '@prisma/adapter-mariadb', 'firebase-admin', 'nodemailer', 'ffmpeg-static'],
   eslint: {
     ignoreDuringBuilds: true,
@@ -28,7 +25,7 @@ const nextConfig = {
   },
   experimental: {
     cpus: 1,
-    workerThreads: true,
+    workerThreads: false,
     // Put ALL static pages into a single export worker so the build never
     // spawns more than one extra process (stays under the host's NPROC limit).
     staticGenerationMinPagesPerWorker: 1000,
