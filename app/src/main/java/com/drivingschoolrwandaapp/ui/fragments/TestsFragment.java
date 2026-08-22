@@ -9,6 +9,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.TypedValue;
@@ -42,6 +43,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.data.local.preferences.AppPreferences;
+import com.drivingschoolrwandaapp.data.local.preferences.TokenManager;
 import com.drivingschoolrwandaapp.database.entities.TestEntity;
 import com.drivingschoolrwandaapp.database.entities.TestWithQuestions;
 import com.drivingschoolrwandaapp.database.entities.User;
@@ -49,6 +51,7 @@ import com.drivingschoolrwandaapp.ui.adapters.TestAdapter;
 import com.drivingschoolrwandaapp.utils.AdManager;
 import com.drivingschoolrwandaapp.utils.AnalyticsUtils;
 import com.drivingschoolrwandaapp.utils.GridSpacingItemDecoration;
+import com.drivingschoolrwandaapp.utils.IntegrityHelper;
 import com.drivingschoolrwandaapp.utils.PaymentUtils;
 import com.drivingschoolrwandaapp.utils.SafetyUtils;
 import com.drivingschoolrwandaapp.viewmodel.SubscriptionViewModel;
@@ -489,11 +492,28 @@ public class TestsFragment extends Fragment {
                         getContext(), test.getTestNumber(), selectedDays, priceDigits);
                 dialogProgressBar.setVisibility(View.VISIBLE);
                 btnConfirm.setEnabled(false);
-                subscriptionViewModel.requestTestAccess(test.getTestNumber(), selectedDays, testAdapter.currentLanguageId);
-                // Show the payment instructions (MoMo / Airtel USSD codes)
-                // right away, so the user always sees how to pay even if the
-                // server rejects the request as a duplicate / already pending.
-                showPaymentInstructionsDialog(selectedPlan);
+
+                // Play Integrity attestation — verify device before subscription request.
+                // Fail-open: if the backend route is not deployed yet, proceed anyway.
+                String authToken = new TokenManager(requireContext()).getAccessToken();
+                IntegrityHelper.attest(requireContext(), authToken, (verified, requestId, error) -> {
+                    if (verified) {
+                        Log.d("TestsFragment", "Integrity verified before subscription request");
+                    } else {
+                        Log.w("TestsFragment", "Integrity check failed (fail-open): " + error);
+                    }
+                    // Proceed with the subscription request regardless of verification result
+                    // (fail-open until backend /api/integrity/verify is deployed)
+                    if (isAdded()) {
+                        requireActivity().runOnUiThread(() -> {
+                            subscriptionViewModel.requestTestAccess(test.getTestNumber(), selectedDays, testAdapter.currentLanguageId);
+                            // Show the payment instructions (MoMo / Airtel USSD codes)
+                            // right away, so the user always sees how to pay even if the
+                            // server rejects the request as a duplicate / already pending.
+                            showPaymentInstructionsDialog(selectedPlan);
+                        });
+                    }
+                });
             }
         });
 
@@ -509,13 +529,28 @@ public class TestsFragment extends Fragment {
                     public void onRewardEarned(@NonNull com.google.android.gms.ads.rewarded.RewardItem reward) {
                         // User watched the full ad — grant 1-day temporary access
                         if (!isAdded()) return;
-                        subscriptionViewModel.requestTestAccess(test.getTestNumber(), 1, testAdapter.currentLanguageId);
-                        Toast.makeText(requireContext(), getString(R.string.dsrw_ad_reward_msg), Toast.LENGTH_LONG).show();
-                        if (requestAccessDialog != null && requestAccessDialog.isShowing()) {
-                            requestAccessDialog.dismiss();
-                        }
-                        // Refresh profile to pick up the new access
-                        userViewModel.loadProfile();
+
+                        // Play Integrity attestation — verify device before granting free access.
+                        // Fail-open: proceed even if verification fails.
+                        String authToken = new TokenManager(requireContext()).getAccessToken();
+                        IntegrityHelper.attest(requireContext(), authToken, (verified, requestId, error) -> {
+                            if (verified) {
+                                Log.d("TestsFragment", "Integrity verified before rewarded access grant");
+                            } else {
+                                Log.w("TestsFragment", "Integrity check failed (fail-open): " + error);
+                            }
+                            if (isAdded()) {
+                                requireActivity().runOnUiThread(() -> {
+                                    subscriptionViewModel.requestTestAccess(test.getTestNumber(), 1, testAdapter.currentLanguageId);
+                                    Toast.makeText(requireContext(), getString(R.string.dsrw_ad_reward_msg), Toast.LENGTH_LONG).show();
+                                    if (requestAccessDialog != null && requestAccessDialog.isShowing()) {
+                                        requestAccessDialog.dismiss();
+                                    }
+                                    // Refresh profile to pick up the new access
+                                    userViewModel.loadProfile();
+                                });
+                            }
+                        });
                     }
 
                     @Override

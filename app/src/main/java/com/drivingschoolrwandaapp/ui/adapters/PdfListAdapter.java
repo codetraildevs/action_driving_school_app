@@ -21,10 +21,19 @@ public class PdfListAdapter extends RecyclerView.Adapter<PdfListAdapter.PdfViewH
 
     private List<PdfFile> pdfFiles;
     private final Context context;
+    private OnPdfClickListener listener;
+
+    public interface OnPdfClickListener {
+        void onPdfClick(PdfFile pdfFile);
+    }
 
     public PdfListAdapter(Context context, List<PdfFile> pdfFiles) {
         this.context = context;
         this.pdfFiles = pdfFiles;
+    }
+
+    public void setOnPdfClickListener(OnPdfClickListener listener) {
+        this.listener = listener;
     }
 
     @NonNull
@@ -40,11 +49,15 @@ public class PdfListAdapter extends RecyclerView.Adapter<PdfListAdapter.PdfViewH
         holder.pdfTitle.setText(pdfFile.getTitle());
 
         holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(context, PdfViewerActivity.class);
-            intent.setData(Uri.parse(pdfFile.getFilePath()));
-            intent.putExtra("pdf_title", pdfFile.getTitle());
-            intent.putExtra("pdf_id", pdfFile.getId());
-            context.startActivity(intent);
+            if (listener != null) {
+                listener.onPdfClick(pdfFile);
+            } else {
+                Intent intent = new Intent(context, PdfViewerActivity.class);
+                intent.setData(Uri.parse(pdfFile.getFilePath()));
+                intent.putExtra("pdf_title", pdfFile.getTitle());
+                intent.putExtra("pdf_id", pdfFile.getId());
+                context.startActivity(intent);
+            }
         });
     }
 

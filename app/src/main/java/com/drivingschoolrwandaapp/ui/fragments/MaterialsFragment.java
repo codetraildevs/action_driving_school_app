@@ -437,12 +437,26 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
             Uri fileUri = FileProvider.getUriForFile(requireContext(), authority, file);
             
             if ("application/pdf".equals(material.getFileType())) {
-                Intent intent = new Intent(getContext(), PdfViewerActivity.class);
-                intent.setData(fileUri);
-                intent.putExtra("pdf_title", material.getTitle());
-                intent.putExtra("pdf_id", String.valueOf(material.getId()));
-                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                startActivity(intent);
+                // Show interstitial ad before opening PDF viewer
+                if (getActivity() != null && AdManager.showInterstitialIfReady(getActivity())) {
+                    new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                        if (isAdded() && getActivity() != null) {
+                            Intent intent = new Intent(getContext(), PdfViewerActivity.class);
+                            intent.setData(fileUri);
+                            intent.putExtra("pdf_title", material.getTitle());
+                            intent.putExtra("pdf_id", String.valueOf(material.getId()));
+                            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                            startActivity(intent);
+                        }
+                    }, 500);
+                } else {
+                    Intent intent = new Intent(getContext(), PdfViewerActivity.class);
+                    intent.setData(fileUri);
+                    intent.putExtra("pdf_title", material.getTitle());
+                    intent.putExtra("pdf_id", String.valueOf(material.getId()));
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    startActivity(intent);
+                }
             } else if (material.getFileType().startsWith("image/")) {
                 showImageDialog(material, fileUri);
             } else {

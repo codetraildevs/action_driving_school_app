@@ -7,8 +7,10 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import com.drivingschoolrwandaapp.R;
+import com.drivingschoolrwandaapp.utils.AdManager;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -62,5 +64,16 @@ public class HomeFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_home, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // Load AdMob banner
+        FrameLayout adContainer = view.findViewById(R.id.ad_container);
+        if (adContainer != null && getActivity() != null) {
+            AdManager.showBanner(getActivity(), adContainer, null);
+        }
     }
 }

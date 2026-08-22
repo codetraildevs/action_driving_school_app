@@ -26,6 +26,7 @@ import com.drivingschoolrwandaapp.data.local.preferences.AppPreferences;
 import com.drivingschoolrwandaapp.data.local.preferences.TokenManager;
 import com.drivingschoolrwandaapp.repository.Resource;
 import com.drivingschoolrwandaapp.utils.InsetsUtils;
+import com.drivingschoolrwandaapp.utils.IntegrityHelper;
 import com.drivingschoolrwandaapp.utils.PhoneUtils;
 import com.drivingschoolrwandaapp.viewmodel.UserViewModel;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -188,6 +189,19 @@ public class LoginActivity extends AppCompatActivity {
                         tokenManager.saveRole(roleId);
                         Log.d(TAG, "Login successful (rememberMe=" + rememberMe + ", role=" + roleId + ").");
                         Toast.makeText(this, getString(R.string.login_successful_redirect), Toast.LENGTH_SHORT).show();
+
+                        // Play Integrity attestation — background check for ad-fraud protection.
+                        // Does not block login; results are logged and sent to the backend.
+                        IntegrityHelper.attest(LoginActivity.this, resource.data.getAccessToken(),
+                                (verified, requestId, error) -> {
+                                    if (verified) {
+                                        Log.d(TAG, "Play Integrity verified (requestId=" + requestId + ")");
+                                    } else {
+                                        Log.w(TAG, "Play Integrity check failed: " + error
++ " — login allowed (fail-open)");
+                                    }
+                                });
+
                         Intent destination = com.drivingschoolrwandaapp.utils.RoleUtils.isAdminRole(roleId)
                                 ? new Intent(LoginActivity.this, AdminActivity.class)
                                 : new Intent(LoginActivity.this, App.class);
