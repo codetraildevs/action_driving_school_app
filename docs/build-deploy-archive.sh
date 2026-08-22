@@ -19,6 +19,7 @@ tar -czf "$OUT" \
   --exclude='./mine' \
   --exclude='./lib/generated' \
   --exclude='./public/uploads' \
+  --exclude='./public/images/New folder' \
   --exclude='./deploy-cron.sh' \
   --exclude='./.gitignore' \
   --exclude='./*.md' \
