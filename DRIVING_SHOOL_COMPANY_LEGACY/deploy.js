@@ -281,6 +281,29 @@ try {
   log('\nBuild memory cap: NODE_OPTIONS=--max-old-space-size=1024');
   execSync(`"${npm}" run build`, { stdio: 'inherit', shell: true, env: buildEnv });
 
+  // --- Verify the build succeeded before restarting ---------------------------
+  // If the build was killed by the host (OOM/nproc), .next is left corrupt and
+  // workers will crash on start. This check prevents that.
+  const buildIdFile = path.join(__dirname, '.next', 'BUILD_ID');
+  if (!fs.existsSync(buildIdFile)) {
+    logErr('.next/BUILD_ID is MISSING after build — the build was likely killed.');
+    logErr('Check deploy.log for OOM or EAGAIN errors. The app was NOT restarted.');
+    logStream.end();
+    process.exit(1);
+  }
+  const buildId = fs.readFileSync(buildIdFile, 'utf8').trim();
+  log('Build verified — BUILD_ID: ' + buildId);
+
+  // Backup the current .next before replacing (so a bad deploy can be rolled back)
+  const backupDir = path.join(__dirname, '.next.backup');
+  try {
+    if (fs.existsSync(backupDir)) fs.rmSync(backupDir, { recursive: true, force: true });
+    fs.cpSync(path.join(__dirname, '.next'), backupDir, { recursive: true });
+    log('Previous build backed up to .next.backup/');
+  } catch (e) {
+    log('Backup skipped: ' + e.message);
+  }
+
   // Restart the app so Passenger serves the new build (cPanel restart.txt mechanism).
   fs.mkdirSync(path.join(__dirname, 'tmp'), { recursive: true });
   fs.closeSync(fs.openSync(path.join(__dirname, 'tmp', 'restart.txt'), 'a')); // touch
