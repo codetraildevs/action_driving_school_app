@@ -1,12 +1,12 @@
 #!/bin/bash
 # rwanda_app_backend — scheduled rebuild + restart for cPanel (Phusion Passenger)
-# Run from cPanel -> Cron Jobs with:  bash /home/sxlvhdzo/project1/deploy-cron.sh
+# Run from cPanel -> Cron Jobs with:  bash /home/sxlvhdzo/project3/deploy-cron.sh
 # All output goes to deploy-cron.log next to this script.
 
 set -e
 
-APP_DIR="/home/sxlvhdzo/project1"                      # app root (where package.json + .next live)
-NODE_BIN="/home/sxlvhdzo/nodevenv/project1/22/bin"     # cPanel nodevenv bin (node/npm/npx)
+APP_DIR="/home/sxlvhdzo/project3"                      # app root (where package.json + .next live)
+NODE_BIN="/home/sxlvhdzo/nodevenv/project3/22/bin"     # cPanel nodevenv bin (node/npm/npx)
 LOG="$APP_DIR/deploy-cron.log"
 LOCK="$APP_DIR/.deploy.lock"
 
