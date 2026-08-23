@@ -104,12 +104,9 @@ public class SpecialRequestActivity extends BaseIremboFormActivity {
                 showLoadingDialog();
             } else if (resource.status == Resource.Status.SUCCESS) {
                 hideLoadingDialog();
-                if (resource.data != null) {
-                    showPaymentConfirmationDialog(resource.data);
-                } else if (!isFinishing()) {
-                    Toast.makeText(this, getString(R.string.special_submitted), Toast.LENGTH_SHORT).show();
-                    finish();
-                }
+                // Always show payment modal — the payment numbers are hardcoded
+                // (not from the API response), so null data is fine.
+                showPaymentConfirmationDialog(null);
             } else if (resource.status == Resource.Status.ERROR) {
                 hideLoadingDialog();
                 if (!isFinishing()) {
