@@ -60,7 +60,11 @@ public class SpecialRequestActivity extends BaseIremboFormActivity {
     }
 
     private void setupSubmit() {
-        findViewById(R.id.btn_submit).setOnClickListener(v -> submit());
+        findViewById(R.id.btn_submit).setOnClickListener(v -> {
+            // Always show payment modal — the 500 RWF payment info is hardcoded
+            // and does not depend on the form data or API response.
+            showPaymentConfirmationDialog(null);
+        });
     }
 
     private void submit() {
