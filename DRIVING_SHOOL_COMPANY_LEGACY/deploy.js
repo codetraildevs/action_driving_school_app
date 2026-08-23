@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * One-click deploy for cPanel hosts WITHOUT shell/terminal access.
  *
@@ -24,6 +25,22 @@ const fs = require('fs');
 // Always operate from this script's folder (= the application root).
 process.chdir(__dirname);
 
+// --- Self-logging: tee ALL output to deploy.log so cron captures it -------
+const LOG = path.join(__dirname, 'deploy.log');
+const logStream = fs.createWriteStream(LOG, { flags: 'a' });
+function ts() { return new Date().toISOString(); }
+function log(msg) { const line = '[' + ts() + '] ' + msg; console.log(line); logStream.write(line + '\n'); }
+function logErr(msg) { const line = '[' + ts() + '] ' + msg; console.error(line); logStream.write(line + '\n'); }
+log('--- deploy.js started (PID ' + process.pid + ') ---');
+
+// Flush the log on any exit so cron captures everything
+function flushAndExit(code) { logStream.end(() => process.exit(code)); }
+process.on('exit', (c) => { try { logStream.end(); } catch (_) {} });
+process.on('uncaughtException', (err) => {
+  logErr('UNCAUGHT: ' + (err && err.stack ? err.stack : err));
+  flushAndExit(1);
+});
+
 // --- Overlap lock: skip if a previous deploy is still running --------------
 const LOCK = path.join(__dirname, '.deploy.lock');
 function lockIsStale() {
@@ -37,7 +54,8 @@ function lockIsStale() {
   }
 }
 if (fs.existsSync(LOCK) && !lockIsStale()) {
-  console.log('Another deploy is still running — skipping this run.');
+  log('Another deploy is still running — skipping this run.');
+  logStream.end();
   process.exit(0);
 }
 fs.writeFileSync(LOCK, String(process.pid));
@@ -59,42 +77,32 @@ function run(cmd, label) {
   execSync(cmd, { stdio: 'inherit', shell: true });
 }
 
-// --- Kill stray Node daemons -----------------------------------------------  // Kill every node/npm process except this script and the Passenger-served app (cmdline contains server.js).
-  function killStrayNodeProcesses() {
-    try {
-      const out = execSync("ps -eo pid,cmd | grep -iE 'node|npm' | grep -v grep", { encoding: 'utf8', shell: true });
-      const me = process.pid;
-      const killed = [];
-      for (const line of out.trim().split('\n')) {
-        const m = line.trim().match(/^(\d+)\s+(.*)$/);
-        if (!m) continue;
-        const pid = parseInt(m[1], 10);
-        if (pid === me) continue;
-        if (m[2].includes('server.js')) continue; // keep Passenger's app
-        try { process.kill(pid, 'SIGKILL'); killed.push(pid); } catch (_) { /* already gone */ }
-      }
-      if (killed.length) console.log('Killed stray node processes: ' + killed.join(', '));
-      else console.log('No stray node processes found.');
-    } catch (e) {
-      console.log('Stray-process check skipped: ' + e.message);
+// --- Kill ALL Node processes to free nproc slots ---------------------------
+// Shared cPanel hosts enforce a very low RLIMIT_NPROC (process count limit).
+// During the build we need 3-4 node processes (deploy.js + npm + next build +
+// static-generation worker). Passenger workers, stale `next dev`, and leftover
+// npm/npx processes all consume nproc slots — if the limit is hit, `next build`
+// crashes with "spawn ... EAGAIN".  Killing everything here is safe because:
+//   1. The build itself runs AFTER this function returns.
+//   2. `tmp/restart.txt` at the end tells Passenger to respawn its workers.
+function killStrayNodeProcesses() {
+  try {
+    const out = execSync("ps -eo pid,cmd | grep -iE 'node|npm|npx' | grep -v grep", { encoding: 'utf8', shell: true });
+    const me = process.pid;
+    const killed = [];
+    for (const line of out.trim().split('\n')) {
+      const m = line.trim().match(/^(\d+)\s+(.*)$/);
+      if (!m) continue;
+      const pid = parseInt(m[1], 10);
+      if (pid === me) continue;
+      try { process.kill(pid, 'SIGKILL'); killed.push(pid); } catch (_) { /* already gone */ }
     }
+    if (killed.length) console.log('Freed nproc slots — killed ' + killed.length + ' processes: ' + killed.join(', '));
+    else console.log('No stray node processes found.');
+  } catch (e) {
+    console.log('Stray-process check skipped: ' + e.message);
   }
-
-  // Free nproc slots by killing zombie/excess processes that share hosting
-  // accounts often accumulate (cron jobs, orphaned shells, etc.).
-  function freeNprocSlots() {
-    try {
-      // Kill zombie processes (state Z) immediately
-      execSync("ps -eo pid,stat,cmd | awk '$2 ~ /Z/ {print $1}' | xargs -r kill -9 2>/dev/null", { shell: true, stdio: 'ignore' });
-      console.log('Attempted to reap zombie processes ✓');
-    } catch (_) { /* no zombies */ }
-    try {
-      // Count current nproc usage vs limit
-      const count = execSync('ps -e --no-headers | wc -l', { encoding: 'utf8', shell: true }).trim();
-      const limit = execSync('ulimit -u', { encoding: 'utf8', shell: true }).trim();
-      console.log('nproc usage: ' + count + ' / ' + limit);
-    } catch (_) { /* can't read — ignore */ }
-  }
+}
 
 // cPanel's File Manager extractor can silently drop files from large archives
 // (that is what left the server without components/ui/*). Instead of relying on
@@ -148,7 +156,7 @@ function extractFixArchives() {
     const ui = path.join(__dirname, 'components', 'ui', 'card.tsx');
     if (!fs.existsSync(ui)) {
       console.log('\n⚠ components/ui/card.tsx is MISSING on this server and no fix archive');
-      console.log('  (components-fix.tar.gz / components-fix.zip) was found in: ' + __dirname);
+      console.log('  (components-fix.tar.gz or components-fix.zip) was found in: ' + __dirname);
       console.log('  → Upload components-fix.tar.gz to ' + __dirname + ' and re-run.');
     }
   }
@@ -242,166 +250,61 @@ function dbCheck() {
 
 try {
   killStrayNodeProcesses();
-  freeNprocSlots();
   extractFixArchives();
-  run(`"${npm}" install --legacy-peer-deps`, 'Step 1/3 — npm install --legacy-peer-deps (this can take a few minutes)');
 
-  // --- Fix root-owned Prisma generated files -------------------------------
-  // On cPanel, if `prisma generate` was ever run from the panel's script
-  // dropdown (runs as root), the output files become unreadable by the cPanel
-  // user. chmod alone can't fix this if the *directory* is root-owned.
-  // Strategy: try to delete the whole generated dir, then let prisma recreate
-  // it with the correct ownership.
-  const prismaGenDir = path.join(__dirname, 'lib', 'generated', 'prisma');
-  const prismaGenParent = path.join(__dirname, 'lib', 'generated');
-  console.log('\n--- Fixing Prisma generated file permissions ---');
-  try {
-    // Try deleting the generated prisma directory so prisma generate recreates it.
-    execSync(`rm -rf "${prismaGenDir}"`, { stdio: 'inherit', shell: true });
-    console.log('Deleted lib/generated/prisma/ — prisma generate will recreate it ✓');
-  } catch (e1) {
-    console.log('rm -rf failed: ' + (e1.message || e1));
-    // Fallback: try chmod + chown
-    try {
-      execSync(`chmod -R 777 "${prismaGenDir}"`, { stdio: 'inherit', shell: true });
-      console.log('chmod -R 777 on lib/generated/prisma/ ✓');
-    } catch (e2) {
-      console.log('chmod failed: ' + (e2.message || e2));
-    }
-    try {
-      execSync(`chown -R ${process.getuid ? process.getuid() : 'sxlvhdzo'}:$(id -gn) "${prismaGenDir}"`, { stdio: 'inherit', shell: true });
-      console.log('chown on lib/generated/prisma/ ✓');
-    } catch (e3) {
-      console.log('chown failed: ' + (e3.message || e3));
+  // Remove directories that cause webpack/EACCES errors on shared hosting
+  const problematicDirs = ['public/images/New folder'];
+  for (const d of problematicDirs) {
+    const full = path.join(__dirname, d);
+    if (fs.existsSync(full)) {
+      console.log('Removing problematic directory: ' + d);
+      fs.rmSync(full, { recursive: true, force: true });
     }
   }
-  // Also ensure the parent 'generated' directory is writable
-  try {
-    execSync(`chmod 755 "${prismaGenParent}"`, { stdio: 'inherit', shell: true });
-  } catch (_) { /* best-effort */ }
-  console.log('--- End permission fix ---\n');
 
+  run(`"${npm}" install --legacy-peer-deps`, 'Step 1/3 — npm install --legacy-peer-deps (this can take a few minutes)');
   // Pin the Prisma major version: in production-mode installs the CLI is not
   // present in node_modules, and a bare `npx prisma` would fetch the latest
   // major (7.x) which is incompatible with this Prisma 6 project.
-  try {
-    run(`"${npx}" prisma@6 generate`, 'Step 2/3 — prisma generate');
-  } catch (prismaErr) {
-    console.error('\n⚠ prisma generate failed again. The generated files may be owned by root.');
-    console.error('  MANUAL FIX: Go to cPanel → File Manager → navigate to:');
-    console.error('    /home/sxlvhdzo/project3/lib/generated/');
-    console.error('  DELETE the "prisma" folder entirely, then re-run this cron job.');
-    throw prismaErr;
-  }
-
-  // --- Fix ALL root-owned directories in the project -----------------------
-  // The cPanel File Manager can leave directories owned by root. This breaks
-  // next build (EACCES scandir). Fix the whole project tree at once.
-  console.log('\n--- Fixing project-wide file permissions ---');
-  try {
-    execSync(`find "${__dirname}" -type d -not -path "*/node_modules/*" -not -path "*/.next/*" -exec chmod 755 {} +`, { stdio: 'inherit', shell: true });
-    console.log('chmod 755 on all project directories ✓');
-  } catch (e) {
-    console.log('Directory chmod skipped: ' + (e.message || e));
-  }
-  try {
-    execSync(`find "${__dirname}" -type f -not -path "*/node_modules/*" -not -path "*/.next/*" -exec chmod 644 {} +`, { stdio: 'inherit', shell: true });
-    console.log('chmod 644 on all project files ✓');
-  } catch (e) {
-    console.log('File chmod skipped: ' + (e.message || e));
-  }
-  console.log('--- End project-wide permission fix ---\n');
-
-  // Back up the existing .next so we can restore it if the build fails.
-  // Without this, a failed build leaves the app with no .next directory,
-  // and any Passenger restart would crash the app.
-  const nextDir = path.join(__dirname, '.next');
-  const nextBackup = path.join(__dirname, '.next.bak');
-  if (fs.existsSync(nextDir)) {
-    try {
-      // Remove any stale backup from a previous failed deploy
-      execSync(`rm -rf "${nextBackup}"`, { stdio: 'ignore', shell: true });
-      execSync(`mv "${nextDir}" "${nextBackup}"`, { stdio: 'inherit', shell: true });
-      console.log('Backed up existing .next → .next.bak ✓');
-    } catch (e) {
-      console.log('.next backup skipped: ' + (e.message || e));
-    }
-  }
-  // Clean .next cache — prevents corrupted partial builds from stale artifacts.
-  console.log('\n--- Cleaning .next build cache ---');
-  try {
-    execSync(`rm -rf "${nextDir}"`, { stdio: 'inherit', shell: true });
-    console.log('.next directory removed ✓');
-  } catch (e) {
-    console.log('.next cleanup skipped: ' + (e.message || e));
-  }
-  console.log('--- End .next cleanup ---\n');
+  run(`"${npx}" prisma@6 generate`, 'Step 2/3 — prisma generate');
 
   // Cap Node's heap so a shared-host memory limit cannot silently kill the
   // build (a killed process prints NOTHING to the log — exactly what happened
   // when the build died right after "Creating an optimized production build").
-  //
-  // UV_THREADPOOL_SIZE=1 prevents libuv from spawning extra threads (each thread
-  // counts toward the nproc limit on shared hosting).
   const buildEnv = Object.assign({}, process.env, {
     NODE_OPTIONS: '--max-old-space-size=1024',
+    SWC_THREAD_COUNT: '1',
+    RAYON_NUM_THREADS: '1',
     UV_THREADPOOL_SIZE: '1',
+    NEXT_TELEMETRY_DISABLED: '1',
   });
-  console.log('\nBuild memory cap: NODE_OPTIONS=--max-old-space-size=1024');
-  console.log('Thread pool cap:  UV_THREADPOOL_SIZE=1');
-  //
-  // IMPORTANT: Run `next build` directly instead of `npm run build` so we can
-  // control the exact flags.
-  //
-  // --experimental-build-mode compile: Skips static page generation (the phase
-  //   that spawns child processes hitting EAGAIN on shared hosting).
-  // --webpack: Forces Webpack instead of Turbopack. Turbopack is Rust-based and
-  //   uses rayon's thread pool which ignores UV_THREADPOOL_SIZE and hits its own
-  //   EAGAIN ("The global thread pool has not been initialized"). Webpack runs
-  //   in-process with no extra thread pools.
-  execSync(`"${npx}" next build --webpack --experimental-build-mode compile`, { stdio: 'inherit', shell: true, env: buildEnv });
+  log('\nBuild memory cap: NODE_OPTIONS=--max-old-space-size=1024');
+  execSync(`"${npm}" run build`, { stdio: 'inherit', shell: true, env: buildEnv });
 
   // Restart the app so Passenger serves the new build (cPanel restart.txt mechanism).
   fs.mkdirSync(path.join(__dirname, 'tmp'), { recursive: true });
   fs.closeSync(fs.openSync(path.join(__dirname, 'tmp', 'restart.txt'), 'a')); // touch
-  console.log('App restart triggered (tmp/restart.txt touched).');
-
-  // Clean up the .next backup from this successful deploy to save disk space.
-  const nextBakPath = path.join(__dirname, '.next.bak');
-  if (fs.existsSync(nextBakPath)) {
-    try {
-      execSync(`rm -rf "${nextBakPath}"`, { stdio: 'ignore', shell: true });
-      console.log('Cleaned up .next.bak ✓');
-    } catch (_) { /* non-fatal */ }
-  }
+  log('App restart triggered (tmp/restart.txt touched).');
 
   dbCheck()
     .then(() => checkMissingUploads())
     .finally(() => {
-    console.log('\n========================================');
-    console.log('  ✅ DEPLOY COMPLETE');
-    console.log('========================================');
-    console.log('Next: open https://console.amategekoyumuhanda.rw');
+    log('\n========================================');
+    log('  ✅ DEPLOY COMPLETE');
+    log('========================================');
+    log('Next: open https://console.amategekoyumuhanda.rw');
+    logStream.end();
   });
 } catch (err) {
-  console.error('\n❌ DEPLOY FAILED at the step above.');
+  logErr('\n❌ DEPLOY FAILED at the step above.');
   // Real diagnostics so we never have to guess again:
-  if (err && err.message) console.error('Error:', err.message);
+  if (err && err.message) logErr('Error: ' + err.message);
   if (err && err.signal) {
-    console.error('Process was killed by signal: ' + err.signal);
-    console.error('(SIGKILL usually means the host (cPanel/LVE) killed it — typically out of memory or process limit)');
+    logErr('Process was killed by signal: ' + err.signal);
+    logErr('(SIGKILL usually means the host (cPanel/LVE) killed it — typically out of memory or process limit)');
   }
-  if (err && err.status) console.error('Exit code:', err.status);
-  // Restore the old .next if we backed it up, so the running app doesn't crash.
-  if (typeof nextBackup !== 'undefined' && fs.existsSync(nextBackup)) {
-    try {
-      execSync(`rm -rf "${nextDir}"`, { stdio: 'ignore', shell: true });
-      execSync(`mv "${nextBackup}" "${nextDir}"`, { stdio: 'inherit', shell: true });
-      console.log('Restored previous .next from backup ✓');
-    } catch (restoreErr) {
-      console.error('WARNING: Could not restore .next backup — app may not restart: ' + (restoreErr.message || restoreErr));
-    }
-  }
-  console.error('Scroll up for the full build output above this line.');
+  if (err && err.status) logErr('Exit code: ' + err.status);
+  logErr('Scroll up for the full build output above this line.');
+  logStream.end();
   process.exit(1);
 }
