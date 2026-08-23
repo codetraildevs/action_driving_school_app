@@ -350,14 +350,16 @@ try {
   console.log('\nBuild memory cap: NODE_OPTIONS=--max-old-space-size=1024');
   console.log('Thread pool cap:  UV_THREADPOOL_SIZE=1');
   //
-  // IMPORTANT: Run `next build --experimental-build-mode compile` directly instead
-  // of `npm run build` to skip the static page generation phase.
-  // The server's package.json may not have this flag, and even if it does, npm
-  // can strip arguments. In compile mode Next.js still produces all the .next
-  // artifacts needed by server.js (compiled bundles, route manifests, etc.) but
-  // skips spawning child processes for static HTML generation — the exact step
-  // that hits EAGAIN on shared hosting with tight nproc limits.
-  execSync(`"${npx}" next build --experimental-build-mode compile`, { stdio: 'inherit', shell: true, env: buildEnv });
+  // IMPORTANT: Run `next build` directly instead of `npm run build` so we can
+  // control the exact flags.
+  //
+  // --experimental-build-mode compile: Skips static page generation (the phase
+  //   that spawns child processes hitting EAGAIN on shared hosting).
+  // --webpack: Forces Webpack instead of Turbopack. Turbopack is Rust-based and
+  //   uses rayon's thread pool which ignores UV_THREADPOOL_SIZE and hits its own
+  //   EAGAIN ("The global thread pool has not been initialized"). Webpack runs
+  //   in-process with no extra thread pools.
+  execSync(`"${npx}" next build --webpack --experimental-build-mode compile`, { stdio: 'inherit', shell: true, env: buildEnv });
 
   // Restart the app so Passenger serves the new build (cPanel restart.txt mechanism).
   fs.mkdirSync(path.join(__dirname, 'tmp'), { recursive: true });

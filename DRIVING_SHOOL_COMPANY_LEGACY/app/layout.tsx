@@ -16,6 +16,7 @@ export const dynamic = "force-dynamic";
 const inter = Syne({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://console.amategekoyumuhanda.rw'),
   title: siteDetails.metadata.title,
   description: siteDetails.metadata.description,
   openGraph: {
