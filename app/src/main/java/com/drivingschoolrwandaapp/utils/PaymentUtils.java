@@ -49,32 +49,51 @@ public class PaymentUtils {
         });
     }
 
+    /** Default payment numbers (used by Irembo services). */
+    private static final String DEFAULT_MOMO_PAY_CODE = "644209";
+    private static final String DEFAULT_MTN_NUMBER = "0785460748";
+    private static final String DEFAULT_TIGO_NUMBER = "0726656615";
+
+    /** Exam list payment numbers. */
+    private static final String EXAM_MOMO_PAY_CODE = "847318";
+    private static final String EXAM_MTN_NUMBER = "0782877442";
+    private static final String EXAM_TIGO_NUMBER = "0722877442";
+
     public static void setupPaymentMethods(View rootView, Fragment fragment, String amount) {
-        MaterialCardView paymentMethod1 = rootView.findViewById(R.id.payment_method_1);
-        MaterialCardView paymentMethod2 = rootView.findViewById(R.id.payment_method_2);
-        MaterialCardView paymentMethod3 = rootView.findViewById(R.id.payment_method_3);
-
-        String momoPayUssd = "*182*8*1*644209*" + amount + "#";
-        String numberUssd = "*182*1*1*0785460748*" + amount + "#";
-        String airtelUssd = "*182*1*1*0726656615*" + amount + "#";
-
-        if(paymentMethod1 != null) paymentMethod1.setOnClickListener(v -> dialUssd(fragment, momoPayUssd));
-        if(paymentMethod2 != null) paymentMethod2.setOnClickListener(v -> dialUssd(fragment, numberUssd));
-        if (paymentMethod3 != null) paymentMethod3.setOnClickListener(v -> dialUssd(fragment, airtelUssd));
+        setupPaymentMethods(rootView, fragment, null, amount, DEFAULT_MOMO_PAY_CODE, DEFAULT_MTN_NUMBER, DEFAULT_TIGO_NUMBER);
     }
 
     public static void setupPaymentMethods(View rootView, Activity activity, String amount) {
+        setupPaymentMethods(rootView, null, activity, amount, DEFAULT_MOMO_PAY_CODE, DEFAULT_MTN_NUMBER, DEFAULT_TIGO_NUMBER);
+    }
+
+    /** Exam-list payment with custom numbers. */
+    public static void setupExamPaymentMethods(View rootView, Fragment fragment, String amount) {
+        setupPaymentMethods(rootView, fragment, null, amount, EXAM_MOMO_PAY_CODE, EXAM_MTN_NUMBER, EXAM_TIGO_NUMBER);
+    }
+
+    private static void setupPaymentMethods(View rootView, Fragment fragment, Activity activity, String amount,
+            String momoPayCode, String mtnNumber, String tigoNumber) {
         MaterialCardView paymentMethod1 = rootView.findViewById(R.id.payment_method_1);
         MaterialCardView paymentMethod2 = rootView.findViewById(R.id.payment_method_2);
         MaterialCardView paymentMethod3 = rootView.findViewById(R.id.payment_method_3);
 
-        String momoPayUssd = "*182*8*1*644209*" + amount + "#";
-        String numberUssd = "*182*1*1*0785460748*" + amount + "#";
-        String airtelUssd = "*182*1*1*0726656615*" + amount + "#";
+        String momoPayUssd = "*182*8*1*" + momoPayCode + "*" + amount + "#";
+        String mtnUssd = "*182*1*1*" + mtnNumber + "*" + amount + "#";
+        String tigoUssd = "*182*1*1*" + tigoNumber + "*" + amount + "#";
 
-        if(paymentMethod1 != null) paymentMethod1.setOnClickListener(v -> dialUssd(activity, momoPayUssd));
-        if(paymentMethod2 != null) paymentMethod2.setOnClickListener(v -> dialUssd(activity, numberUssd));
-        if (paymentMethod3 != null) paymentMethod3.setOnClickListener(v -> dialUssd(activity, airtelUssd));
+        if (paymentMethod1 != null) paymentMethod1.setOnClickListener(v -> {
+            if (fragment != null) dialUssd(fragment, momoPayUssd);
+            else if (activity != null) dialUssd(activity, momoPayUssd);
+        });
+        if (paymentMethod2 != null) paymentMethod2.setOnClickListener(v -> {
+            if (fragment != null) dialUssd(fragment, mtnUssd);
+            else if (activity != null) dialUssd(activity, mtnUssd);
+        });
+        if (paymentMethod3 != null) paymentMethod3.setOnClickListener(v -> {
+            if (fragment != null) dialUssd(fragment, tigoUssd);
+            else if (activity != null) dialUssd(activity, tigoUssd);
+        });
     }
 
     private static void dialUssd(Fragment fragment, String ussd) {

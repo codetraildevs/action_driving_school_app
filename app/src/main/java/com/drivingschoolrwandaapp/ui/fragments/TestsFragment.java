@@ -545,7 +545,7 @@ public class TestsFragment extends Fragment {
             }
         }
 
-        PaymentUtils.setupPaymentMethods(dialogView, this, price);
+        PaymentUtils.setupExamPaymentMethods(dialogView, this, price);
 
         // Show the selected plan's price prominently in the dialog header.
         TextView tvPaymentAmount = dialogView.findViewById(R.id.tv_payment_amount);
