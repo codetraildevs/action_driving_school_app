@@ -40,3 +40,9 @@ mkdir -p "$APP_DIR/tmp"
 touch "$APP_DIR/tmp/restart.txt"
 
 echo "$(date '+%F %T'): ===== deploy done ====="
+
+# --- Auto-rebuild if .next is missing (safety net) ---
+if [ ! -f "$APP_DIR/.next/BUILD_ID" ]; then
+  echo "$(date '+%F %T'): ⚠ .next/BUILD_ID is MISSING after deploy — running healthcheck..."
+  "$NODE_BIN/node" "$APP_DIR/healthcheck.js"
+fi

@@ -1,192 +1,128 @@
 // @ts-nocheck
-#!/usr/bin/env node
 /**
- * Uptime / response-time healthcheck for the Driving School console.
+ * healthcheck.js — Standalone health check for the Next.js app.
  *
- * Add it as a cron job in cPanel → Cron Jobs (every 5 minutes):
+ * Can be called from:
+ *   - Cron:  /home/sxlvhdzo/nodevenv/project3/22/bin/node healthcheck.js
+ *   - External: curl https://console.amategekoyumuhanda.rw/api/health
+ *   - Passenger: touch tmp/restart.txt if unhealthy
  *
- *   /home/sxlvhdzo/nodevenv/project3/22/bin/node /home/sxlvhdzo/project3/healthcheck.js >> /home/sxlvhdzo/project3/healthcheck-cron.log 2>&1
- *
- * What it does:
- *   1. Probes GET /api/health (app + DB) and GET / (landing) with a 15s timeout.
- *   2. Appends one line per run to healthcheck.log (auto-rotated).
- *   3. After 2 consecutive failures it emails an alert via the app's SMTP
- *      (EMAIL_HOST/EMAIL_USER/EMAIL_PASSWORD from .env) to ALERT_EMAIL
- *      (falls back to EMAIL_USER). Sends a "recovered" email when it's back.
- *
- * No dependencies beyond the project's own node_modules (nodemailer).
- * Requires Node 18+ (global fetch / https).
+ * Checks:
+ *   1. .next/BUILD_ID exists and is non-empty
+ *   2. Node process can start without crashing
+ *   3. Database is reachable (optional)
  */
 const fs = require('fs');
 const path = require('path');
-const https = require('https');
+const http = require('http');
 
-process.chdir(__dirname);
+const APP_DIR = __dirname;
+const BUILD_ID_FILE = path.join(APP_DIR, '.next', 'BUILD_ID');
+const RESTART_FILE = path.join(APP_DIR, 'tmp', 'restart.txt');
+const LOG_FILE = path.join(APP_DIR, 'healthcheck.log');
+const PORT = process.env.PORT || 3000;
 
-const BASE_URL = process.env.CHECK_URL || 'https://console.amategekoyumuhanda.rw';
-const LOG_FILE = path.join(__dirname, 'healthcheck.log');
-const STATE_FILE = path.join(__dirname, 'healthcheck.state.json');
-const ALERT_AFTER = 2; // consecutive failures before emailing
-const TIMEOUT_MS = 15000;
-
-function loadEnv() {
-  const env = {};
-  try {
-    const txt = fs.readFileSync(path.join(__dirname, '.env'), 'utf8');
-    for (const line of txt.split('\n')) {
-      const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$/);
-      if (!m) continue;
-      let v = m[2].trim();
-      if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) {
-        v = v.slice(1, -1);
-      }
-      env[m[1]] = process.env[m[1]] !== undefined ? process.env[m[1]] : v;
-    }
-  } catch (_) { /* no .env — email alerts will be skipped */ }
-  for (const k of ['EMAIL_HOST', 'EMAIL_PORT', 'EMAIL_USER', 'EMAIL_PASSWORD', 'EMAIL_FROM', 'ALERT_EMAIL', 'CHECK_URL']) {
-    if (process.env[k] !== undefined && env[k] === undefined) env[k] = process.env[k];
-  }
-  return env;
-}
-
-function probe(url) {
-  return new Promise((resolve) => {
-    const started = Date.now();
-    const req = https.get(url, { timeout: TIMEOUT_MS }, (res) => {
-      res.resume();
-      res.on('end', () => {
-        resolve({
-          ok: res.statusCode >= 200 && res.statusCode < 300,
-          code: res.statusCode,
-          ms: Date.now() - started,
-        });
-      });
-    });
-    req.on('timeout', () => {
-      req.destroy(new Error('timeout'));
-      resolve({ ok: false, code: 0, ms: TIMEOUT_MS, error: 'timeout' });
-    });
-    req.on('error', () => {
-      resolve({ ok: false, code: 0, ms: Date.now() - started, error: 'network error' });
-    });
-  });
-}
-
-function readState() {
-  try {
-    return JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
-  } catch (_) {
-    return { consecutiveFailures: 0, alerted: false, lastFailureAt: null };
-  }
-}
-
-function writeState(s) {
-  try { fs.writeFileSync(STATE_FILE, JSON.stringify(s)); } catch (_) { /* non-fatal */ }
-}
-
-function appendLog(line) {
-  try {
-    fs.appendFileSync(LOG_FILE, line + '\n');
-    const size = fs.statSync(LOG_FILE).size;
-    if (size > 2 * 1024 * 1024) {
-      fs.copyFileSync(LOG_FILE, LOG_FILE + '.old');
-      fs.truncateSync(LOG_FILE, 0);
-    }
-  } catch (_) { /* non-fatal */ }
-}
-
-function sendEmail(env, subject, text) {
-  return new Promise((resolve) => {
-    if (!env.EMAIL_HOST || !env.EMAIL_USER) {
-      console.log('  (email alert skipped: EMAIL_HOST/EMAIL_USER not set in .env)');
-      return resolve(false);
-    }
-    try {
-      const nodemailer = require('nodemailer');
-      const transporter = nodemailer.createTransport({
-        host: env.EMAIL_HOST,
-        port: parseInt(env.EMAIL_PORT || '587', 10),
-        secure: false,
-        auth: { user: env.EMAIL_USER, pass: env.EMAIL_PASSWORD },
-      });
-      const to = env.ALERT_EMAIL || env.EMAIL_USER;
-      transporter.sendMail(
-        {
-          from: env.EMAIL_FROM || env.EMAIL_USER,
-          to,
-          subject,
-          text,
-        },
-        (err) => {
-          if (err) console.log('  (email send failed: ' + err.message + ')');
-          resolve(!err);
-        }
-      );
-    } catch (e) {
-      console.log('  (email alert failed: ' + e.message + ')');
-      resolve(false);
-    }
-  });
-}
-
-async function main() {
-  const env = loadEnv();
-  const stamp = new Date().toISOString();
-  const health = await probe(BASE_URL + '/api/health');
-  const home = await probe(BASE_URL + '/');
-
-  const state = readState();
-  let note = 'OK';
-
-  if (health.ok) {
-    if (state.alerted) {
-      const sent = await sendEmail(
-        env,
-        '✅ Console recovered: ' + BASE_URL,
-        'The console is back up.\n\n' +
-          'Last failure: ' + (state.lastFailureAt || 'unknown') + '\n' +
-          'Health now: HTTP ' + health.code + ' in ' + health.ms + 'ms\n' +
-          'Timestamp: ' + stamp
-      );
-      note = 'RECOVERED' + (sent ? ' - recovery email sent' : '');
-      state.alerted = false;
-      state.consecutiveFailures = 0;
-    } else {
-      state.consecutiveFailures = 0;
-    }
-    state.lastFailureAt = null;
-  } else {
-    state.consecutiveFailures = (state.consecutiveFailures || 0) + 1;
-    if (!state.lastFailureAt) state.lastFailureAt = stamp;
-
-    if (state.consecutiveFailures >= ALERT_AFTER && !state.alerted) {
-      const sent = await sendEmail(
-        env,
-        '🚨 Console DOWN: ' + BASE_URL,
-        'The console is DOWN or unhealthy.\n\n' +
-          'Consecutive failed checks: ' + state.consecutiveFailures + '\n' +
-          'Health probe: HTTP ' + health.code + (health.error ? ' (' + health.error + ')' : '') + ' in ' + health.ms + 'ms\n' +
-          'Landing page: HTTP ' + home.code + ' in ' + home.ms + 'ms\n' +
-          'First failure at: ' + state.lastFailureAt + '\n' +
-          'Timestamp: ' + stamp
-      );
-      state.alerted = sent;
-      note = 'DOWN x' + state.consecutiveFailures + (sent ? ' - alert email sent' : ' - alert email FAILED, will retry');
-    } else {
-      note = 'DOWN x' + state.consecutiveFailures + ' (no alert yet)';
-    }
-  }
-  writeState(state);
-
-  const line =
-    stamp +
-    ' | health:' + health.code + ' ' + health.ms + 'ms' +
-    ' | home:' + home.code + ' ' + home.ms + 'ms' +
-    ' | ' + note;
+// --- Logging ---
+function log(msg) {
+  const line = `[${new Date().toISOString()}] ${msg}`;
   console.log(line);
-  appendLog(line);
+  try { fs.appendFileSync(LOG_FILE, line + '\n'); } catch (_) {}
+}
+
+// --- Check 1: BUILD_ID exists ---
+function checkBuildId() {
+  try {
+    if (!fs.existsSync(BUILD_ID_FILE)) {
+      return { ok: false, reason: '.next/BUILD_ID is MISSING' };
+    }
+    const id = fs.readFileSync(BUILD_ID_FILE, 'utf8').trim();
+    if (!id) {
+      return { ok: false, reason: '.next/BUILD_ID is empty' };
+    }
+    return { ok: true, buildId: id };
+  } catch (e) {
+    return { ok: false, reason: `BUILD_ID read error: ${e.message}` };
+  }
+}
+
+// --- Check 2: HTTP health (is the server responding?) ---
+function checkHttp(timeout = 5000) {
+  return new Promise((resolve) => {
+    const req = http.get(`http://localhost:${PORT}/api/health`, { timeout }, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        try {
+          const json = JSON.parse(data);
+          resolve({ ok: json.status === 'ok', data: json });
+        } catch (_) {
+          resolve({ ok: false, reason: `Invalid JSON: ${data.substring(0, 100)}` });
+        }
+      });
+    });
+    req.on('error', (e) => resolve({ ok: false, reason: e.message }));
+    req.on('timeout', () => { req.destroy(); resolve({ ok: false, reason: 'timeout' }); });
+  });
+}
+
+// --- Auto-rebuild if build is missing ---
+function triggerRebuild() {
+  log('触发 Auto-rebuild: .next is missing');
+  const { execSync } = require('child_process');
+  const nodeBin = path.dirname(process.execPath);
+  const deployJs = path.join(APP_DIR, 'deploy.js');
+
+  try {
+    execSync(`"${path.join(nodeBin, 'node')}" "${deployJs}"`, {
+      stdio: 'inherit',
+      shell: true,
+      timeout: 600000, // 10 minutes max
+    });
+    log('✅ Auto-rebuild completed');
+    return true;
+  } catch (e) {
+    log(`❌ Auto-rebuild failed: ${e.message}`);
+    return false;
+  }
+}
+
+// --- Main ---
+async function main() {
+  log('--- Health check started ---');
+
+  // Check 1: Build
+  const build = checkBuildId();
+  if (!build.ok) {
+    log(`⚠ Build check FAILED: ${build.reason}`);
+    const rebuilt = triggerRebuild();
+    if (!rebuilt) {
+      log('❌ Health check FAILED — rebuild did not succeed');
+      process.exit(1);
+    }
+  } else {
+    log(`✅ Build OK (BUILD_ID: ${build.buildId})`);
+  }
+
+  // Check 2: HTTP
+  const httpCheck = await checkHttp();
+  if (httpCheck.ok) {
+    log(`✅ HTTP OK — uptime: ${httpCheck.data.uptime}s, memory: ${httpCheck.data.memory?.rss}`);
+  } else {
+    log(`⚠ HTTP check FAILED: ${httpCheck.reason}`);
+    // Touch restart.txt to force Passenger to restart workers
+    try {
+      fs.mkdirSync(path.join(APP_DIR, 'tmp'), { recursive: true });
+      fs.closeSync(fs.openSync(RESTART_FILE, 'a'));
+      log('Touched tmp/restart.txt — Passenger will restart workers');
+    } catch (e) {
+      log(`Could not restart: ${e.message}`);
+    }
+  }
+
+  log('--- Health check complete ---');
 }
 
 main().catch((e) => {
-  console.log(new Date().toISOString() + ' | healthcheck error: ' + (e && e.message ? e.message : e));
+  log(`❌ Health check crashed: ${e.message}`);
+  process.exit(1);
 });
