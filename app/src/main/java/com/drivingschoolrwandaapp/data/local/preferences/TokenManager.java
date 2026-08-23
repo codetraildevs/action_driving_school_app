@@ -22,10 +22,23 @@ public class TokenManager {
     private static final String KEY_REMEMBER_ME = "remember_me";
     private static final String KEY_ROLE_ID = "role_id";
 
-    private final SharedPreferences encryptedPreferences;
+    private volatile SharedPreferences encryptedPreferences;
+    private final Context appContext;
+    private volatile boolean usingFallback = false;
 
     public TokenManager(Context context) {
-        this.encryptedPreferences = createEncryptedPreferences(context);
+        this.appContext = context.getApplicationContext();
+        this.encryptedPreferences = createEncryptedPreferences(this.appContext);
+    }
+
+    /**
+     * Package-private constructor for unit testing. Accepts a pre-built
+     * SharedPreferences so tests can inject mocks without triggering
+     * EncryptedSharedPreferences or FirebaseCrashlytics.
+     */
+    TokenManager(Context context, SharedPreferences preferences) {
+        this.appContext = context;
+        this.encryptedPreferences = preferences;
     }
 
     private SharedPreferences createEncryptedPreferences(Context context) {
@@ -47,6 +60,28 @@ public class TokenManager {
             // Fallback to regular SharedPreferences (less secure)
             return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         }
+    }
+
+    /**
+     * Safe accessor that catches StackOverflowError from corrupted EncryptedSharedPreferences
+     * (known Android Keystore bug) and transparently switches to a plain fallback.
+     */
+    private SharedPreferences safePrefs() {
+        return encryptedPreferences;
+    }
+
+    /**
+     * When EncryptedSharedPreferences is corrupted (StackOverflow on read), migrate to
+     * plain SharedPreferences so the app keeps working instead of crashing.
+     */
+    private void switchToFallback() {
+        if (usingFallback) return;
+        usingFallback = true;
+        Log.w(TAG, "EncryptedSharedPreferences corrupted — switching to plain fallback");
+        encryptedPreferences = appContext.getSharedPreferences(PREFS_NAME + "_fallback", Context.MODE_PRIVATE);
+        // Token data from the encrypted store is unrecoverable; user will need to log in again.
+        // Clear any stale tokens in the fallback to avoid using wrong credentials.
+        encryptedPreferences.edit().clear().apply();
     }
 
     /**
@@ -78,26 +113,48 @@ public class TokenManager {
     }
 
     public String getAccessToken() {
-        return encryptedPreferences.getString(KEY_ACCESS_TOKEN, null);
+        try {
+            return encryptedPreferences.getString(KEY_ACCESS_TOKEN, null);
+        } catch (StackOverflowError e) {
+            Log.e(TAG, "StackOverflow reading access token — keystore corrupted", e);
+            switchToFallback();
+            return null;
+        }
     }
 
     public String getRefreshToken() {
-        return encryptedPreferences.getString(KEY_REFRESH_TOKEN, null);
+        try {
+            return encryptedPreferences.getString(KEY_REFRESH_TOKEN, null);
+        } catch (StackOverflowError e) {
+            Log.e(TAG, "StackOverflow reading refresh token — keystore corrupted", e);
+            switchToFallback();
+            return null;
+        }
     }
 
     public boolean isTokenExpired() {
-        long expiryTime = encryptedPreferences.getLong(KEY_TOKEN_EXPIRY, 0);
-        return System.currentTimeMillis() > expiryTime;
+        try {
+            long expiryTime = encryptedPreferences.getLong(KEY_TOKEN_EXPIRY, 0);
+            return System.currentTimeMillis() > expiryTime;
+        } catch (StackOverflowError e) {
+            Log.e(TAG, "StackOverflow reading token expiry — keystore corrupted", e);
+            switchToFallback();
+            return true; // treat as expired so user re-authenticates
+        }
     }
 
     public void clearTokens() {
-        SharedPreferences.Editor editor = encryptedPreferences.edit();
-        editor.remove(KEY_ACCESS_TOKEN);
-        editor.remove(KEY_REFRESH_TOKEN);
-        editor.remove(KEY_TOKEN_EXPIRY);
-        editor.remove(KEY_ROLE_ID);
-        editor.apply();
-        Log.d(TAG, "Tokens cleared");
+        try {
+            SharedPreferences.Editor editor = encryptedPreferences.edit();
+            editor.remove(KEY_ACCESS_TOKEN);
+            editor.remove(KEY_REFRESH_TOKEN);
+            editor.remove(KEY_TOKEN_EXPIRY);
+            editor.remove(KEY_ROLE_ID);
+            editor.apply();
+            Log.d(TAG, "Tokens cleared");
+        } catch (Exception e) {
+            Log.e(TAG, "Error clearing tokens", e);
+        }
     }
 
     /**
@@ -105,12 +162,22 @@ public class TokenManager {
      * can route admins to the admin console on later launches.
      */
     public void saveRole(int roleId) {
-        encryptedPreferences.edit().putInt(KEY_ROLE_ID, roleId).apply();
+        try {
+            encryptedPreferences.edit().putInt(KEY_ROLE_ID, roleId).apply();
+        } catch (Exception e) {
+            Log.e(TAG, "Error saving role", e);
+        }
     }
 
     /** Returns the persisted role id, or 0 if not set (regular user). */
     public int getRoleId() {
-        return encryptedPreferences.getInt(KEY_ROLE_ID, 0);
+        try {
+            return encryptedPreferences.getInt(KEY_ROLE_ID, 0);
+        } catch (StackOverflowError e) {
+            Log.e(TAG, "StackOverflow reading role id — keystore corrupted", e);
+            switchToFallback();
+            return 0;
+        }
     }
 
     public boolean isLoggedIn() {
@@ -121,13 +188,25 @@ public class TokenManager {
      * Returns the token expiry time in milliseconds since epoch, or 0 if not set.
      */
     public long getTokenExpiryTime() {
-        return encryptedPreferences.getLong(KEY_TOKEN_EXPIRY, 0);
+        try {
+            return encryptedPreferences.getLong(KEY_TOKEN_EXPIRY, 0);
+        } catch (StackOverflowError e) {
+            Log.e(TAG, "StackOverflow reading token expiry time — keystore corrupted", e);
+            switchToFallback();
+            return 0;
+        }
     }
 
     /**
      * Returns whether the user chose "Remember Me" for the current session.
      */
     public boolean isRememberMe() {
-        return encryptedPreferences.getBoolean(KEY_REMEMBER_ME, true);
+        try {
+            return encryptedPreferences.getBoolean(KEY_REMEMBER_ME, true);
+        } catch (StackOverflowError e) {
+            Log.e(TAG, "StackOverflow reading remember me — keystore corrupted", e);
+            switchToFallback();
+            return true;
+        }
     }
 }

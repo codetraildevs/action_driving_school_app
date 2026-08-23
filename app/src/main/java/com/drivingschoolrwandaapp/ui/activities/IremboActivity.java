@@ -12,7 +12,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
+import com.drivingschoolrwandaapp.utils.EdgeToEdgeUtils;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -48,7 +48,7 @@ public class IremboActivity extends AppCompatActivity implements IremboServiceAd
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        EdgeToEdge.enable(this);
+        EdgeToEdgeUtils.enable(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_irembo);
 

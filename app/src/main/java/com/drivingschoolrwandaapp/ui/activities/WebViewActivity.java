@@ -20,7 +20,7 @@ import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
+import com.drivingschoolrwandaapp.utils.EdgeToEdgeUtils;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -37,7 +37,7 @@ public class WebViewActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        EdgeToEdge.enable(this);
+        EdgeToEdgeUtils.enable(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web_view);
 

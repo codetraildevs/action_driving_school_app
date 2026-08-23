@@ -8,7 +8,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
+import com.drivingschoolrwandaapp.utils.EdgeToEdgeUtils;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -61,7 +61,7 @@ public abstract class BaseIremboFormActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        EdgeToEdge.enable(this);
+        EdgeToEdgeUtils.enable(this);
         super.onCreate(savedInstanceState);
         setContentView(getFormLayoutId());
 

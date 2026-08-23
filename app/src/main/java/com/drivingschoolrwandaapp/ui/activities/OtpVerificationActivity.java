@@ -6,7 +6,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
+import com.drivingschoolrwandaapp.utils.EdgeToEdgeUtils;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -29,7 +29,7 @@ public class OtpVerificationActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
+        EdgeToEdgeUtils.enable(this);
         setContentView(R.layout.activity_otp_verification);
 
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);

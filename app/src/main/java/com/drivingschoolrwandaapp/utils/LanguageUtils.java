@@ -35,7 +35,13 @@ public class LanguageUtils {
             Resources resources = context.getResources();
             Configuration config = resources.getConfiguration();
             config.setLocale(locale);
-            resources.updateConfiguration(config, resources.getDisplayMetrics());
+            try {
+                resources.updateConfiguration(config, resources.getDisplayMetrics());
+            } catch (UnsupportedOperationException e) {
+                // Some devices throw on updateConfiguration; AppCompatDelegate
+                // already handled the locale change, so this is non-fatal.
+                android.util.Log.w("LanguageUtils", "updateConfiguration not supported", e);
+            }
         }
     }
 

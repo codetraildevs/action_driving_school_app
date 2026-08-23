@@ -103,6 +103,9 @@ android {
         viewBinding = true
         buildConfig = true
     }
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
     packaging {
         jniLibs {
             // libdatastore_shared_counter.so is a stripped DataStore helper that

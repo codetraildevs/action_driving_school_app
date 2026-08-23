@@ -7,7 +7,7 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
+import com.drivingschoolrwandaapp.utils.EdgeToEdgeUtils;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -41,7 +41,7 @@ public class MyApplicationsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        EdgeToEdge.enable(this);
+        EdgeToEdgeUtils.enable(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_my_applications);
 
