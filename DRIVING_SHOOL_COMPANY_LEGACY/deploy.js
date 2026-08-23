@@ -59,31 +59,42 @@ function run(cmd, label) {
   execSync(cmd, { stdio: 'inherit', shell: true });
 }
 
-// --- Kill stray Node daemons -----------------------------------------------
-// A `next dev` / `next start` started from the panel's script dropdown keeps
-// running (the UI warns it cannot be stopped) and eats the account's
-// process/thread quota — the cause of spawn EAGAIN and Prisma "timer has gone
-// away" panics on this host. Kill every node/npm process except this script
-// and the Passenger-served app (cmdline contains server.js).
-function killStrayNodeProcesses() {
-  try {
-    const out = execSync("ps -eo pid,cmd | grep -iE 'node|npm' | grep -v grep", { encoding: 'utf8', shell: true });
-    const me = process.pid;
-    const killed = [];
-    for (const line of out.trim().split('\n')) {
-      const m = line.trim().match(/^(\d+)\s+(.*)$/);
-      if (!m) continue;
-      const pid = parseInt(m[1], 10);
-      if (pid === me) continue;
-      if (m[2].includes('server.js')) continue; // keep Passenger's app
-      try { process.kill(pid, 'SIGKILL'); killed.push(pid); } catch (_) { /* already gone */ }
+// --- Kill stray Node daemons -----------------------------------------------  // Kill every node/npm process except this script and the Passenger-served app (cmdline contains server.js).
+  function killStrayNodeProcesses() {
+    try {
+      const out = execSync("ps -eo pid,cmd | grep -iE 'node|npm' | grep -v grep", { encoding: 'utf8', shell: true });
+      const me = process.pid;
+      const killed = [];
+      for (const line of out.trim().split('\n')) {
+        const m = line.trim().match(/^(\d+)\s+(.*)$/);
+        if (!m) continue;
+        const pid = parseInt(m[1], 10);
+        if (pid === me) continue;
+        if (m[2].includes('server.js')) continue; // keep Passenger's app
+        try { process.kill(pid, 'SIGKILL'); killed.push(pid); } catch (_) { /* already gone */ }
+      }
+      if (killed.length) console.log('Killed stray node processes: ' + killed.join(', '));
+      else console.log('No stray node processes found.');
+    } catch (e) {
+      console.log('Stray-process check skipped: ' + e.message);
     }
-    if (killed.length) console.log('Killed stray node processes: ' + killed.join(', '));
-    else console.log('No stray node processes found.');
-  } catch (e) {
-    console.log('Stray-process check skipped: ' + e.message);
   }
-}
+
+  // Free nproc slots by killing zombie/excess processes that share hosting
+  // accounts often accumulate (cron jobs, orphaned shells, etc.).
+  function freeNprocSlots() {
+    try {
+      // Kill zombie processes (state Z) immediately
+      execSync("ps -eo pid,stat,cmd | awk '$2 ~ /Z/ {print $1}' | xargs -r kill -9 2>/dev/null", { shell: true, stdio: 'ignore' });
+      console.log('Attempted to reap zombie processes ✓');
+    } catch (_) { /* no zombies */ }
+    try {
+      // Count current nproc usage vs limit
+      const count = execSync('ps -e --no-headers | wc -l', { encoding: 'utf8', shell: true }).trim();
+      const limit = execSync('ulimit -u', { encoding: 'utf8', shell: true }).trim();
+      console.log('nproc usage: ' + count + ' / ' + limit);
+    } catch (_) { /* can't read — ignore */ }
+  }
 
 // cPanel's File Manager extractor can silently drop files from large archives
 // (that is what left the server without components/ui/*). Instead of relying on
@@ -231,6 +242,7 @@ function dbCheck() {
 
 try {
   killStrayNodeProcesses();
+  freeNprocSlots();
   extractFixArchives();
   run(`"${npm}" install --legacy-peer-deps`, 'Step 1/3 — npm install --legacy-peer-deps (this can take a few minutes)');
 
@@ -300,19 +312,66 @@ try {
   }
   console.log('--- End project-wide permission fix ---\n');
 
+  // Back up the existing .next so we can restore it if the build fails.
+  // Without this, a failed build leaves the app with no .next directory,
+  // and any Passenger restart would crash the app.
+  const nextDir = path.join(__dirname, '.next');
+  const nextBackup = path.join(__dirname, '.next.bak');
+  if (fs.existsSync(nextDir)) {
+    try {
+      // Remove any stale backup from a previous failed deploy
+      execSync(`rm -rf "${nextBackup}"`, { stdio: 'ignore', shell: true });
+      execSync(`mv "${nextDir}" "${nextBackup}"`, { stdio: 'inherit', shell: true });
+      console.log('Backed up existing .next → .next.bak ✓');
+    } catch (e) {
+      console.log('.next backup skipped: ' + (e.message || e));
+    }
+  }
+  // Clean .next cache — prevents corrupted partial builds from stale artifacts.
+  console.log('\n--- Cleaning .next build cache ---');
+  try {
+    execSync(`rm -rf "${nextDir}"`, { stdio: 'inherit', shell: true });
+    console.log('.next directory removed ✓');
+  } catch (e) {
+    console.log('.next cleanup skipped: ' + (e.message || e));
+  }
+  console.log('--- End .next cleanup ---\n');
+
   // Cap Node's heap so a shared-host memory limit cannot silently kill the
   // build (a killed process prints NOTHING to the log — exactly what happened
   // when the build died right after "Creating an optimized production build").
+  //
+  // UV_THREADPOOL_SIZE=1 prevents libuv from spawning extra threads (each thread
+  // counts toward the nproc limit on shared hosting).
   const buildEnv = Object.assign({}, process.env, {
     NODE_OPTIONS: '--max-old-space-size=1024',
+    UV_THREADPOOL_SIZE: '1',
   });
   console.log('\nBuild memory cap: NODE_OPTIONS=--max-old-space-size=1024');
-  execSync(`"${npm}" run build`, { stdio: 'inherit', shell: true, env: buildEnv });
+  console.log('Thread pool cap:  UV_THREADPOOL_SIZE=1');
+  //
+  // IMPORTANT: Run `next build --experimental-build-mode compile` directly instead
+  // of `npm run build` to skip the static page generation phase.
+  // The server's package.json may not have this flag, and even if it does, npm
+  // can strip arguments. In compile mode Next.js still produces all the .next
+  // artifacts needed by server.js (compiled bundles, route manifests, etc.) but
+  // skips spawning child processes for static HTML generation — the exact step
+  // that hits EAGAIN on shared hosting with tight nproc limits.
+  execSync(`"${npx}" next build --experimental-build-mode compile`, { stdio: 'inherit', shell: true, env: buildEnv });
 
   // Restart the app so Passenger serves the new build (cPanel restart.txt mechanism).
   fs.mkdirSync(path.join(__dirname, 'tmp'), { recursive: true });
   fs.closeSync(fs.openSync(path.join(__dirname, 'tmp', 'restart.txt'), 'a')); // touch
   console.log('App restart triggered (tmp/restart.txt touched).');
+
+  // Clean up the .next backup from this successful deploy to save disk space.
+  const nextBakPath = path.join(__dirname, '.next.bak');
+  if (fs.existsSync(nextBakPath)) {
+    try {
+      execSync(`rm -rf "${nextBakPath}"`, { stdio: 'ignore', shell: true });
+      console.log('Cleaned up .next.bak ✓');
+    } catch (_) { /* non-fatal */ }
+  }
 
   dbCheck()
     .then(() => checkMissingUploads())
@@ -331,6 +390,16 @@ try {
     console.error('(SIGKILL usually means the host (cPanel/LVE) killed it — typically out of memory or process limit)');
   }
   if (err && err.status) console.error('Exit code:', err.status);
+  // Restore the old .next if we backed it up, so the running app doesn't crash.
+  if (typeof nextBackup !== 'undefined' && fs.existsSync(nextBackup)) {
+    try {
+      execSync(`rm -rf "${nextDir}"`, { stdio: 'ignore', shell: true });
+      execSync(`mv "${nextBackup}" "${nextDir}"`, { stdio: 'inherit', shell: true });
+      console.log('Restored previous .next from backup ✓');
+    } catch (restoreErr) {
+      console.error('WARNING: Could not restore .next backup — app may not restart: ' + (restoreErr.message || restoreErr));
+    }
+  }
   console.error('Scroll up for the full build output above this line.');
   process.exit(1);
 }

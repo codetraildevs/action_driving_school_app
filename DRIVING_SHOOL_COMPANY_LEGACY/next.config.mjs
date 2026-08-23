@@ -17,6 +17,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // Fixes the "metadataBase not set" warning for social/OG images.
+  metadataBase: new URL('https://console.amategekoyumuhanda.rw'),
   experimental: {
     cpus: 1,
     workerThreads: false,
