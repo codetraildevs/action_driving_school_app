@@ -20,6 +20,8 @@ import androidx.fragment.app.Fragment;
 import com.drivingschoolrwandaapp.R;
 import com.google.android.material.card.MaterialCardView;
 
+import android.widget.TextView;
+
 public class PaymentUtils {
 
     private static final int CALL_PHONE_PERMISSION_REQUEST_CODE = 456;
@@ -61,10 +63,12 @@ public class PaymentUtils {
 
     public static void setupPaymentMethods(View rootView, Fragment fragment, String amount) {
         setupPaymentMethods(rootView, fragment, null, amount, DEFAULT_MOMO_PAY_CODE, DEFAULT_MTN_NUMBER, DEFAULT_TIGO_NUMBER);
+        updateIremboPaymentText(rootView);
     }
 
     public static void setupPaymentMethods(View rootView, Activity activity, String amount) {
         setupPaymentMethods(rootView, null, activity, amount, DEFAULT_MOMO_PAY_CODE, DEFAULT_MTN_NUMBER, DEFAULT_TIGO_NUMBER);
+        updateIremboPaymentText(rootView);
     }
 
     /** Exam-list payment with custom numbers. */
@@ -94,6 +98,26 @@ public class PaymentUtils {
             if (fragment != null) dialUssd(fragment, tigoUssd);
             else if (activity != null) dialUssd(activity, tigoUssd);
         });
+    }
+
+    /**
+     * Updates the payment instruction text to show Irembo-specific numbers.
+     * Called only for Irembo services (not exam payments).
+     */
+    private static void updateIremboPaymentText(View rootView) {
+        TextView tvInstruction1 = rootView.findViewById(R.id.tv_payment_instruction_1);
+        TextView tvInstruction2 = rootView.findViewById(R.id.tv_payment_instruction_2);
+        TextView tvInstruction3 = rootView.findViewById(R.id.tv_payment_instruction_3);
+
+        if (tvInstruction1 != null) {
+            tvInstruction1.setText(DEFAULT_MOMO_PAY_CODE + " (registered on Louise)");
+        }
+        if (tvInstruction2 != null) {
+            tvInstruction2.setText(DEFAULT_MTN_NUMBER);
+        }
+        if (tvInstruction3 != null) {
+            tvInstruction3.setText(DEFAULT_TIGO_NUMBER);
+        }
     }
 
     private static void dialUssd(Fragment fragment, String ussd) {
