@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 // @ts-nocheck
 /**
  * Pre-build safety net (runs automatically before `next build` via the
