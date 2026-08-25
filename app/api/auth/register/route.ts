@@ -180,6 +180,15 @@ export async function POST(request: NextRequest) {
           },
         });
 
+        // Also create the junction-table record so login/profile can
+        // resolve the timezone via the userTimezone relation.
+        await tx.userTimezone.create({
+          data: {
+            userId: user.id,
+            timezoneId: userTimezone.id,
+          },
+        });
+
         if (userAddress && Object.keys(userAddress).length > 0) {
           await tx.address.create({
             data: {

@@ -26,7 +26,7 @@ cd "$APP_DIR"
 
 # ── 1. Pull latest code ──
 echo "[1/5] Pulling latest code..."
-git pull origin feature/vps-migration
+git pull origin backend-deploy
 
 # ── 2. Install dependencies ──
 echo "[2/5] Installing dependencies..."

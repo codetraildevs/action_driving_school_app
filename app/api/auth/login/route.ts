@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma} from "@/lib/prismaDB";
 import { generateAccessToken, generateRefreshToken } from "@/lib/auth/jwt";
 import { isAdminRoleName } from "@/lib/auth/roles";
+import { resolveTimezoneName } from "@/lib/auth/timezone";
 import { sendFCMNotification } from "@/lib/notification";
 import { NOTIFICATION_CHANNELS } from "@/lib/types";
 
@@ -121,13 +122,16 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      // Resolve timezone (junction table → direct FK → UTC)
+      const timezoneName = await resolveTimezoneName(user.userTimezone, user.timezoneId);
+
       // Generate tokens
       const tokenPayload = {
         userId: user.id,
         email: user.email,
         role: user.role.id,
         language: user.language.languageCode,
-        timezone: user.userTimezone?.timezone.timezoneName || "UTC",
+        timezone: timezoneName,
       };
 
       const accessToken = generateAccessToken(tokenPayload);
@@ -173,7 +177,7 @@ export async function POST(request: NextRequest) {
             roleName: user.role.roleName,
             languageId:user.languageId,
             language: user.language.languageCode,
-            timezone: user.userTimezone?.timezone.timezoneName || "UTC",
+            timezone: timezoneName,
           },
           accessToken,
           refreshToken,

@@ -8,6 +8,7 @@ import {
 } from "@/lib/auth/jwt";
 
 import { prisma } from "@/lib/prismaDB";
+import { resolveTimezoneName } from "@/lib/auth/timezone";
 
 const refreshSchema = z.object({
   refreshToken: z.string(),
@@ -54,13 +55,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Resolve timezone (junction table → direct FK → UTC)
+    const timezoneName = await resolveTimezoneName(user.userTimezone, user.timezoneId);
+
     // Generate new tokens
     const tokenPayload = {
       userId: user.id,
       email: user.email,
       role: user.role.id,
       language: user.language.languageCode,
-      timezone: user.userTimezone?.timezone.timezoneName || "UTC",
+      timezone: timezoneName,
     };
 
     const newAccessToken = generateAccessToken(tokenPayload);

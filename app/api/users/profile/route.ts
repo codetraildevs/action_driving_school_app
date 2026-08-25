@@ -2,6 +2,7 @@
 import { verifyToken } from "@/lib/auth/jwt";
 
 import { prisma } from "@/lib/prismaDB";
+import { resolveTimezoneName } from "@/lib/auth/timezone";
 
 export async function GET(request: NextRequest) {
   try {
@@ -45,7 +46,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    
+    // Resolve timezone (junction table → direct FK → UTC)
+    const timezoneName = await resolveTimezoneName(user.userTimezone, user.timezoneId);
+
     const userProfile = {
       id: user.id,
       firstName: user.firstName,
@@ -58,7 +61,7 @@ export async function GET(request: NextRequest) {
       roleName: user.role.roleName,
       languageId:user.languageId,
       language: user.language.languageCode,
-      timezone: user.userTimezone?.timezone.timezoneName || "UTC",
+      timezone: timezoneName,
       createdAt: user.createdAt.toISOString(),
       userTestAccess:user.userTestAccess
     };
