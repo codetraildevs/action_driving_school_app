@@ -29,6 +29,16 @@ const nextConfig = {
     // Put ALL static pages into a single export worker so the build never
     // spawns more than one extra process (stays under the host's NPROC limit).
     staticGenerationMinPagesPerWorker: 1000,
+    serverActions: {
+      // Allow Server Actions from the external IP (with and without port)
+      // and the production domain. Fixes the x-forwarded-host mismatch
+      // when the VPS is accessed on a non-standard external port.
+      allowedOrigins: [
+        "108.181.215.244:10041",
+        "108.181.215.244",
+        "console.amategekoyumuhanda.rw",
+      ],
+    },
   },
 }
 
