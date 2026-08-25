@@ -114,6 +114,31 @@ const getReportsHandler = withPermission(PERMISSIONS.REPORTS_VIEW)(
           });
           break;
 
+        case 'requests':
+          reportData = await prisma.userSubscriptionRequest.findMany({
+            where: dateFilter,
+            select: {
+              id: true,
+              userId: true,
+              requestedTests: true,
+              requestedDays: true,
+              requestedExpiresAt: true,
+              status: true,
+              createdAt: true,
+              user: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  phoneNumber: true,
+                  email: true,
+                }
+              },
+            },
+            orderBy: { createdAt: 'desc' }
+          });
+          break;
+
         case 'pdfs':
           reportData = await prisma.pdfFile.findMany({
             where: dateFilter,

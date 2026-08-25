@@ -41,7 +41,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-type ReportType = "users" | "subscriptions" | "tests" | "pdfs";
+type ReportType = "users" | "subscriptions" | "requests" | "tests" | "pdfs";
 
 interface ReportResult {
   reportType: string;
@@ -53,6 +53,7 @@ interface ReportResult {
 const reportTypes: { value: ReportType; label: string; icon: any }[] = [
   { value: "users", label: "Users", icon: Users },
   { value: "subscriptions", label: "Subscriptions", icon: CreditCard },
+  { value: "requests", label: "User Requests", icon: BookOpen },
   { value: "tests", label: "Test Results", icon: BookOpen },
   { value: "pdfs", label: "PDF Files", icon: FileText },
 ];
@@ -223,6 +224,52 @@ export default function AnalyticsReportsPage() {
                       : "—"}
                   </TableCell>
                   <TableCell>{formatDate(tx.createdAt)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        );
+
+      case "requests":
+        return (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>User</TableHead>
+                <TableHead>Phone</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Tests</TableHead>
+                <TableHead>Days</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Requested</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {report.results.map((req: any) => (
+                <TableRow key={req.id}>
+                  <TableCell className="font-medium">
+                    {req.user?.firstName} {req.user?.lastName}
+                  </TableCell>
+                  <TableCell>{req.user?.phoneNumber || "—"}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {req.user?.email || "—"}
+                  </TableCell>
+                  <TableCell>{req.requestedTests}</TableCell>
+                  <TableCell>{req.requestedDays}</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        req.status === "ACCEPTED"
+                          ? "default"
+                          : req.status === "REJECTED"
+                            ? "destructive"
+                            : "secondary"
+                      }
+                    >
+                      {req.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{formatDate(req.createdAt)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
