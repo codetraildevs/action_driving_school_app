@@ -30,7 +30,7 @@ git pull origin backend-deploy
 
 # ── 2. Install dependencies ──
 echo "[2/5] Installing dependencies..."
-npm install --production=false
+npm install --omit=dev --legacy-peer-deps
 
 # ── 3. Prisma generate ──
 echo "[3/5] Running Prisma generate..."
