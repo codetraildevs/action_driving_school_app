@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { apiClient } from "@/lib/api-client";
-import { Users, FileText, CreditCard, TrendingUp, Activity, Download, Eye, User, Calendar } from "lucide-react";
+import { Users, FileText, CreditCard, TrendingUp, Activity, Download, Eye, User, Calendar, Clock, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface DashboardStats {
@@ -17,6 +17,21 @@ interface DashboardStats {
   totalPdfFiles: number;
   recentActivity: any[];
   popularContent: any[];
+}
+
+interface SubscriptionRequest {
+  id: number;
+  userId: number;
+  requestedTests: number;
+  requestedDays: number;
+  status: string;
+  createdAt: string;
+  user: {
+    firstName: string;
+    lastName: string;
+    phoneNumber: string;
+    email: string;
+  };
 }
 
 interface ActivityItem {
@@ -47,22 +62,38 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [requests, setRequests] = useState<SubscriptionRequest[]>([]);
+  const [requestsLoading, setRequestsLoading] = useState(true);
 
   useEffect(() => {
     fetchDashboardData();
+    fetchRequests();
   }, []);
 
   const fetchDashboardData = async () => {
     try {
       setError(null);
       const data = await apiClient.get<{ data: DashboardStats }>("/api/admin/analytics/dashboard");
-      console.log("Dashboard data:", data.data); // Debug log
       setStats(data.data);
     } catch (error) {
       console.error("Failed to fetch dashboard data:", error);
       setError("Failed to load dashboard data");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchRequests = async () => {
+    try {
+      setRequestsLoading(true);
+      const data = await apiClient.get<{ data: SubscriptionRequest[]; total: number }>(
+        "/api/subscriptions/userRequests?pageSize=20"
+      );
+      setRequests(data.data || []);
+    } catch (error) {
+      console.error("Failed to fetch requests:", error);
+    } finally {
+      setRequestsLoading(false);
     }
   };
 
@@ -276,6 +307,78 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Subscription Requests */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCard className="h-5 w-5" />
+                Subscription Requests
+              </CardTitle>
+              <CardDescription>Recent user subscription requests</CardDescription>
+            </div>
+            <a href="/admin/user-requests">
+              <Button variant="outline" size="sm">View All</Button>
+            </a>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {requestsLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              </div>
+            ) : requests.length > 0 ? (
+              requests.slice(0, 10).map((req) => (
+                <div key={req.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className={`p-2 rounded-full ${
+                      req.status === "ACCEPTED" ? "bg-green-50" :
+                      req.status === "REJECTED" ? "bg-red-50" : "bg-yellow-50"
+                    }`}>
+                      {req.status === "ACCEPTED" ? (
+                        <Check className="h-4 w-4 text-green-600" />
+                      ) : req.status === "REJECTED" ? (
+                        <X className="h-4 w-4 text-red-600" />
+                      ) : (
+                        <Clock className="h-4 w-4 text-yellow-600" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">
+                        {req.user.firstName} {req.user.lastName}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {req.user.phoneNumber} • {req.requestedTests} tests • {req.requestedDays} days
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Badge
+                      variant={
+                        req.status === "ACCEPTED" ? "default" :
+                        req.status === "REJECTED" ? "destructive" : "secondary"
+                      }
+                    >
+                      {req.status}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {formatDate(req.createdAt)}
+                    </span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <CreditCard className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                <p className="text-sm text-muted-foreground">No subscription requests</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* System Health */}
       <Card>
