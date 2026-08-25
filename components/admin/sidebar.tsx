@@ -23,6 +23,7 @@ import {
   Globe2,
   Group,
   Network,
+  BarChart3,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth/auth-context";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,15 @@ const navigation = [
     name: "Dashboard",
     href: "/admin/dashboard",
     icon: LayoutDashboard,
+  },
+  {
+    name: "Analytics",
+    href: "/admin/analytics",
+    icon: BarChart3,
+    submenu: [
+      { name: "Overview", href: "/admin/analytics/dashboard" },
+      { name: "Reports", href: "/admin/analytics/reports" },
+    ],
   },
   {
     name: "Users",
