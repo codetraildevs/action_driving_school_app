@@ -250,12 +250,15 @@ export default function DashboardLayout({
 
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data);
- 
+
+      // Ignore the initial "Connected!" handshake message
+      if (!data.data) return;
 
       try {
         const pendingRequests = data.data;
         setRequests(pendingRequests || []);
-        document.title= `(${pendingRequests.length}) Admin Dashboard - Action Driving School`
+        setLoading(false);
+        document.title = `(${pendingRequests.length}) Admin Dashboard - Action Driving School`;
       } catch (error) {
         console.error("Failed to check notifications:", error);
       }
@@ -272,8 +275,14 @@ export default function DashboardLayout({
     };
   }, []);
 
+  // SSE handles real-time updates. Initial fetch is a fallback in case SSE is slow.
   useEffect(() => {
-    fetchPendingRequests();
+    const timer = setTimeout(() => {
+      if (requests.length === 0) {
+        fetchPendingRequests();
+      }
+    }, 8000);
+    return () => clearTimeout(timer);
   }, []);
 
   // Mobile bottom nav items
