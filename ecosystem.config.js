@@ -6,10 +6,9 @@ module.exports = {
       cwd: '/home/project3',
 
       // ── Instances ──
-      // 'max' = one per CPU core (2 cores on Express VPS = 2 workers)
-      // This handles concurrent requests without blocking.
-      instances: 'max',
-      exec_mode: 'cluster',
+      // Single instance to save memory on 4GB VPS
+      instances: 1,
+      exec_mode: 'fork',
 
       // ── Environment ──
       env: {
