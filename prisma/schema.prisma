@@ -1,0 +1,969 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  output        = "../lib/generated/prisma"
+  // "native" resolves to the server platform at generate time (the server has
+  // OpenSSL 3.0.x). The stale debian-openssl-1.0.x entry was removed — it did
+  // not match the host and contributed to query-engine problems on cPanel.
+  binaryTargets = ["native"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                           Int                                                   @id @default(autoincrement())
+  firstName                    String                        @map("first_name")      @db.VarChar(255)
+  middleName                   String?                       @map("middle_name")     @db.VarChar(255)
+  lastName                     String?                       @map("last_name")       @db.VarChar(255)
+  dob                          DateTime?                                             @db.Date
+  phoneNumber                  String                        @map("phone_number")    @unique @db.VarChar(20)
+  isActive                     Boolean                       @map("is_active")       @default(false)
+  roleId                       Int                           @map("role")
+  profilePicture               String?                       @map("profile_picture") @db.VarChar(255)
+  email                        String?                       @map("email")           @db.VarChar(255)
+  lastLogin                    DateTime?                     @map("last_login")
+  createdAt                    DateTime                      @map("created_at")      @default(now())
+  updatedAt                    DateTime                      @map("updated_at")      @updatedAt
+  password                     String                                                @db.Text
+  languageId                   Int                           @map("language")
+  pendingLanguageId            Int?                          @map("pendingLanguage")
+  timezoneId                   Int                           @map("userTimezone")    @default(1)
+
+  // Hot query support: admin users list filters by is_active and sorts by created_at
+  @@index([isActive, createdAt])
+  @@index([createdAt])
+
+  role                         UserRole                      @relation(fields: [roleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  language                     Language                      @relation("language", fields: [languageId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  Pendinglanguage              Language?                     @relation("pendingLanguage", fields: [pendingLanguageId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  addresses                    Address[]
+  devices                      Device[]
+  sessions                     Session[]
+  userSubscription             UserSubscription?
+  userPermissions              UserPermission[]
+  userTimezone                 UserTimezone?
+  pdfFiles                     PdfFile[]
+  readingSessions              ReadingSession[]
+  testAttempts                 TestAttempt[]
+  testResults                  TestResult[]
+  userActivities               UserActivity[]
+  transactions                 Transaction[]
+  bookmarks                    Bookmark[]
+  notifications                UserNotification[]
+  ratings                      Rating[]
+  permission_logs              PermissionLogs[]
+  PrivacyConsent               PrivacyConsent[]
+  DataDeletionRequest          DataDeletionRequest[]
+  LoginAttempts                LoginAttempts[]
+  PrivacyPolicyAcceptance      PrivacyPolicyAcceptance[]
+  TermsOfServiceAcceptance     TermsOfServiceAcceptance[]
+  userLearningMaterials        UserLearningMaterial[]
+  userRatings                  UserRating[]
+  userSubscriptionRequests     UserSubscriptionRequest[]
+  userTestAccess               UserTestAccess?
+
+  @@map("users")
+
+  iremboDrivingLicenseRequests IremboDrivingLicenseRequest[]
+  iremboSpecialRequests        IremboSpecialRequest[]
+}
+
+model UserRole {
+  id          Int                         @id @default(autoincrement())
+  roleName    String   @map("role_name")  @db.VarChar(255)
+  description String                      @db.Text
+  createdAt   DateTime @map("created_at") @default(now())
+  updatedAt   DateTime @map("updated_at") @updatedAt
+
+  users       User[]
+
+  @@map("user_roles")
+}
+
+model Address {
+  id        Int                         @id @default(autoincrement())
+  village   String                      @db.VarChar(255)
+  cell      String                      @db.VarChar(255)
+  sector    String                      @db.VarChar(255)
+  district  String                      @db.VarChar(255)
+  province  String                      @db.VarChar(255)
+  userId    Int      @map("user")
+  createdAt DateTime @map("created_at") @default(now())
+  updatedAt DateTime @map("updated_at") @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("addresses")
+}
+
+model Device {
+  id              Int                                      @id @default(autoincrement())
+  physicalAddress String          @map("physical_address") @unique @db.VarChar(255)
+  manufacturer    String                                   @db.VarChar(255)
+  model           String                                   @db.VarChar(255)
+  name            String                                   @db.VarChar(255)
+  userId          Int             @map("user")
+  createdAt       DateTime        @map("created_at")       @default(now())
+  updatedAt       DateTime        @map("updated_at")       @updatedAt
+
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  sessions        Session[]
+  LoginAttempts   LoginAttempts[]
+
+  @@index([userId])
+  @@map("devices")
+}
+
+model FirebaseDevice {
+  id            Int         @id @default(autoincrement())
+  physicalDeviceId String   @map("physical_device") @unique @db.VarChar(255)
+  deviceToken   String      @map("device_token") @unique @db.VarChar(255)
+  createdAt     DateTime    @map("created_at")   @default(now())
+  updatedAt     DateTime    @map("updated_at")   @updatedAt
+  @@map("firebase_devices")
+}
+
+model PermissionLogs {
+  id        Int                         @id @default(autoincrement())
+  purpose   String                      @db.VarChar(255)
+  granted   Boolean  @map("granted")    @default(false)
+  name      String                      @db.VarChar(255)
+  userId    Int      @map("user")
+  createdAt DateTime @map("created_at") @default(now())
+  updatedAt DateTime @map("updated_at") @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("permissionlogs")
+}
+
+model PrivacyConsent {
+  id            Int                          @id @default(autoincrement())
+  policyVersion String                       @db.VarChar(255)
+  accepted_at   DateTime @map("accepted_at") @default(now())
+  ipAddress     String                       @db.VarChar(255)
+  userId        Int      @map("user")
+  createdAt     DateTime @map("created_at")  @default(now())
+  updatedAt     DateTime @map("updated_at")  @updatedAt
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("privacyConsent")
+}
+
+model DataDeletionRequest {
+  id            Int                                      @id @default(autoincrement())
+  requestDate   DateTime           @map("request_date")  @default(now())
+  complete_date DateTime           @map("complete_date") @updatedAt
+  userId        Int                @map("user")
+  createdAt     DateTime           @map("created_at")    @default(now())
+  updatedAt     DateTime           @map("updated_at")    @updatedAt
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  status        DataDeletionStatus                       @default(pending)
+  reason        String?                                  @db.Text
+  confirmedAt   DateTime?          @map("confirmed_at")
+
+  @@map("DataDeletionRequests")
+}
+
+model LoginAttempts {
+  id          Int                         @id @default(autoincrement())
+  userId      Int      @map("user")
+  attemptType String                      @db.VarChar(255)
+  success     Boolean                     @default(false)
+  ipAddress   String                      @db.VarChar(255)
+  deviceId    Int      @map("device")
+  createdAt   DateTime @map("created_at") @default(now())
+  updatedAt   DateTime @map("updated_at") @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  device      Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  // Hot query support: login attempts looked up by user
+  @@index([userId])
+  @@map("loginAttemps")
+}
+
+model Session {
+  id        Int                          @id @default(autoincrement())
+  userId    Int       @map("user")
+  deviceId  Int       @map("device")
+  isSuspect Boolean   @map("is_suspect") @default(false)
+  startedAt DateTime  @map("started_at")
+  endedAt   DateTime? @map("ended_at")
+  createdAt DateTime  @map("created_at") @default(now())
+  updatedAt DateTime  @map("updated_at") @updatedAt
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  device    Device    @relation(fields: [deviceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  // Hot query support: device-binding checks look up sessions by user / device
+  @@index([userId])
+  @@index([deviceId])
+  @@map("sessions")
+}
+
+model SubscriptionPlan {
+  id                Int                                   @id @default(autoincrement())
+  planName          String             @map("plan_name")  @unique @db.VarChar(255)
+  amount            Decimal                               @db.Decimal(10, 2)
+  duration          Int
+  createdAt         DateTime           @map("created_at") @default(now())
+  updatedAt         DateTime           @map("updated_at") @updatedAt
+
+  permissions       Permission[]
+  userSubscriptions UserSubscription[]
+  transactions      Transaction[]
+
+  @@map("subscription_plans")
+}
+
+model Permission {
+  id                 Int                                        @id @default(autoincrement())
+  permissionName     String           @map("permission_name")   @unique @db.VarChar(255)
+  subscriptionPlanId Int              @map("subscription_plan")
+  createdAt          DateTime         @map("created_at")        @default(now())
+  updatedAt          DateTime         @map("updated_at")        @updatedAt
+
+  subscriptionPlan   SubscriptionPlan @relation(fields: [subscriptionPlanId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userPermissions    UserPermission[]
+
+  @@map("permissions")
+}
+
+model UserSubscription {
+  id                 Int                                        @id @default(autoincrement())
+  userId             Int              @map("user")              @unique
+  subscriptionPlanId Int              @map("subscription_plan")
+  startDate          DateTime?
+  endDate            DateTime?
+  createdAt          DateTime         @map("created_at")        @default(now())
+  updatedAt          DateTime         @map("updated_at")        @updatedAt
+
+  user               User             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  subscriptionPlan   SubscriptionPlan @relation(fields: [subscriptionPlanId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@map("user_subscriptions")
+}
+
+model UserPermission {
+  id           Int                           @id @default(autoincrement())
+  userId       Int        @map("user")
+  permissionId Int        @map("permission")
+  createdAt    DateTime   @map("created_at") @default(now())
+  updatedAt    DateTime   @map("updated_at") @updatedAt
+
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("user_permissions")
+}
+
+model Timezone {
+  id              Int                                      @id @default(autoincrement())
+  timezoneName    String         @map("timezone_name")     @db.VarChar(255)
+  utcOffset       String         @map("utc_offset")        @db.VarChar(10)
+  offsetInMinutes Int            @map("offset_in_minutes")
+  countryCode     String         @map("country_code")      @db.Char(2)
+  countryName     String         @map("country_name")      @db.VarChar(100)
+  region          String                                   @db.VarChar(100)
+  isDst           Boolean        @map("is_dst")            @default(false)
+  createdAt       DateTime       @map("created_at")        @default(now())
+  updatedAt       DateTime       @map("updated_at")        @updatedAt
+
+  userTimezones   UserTimezone[]
+
+  @@map("timezones")
+}
+
+model UserTimezone {
+  id         Int                         @id @default(autoincrement())
+  userId     Int      @map("user")       @unique
+  timezoneId Int      @map("timezone")
+  createdAt  DateTime @map("created_at") @default(now())
+  updatedAt  DateTime @map("updated_at") @updatedAt
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  timezone   Timezone @relation(fields: [timezoneId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@map("user_timezones")
+}
+
+model PdfFile {
+  id              Int                                  @id @default(autoincrement())
+  title           String                               @db.VarChar(255)
+  filePath        String           @map("file_path")   @db.VarChar(255)
+  author          String                               @db.VarChar(255)
+  totalPages      Int              @map("total_pages")
+  uploadedBy      Int              @map("uploaded_by")
+  uploadedAt      DateTime         @map("uploaded_at")
+  description     String                               @db.Text
+  isPublic        Boolean          @map("is_public")   @default(true)
+  createdAt       DateTime         @map("created_at")  @default(now())
+  updatedAt       DateTime         @map("updated_at")  @updatedAt
+  languageId      Int              @map("language")
+
+  uploader        User             @relation(fields: [uploadedBy], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  language        Language         @relation(fields: [languageId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  readingSessions ReadingSession[]
+  bookmarks       Bookmark[]
+  ratings         Rating[]
+
+  @@map("pdf_files")
+}
+
+model ReadingSession {
+  id          Int                           @id @default(autoincrement())
+  userId      Int      @map("user")         @unique
+  pdfId       Int      @map("pdf")
+  currentPage Int      @map("current_page") @default(1)
+  totalPages  Int      @map("total_pages")
+  createdAt   DateTime @map("created_at")   @default(now())
+  updatedAt   DateTime @map("updated_at")   @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  pdf         PdfFile  @relation(fields: [pdfId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("reading_sessions")
+}
+
+model Question {
+  id                   Int                                         @id @default(autoincrement())
+  questionText         String                @map("question_text") @db.VarChar(255)
+  questionType         QuestionType          @map("question_type") @default(mcq)
+  imageUrl             String?               @map("image_url")     @db.VarChar(255)
+  createdAt            DateTime              @map("created_at")    @default(now())
+  updatedAt            DateTime              @map("updated_at")    @updatedAt
+
+  options              QuestionOption[]
+  testQuestions        TestQuestion[]
+  testAnswers          TestAnswer[]
+  questionTranslations QuestionTranslation[]
+
+  @@map("questions")
+}
+
+enum QuestionType {
+  mcq
+  true_false
+}
+
+model QuestionOption {
+  id                         Int                                             @id @default(autoincrement())
+  questionId                 Int                         @map("question_id")
+  text                       String                                          @db.VarChar(255)
+  isCorrect                  Boolean                     @map("is_correct")  @default(false)
+  imageUrl                   String?                     @map("image_url")
+  createdAt                  DateTime                    @map("created_at")  @default(now())
+  updatedAt                  DateTime                    @map("updated_at")  @updatedAt
+
+  question                   Question                    @relation(fields: [questionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  testAnswers                TestAnswer[]
+  questionOptionTranslations QuestionOptionTranslation[]
+
+  @@map("question_options")
+}
+
+model Test {
+  id               Int                                   @id @default(autoincrement())
+  title            String                                @db.VarChar(255)
+  description      String                                @db.VarChar(255)
+  testNumber       Int?                                  @unique
+  imageUrl         String?
+  totalMarks       Int               @map("total_marks")
+  passMarks        Int               @map("pass_marks")
+  duration         Int
+  createdAt        DateTime          @map("created_at")  @default(now())
+  updatedAt        DateTime          @map("updated_at")  @updatedAt
+  isFree           Boolean                               @default(false)
+  testQuestions    TestQuestion[]
+  testAttempts     TestAttempt[]
+  testResults      TestResult[]
+  testTranslations TestTranslation[]
+
+  @@map("tests")
+}
+
+model TestQuestion {
+  id         Int                          @id @default(autoincrement())
+  questionId Int      @map("question_id")
+  testId     Int      @map("test_id")
+  createdAt  DateTime @map("created_at")  @default(now())
+  updatedAt  DateTime @map("updated_at")  @updatedAt
+
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  test       Test     @relation(fields: [testId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("test_questions")
+}
+
+model TestAttempt {
+  id          Int                                   @id @default(autoincrement())
+  testId      Int               @map("test")
+  userId      Int               @map("user")
+  startTime   DateTime          @map("start_time")
+  endTime     DateTime          @map("end_time")
+  totalScore  Decimal?          @map("total_score") @db.Decimal(5, 2)
+  passed      Boolean                               @default(false)
+  status      TestAttemptStatus                     @default(not_started)
+  createdAt   DateTime          @map("created_at")  @default(now())
+  updatedAt   DateTime          @map("updated_at")  @updatedAt
+
+  test        Test              @relation(fields: [testId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  testAnswers TestAnswer[]
+  testResults TestResult[]
+
+  @@map("test_attempts")
+}
+
+enum TestAttemptStatus {
+  not_started
+  in_progress
+  submitted
+  graded
+}
+
+model TestAnswer {
+  id         Int                               @id @default(autoincrement())
+  attemptId  Int            @map("attempt")
+  questionId Int            @map("question")
+  optionId   Int            @map("option")
+  createdAt  DateTime       @map("created_at") @default(now())
+  updatedAt  DateTime       @map("updated_at") @updatedAt
+
+  attempt    TestAttempt    @relation(fields: [attemptId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  question   Question       @relation(fields: [questionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  option     QuestionOption @relation(fields: [optionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("test_answers")
+}
+
+model TestResult {
+  id         Int                             @id @default(autoincrement())
+  attemptId  Int         @map("attempt")
+  userId     Int         @map("user")
+  testId     Int         @map("test")
+  totalScore Decimal     @map("total_score") @db.Decimal(5, 2)
+  passed     Boolean                         @default(false)
+  createdAt  DateTime    @map("created_at")  @default(now())
+  updatedAt  DateTime    @map("updated_at")  @updatedAt
+
+  attempt    TestAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  test       Test        @relation(fields: [testId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("test_results")
+}
+
+model UserActivity {
+  id           Int                            @id @default(autoincrement())
+  activityType String   @map("activity_type") @db.Text
+  description  String                         @db.Text
+  userId       Int      @map("user")
+  createdAt    DateTime @map("created_at")    @default(now())
+  updatedAt    DateTime @map("updated_at")    @updatedAt
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  // Hot query support: activity log filters by user + sorts by created_at
+  @@index([userId, createdAt])
+  @@map("user_activities")
+}
+
+model Transaction {
+  id             Int                                   @id @default(autoincrement())
+  subscriptionId Int              @map("subscription")
+  userId         Int              @map("user")
+  paid           Boolean                               @default(true)
+  method         String                                @db.VarChar(255)
+  refId          String           @map("ref_id")       @db.VarChar(255)
+  createdAt      DateTime         @map("created_at")   @default(now())
+  updatedAt      DateTime         @map("updated_at")   @updatedAt
+
+  subscription   SubscriptionPlan @relation(fields: [subscriptionId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("transactions")
+}
+
+model Bookmark {
+  id         Int                          @id @default(autoincrement())
+  pageNumber Int      @map("page_number") @default(1)
+  pdfId      Int      @map("pdf")
+  note       String                       @db.VarChar(255)
+  userId     Int      @map("user")
+  createdAt  DateTime @map("created_at")  @default(now())
+  updatedAt  DateTime @map("updated_at")  @updatedAt
+
+  pdf        PdfFile  @relation(fields: [pdfId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("bookmarks")
+}
+
+model UserNotification {
+  id        Int                         @id @default(autoincrement())
+  title     String                      @db.VarChar(255)
+  message   String                      @db.Text
+  userId    Int      @map("user")
+  isRead    Boolean  @map("is_read")    @default(false)
+  createdAt DateTime @map("created_at") @default(now())
+  updatedAt DateTime @map("updated_at") @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("user_notifications")
+}
+
+model Language {
+  id                         Int                                               @id @default(autoincrement())
+  languageCode               String                      @map("language_code") @unique @db.VarChar(10)
+  languageName               String                      @map("language_name") @db.VarChar(255)
+  nativeName                 String                      @map("native_name")   @db.VarChar(255)
+  isActive                   Boolean                     @map("is_active")     @default(true)
+  createdAt                  DateTime?                   @map("created_at")    @default(now())
+  updatedAt                  DateTime?                   @map("updated_at")    @updatedAt
+
+  pdfFiles                   PdfFile[]
+  testTranslations           TestTranslation[]
+  questionTranslations       QuestionTranslation[]
+  questionOptionTranslations QuestionOptionTranslation[]
+  testAcesses                UserTestAccess[]
+
+
+  @@map("languages")
+  pendingUsers               User[]                      @relation("pendingLanguage")
+  users                      User[]                      @relation("language")
+}
+
+model SystemSetting {
+  id           Int                            @id @default(autoincrement())
+  settingKey   String   @map("setting_key")   @db.VarChar(255)
+  settingValue String   @map("setting_value") @db.VarChar(255)
+  description  String                         @db.Text
+  createdAt    DateTime @map("created_at")    @default(now())
+  updatedAt    DateTime @map("updated_at")    @updatedAt
+
+  @@map("system_settings")
+}
+
+model Rating {
+  id        Int                         @id @default(autoincrement())
+  pdfId     Int      @map("pdf")
+  rating    Decimal                     @db.Decimal(2, 1)
+  comment   String                      @db.VarChar(255)
+  userId    Int      @map("user")
+  createdAt DateTime @map("created_at") @default(now())
+  updatedAt DateTime @map("updated_at") @updatedAt
+
+  pdf       PdfFile  @relation(fields: [pdfId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("ratings")
+}
+
+model PrivacyPolicy {
+  id          Int                                          @id @default(autoincrement())
+  version     String                                       @db.VarChar(50)
+  title       String                                       @db.VarChar(255)
+  content     String                                       @db.Text
+  isActive    Boolean                   @map("is_active")  @default(false)
+  appVersion  String                                       @db.VarChar(20)
+  language    String                                       @default("en") @db.VarChar(10)
+  createdAt   DateTime                  @map("created_at") @default(now())
+  updatedAt   DateTime                  @map("updated_at") @updatedAt
+
+  acceptances PrivacyPolicyAcceptance[]
+
+  @@unique([version, appVersion, language])
+  @@map("privacy_policies")
+}
+
+model PrivacyPolicyAcceptance {
+  id              Int                                     @id @default(autoincrement())
+  userId          Int           @map("user_id")
+  privacyPolicyId Int           @map("privacy_policy_id")
+  acceptedAt      DateTime      @map("accepted_at")       @default(now())
+  ipAddress       String?       @map("ip_address")        @db.VarChar(45)
+  userAgent       String?       @map("user_agent")        @db.Text
+
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  privacyPolicy   PrivacyPolicy @relation(fields: [privacyPolicyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("privacy_policy_acceptances")
+}
+
+model TermsOfService {
+  id          Int                                           @id @default(autoincrement())
+  version     String                                        @db.VarChar(50)
+  title       String                                        @db.VarChar(255)
+  content     String                                        @db.Text
+  isActive    Boolean                    @map("is_active")  @default(false)
+  appVersion  String                                        @db.VarChar(20)
+  language    String                                        @default("en") @db.VarChar(10)
+  createdAt   DateTime                   @map("created_at") @default(now())
+  updatedAt   DateTime                   @map("updated_at") @updatedAt
+
+  acceptances TermsOfServiceAcceptance[]
+
+  @@unique([version, appVersion, language])
+  @@map("terms_of_service")
+}
+
+model TermsOfServiceAcceptance {
+  id               Int                                        @id @default(autoincrement())
+  userId           Int            @map("user_id")
+  termsOfServiceId Int            @map("terms_of_service_id")
+  acceptedAt       DateTime       @map("accepted_at")         @default(now())
+  ipAddress        String?        @map("ip_address")          @db.VarChar(45)
+  userAgent        String?        @map("user_agent")          @db.Text
+
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  termsOfService   TermsOfService @relation(fields: [termsOfServiceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("terms_of_service_acceptances")
+}
+
+enum DataDeletionStatus {
+  pending
+  confirmed
+  processing
+  completed
+  cancelled
+}
+
+model AppStoreCompliance {
+  id                    Int                                       @id @default(autoincrement())
+  privacyPolicyVersion  String   @map("privacy_policy_version")   @db.VarChar(50)
+  termsOfServiceVersion String   @map("terms_of_service_version") @db.VarChar(50)
+  minimumAppVersion     String   @map("minimum_app_version")      @db.VarChar(20)
+  requiresReacceptance  Boolean  @map("requires_reacceptance")    @default(false)
+  effectiveFrom         DateTime @map("effective_from")
+  createdAt             DateTime @map("created_at")               @default(now())
+  updatedAt             DateTime @map("updated_at")               @updatedAt
+
+  @@map("app_store_compliance")
+}
+
+model ForgetPasswordRequest {
+  id        Int                           @id @default(autoincrement())
+  email     String                        @unique
+  token     String                        @db.VarChar(6)
+  expiresAt DateTime @map("expires_at")
+  requestAt DateTime @map("requested_at") @default(now())
+  active    Boolean  @map("is_active")    @default(true)
+
+  @@map("forget_password_requests")
+}
+
+model LearningMaterial {
+  id                    Int                                          @id @default(autoincrement())
+  title                 String                                       @db.VarChar(255)
+  description           String                                       @db.Text
+  filePath              String                 @map("file_path")     @db.VarChar(255)
+  fileType              String                 @map("file_type")     @db.VarChar(255)
+  thumbnailUrl          String?                @map("thumbnail_url") @db.VarChar(255)
+  isPublic              Boolean                @map("is_public")     @default(true)
+  createdAt             DateTime               @map("created_at")    @default(now())
+  updatedAt             DateTime               @map("updated_at")    @updatedAt
+
+  userLearningMaterials UserLearningMaterial[]
+
+  @@map("learning_materials")
+}
+
+model UserLearningMaterial {
+  id                 Int                                           @id @default(autoincrement())
+  userId             Int              @map("user_id")
+  learningMaterialId Int              @map("learning_material_id")
+  downloadedAt       DateTime?        @map("downloaded_at")
+  localPath          String?          @map("local_path")           @db.VarChar(255)
+  expiresAt          DateTime?        @map("expires_at")
+
+  user               User             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  learningMaterial   LearningMaterial @relation(fields: [learningMaterialId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("user_learning_materials")
+}
+
+model UserRating {
+  id         Int                          @id @default(autoincrement())
+  rating     Decimal                      @db.Decimal(2, 1)
+  title      String                       @db.VarChar(255)
+  comment    String                       @db.Text
+  userId     Int      @map("user_id")
+  isVerified Boolean  @map("is_verified") @default(false)
+  platform   String                       @db.VarChar(50)
+  appVersion String                       @db.VarChar(20)
+  createdAt  DateTime @map("created_at")  @default(now())
+  updatedAt  DateTime @map("updated_at")  @updatedAt
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([userId])
+  @@index([platform])
+  @@index([createdAt])
+  @@map("user_ratings")
+}
+
+model File {
+  id           Int                            @id @default(autoincrement())
+  name         String                         @db.VarChar(255)
+  description  String                         @db.Text
+  filePath     String   @map("file_path")     @db.VarChar(500)
+  fileType     String   @map("file_type")     @db.VarChar(100)
+  fileSize     Int      @map("file_size")
+  thumbnailUrl String?  @map("thumbnail_url") @db.VarChar(500)
+  folderId     Int?     @map("folder_id")
+  createdAt    DateTime @map("created_at")    @default(now())
+  updatedAt    DateTime @map("updated_at")    @updatedAt
+
+  folder       Folder?  @relation(fields: [folderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("files")
+}
+
+model Folder {
+  id        Int                         @id @default(autoincrement())
+  name      String                      @db.VarChar(255)
+  path      String                      @unique @db.VarChar(500)
+  parentId  Int?     @map("parent_id")
+  createdAt DateTime @map("created_at") @default(now())
+  updatedAt DateTime @map("updated_at") @updatedAt
+
+  parent    Folder?  @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  children  Folder[] @relation("FolderHierarchy")
+  files     File[]
+
+  @@map("folders")
+}
+
+model UserSubscriptionRequest {
+  id                 Int                                        @id @default(autoincrement())
+  userId             Int               @map("user")
+  requestedTests     Int                                        @default(0)
+  requestedExpiresAt DateTime                                   @default(now())
+  requestedDays      Int                                        @default(0)
+  userTestAccessId   Int?              @map("userTestAccessId")
+  createdAt          DateTime          @map("created_at")       @default(now())
+  updatedAt          DateTime          @map("updated_at")       @updatedAt
+  status             UserRequestStatus                          @default(PENDING)
+  user               User              @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userTestAccess     UserTestAccess?   @relation(fields: [userTestAccessId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  // Hot query support: SSE/pending-requests poll by status + sort by created_at
+  @@index([status, createdAt])
+  @@index([createdAt])
+  @@index([userId])
+  @@map("user_subscriptions_request")
+}
+
+model UserTestAccess {
+  id                       Int                                        @id @default(autoincrement())
+  userId                   Int                       @map("user")     @unique
+  maxTest                  Int
+  expiresAt                DateTime
+  createdAt                DateTime                                   @default(now())
+  updatedAt                DateTime                                   @updatedAt
+  user                     User                      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  status                   UserTestAccessStatus                       @default(PENDING)
+  userSubscriptionRequests UserSubscriptionRequest[]
+  languageId               Int?                      @map("language")
+  language                 Language?                 @relation(fields: [languageId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@map("user_test_access")
+}
+
+enum UserRequestStatus {
+  ACCEPTED
+  PENDING
+  REJECTED
+}
+
+enum UserTestAccessStatus {
+  ACTIVE
+  PENDING
+  INACTIVE
+}
+
+enum SupportedLanguage {
+  en
+  fr
+  rw
+}
+
+model TestTranslation {
+  id          Int                          @id @default(autoincrement())
+  testId      Int      @map("test_id")
+  languageId  Int      @map("language_id")
+  title       String                       @db.VarChar(255)
+  description String                       @db.VarChar(255)
+  imageUrl    String?  @map("image_url")   @db.VarChar(255)
+  createdAt   DateTime @map("created_at")  @default(now())
+  updatedAt   DateTime @map("updated_at")  @updatedAt
+
+  test        Test     @relation(fields: [testId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  language    Language @relation(fields: [languageId], references: [id])
+
+  @@unique([testId, languageId])
+  @@map("test_translations")
+}
+
+model QuestionTranslation {
+  id           Int                            @id @default(autoincrement())
+  questionId   Int      @map("question_id")
+  languageId   Int      @map("language_id")
+  questionText String   @map("question_text") @db.Text
+  imageUrl     String?  @map("image_url")     @db.VarChar(255)
+  createdAt    DateTime @map("created_at")    @default(now())
+  updatedAt    DateTime @map("updated_at")    @updatedAt
+
+  question     Question @relation(fields: [questionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  language     Language @relation(fields: [languageId], references: [id])
+
+  @@unique([questionId, languageId])
+  @@map("question_translations")
+}
+
+model QuestionOptionTranslation {
+  id         Int                                @id @default(autoincrement())
+  optionId   Int            @map("option_id")
+  languageId Int            @map("language_id")
+  text       String                             @db.VarChar(255)
+  createdAt  DateTime       @map("created_at")  @default(now())
+  updatedAt  DateTime       @map("updated_at")  @updatedAt
+
+  option     QuestionOption @relation(fields: [optionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  language   Language       @relation(fields: [languageId], references: [id])
+
+  @@unique([optionId, languageId])
+  @@map("question_option_translations")
+}
+ 
+
+model IremboDrivingLicenseRequest {
+  id                   Int                                          @id @default(autoincrement())
+  userId               Int           @map("user_id")
+
+  category             String
+  licenseType          String        @map("license_type")
+  applicationType      String        @map("application_type")
+  referenceId          String?        @unique  
+  applicantName        String        @map("applicant_name")         @db.VarChar(255)
+  applicantPhoneNumber String        @map("applicant_phone_number") @db.VarChar(20)
+  applicantNationalId  String        @map("applicant_national_id")  @db.VarChar(50)
+
+  address              String                                       @db.VarChar(255)
+
+
+
+  status               RequestStatus?                                @default(PENDING)
+   message         String?    
+  completionPercentage Int          @map("completion_percentage") @default(0)
+  currentStep    String?           @map("current_step") 
+
+  paymentStatus        PaymentStatus @map("payment_status")         @default(PENDING)
+  paymentAmount        Decimal       @map("payment_amount")         @db.Decimal(10, 2) @default(500)
+  createdAt            DateTime      @map("created_at")             @default(now())
+  updatedAt            DateTime      @map("updated_at")             @updatedAt
+
+  user                 User          @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([userId])
+  // Hot query support: per-user pending counts in the admin requests page
+  @@index([userId, status])
+  @@index([applicantNationalId])
+  @@index([status])
+  @@index([category])
+  @@map("irembo_driving_license_requests")
+}
+
+
+
+model IremboSpecialRequest {
+  id             Int                                   @id @default(autoincrement())
+  userId         Int           @map("user_id")
+  referenceId    String?       @unique
+  serviceName    String        @map("service_name")    @db.VarChar(100)
+  category       String                                @db.VarChar(50)
+  applicantName  String        @map("applicant_name")  @db.VarChar(255)
+  applicantPhone String        @map("applicant_phone") @db.VarChar(20)
+  nationalId     String        @map("national_id")     @db.VarChar(50)
+
+  description    String                                @db.Text
+  status         RequestStatus?                         @default(PENDING)
+  message         String?    
+  completionPercentage Int          @map("completion_percentage") @default(0)
+  currentStep    String?           @map("current_step")       
+  createdAt      DateTime      @map("created_at")      @default(now())
+  updatedAt      DateTime      @map("updated_at")      @updatedAt
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([userId])
+  // Hot query support: per-user pending counts in the admin requests page
+  @@index([userId, status])
+  @@index([nationalId])
+  @@index([status])
+  @@map("irembo_special_requests")
+}
+model WhatsAppGroup {
+  id          String   @id @default(cuid())
+  name        String   @db.VarChar(255)
+  description String?
+  whatsappLink String? @db.VarChar(500)
+  imageUrl    String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+ 
+ 
+  @@index([isActive])
+}
+enum RequestStatus {
+  PENDING
+  PROCESSING
+  ACTION
+  APPROVED
+  REJECTED
+}
+
+enum DrivingLicenseCategory {
+  A    
+  B    
+  C    
+  D    
+}
+
+enum LicenseType {
+  LEARNER
+  FULL
+}
+
+enum ApplicationType {
+  NEW
+  RENEWAL
+  DUPLICATE
+}
+
+enum DrivingLicenseStatus {
+  PENDING
+  TEST_PENDING
+  TEST_PASSED
+  TEST_FAILED
+  PAYMENT_PENDING
+  PROCESSING
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+}

@@ -1,0 +1,12 @@
+enum NOTIFICATION_CHANNELS{
+    GENERAL="1",
+    EXAMS="2",
+    IREMBO="3",
+    APPLICATIONS="4",
+    SUBSCRIPTIONS="5"
+
+}
+
+export {NOTIFICATION_CHANNELS};
+
+

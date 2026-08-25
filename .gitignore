@@ -1,88 +1,76 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
-local.properties
+# Dependencies
+node_modules/
 
-# IDE configs
+# Next.js build
+.next/
+out/
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.backup
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
 .idea/
 .vscode/
 
-# Generated / artifacts
-*.md
-!README.md
-!RELEASE_CHECKLIST.md
-nul
-
-# App build outputs
-app/release/
-app/build/
-/release/
-
-# OS artifacts
-Thumbs.db
-*.swp
-*.swo
-~$*
-
-# Kotlin compiler cache
-.kotlin/
-
-# Package outputs & profiling
-*.apk
-*.aab
-*.hprof
+# Build artifacts
+*.tar.gz
 *.zip
 
-# Security (keystore / signing)
-*.jks
-*.keystore
-keystore.properties
+# SQL dumps (too large for git)
+*.sql
+*.sql.gz
 
-# Node.js artifacts (generated during tool use)
-node_modules/
-package.json
-package-lock.json
+# Uploads (user content)
+uploads/
 
-# Extra IDE artifacts
-out/
-*.ipr
-*.iws
+# Debug files
+hs_err_pid*.log
+replay_pid*.log
 
-# Firebase config (public repo - use google-services.json.example)
-**/google-services.json
-*.log
-appbuildsettext_warnings.txt
-screenshots/
-
-# Local MariaDB/MySQL data (never version-controlled)
+# Android files (not needed for backend)
+app/
+baseline-profile/
+build/
+gradle/
 local-db/
-
-# Deployment archives
-*.tar.gz
-
-
-# Production database dumps (may contain real user data)
-docs/*.sql
-
-# On-device test artifacts (DB dumps, token backups, screenshots — personal data)
+r8-analysis/
+release/
+screenshots/
+.gradle/
+.idea/
+.kotlin/
 .offline_test/
-
-# docs/app-flows.md is referenced from README.md, so keep it despite the *.md rule
-!docs/app-flows.md
-
-# On-device offline test report (deliberate deliverable)
-!docs/offline-test-report-2026-08-16.md
-
-# Firebase service account (keep out of git)
+build.gradle.kts
+settings.gradle.kts
+gradle.properties
+gradlew
+gradlew.bat
+local.properties
+upload-keystore.jks
+*.apk
+google-services.json
 firebase-service-account.json
+
+# Legacy folder (files moved to root)
+DRIVING_SHOOL_COMPANY_LEGACY/
+
+# Other unnecessary files
+*.json.example
+adoptium_response.json
+appbuildsettext_warnings.txt
+clean_strings.awk
+install_jdk21.ps1
+strip_unused_strings.sh
+test.py
+nul
