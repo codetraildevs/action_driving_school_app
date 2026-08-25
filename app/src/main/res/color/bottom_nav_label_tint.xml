@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Transparent for selected to "hide" it while keeping labels for others -->
-    <item android:color="@android:color/transparent" android:state_checked="true"/>
-    <item android:color="#777" android:state_checked="false"/>
-</selector>

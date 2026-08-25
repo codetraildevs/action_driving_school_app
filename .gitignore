@@ -38,7 +38,7 @@ uploads/
 hs_err_pid*.log
 replay_pid*.log
 
-# Android files (not needed for backend)
+# Android files (NOT needed for backend)
 app/
 baseline-profile/
 build/
@@ -74,3 +74,34 @@ install_jdk21.ps1
 strip_unused_strings.sh
 test.py
 nul
+
+# Deployment archives (keep source only)
+backend-deploy.tar.gz
+backend-deploy.zip
+backend-fix-delta.tar.gz
+components-fix.tar.gz
+components-fix.zip
+deploy-fix.tar.gz
+deploy-fix.zip
+fix-eagain-deploy.tar.gz
+fix-eagain-deploy.zip
+fix-*.zip
+gazette-pdfs.zip
+irembo_*.zip
+next-build.tar.gz
+pending-deploy.tar.gz
+perf-fix-delta.tar.gz
+project3-deploy.zip
+project3-source.tar.gz
+project3-source.zip
+subscription_duplicate_fix.zip
+uploads-restore.tar.gz
+uploads-restore.zip
+withpermission-fix.zip
+duplicate_fixes_bundle.zip
+
+# Generated Prisma files (will be regenerated on server)
+lib/generated/
+
+# Package lock (will be regenerated)
+package-lock.json

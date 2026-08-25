@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <item name="password_field" type="id" />
-    <item name="confirmPassword_field" type="id" />
-    <item name="group_logout" type="id" />
-    <item name="option_container" type="id" />
-</resources>
