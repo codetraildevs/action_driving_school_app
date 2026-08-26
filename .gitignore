@@ -37,6 +37,8 @@ uploads/
 # Debug files
 hs_err_pid*.log
 replay_pid*.log
+debug-login.sh
+test-ssl.sh
 
 # Android files (NOT needed for backend)
 baseline-profile/
