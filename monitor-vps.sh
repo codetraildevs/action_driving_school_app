@@ -29,7 +29,7 @@ APP_URL="https://console.amategekoyumuhanda.rw"
 HEALTH_URL="http://localhost:3000/api/health"
 DISK_THRESHOLD=85
 MEMORY_THRESHOLD=85
-LOG_FILE="/var/log/vps-monitor.log"
+LOG_FILE="/home/project3/vps-monitor.log"
 
 # Telegram (optional — set these if you want Telegram alerts)
 TELEGRAM_BOT_TOKEN="${TELEGRAM_BOT_TOKEN:-}"

@@ -99,6 +99,8 @@ export default function LearningMaterialsPage() {
     useState<LearningMaterial | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [files, setFiles] = useState<FileItem[]>([]);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   const [formData, setFormData] = useState<MaterialFormData>({
     title: "",
     description: "",
@@ -153,6 +155,47 @@ export default function LearningMaterialsPage() {
       }
       toast.error("Failed to delete material");
     }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    if (
+      !confirm(
+        `Are you sure you want to delete ${selectedIds.length} material(s)? This action cannot be undone.`
+      )
+    )
+      return;
+
+    setIsBulkDeleting(true);
+    try {
+      // Optimistically remove from UI
+      setMaterials((prev) => prev.filter((m) => !selectedIds.includes(m.id)));
+      setSelectedIds([]);
+
+      await apiClient.post(`/api/learning-materials/bulk-delete`, {
+        ids: selectedIds,
+      });
+      toast.success(`${selectedIds.length} material(s) deleted successfully`);
+    } catch (error) {
+      toast.error("Failed to delete materials");
+      fetchMaterials(); // Refetch on error
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === filteredMaterials.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredMaterials.map((m) => m.id));
+    }
+  };
+
+  const toggleSelect = (id: number) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
   };
 
   const handleUpload = async () => {
@@ -424,9 +467,44 @@ export default function LearningMaterialsPage() {
             <>
               {/* Desktop Table View */}
               <div className="hidden md:block">
+                {selectedIds.length > 0 && (
+                  <div className="flex items-center gap-2 mb-4 p-3 bg-muted rounded-lg">
+                    <span className="text-sm font-medium">
+                      {selectedIds.length} item(s) selected
+                    </span>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleBulkDelete}
+                      disabled={isBulkDeleting}
+                    >
+                      {isBulkDeleting ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="mr-2 h-4 w-4" />
+                      )}
+                      Delete Selected
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedIds([])}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                )}
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-10">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.length === filteredMaterials.length && filteredMaterials.length > 0}
+                          onChange={toggleSelectAll}
+                          className="rounded"
+                        />
+                      </TableHead>
                       <TableHead>Thumbnail</TableHead>
                       <TableHead>Title</TableHead>
                       <TableHead>Type</TableHead>
@@ -439,6 +517,14 @@ export default function LearningMaterialsPage() {
                   <TableBody>
                     {filteredMaterials.map((material) => (
                       <TableRow key={material.id}>
+                        <TableCell>
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.includes(material.id)}
+                            onChange={() => toggleSelect(material.id)}
+                            className="rounded"
+                          />
+                        </TableCell>
                         <TableCell>
                           {material.thumbnailUrl ? (
                             <img

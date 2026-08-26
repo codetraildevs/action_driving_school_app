@@ -131,6 +131,8 @@ export default function TestsPage() {
 
   const [dragItemIndex, setDragItemIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
   const fetchTests = async () => {
     try {
@@ -292,6 +294,44 @@ export default function TestsPage() {
       }
       toast.error("Failed to delete test");
     }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    if (
+      !confirm(
+        `Are you sure you want to delete ${selectedIds.length} test(s)? This action cannot be undone.`
+      )
+    )
+      return;
+
+    setIsBulkDeleting(true);
+    try {
+      setTests((prev) => prev.filter((t) => !selectedIds.includes(t.id)));
+      setSelectedIds([]);
+
+      await apiClient.post(`/api/tests/bulk-delete`, { ids: selectedIds });
+      toast.success(`${selectedIds.length} test(s) deleted successfully`);
+    } catch (error) {
+      toast.error("Failed to delete tests");
+      fetchTests();
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === filteredTests.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredTests.map((t) => t.id));
+    }
+  };
+
+  const toggleSelect = (id: number) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
   };
 
   const handleEdit = (test: Test) => {
@@ -606,9 +646,44 @@ export default function TestsPage() {
             <>
               {/* Desktop Table View */}
               <div className="hidden md:block">
+                {selectedIds.length > 0 && (
+                  <div className="flex items-center gap-2 mb-4 p-3 bg-muted rounded-lg">
+                    <span className="text-sm font-medium">
+                      {selectedIds.length} item(s) selected
+                    </span>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleBulkDelete}
+                      disabled={isBulkDeleting}
+                    >
+                      {isBulkDeleting ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="mr-2 h-4 w-4" />
+                      )}
+                      Delete Selected
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedIds([])}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                )}
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-10">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.length === filteredTests.length && filteredTests.length > 0}
+                          onChange={toggleSelectAll}
+                          className="rounded"
+                        />
+                      </TableHead>
                       <TableHead className="w-10"></TableHead>
                       <TableHead>Image</TableHead>
                       <TableHead>Test Number</TableHead>
@@ -639,6 +714,14 @@ export default function TestsPage() {
                         onDrop={(e) => handleDrop(e, index)}
                         onDragEnd={handleDragEnd}
                       >
+                        <TableCell>
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.includes(test.id)}
+                            onChange={() => toggleSelect(test.id)}
+                            className="rounded"
+                          />
+                        </TableCell>
                         <TableCell className="cursor-move">
                           <GripVertical className="h-4 w-4 text-muted-foreground" />
                         </TableCell>

@@ -81,6 +81,8 @@ export default function QuestionsPage() {
   const [questionNumberInput, setQuestionNumberInput] = useState("");
   const tableRef = useRef<HTMLDivElement>(null);
   const questionRefs = useRef<Map<number, HTMLTableRowElement>>(new Map());
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
   const translateRow = async (id: number, languageId: number) => {
     setQuestions((prev) =>
@@ -193,6 +195,44 @@ export default function QuestionsPage() {
       }
       toast.error("Failed to delete question");
     }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    if (
+      !confirm(
+        `Are you sure you want to delete ${selectedIds.length} question(s)? This action cannot be undone.`
+      )
+    )
+      return;
+
+    setIsBulkDeleting(true);
+    try {
+      setQuestions((prev) => prev.filter((q) => !selectedIds.includes(q.id)));
+      setSelectedIds([]);
+
+      await apiClient.post(`/api/questions/bulk-delete`, { ids: selectedIds });
+      toast.success(`${selectedIds.length} question(s) deleted successfully`);
+    } catch (error) {
+      toast.error("Failed to delete questions");
+      fetchQuestions();
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === filteredQuestions.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredQuestions.map((q) => q.id));
+    }
+  };
+
+  const toggleSelect = (id: number) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
   };
 
   const getQuestionTypeBadge = (type: string) => {
@@ -480,9 +520,44 @@ export default function QuestionsPage() {
             <>
               {/* Desktop Table View */}
               <div className="hidden md:block overflow-auto" ref={tableRef}>
+                {selectedIds.length > 0 && (
+                  <div className="flex items-center gap-2 mb-4 p-3 bg-muted rounded-lg">
+                    <span className="text-sm font-medium">
+                      {selectedIds.length} item(s) selected
+                    </span>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleBulkDelete}
+                      disabled={isBulkDeleting}
+                    >
+                      {isBulkDeleting ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="mr-2 h-4 w-4" />
+                      )}
+                      Delete Selected
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedIds([])}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                )}
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-10">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.length === filteredQuestions.length && filteredQuestions.length > 0}
+                          onChange={toggleSelectAll}
+                          className="rounded"
+                        />
+                      </TableHead>
                       <TableHead className="w-16">#</TableHead>
                       <TableHead>Question</TableHead>
                       <TableHead>Type</TableHead>
@@ -507,6 +582,14 @@ export default function QuestionsPage() {
                           }
                         }}
                       >
+                        <TableCell>
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.includes(question.id)}
+                            onChange={() => toggleSelect(question.id)}
+                            className="rounded"
+                          />
+                        </TableCell>
                         <TableCell className="font-medium">
                           <span className="text-sm font-semibold text-muted-foreground">
                             #{isReversed ? filteredQuestions.length - index : index + 1}
