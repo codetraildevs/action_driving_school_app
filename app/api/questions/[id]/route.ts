@@ -166,7 +166,7 @@ const deleteQuestionHandler = withPermission(PERMISSIONS.TEST_DELETE)(
     if (options.length > 0) {
       const optionIds = options.map((o) => o.id);
       await prisma.questionOptionTranslation.deleteMany({
-        where: { questionOptionId: { in: optionIds } },
+        where: { optionId: { in: optionIds } },
       });
       await prisma.questionOption.deleteMany({
         where: { questionId },

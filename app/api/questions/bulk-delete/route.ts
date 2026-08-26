@@ -31,7 +31,7 @@ const bulkDeleteHandler = withPermission(PERMISSIONS.PDF_DELETE)(
 
       if (optionIds.length > 0) {
         await prisma.questionOptionTranslation.deleteMany({
-          where: { questionOptionId: { in: optionIds } },
+          where: { optionId: { in: optionIds } },
         });
         await prisma.questionOption.deleteMany({
           where: { questionId: { in: numericIds } },
