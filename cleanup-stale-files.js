@@ -1,5 +1,3 @@
-#!/bin/bash
-# cleanup-stale-files.js — Remove file records that point to missing physical files
 const { PrismaClient } = require("@prisma/client");
 const fs = require("fs");
 const path = require("path");
