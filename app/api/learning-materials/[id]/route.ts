@@ -7,11 +7,12 @@ import { prisma } from "@/lib/prismaDB";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params;
     const material = await prisma.learningMaterial.findUnique({
-      where: { id: parseInt(params.id) },
+      where: { id: parseInt(id) },
       include: {
         userLearningMaterials: {
           include: {
@@ -93,9 +94,10 @@ export const POST = createMaterialHandler;
 const updateMaterialHandler = withPermission(PERMISSIONS.PDF_UPDATE)(
   async (
     request: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }>; user: any }
   ) => {
   try {
+    const { id } = await context.params;
     const body = await request.json();
 
     const {
@@ -109,7 +111,7 @@ const updateMaterialHandler = withPermission(PERMISSIONS.PDF_UPDATE)(
     } = body;
 
     const existingMaterial = await prisma.learningMaterial.findUnique({
-      where: { id: parseInt(params.id) },
+      where: { id: parseInt(id) },
     });
 
     if (!existingMaterial) {
@@ -132,7 +134,7 @@ const updateMaterialHandler = withPermission(PERMISSIONS.PDF_UPDATE)(
       myFileType = fileTouse?.fileType;
     }
     const updatedMaterial = await prisma.learningMaterial.update({
-      where: { id: parseInt(params.id) },
+      where: { id: parseInt(id) },
       data: {
         ...(title && { title }),
         ...(description && { description }),
@@ -169,11 +171,12 @@ export const PUT = updateMaterialHandler;
 const deleteMaterialHandler = withPermission(PERMISSIONS.PDF_DELETE)(
   async (
     request: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }>; user: any }
   ) => {
   try {
+    const { id } = await context.params;
     const existingMaterial = await prisma.learningMaterial.findUnique({
-      where: { id: parseInt(params.id) },
+      where: { id: parseInt(id) },
     });
 
     if (!existingMaterial) {
@@ -185,12 +188,42 @@ const deleteMaterialHandler = withPermission(PERMISSIONS.PDF_DELETE)(
 
     // Delete associated user learning materials first
     await prisma.userLearningMaterial.deleteMany({
-      where: { learningMaterialId: parseInt(params.id) },
+      where: { learningMaterialId: parseInt(id) },
     });
+
+    // Delete physical file from disk if it exists
+    if (existingMaterial.filePath) {
+      try {
+        const { unlink } = await import("fs/promises");
+        const { join } = await import("path");
+        const { existsSync } = await import("fs");
+        const filePath = join(process.cwd(), "public", existingMaterial.filePath);
+        if (existsSync(filePath)) {
+          await unlink(filePath);
+        }
+      } catch (err) {
+        console.warn("Could not delete physical file:", err);
+      }
+    }
+
+    // Delete thumbnail from disk if it exists
+    if (existingMaterial.thumbnailUrl) {
+      try {
+        const { unlink } = await import("fs/promises");
+        const { join } = await import("path");
+        const { existsSync } = await import("fs");
+        const thumbPath = join(process.cwd(), "public", existingMaterial.thumbnailUrl);
+        if (existsSync(thumbPath)) {
+          await unlink(thumbPath);
+        }
+      } catch (err) {
+        console.warn("Could not delete thumbnail:", err);
+      }
+    }
 
     // Then delete the learning material
     await prisma.learningMaterial.delete({
-      where: { id: parseInt(params.id) },
+      where: { id: parseInt(id) },
     });
 
     return NextResponse.json({

@@ -106,6 +106,8 @@ export default function FileManagerPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState<FileItem | null>(null);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
   const [uploadForm, setUploadForm] = useState({
     name: "New File",
@@ -289,11 +291,48 @@ export default function FileManagerPage() {
 
       toast.success("Folder deleted successfully");
       fetchFolders();
-      fetchFiles();
-    } catch (error) {
+      fetchFiles();    } catch (error) {
       toast.error("Failed to delete folder");
     }
   };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    if (
+      !confirm(
+        `Are you sure you want to delete ${selectedIds.length} file(s)? This action cannot be undone.`
+      )
+    )
+      return;
+
+    setIsBulkDeleting(true);
+    try {
+      await apiClient.post(`/api/files/bulk-delete`, { ids: selectedIds });
+      toast.success(`${selectedIds.length} file(s) deleted successfully`);
+      setSelectedIds([]);
+      fetchFiles();
+    } catch (error) {
+      toast.error("Failed to delete files");
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === files.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(files.map((f) => f.id));
+    }
+  };
+
+  const toggleSelect = (id: number) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
+
 
   const openEditModal = (file: FileItem) => {
     setSelectedFile(file);
@@ -589,9 +628,44 @@ export default function FileManagerPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
+                {selectedIds.length > 0 && (
+                  <div className="flex items-center gap-2 mb-4 p-3 bg-muted rounded-lg">
+                    <span className="text-sm font-medium">
+                      {selectedIds.length} file(s) selected
+                    </span>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleBulkDelete}
+                      disabled={isBulkDeleting}
+                    >
+                      {isBulkDeleting ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="mr-2 h-4 w-4" />
+                      )}
+                      Delete Selected
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedIds([])}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                )}
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-10">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.length === files.length && files.length > 0}
+                          onChange={toggleSelectAll}
+                          className="rounded"
+                        />
+                      </TableHead>
                       <TableHead>Name</TableHead>
                       <TableHead>Type</TableHead>
                       <TableHead>Size</TableHead>
@@ -603,6 +677,14 @@ export default function FileManagerPage() {
                   <TableBody>
                     {files.map((file) => (
                       <TableRow key={file.id}>
+                        <TableCell>
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.includes(file.id)}
+                            onChange={() => toggleSelect(file.id)}
+                            className="rounded"
+                          />
+                        </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <div className="flex-shrink-0">

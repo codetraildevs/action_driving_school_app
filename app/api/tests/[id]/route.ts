@@ -5,11 +5,12 @@ import { prisma } from "@/lib/prismaDB";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params;
     const test = await prisma.test.findUnique({
-      where: { id: parseInt(params.id) },
+      where: { id: parseInt(id) },
       include: {
         testTranslations: true,
 
@@ -38,9 +39,10 @@ export async function GET(
 const updateTestHandler = withPermission(PERMISSIONS.TEST_UPDATE)(
   async (
     request: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }>; user: any }
   ) => {
   try {
+    const { id } = await context.params;
     const {
       title,
       description,
@@ -66,7 +68,7 @@ const updateTestHandler = withPermission(PERMISSIONS.TEST_UPDATE)(
     }
 
     const test = await prisma.test.update({
-      where: { id: parseInt(params.id) },
+      where: { id: parseInt(id) },
       data: {
         title,
         description,
@@ -100,14 +102,25 @@ export const PUT = updateTestHandler;
 const deleteTestHandler = withPermission(PERMISSIONS.TEST_DELETE)(
   async (
     request: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }>; user: any }
   ) => {
   try {
-    await prisma.test.delete({
-      where: { id: parseInt(params.id) },
+    const { id } = await context.params;
+    const testId = parseInt(id);
+
+    // Clean up related records first
+    await prisma.testQuestion.deleteMany({
+      where: { testId },
+    });
+    await prisma.testTranslation.deleteMany({
+      where: { testId },
     });
 
-    return NextResponse.json({ success: true });
+    await prisma.test.delete({
+      where: { id: testId },
+    });
+
+    return NextResponse.json({ success: true, message: "Test deleted successfully" });
   } catch (error) {
     console.error("Error deleting test:", error);
     return NextResponse.json(

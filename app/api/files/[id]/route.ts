@@ -4,17 +4,18 @@ import { withPermission } from "@/lib/middleware/withPermission";
 import { PERMISSIONS } from "@/lib/auth/permissions";
 import { unlink } from "fs/promises";
 import { join } from "path";
- ;
+import { existsSync } from "fs";
 
 import { prisma } from "@/lib/prismaDB";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params;
     const file = await prisma.file.findUnique({
-      where: { id: parseInt(params.id) },
+      where: { id: parseInt(id) },
       include: {
         folder: {
           select: {
@@ -46,9 +47,10 @@ export async function GET(
 const updateFileHandler = withPermission(PERMISSIONS.PDF_UPDATE)(
   async (
     request: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }>; user: any }
   ) => {
   try {
+    const { id } = await context.params;
     const { name, description, folderId } = await request.json();
 
     if (!name) {
@@ -59,7 +61,7 @@ const updateFileHandler = withPermission(PERMISSIONS.PDF_UPDATE)(
     }
 
     const file = await prisma.file.update({
-      where: { id: parseInt(params.id) },
+      where: { id: parseInt(id) },
       data: {
         name,
         description: description || "",
@@ -92,11 +94,12 @@ export const PUT = updateFileHandler;
 const deleteFileHandler = withPermission(PERMISSIONS.PDF_DELETE)(
   async (
     request: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }>; user: any }
   ) => {
   try {
+    const { id } = await context.params;
     const file = await prisma.file.findUnique({
-      where: { id: parseInt(params.id) }
+      where: { id: parseInt(id) }
     });
 
     if (!file) {
@@ -106,19 +109,23 @@ const deleteFileHandler = withPermission(PERMISSIONS.PDF_DELETE)(
       );
     }
 
-    // Delete physical file
+    // Delete physical file from disk
     const fileFullPath = join(process.cwd(), "public", file.filePath);
     try {
-      await unlink(fileFullPath);
+      if (existsSync(fileFullPath)) {
+        await unlink(fileFullPath);
+      }
     } catch (error) {
       console.warn("Could not delete physical file:", error);
     }
 
-    // Delete thumbnail if exists
+    // Delete thumbnail from disk if exists
     if (file.thumbnailUrl) {
       const thumbFullPath = join(process.cwd(), "public", file.thumbnailUrl);
       try {
-        await unlink(thumbFullPath);
+        if (existsSync(thumbFullPath)) {
+          await unlink(thumbFullPath);
+        }
       } catch (error) {
         console.warn("Could not delete thumbnail:", error);
       }
@@ -126,10 +133,10 @@ const deleteFileHandler = withPermission(PERMISSIONS.PDF_DELETE)(
 
     // Delete from database
     await prisma.file.delete({
-      where: { id: parseInt(params.id) }
+      where: { id: parseInt(id) }
     });
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, message: "File deleted successfully" });
   } catch (error) {
     console.error("Error deleting file:", error);
     return NextResponse.json(
