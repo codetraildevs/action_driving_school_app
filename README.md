@@ -178,45 +178,60 @@ pm2 startup
 
 ## 🚢 Deployment
 
-### Quick Deploy (VPS)
+### Architecture
 
-```bash
-# One-command setup
-bash go-live.sh
-
-# Or manual setup
-sudo bash server-setup.sh
+```
+Internet → DatabaseMart LB (SSL) → VPS:80 (HTTP) → nginx → Next.js (PM2 :3000)
 ```
 
-### Deploy Updates
+- **SSL**: Managed by DatabaseMart load balancer (Let's Encrypt)
+- **HTTP**: VPS listens on port 80, receives traffic from LB
+- **App**: Next.js runs on PM2 at `localhost:3000`
+
+### Nginx Configuration
+
+| File | Purpose | Deployed To |
+|------|---------|-------------|
+| `nginx-main.conf` | Main nginx.conf (http context) | `/etc/nginx/nginx.conf` |
+| `nginx-databasemart.conf` | Site config (server block) | `/etc/nginx/sites-available/driving-school` |
+
+### Deploy App (code changes only)
 
 ```bash
-bash go-live.sh update
+cd /home/project3
+./deploy-vps.sh
 ```
 
-### Manual Deployment
+### Deploy Nginx (config changes only)
 
 ```bash
-# 1. Pull latest code
+cd /home/project3
 git pull origin backend-deploy
-
-# 2. Install dependencies
-npm install
-
-# 3. Generate Prisma client
-npx prisma generate
-
-# 4. Build the app
-npm run build
-
-# 5. Restart PM2
-pm2 reload ecosystem.config.js --env production
+sudo cp nginx-main.conf /etc/nginx/nginx.conf
+sudo cp nginx-databasemart.conf /etc/nginx/sites-available/driving-school
+sudo nginx -t && sudo systemctl reload nginx
 ```
 
-### SSL Setup
+### Full Deploy (app + nginx)
 
 ```bash
-certbot --nginx -d your-domain.com
+cd /home/project3
+git pull origin backend-deploy
+sudo cp nginx-main.conf /etc/nginx/nginx.conf
+sudo cp nginx-databasemart.conf /etc/nginx/sites-available/driving-school
+sudo nginx -t && sudo systemctl reload nginx
+./deploy-vps.sh
+```
+
+### Rollback
+
+```bash
+# Nginx
+sudo cp /etc/nginx/nginx.conf.backup /etc/nginx/nginx.conf
+sudo nginx -t && sudo systemctl reload nginx
+
+# App (PM2 keeps previous builds)
+pm2 reload driving-school
 ```
 
 ---
@@ -299,10 +314,9 @@ certbot --nginx -d your-domain.com
 | `npm run build` | Build for production |
 | `npm start` | Start production server |
 | `npm run lint` | Run ESLint |
-| `bash go-live.sh` | One-command VPS setup |
-| `bash go-live.sh update` | Deploy updates |
-| `bash server-setup.sh check` | Check server health |
-| `bash server-setup.sh repair` | Repair common issues |
+| `./deploy-vps.sh` | Deploy to VPS |
+| `./debug-login.sh` | Debug login issues (local only) |
+| `./test-ssl.sh` | Test SSL/connectivity (local only) |
 
 ---
 
@@ -331,10 +345,10 @@ certbot --nginx -d your-domain.com
 ├── public/                # Static assets
 ├── types/                 # TypeScript types
 ├── data/                  # Configuration data
-├── server.js              # Custom Node.js server
+├── nginx-main.conf        # Main nginx config (for VPS)
+├── nginx-databasemart.conf # Site nginx config (for VPS)
+├── deploy-vps.sh          # VPS deployment script
 ├── ecosystem.config.js    # PM2 configuration
-├── server-setup.sh        # VPS setup script
-├── go-live.sh             # One-command deploy
 └── package.json           # Dependencies
 ```
 
@@ -349,10 +363,30 @@ certbot --nginx -d your-domain.com
 pm2 status
 
 # View logs
-pm2 logs driving-school
+pm2 logs driving-school --err --lines 50
+pm2 logs driving-school --out --lines 50
 
 # Restart app
 pm2 restart driving-school
+
+# Full restart
+pm2 reload ecosystem.config.js --env production
+```
+
+### Nginx Issues
+
+```bash
+# Test config
+sudo nginx -t
+
+# View error logs
+sudo tail -50 /var/log/nginx/driving-school_error.log
+
+# Reload nginx
+sudo systemctl reload nginx
+
+# Check nginx status
+sudo systemctl status nginx
 ```
 
 ### Database Connection Issues
@@ -375,12 +409,14 @@ npx prisma generate
 npm run build
 ```
 
-### Permission Errors
+### SSL/HTTPS Issues
 
-```bash
-# Fix permissions
-sudo chown -R deploy:deploy /home/project3
-```
+The site uses DatabaseMart's load balancer for SSL. If HTTPS stops working:
+
+1. Check the DatabaseMart control panel
+2. Verify SSL certificate is active
+3. Test locally: `curl -I http://localhost`
+4. Test externally: `curl -I https://console.amategekoyumuhanda.rw/`
 
 ---
 
