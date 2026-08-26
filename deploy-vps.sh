@@ -24,24 +24,29 @@ echo "════════════════════════�
 
 cd "$APP_DIR"
 
+# ── 0. Ensure uploads directory exists (protected from git) ──
+echo "[0/6] Ensuring uploads directory..."
+mkdir -p "$APP_DIR/public/uploads/files"
+mkdir -p "$APP_DIR/public/uploads/learning-materials/thumbnails"
+
 # ── 1. Pull latest code ──
-echo "[1/5] Pulling latest code..."
+echo "[1/6] Pulling latest code..."
 git pull origin backend-deploy
 
 # ── 2. Install dependencies ──
-echo "[2/5] Installing dependencies..."
+echo "[2/6] Installing dependencies..."
 npm install --omit=dev --legacy-peer-deps
 
 # ── 3. Prisma generate ──
-echo "[3/5] Running Prisma generate..."
+echo "[3/6] Running Prisma generate..."
 npx prisma generate
 
 # ── 4. Build Next.js ──
-echo "[4/5] Building Next.js..."
+echo "[4/6] Building Next.js..."
 npm run build
 
 # ── 5. Restart PM2 (zero-downtime reload) ──
-echo "[5/5] Restarting PM2..."
+echo "[5/6] Restarting PM2..."
 pm2 reload ecosystem.config.js --env production
 
 # ── Done ──
