@@ -39,6 +39,10 @@ hs_err_pid*.log
 replay_pid*.log
 debug-login.sh
 test-ssl.sh
+cleanup-stale-files.js
+check-login.js
+debug-login2.js
+reset-password.js
 
 # Android files (NOT needed for backend)
 baseline-profile/
