@@ -109,16 +109,15 @@ const deleteTestHandler = withPermission(PERMISSIONS.TEST_DELETE)(
     const testId = parseInt(id);
 
     // Clean up related records first
-    await prisma.testQuestion.deleteMany({
-      where: { testId },
-    });
-    await prisma.testTranslation.deleteMany({
-      where: { testId },
-    });
+    await prisma.testQuestion.deleteMany({ where: { testId } });
+    await prisma.testTranslation.deleteMany({ where: { testId } });
 
-    await prisma.test.delete({
-      where: { id: testId },
-    });
+    // Use deleteMany to avoid P2025 if test was already cascade-deleted
+    const result = await prisma.test.deleteMany({ where: { id: testId } });
+
+    if (result.count === 0) {
+      return NextResponse.json({ error: "Test not found" }, { status: 404 });
+    }
 
     return NextResponse.json({ success: true, message: "Test deleted successfully" });
   } catch (error) {

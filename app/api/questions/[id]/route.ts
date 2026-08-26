@@ -153,10 +153,8 @@ const deleteQuestionHandler = withPermission(PERMISSIONS.TEST_DELETE)(
     const { id } = await context.params;
     const questionId = parseInt(id);
 
-    // Clean up related records first
-    await prisma.testQuestion.deleteMany({
-      where: { questionId },
-    });
+    // Delete related records using deleteMany (no error if already gone)
+    await prisma.testQuestion.deleteMany({ where: { questionId } });
 
     // Delete question option translations and options
     const options = await prisma.questionOption.findMany({
@@ -165,23 +163,18 @@ const deleteQuestionHandler = withPermission(PERMISSIONS.TEST_DELETE)(
     });
     if (options.length > 0) {
       const optionIds = options.map((o) => o.id);
-      await prisma.questionOptionTranslation.deleteMany({
-        where: { optionId: { in: optionIds } },
-      });
-      await prisma.questionOption.deleteMany({
-        where: { questionId },
-      });
+      await prisma.questionOptionTranslation.deleteMany({ where: { optionId: { in: optionIds } } });
+      await prisma.questionOption.deleteMany({ where: { questionId } });
     }
 
-    // Delete question translations
-    await prisma.questionTranslation.deleteMany({
-      where: { questionId },
-    });
+    await prisma.questionTranslation.deleteMany({ where: { questionId } });
 
-    // Delete the question
-    await prisma.question.delete({
-      where: { id: questionId },
-    });
+    // Use deleteMany to avoid P2025 if question was already cascade-deleted
+    const result = await prisma.question.deleteMany({ where: { id: questionId } });
+
+    if (result.count === 0) {
+      return NextResponse.json({ error: "Question not found" }, { status: 404 });
+    }
 
     return NextResponse.json({ success: true, message: "Question deleted successfully" });
   } catch (error) {
