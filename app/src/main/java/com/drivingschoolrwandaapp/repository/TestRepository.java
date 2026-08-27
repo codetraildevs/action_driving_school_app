@@ -19,6 +19,9 @@ import com.drivingschoolrwandaapp.repository.Resource;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -31,6 +34,11 @@ import dagger.hilt.android.qualifiers.ApplicationContext;
  * Exam data is loaded using [LocalExamDataSource] and mapped to
  * existing database entities for UI compatibility.
  * Supports multilingual exams following the app's language preference.
+ *
+ * The JSON assets (200-250 KB per language) are read and parsed on a
+ * dedicated background executor and the result is posted back to the
+ * main thread via LiveData, so opening the Exams screen never blocks
+ * the UI thread with a large synchronous file parse.
  */
 @Singleton
 public class TestRepository {
@@ -41,11 +49,15 @@ public class TestRepository {
 
     private final LocalExamDataSource localExamDataSource;
     private final AppPreferences appPreferences;
+    private final Context context;
+    private final ExecutorService executorService;
 
     @Inject
     public TestRepository(LocalExamDataSource localExamDataSource, @ApplicationContext Context context) {
         this.localExamDataSource = localExamDataSource;
         this.appPreferences = new AppPreferences(context);
+        this.context = context.getApplicationContext();
+        this.executorService = Executors.newSingleThreadExecutor();
     }
 
     /**
@@ -56,37 +68,38 @@ public class TestRepository {
     public LiveData<Resource<List<TestEntity>>> getTests(boolean forceRefresh) {
         MutableLiveData<Resource<List<TestEntity>>> result = new MutableLiveData<>();
 
-        try {
-            // Get current language from app preferences
-            String languageCode = getCurrentLanguage();
+        executeSafely(() -> {
+            try {
+                // Get current language from app preferences
+                String languageCode = getCurrentLanguage();
 
-            // Load exams from local JSON
-            List<LocalExam> localExams = localExamDataSource.loadExams(languageCode);
-            List<TestEntity> testEntities = new ArrayList<>();
+                // Load exams from local JSON
+                List<LocalExam> localExams = localExamDataSource.loadExams(languageCode);
+                List<TestEntity> testEntities = new ArrayList<>();
 
-            for (int i = 0; i < localExams.size(); i++) {
-                LocalExam localExam = localExams.get(i);
-                TestEntity entity = new TestEntity();
-                entity.setId(parseQuizId(localExam.getQuizId(), i));
-                entity.setTitle(localExam.getTitle());
-                entity.setDescription(localExam.getExamType());
-                entity.setTestNumber(i + 1);
-                entity.setImageUrl(convertToAssetUri(localExam.getExamImgUrl()));
-                entity.setTotalMarks(localExam.getQuestions().size());
-                entity.setPassMarks((int) Math.ceil(localExam.getQuestions().size() * 0.5)); // 50% to pass
-                entity.setDuration(localExam.getQuestions().size()); // 1 minute per question
-                entity.setFree("Free".equalsIgnoreCase(localExam.getExamType()));
-                entity.setQuestionCount(localExam.getQuestions().size());
-                entity.setLastRefreshed(System.currentTimeMillis());
-                testEntities.add(entity);
+                for (int i = 0; i < localExams.size(); i++) {
+                    LocalExam localExam = localExams.get(i);
+                    TestEntity entity = new TestEntity();
+                    entity.setId(parseQuizId(localExam.getQuizId(), i));
+                    entity.setTitle(localExam.getTitle());
+                    entity.setDescription(localExam.getExamType());
+                    entity.setTestNumber(i + 1);
+                    entity.setImageUrl(convertToAssetUri(localExam.getExamImgUrl()));
+                    entity.setTotalMarks(localExam.getQuestions().size());
+                    entity.setPassMarks((int) Math.ceil(localExam.getQuestions().size() * 0.5)); // 50% to pass
+                    entity.setDuration(localExam.getQuestions().size()); // 1 minute per question
+                    entity.setFree("Free".equalsIgnoreCase(localExam.getExamType()));
+                    entity.setQuestionCount(localExam.getQuestions().size());
+                    entity.setLastRefreshed(System.currentTimeMillis());
+                    testEntities.add(entity);
+                }
+
+                result.postValue(Resource.success(testEntities));
+            } catch (Exception e) {
+                reportQuietly(TAG, "Error loading local exams", e);
+                result.postValue(Resource.<List<TestEntity>>error(ErrorUtils.getUserFriendlyMessage(context, e), null));
             }
-
-            result.setValue(Resource.success(testEntities));
-        } catch (Exception e) {
-            Log.e(TAG, "Error loading local exams", e);
-            com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
-            result.setValue(Resource.<List<TestEntity>>error(ErrorUtils.getUserFriendlyMessage(e), null));
-        }
+        });
 
         return result;
     }
@@ -99,46 +112,48 @@ public class TestRepository {
     public LiveData<Resource<TestWithQuestions>> getTestWithQuestions(int testId) {
         MutableLiveData<Resource<TestWithQuestions>> result = new MutableLiveData<>();
 
-        try {
-            String languageCode = getCurrentLanguage();
+        executeSafely(() -> {
+            try {
+                String languageCode = getCurrentLanguage();
 
-            // Load the specific exam (testId maps to quiz sequential index)
-            List<LocalExam> localExams = localExamDataSource.loadExams(languageCode);
+                // Load the specific exam (testId maps to quiz sequential index)
+                List<LocalExam> localExams = localExamDataSource.loadExams(languageCode);
 
-            // Find the exam by its position (1-indexed) or by quizId
-            LocalExam localExam = null;
-            String quizIdStr = String.valueOf(testId);
+                // Find the exam by its position (1-indexed) or by quizId
+                LocalExam localExam;
+                String quizIdStr = String.valueOf(testId);
 
-            // First try by quizId
-            localExam = localExamDataSource.loadExamByQuizId(quizIdStr, languageCode);
+                // First try by quizId
+                localExam = localExamDataSource.loadExamByQuizId(quizIdStr, languageCode);
 
-            // If not found, try by position (1-indexed)
-            if (localExam == null && testId > 0 && testId <= localExams.size()) {
-                localExam = localExamDataSource.loadExamByIndex(testId - 1, languageCode);
-            }
-
-            if (localExam == null) {
-                result.setValue(Resource.<TestWithQuestions>error("Exam not found for ID: " + testId, null));
-                return result;
-            }
-
-            // Find sequential position (consistent with getTests() i+1 numbering)
-            int sequentialNumber = 1;
-            for (int i = 0; i < localExams.size(); i++) {
-                if (localExams.get(i).getQuizId().equals(localExam.getQuizId())) {
-                    sequentialNumber = i + 1;
-                    break;
+                // If not found, try by position (1-indexed)
+                if (localExam == null && testId > 0 && testId <= localExams.size()) {
+                    localExam = localExamDataSource.loadExamByIndex(testId - 1, languageCode);
                 }
-            }
 
-            // Build TestWithQuestions from local data
-            TestWithQuestions testWithQuestions = buildTestWithQuestions(localExam, testId, languageCode, sequentialNumber);
-            result.setValue(Resource.success(testWithQuestions));
-        } catch (Exception e) {
-            Log.e(TAG, "Error loading local exam questions", e);
-            com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
-            result.setValue(Resource.<TestWithQuestions>error(ErrorUtils.getUserFriendlyMessage(e), null));
-        }
+                if (localExam == null) {
+                    result.postValue(Resource.<TestWithQuestions>error(
+                            context.getString(com.drivingschoolrwandaapp.R.string.exam_not_found, testId), null));
+                    return;
+                }
+
+                // Find sequential position (consistent with getTests() i+1 numbering)
+                int sequentialNumber = 1;
+                for (int i = 0; i < localExams.size(); i++) {
+                    if (localExams.get(i).getQuizId().equals(localExam.getQuizId())) {
+                        sequentialNumber = i + 1;
+                        break;
+                    }
+                }
+
+                // Build TestWithQuestions from local data
+                TestWithQuestions testWithQuestions = buildTestWithQuestions(localExam, testId, languageCode, sequentialNumber);
+                result.postValue(Resource.success(testWithQuestions));
+            } catch (Exception e) {
+                reportQuietly(TAG, "Error loading local exam questions", e);
+                result.postValue(Resource.<TestWithQuestions>error(ErrorUtils.getUserFriendlyMessage(context, e), null));
+            }
+        });
 
         return result;
     }
@@ -247,5 +262,43 @@ public class TestRepository {
             cleaned = cleaned.substring(ASSETS_PREFIX.length());
         }
         return FILE_ASSET_PREFIX + cleaned;
+    }
+
+    /**
+     * Logs and reports an exception to Crashlytics without ever throwing.
+     * This code runs on the background executor, and a failure inside logging
+     * or crash reporting must never prevent the error Resource from being
+     * delivered to the UI (otherwise the screen would hang on its spinner).
+     */
+    private static void reportQuietly(String tag, String message, Throwable e) {
+        try {
+            Log.e(tag, message, e);
+        } catch (Throwable ignored) {
+            // Logging must never break the flow.
+        }
+        try {
+            com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
+        } catch (Throwable ignored) {
+            // Crash reporting must never break the flow.
+        }
+    }
+
+    private void executeSafely(Runnable runnable) {
+        try {
+            if (!executorService.isShutdown() && !executorService.isTerminated()) {
+                executorService.execute(runnable);
+            }
+        } catch (RejectedExecutionException e) {
+            Log.w(TAG, "Task rejected, executor is shutting down", e);
+        }
+    }
+
+    /**
+     * Cleanly shut down the internal executor to release the background thread.
+     */
+    public void shutdown() {
+        if (executorService != null && !executorService.isShutdown()) {
+            executorService.shutdown();
+        }
     }
 }

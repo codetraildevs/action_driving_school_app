@@ -13,6 +13,7 @@ import com.drivingschoolrwandaapp.database.entities.TestWithQuestions;
 import com.drivingschoolrwandaapp.models.entities.TestResult;
 import com.drivingschoolrwandaapp.repository.Resource;
 import com.drivingschoolrwandaapp.repository.TestRepository;
+import com.drivingschoolrwandaapp.repository.TestResultRepository;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,6 +30,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 public class TestViewModel extends AndroidViewModel {
 
     private final TestRepository testRepository;
+    private final TestResultRepository testResultRepository;
     private final LiveData<Resource<List<TestEntity>>> tests;
     private final MutableLiveData<Boolean> refreshTrigger = new MutableLiveData<>();
     private final MutableLiveData<Integer> testId = new MutableLiveData<>();
@@ -49,13 +51,21 @@ public class TestViewModel extends AndroidViewModel {
     // History of test results for Previous Tests page
     private final MutableLiveData<List<TestResult>> testResultHistory = new MutableLiveData<>(new ArrayList<>());
 
+    // Persisted history observer: seeds the in-memory list once from Room so
+    // Previous Tests survives restarts and works fully offline.
+    private final LiveData<List<TestResult>> persistedHistory;
+    private final androidx.lifecycle.Observer<List<TestResult>> persistedHistoryObserver;
+    private boolean historySeededFromDb = false;
+
     // Timestamp captured when a test begins, used to report actual time taken
     private long testStartTime = 0L;
 
     @Inject
-    public TestViewModel(@NonNull Application application, TestRepository testRepository) {
+    public TestViewModel(@NonNull Application application, TestRepository testRepository,
+                         TestResultRepository testResultRepository) {
         super(application);
         this.testRepository = testRepository;
+        this.testResultRepository = testResultRepository;
         
         // Initialize refreshTrigger
         refreshTrigger.setValue(false);
@@ -63,6 +73,33 @@ public class TestViewModel extends AndroidViewModel {
         this.tests = Transformations.switchMap(refreshTrigger, force -> testRepository.getTests(force));
         
         this.questionsForTest = Transformations.switchMap(testId, testRepository::getTestWithQuestions);
+
+        // Seed the Previous Tests list from persisted results. The observer
+        // deliberately ignores later emissions (which originate from our own
+        // inserts — those entries are already in the in-memory list), so it can
+        // never overwrite or duplicate live-session history.
+        this.persistedHistory = testResultRepository.getHistory();
+        this.persistedHistoryObserver = persisted -> {
+            if (!historySeededFromDb) {
+                historySeededFromDb = true;
+                List<TestResult> current = testResultHistory.getValue();
+                if (current == null || current.isEmpty()) {
+                    testResultHistory.setValue(persisted != null ? new ArrayList<>(persisted) : new ArrayList<>());
+                }
+            }
+        };
+        this.persistedHistory.observeForever(persistedHistoryObserver);
+    }
+
+    @Override
+    protected void onCleared() {
+        // Only detach the observer. The repository is a process-wide singleton
+        // (its executor must stay alive for future ViewModels), so it is never
+        // shut down here.
+        if (persistedHistory != null && persistedHistoryObserver != null) {
+            persistedHistory.removeObserver(persistedHistoryObserver);
+        }
+        super.onCleared();
     }
 
     public LiveData<Resource<List<TestEntity>>> getTests() {
@@ -230,11 +267,15 @@ public class TestViewModel extends AndroidViewModel {
                     correctAnswers, wrongAnswers, skippedAnswers);
             testResult.setValue(result);
 
-            // Add to history
+            // Add to history (in-memory, for the live session) and persist so
+            // the result survives restarts and is visible offline.
             List<TestResult> history = testResultHistory.getValue();
             if (history != null) {
                 history.add(0, result);
                 testResultHistory.setValue(history);
+            }
+            if (testResultRepository != null) {
+                testResultRepository.saveResult(result);
             }
         }
     }

@@ -15,7 +15,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
+import com.drivingschoolrwandaapp.utils.EdgeToEdgeUtils;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -46,7 +46,7 @@ public class WelcomeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
+        EdgeToEdgeUtils.enable(this);
 
         setContentView(R.layout.activity_welcome);
         appPreferences = new AppPreferences(this);
@@ -60,7 +60,8 @@ public class WelcomeActivity extends AppCompatActivity {
 
         TextView termsPolicyText = findViewById(R.id.terms_policy_text);
         versionTv = findViewById(R.id.versionTv);
-        versionTv.setText(getString(R.string.version_format, BuildConfig.VERSION_NAME));
+        versionTv.setText(getString(R.string.version_format,
+                BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE));
         makeTermsAndPolicyClickable(termsPolicyText);
 
         // Show disclaimer only on first launch

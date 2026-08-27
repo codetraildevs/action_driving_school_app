@@ -323,7 +323,7 @@ class UserRepositoryTest {
     }
 
     @Test
-    fun `login passes normalized phone password and deviceId in request`() {
+    fun `login passes normalized phone password deviceId and android clientType in request`() {
         val requestCaptor = ArgumentCaptor.forClass(com.drivingschoolrwandaapp.models.request.LoginRequest::class.java)
         val call = mockCall<LoginResponse>()
         `when`(apiService.login(requestCaptor.capture())).thenReturn(call)
@@ -334,6 +334,10 @@ class UserRepositoryTest {
         assertEquals("+250700000000", request.identifier)
         assertEquals("pass", request.password)
         assertEquals("dev-1", request.deviceId)
+        // The app always identifies itself as the Android client so the backend
+        // can allow phone-only (shared) admin login while still requiring the
+        // real password from the web console.
+        assertEquals("android_app", request.clientType)
     }
 
     // ---------------------------------------------------------------------------
@@ -624,8 +628,9 @@ class UserRepositoryTest {
         `when`(response.message()).thenReturn("Unauthorized")
         captor.value.onResponse(mockCall(), response)
 
+        // Raw HTTP status text is not shown — a localized generic message is used instead.
         assertEquals(Resource.Status.ERROR, result.value!!.status)
-        assertEquals("Unauthorized", result.value!!.message)
+        assertEquals("Something went wrong", result.value!!.message)
     }
 
     @Test
@@ -645,5 +650,41 @@ class UserRepositoryTest {
 
         assertEquals(Resource.Status.ERROR, result.value!!.status)
         assertNotNull("Expected a friendly error message", result.value!!.message)
+    }
+
+    // ---------------------------------------------------------------------------
+    // mapUser — persisted role sync (called by getProfile's success path)
+    //
+    // The full getProfile success path needs a main looper (Robolectric), so the
+    // role-sync behaviour is verified directly through the package-private mapUser.
+    // ---------------------------------------------------------------------------
+
+    @Test
+    fun `mapUser persists a valid role to the token manager`() {
+        val networkUser = NetworkUser(id = 7, firstName = "Alice", role = 2)
+
+        val dbUser = repository.mapUser(networkUser)
+
+        assertEquals(2, dbUser.roleId)
+        verify(tokenManager).saveRole(2)
+    }
+
+    @Test
+    fun `mapUser does not wipe stored role when the response omits it`() {
+        val networkUser = NetworkUser(id = 7, firstName = "Alice", role = 0)
+
+        repository.mapUser(networkUser)
+
+        // role 0 is not a known role id — the persisted admin role must survive.
+        verify(tokenManager, never()).saveRole(anyInt())
+    }
+
+    @Test
+    fun `mapUser syncs a student role downgrade`() {
+        val networkUser = NetworkUser(id = 7, firstName = "Alice", role = 5)
+
+        repository.mapUser(networkUser)
+
+        verify(tokenManager).saveRole(5)
     }
 }

@@ -44,6 +44,8 @@
 
     <!-- ************ STATUS COLORS ************ -->
     <color name="status_action_text">#D32F2F</color>
+    <color name="status_green">#2E7D32</color>
+    <color name="status_red">#C62828</color>
 
 
     <!-- ************ SHIMMER PLACEHOLDER ************ -->

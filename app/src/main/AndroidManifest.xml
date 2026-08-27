@@ -105,6 +105,12 @@
             android:name=".ui.activities.MyApplicationsActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.activities.LicenseRequestActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.activities.SpecialRequestActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.activities.ApplicationDetailsActivity"
             android:exported="false" />
             
@@ -114,6 +120,10 @@
 
         <activity
             android:name=".ui.activities.WebViewActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.activities.AdminActivity"
             android:exported="false" />
 
         <provider

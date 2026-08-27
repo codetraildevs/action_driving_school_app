@@ -89,6 +89,29 @@
     <string name="fill_all_fields">Nyamuneka wuzuze ibice byose</string>
     <string name="passwords_not_match">Amaijambobanga ntahura</string>
     <string name="something_went_wrong">Habaye ikibazo</string>
+    <string name="unknown_error">Habayemo ikibazo kitazwi</string>
+    <string name="no_whatsapp_groups">Nta matsinda ya WhatsApp akora abonetse.</string>
+    <string name="national_id_16_digits">Agomba kuba imibare 16</string>
+    <string name="irembo_fetch_failed">Kubona ibisabwa bya vuba ntibyashobotse</string>
+    <string name="irembo_submit_failed">Kohereza ubusabe ntibyakunze</string>
+    <string name="irembo_application_not_found">Ubusabe ntibubonetse cyangwa habaye ikibazo</string>
+    <string name="application_not_found_title">Ubusabe ntibubonetse</string>
+    <string name="request_already_sent_title">Gusaba kwawe kwaratwoherejwe</string>
+    <string name="request_already_sent_message">Usanzwe ufite gusaba gukora kuri iyi serivisi. Tegereza ko gutunganywa mbere yo kohereza indi.</string>
+    <string name="error_unknown">Habaye ikibazo kitazwi. Ongera ugerageze.</string>
+    <string name="error_secure_connection">Ntibishoboka gushinga umurongo w\'umutekano. Vugurura porogaramu maze ugerageze.</string>
+    <string name="error_connection_interrupted">Umurongo wabujijwe. Ongera ugerageze.</string>
+    <string name="whatsapp_fetch_failed">Gushyiramo amatsinda ya WhatsApp ntibyakunze.</string>
+    <string name="subscribe_failed">Kwiyandikisha byanze. Ongera ugerageze.</string>
+    <string name="request_access_failed">Gusaba uburenganzira byanze.</string>
+    <string name="cancel_subscription_failed">Guhagarika kwiyandikisha byanze.</string>
+    <string name="refresh_failed">Kuvugurura biva kuri seriveri ntibyakunze.</string>
+    <string name="offline_showing_downloaded">Nta interineti. Reba ibyo wamanuye.</string>
+    <string name="no_offline_content">Nta byandikishijwe mu porogaramu bihari.</string>
+    <string name="could_not_load_offline_content">Ntibishoboka gushyiramo ibyandikishijwe.</string>
+    <string name="no_internet_no_offline">Nta interineti kandi nta byandikishijwe bihari.</string>
+    <string name="exam_not_found">Ikizamini ntikibonetse kuri ID: %1$d</string>
+    <string name="track_failed_title">Kurikirana ntibyakunze</string>
     <string name="invalid_otp">Shyiramo OTP y\'inyuguti 6 yujuje ibisabwa</string>
     <string name="terms_of_service">Amategeko y\'Akazi</string>
     <string name="registration_failed">Iyandikisho ryanze. Gerageza kongera.</string>
@@ -104,6 +127,17 @@
     <string name="no_materials_found">Nta bikoresho bibonetse.</string>
     <string name="download_success">Gukurura byarangiye!</string>
     <string name="download_failure">Gukurura byanze.</string>
+    <string name="download_failure_reason">Gukurura byanze: %1$s</string>
+    <string name="downloading">Gukurura</string>
+    <string name="downloading_material">Gukurura %1$s</string>
+    <string name="download_complete">Gukurura byarangiye</string>
+    <string name="download_complete_message">%1$s byakururwe.</string>
+    <string name="download_failed_title">Gukurura byanze</string>
+    <string name="downloading_file">Gukurura dosiye...</string>
+    <string name="ok">OK</string>
+    <string name="no_thanks">Oya, urakoze</string>
+    <string name="notification_permission_title">Uruhushya rwa notifikasiyo rurakenewe</string>
+    <string name="notification_permission_message">Iyi apulikasiyo ikoresha notifikasiyo kugira ngo ikubere amakuru y\'ingenzi. Nyamuneka ube uruhushya kugira ngo uzakire.</string>
     <string name="download_first">Dosiye ntabwo yakururwa. Nyamuneka ibanze uyikure.</string>
     <string name="no_app_found">Nta porogaramu ishobora gufungura ubu bwoko bwa dosiye.</string>
     <string name="error_opening_file">Ntibishoboka gufungura dosiye.</string>
@@ -133,12 +167,18 @@
     <string name="practice_text">Gira imyitozo n\'ibizamini. Ibizamini by\'ubuntu bihari ku bantu bose. Iyandikishe kugira ngo ufungure ibizamini byisumbuye.</string>
     <string name="review_text">Reba ibisubizo byawe kandi ukurikire intambwe yawe.</string>
     <string name="payment_instructions">Kugirango Ibizamini Bifunguke</string>
-    <string name="payment_instructions_text">IBizamini biri muri apulikasiyo nibyo babaza mu kizamini cya porovisoiri kugirango ibizamini byose bifunguke wishyura amafaranga kuri MOMO PAY, Mobile Money cyangwa kuri Tigo Cash (847318,0782877442, 0722877442); Ibaruye kuri Alexis: </string>
+    <string name="payment_instructions_text">IBizamini biri muri apulikasiyo nibyo babaza mu kizamini cya porovisoiri kugirango ibizamini byose bifunguke wishyura amafaranga kuri MOMO PAY, Mobile Money cyangwa kuri Tigo Cash (847318, 0782877442, 0722877442); Ibaruye kuri Alexis: </string>
     <string name="payment_instructions_pay1">1. Kanda hano *182*8*1*847318#</string>
     <string name="payment_instructions_pay2">2. Ohereza amafaranga kuri 0782877442</string>
     <string name="payment_instructions_pay3">3. Ohereza amafaranga kuri 0722877442</string>
     <string name="ihavepaid">Tangira ibizamini</string>
     <string name="request_access_confirm">Saba</string>
+    <string name="payment_title">Kwishyura</string>
+    <string name="payment_methods_title">Uburyo bwo kwishyura</string>
+    <string name="payment_method_mtn">MTN Mobile Money</string>
+    <string name="payment_method_airtel">Airtel Money</string>
+    <string name="payment_dialog_subtitle">Hitamo uburyo bumwe muri ubu bukurikira, hanyuma ukande ahanditse \"Tangira ibizamini\" umaze kwishyura.</string>
+    <string name="subscription_choose_plan">Hitamo uburyo bukunze</string>
     <string name="dafault_name">John Doe</string>
     <string name="default_email">johndoe@example.com</string>
     <string name="subscrition_status">Uko Ifabuguzi Ryawe Rihagaze: </string>
@@ -165,7 +205,7 @@
     <string name="instructions_3_conten_1">Nugera mu Kizamini cya porovisoiri kuri mashine uzasanga ibi bibazo biri muri apulikasiyo  ari nako bimeze mu kizaminini nta kibazo bazakubaza muri mu kizamini cya porovisoiri kitari hano muri apulikasiyo, Muguhihtamo igisubizo uzakanda mu (✔️) ugakomeza kukindi kibazo  ukande ahanditse *Next* ukomeze n\'ibindi bibazo. Iyo usoje ubirangije uzakanda ahanditse "Soza ikizamini" uzahita umenya amanota ugize ako kanya ushatse wanagenzura ibyo wishe nibyo wakoze  nkuko bimeze muri iyi apulikasiyo</string>
 
     <string name="instructions4">4. KWISHURA KUGIRANGO IBIZAMINI BYOSE BIFUNGUKE</string>
-    <string name="instructions4_content_1">1. Nkuko nabisobanuye haruguru ikizamini cya mbere ni ubuntu ibindi 20 bisaba kwishyura 5000 RWF kuri 0782877442 cyangwa kuri MoNo Pay: 847318 ibaruye Kuri Alexis.</string>
+    <string name="instructions4_content_1">1. Nkuko nabisobanuye haruguru ikizamini cya mbere ni ubuntu ibindi 20 bisaba kwishyura 5000 RWF kuri 0782877442 cyangwa kuri MoMo Pay: 847318 ibaruye Kuri Alexis.</string>
     <string name="instructions4_content_2">2. Iyo umaze kwishyura usubira inyuma ugategereza iminota 5 ukongera ukajya ku bizamini usanga ibyo wishyuriye byafungutse ahari akagufuri gafunze kumutuku usanga kabaye akagufuri gafunguye mu ibara ry\'icyatsi. NB: ubikora ufite connection (Internet).</string>
 
     <string name="instructions_4_content_3">3. Muri apulikasiyo ushobora kwishyura make ikizamini 1 ni 100 Rwf kigafunguka umunsi 1, iyo wishyuye 1000 RWF tugufungurira ibizamini 10 bikamara iminsi 10, iyo wishyuye 2000 RWF tugufungurira ibizamin byose bikamara iminsi 25, iyo wishyuye 5000 tugufungurira ibizamini byose muri apulikasiyo kugera utsinze. </string>
@@ -199,6 +239,8 @@
     <string name="service_name">Izina rya Serivisi</string>
     <string name="special_irembo_service">Serivisi Yihariye ya Irembo (BUSANZA)</string>
     <string name="my_applications">Ubusabe Bwanjye</string>
+    <string name="no_applications_found">Nta bisabe bibonetse</string>
+    <string name="no_applications_found_subtitle">Koresha ubusabe bwawe cyangwa uhindure iyungurura</string>
     <string name="all">Byose</string>
     <string name="pending">Bitegerejwe</string>
     <string name="provisional_license_text">Uruhushya rw\'Agateganyo</string>
@@ -221,7 +263,7 @@
     <string name="_0">0%</string>
     <string name="open_group">Fungura Itsinda</string>
     <string name="learning_materials_dashboard">Imfashanyigisho</string>
-    <string name="all_services">Saba kode yo gukoreraho ikizamini</string>
+    <string name="all_services">Serivisi zose</string>
     <string name="whatsapp_group_text">Amatsinda ya WhatsApp</string>
     <string name="chip_all">Byose</string>
     <string name="chip_pending">Bitegereje</string>
@@ -235,6 +277,7 @@
     <string name="question_counter_format" tools:ignore="PluralsCandidate">Ikibazo %1$d kuri %2$d</string>
     <string name="percent_complete_format" tools:ignore="PluralsCandidate">%%%d byuzuye</string>
     <string name="previous_tests_summary">Ibisubizo Byawe</string>
+    <string name="previous_tests_subtitle">Reba amanota yawe, ikigereranyo n\'icyipimo cyo gutsinda</string>
     <string name="total_tests">Ibizamini Byose</string>
     <string name="average_score">Amanota Rusange</string>
     <string name="pass_rate">Icyipimo Cyo Gustsinza</string>
@@ -264,79 +307,83 @@
 
     <!-- Notification Channels -->
     <string name="general_channel_id" translatable="false">general_channel</string>
-    <string name="general_channel_name">General Announcements</string>
-    <string name="general_channel_description">Notifications for general announcements and updates.</string>
+    <string name="general_channel_name">Amatangazo Rusange</string>
+    <string name="general_channel_description">Amatangazo rusange n\'amakuru agezweho.</string>
     <string name="exams_channel_id" translatable="false">exams_channel</string>
-    <string name="exams_channel_name">Exams</string>
-    <string name="exams_channel_description">Notifications for exam reminders and results.</string>
+    <string name="exams_channel_name">Ibizamini</string>
+    <string name="exams_channel_description">Amatangazo yibutsa ibizamini n\'ibisubizo.</string>
     <string name="irembo_channel_id" translatable="false">irembo_channel</string>
     <string name="irembo_channel_name">Irembo</string>
-    <string name="irembo_channel_description">Notifications for Irembo services.</string>
+    <string name="irembo_channel_description">Amatangazo ya serivisi za Irembo.</string>
     <string name="application_channel_id" translatable="false">application_channel</string>
-    <string name="application_channel_name">My Applications</string>
-    <string name="application_channel_description">Notifications for your applications.</string>
+    <string name="application_channel_name">Ubusabe Bwanjye</string>
+    <string name="application_channel_description">Amatangazo y\'ubusabe bwawe.</string>
     <string name="subscription_channel_id" translatable="false">subscription_channel</string>
-    <string name="subscription_channel_name">Subscription</string>
-    <string name="subscription_channel_description">Notifications for your subscription status.</string>
+    <string name="subscription_channel_name">Kwiyandikisha</string>
+    <string name="subscription_channel_description">Amatangazo y\'uko kwiyandikisha kwawe kumeze.</string>
 
     <!-- Hardcoded string replacements for lint warnings -->
-    <string name="version_format">Version %s</string>
+    <string name="version_format">Verisiyo %1$s (%2$d)</string>
     <string name="ref_format">Ref: %s</string>
-    <string name="applied_format">Applied: %s</string>
-    <string name="page_format">Page %d</string>
-    <string name="processing_status">Processing</string>
-    <string name="no_details_available">No additional details available.</string>
-    <string name="waiting_for_approval">Waiting for approval</string>
-    <string name="action_required_text">Action Required</string>
-    <string name="access_expired">Access Expired</string>
-    <string name="active_status">ACTIVE</string>
-    <string name="notifications_permission_granted">Notifications permission granted</string>
-    <string name="notifications_permission_denied">Notifications will not be shown.</string>
-    <string name="update_flow_failed">Update flow failed! Result code: %d</string>
-    <string name="error_format">Error: %s</string>
-    <string name="error_loading_location">Error loading location data</string>
-    <string name="license_submitted">License request submitted successfully</string>
-    <string name="special_submitted">Special request submitted successfully</string>
-    <string name="please_select_location">Please select location</string>
-    <string name="could_not_open_dialer">Could not open dialer</string>
-    <string name="permission_denied_call">Permission denied to make a call</string>
-    <string name="bookmark_added_toast">Bookmark added</string>
-    <string name="invalid_page_number">Invalid page number</string>
-    <string name="no_bookmarks_yet">No bookmarks yet</string>
-    <string name="need_active_subscription">You need an active subscription to %s this material.</string>
-    <string name="test_access_expired_msg">Your test access has expired. You cannot %s this material.</string>
-    <string name="downloading_file">Downloading file…</string>
-    <string name="download_failed_msg">Download failed: %s</string>
-    <string name="could_not_open_link">Could not open link</string>
-    <string name="invalid_link">Invalid link</string>
-    <string name="link_copied">Link copied to clipboard</string>
-    <string name="no_link_to_copy">No link to copy</string>
+    <string name="applied_format">Byakozwe: %s</string>
+    <string name="page_format">Urupapuro %d</string>
+    <string name="processing_status">Iratunganywa</string>
+    <string name="no_details_available">Nta bisobanuro byongera bihari.</string>
+    <string name="waiting_for_approval">Gutegereza kwemezwa</string>
+    <string name="request_pending_message">Ubusabe bwawe bwoherejwe. Iyo umuyobozi abwemeye, ibizamini byawe bizafunguka ubwabyo - komeza ureke uru rukurikirane rugaragara kugeza icyo gihe.</string>
+    <string name="request_sent_button">Ubusabe bwoherejwe</string>
+    <string name="action_required_text">Igikorwa Girakenewe</string>
+    <string name="access_expired">Uburenganzira Bwarangiye</string>
+    <string name="active_status">GIKORA</string>
+    <string name="notifications_permission_granted">Uruhushya rwa notifikasiyo rwatanzwe</string>
+    <string name="notifications_permission_denied">Notifikasiyo ntizagaragara.</string>
+    <string name="update_flow_failed">Kuvugurura byanze! Kode: %d</string>
+    <string name="error_format">Ikosa: %s</string>
+    <string name="error_loading_location">Habaye ikibazo mu gushyiramo amakuru y\'ahantu</string>
+    <string name="license_submitted">Ubusabe bw\'uruhushya rwo gutwara bwoherejwe neza</string>
+    <string name="special_submitted">Ubusabe budasanzwe bwoherejwe neza</string>
+    <string name="please_select_location">Hitamo ahantu</string>
+    <string name="could_not_open_dialer">Ntibishoboka gufungura telefone</string>
+    <string name="permission_denied_call">Nta ruhushya rwo guhamagara</string>
+    <string name="bookmark_added_toast">Byabitswe</string>
+    <string name="invalid_page_number">Nomero y\'urupapuro itemba</string>
+    <string name="no_bookmarks_yet">Nta byo wabitswe bihari</string>
+    <string name="need_active_subscription">Ukeneye kwiyandikisha kugira ngo %s iki gikoresho.</string>
+    <string name="test_access_expired_msg">Igihe cyawe cyo gukora ibizamini cyarangiye. Ntushobora %s iki gikoresho.</string>
+
+    <string name="download_failed_msg">Gukurura byanze: %s</string>
+    <string name="could_not_open_link">Ntibishoboka gufungura link</string>
+    <string name="invalid_link">Link itemba</string>
+    <string name="link_copied">Link yanditswe</string>
+    <string name="no_link_to_copy">Nta link yo kwandika</string>
 
     <!-- Login & Registration error messages -->
-    <string name="network_error">Connection failed. Please check your internet connection and try again.</string>
-    <string name="request_timeout">Request timed out. The server is not responding. Please try again later or contact support.</string>
-    <string name="login_successful_redirect">Login successful!</string>
-    <string name="registration_success">Account created successfully! Please login to continue.</string>
-    <string name="loading">Loading…</string>
-    <string name="remember_me">Remember me (30 days)</string>
-    <string name="session_info">Session</string>
-    <string name="session_expires_in">Session expires in %s</string>
-    <string name="session_expired">Session expired — log in again</string>
+    <string name="network_error">Ihuza ryanze. Reba ko interineti ikora maze ugerageze.</string>
+    <string name="request_timeout">Igihe kirarangiye. Seriveri ntiyashubije. Ongera ugerageze nyuma.</string>
+    <string name="login_successful_redirect">Kwinjira byakunze!</string>
+    <string name="registration_success">Konte yahanzwe neza! Injira ukomeze.</string>
+    <string name="loading">Biracyakururwa…</string>
+    <string name="remember_me">Nibuke (iminsi 30)</string>
+    <string name="session_info">Igihe</string>
+    <string name="session_expires_in">Igihe kirangira mu %s</string>
+    <string name="session_expired">Igihe cyawe kirangiye — subira winjire</string>
 
     <!-- Device not allowed error - login -->
-    <string name="device_not_allowed">You are not allowed to login from this device. Please contact support at +250782877442 or +250722877442.</string>
-    <string name="device_not_allowed_short">This device is not recognized. Please contact support at +250782877442 or +250722877442 to reset your device association.</string>
+    <string name="device_not_allowed">Ntabwo urekurwa kwinjira kuri iyi mashini. Wende ku bukangurambaga kuri +250782877442 cyangwa +250722877442.</string>
+    <string name="device_not_allowed_short">Iyi mashini ntimenyekana. Wende ku bukangurambaga kuri +250782877442 cyangwa +250722877442 kugira ngo uruhushya rusubizwe.</string>
 
     <!-- Hardcoded text fixes -->
-    <string name="message_label">Message</string>
-    <string name="no_additional_message">No additional message.</string>
+    <string name="message_label">Ubutumwa</string>
+    <string name="no_additional_message">Nta butumwa bwongera.</string>
     <string name="province">Intara</string>
     <string name="district">Akarere</string>
-    <string name="an_error_occurred">An error occurred</string>
-    <string name="app_version_placeholder">Version 1.0.0</string>
-    <string name="learning_fragment">Learning Fragment</string>
+    <string name="an_error_occurred">Habaye ikibazo</string>
+    <string name="app_version_placeholder">Verisiyo 1.0.0</string>
+    <string name="share_via">Sangiza ukoresheje</string>
+    <string name="learning_fragment">Igice cyo Kwiga</string>
     <string name="momo_pay">MOMO Pay</string>
-    <string name="expires_na">Expires: N/A</string>
+    <string name="irembo_service_subtitle">Saba kuri Irembo</string>
+    <string name="expires_na">Birangira: N/A</string>
     <string name="contact_phone_1">+250782877442</string>
     <string name="contact_phone_2">+250722877442</string>
     <string name="default_price_rwf">2,000 RWF</string>
@@ -354,10 +401,10 @@
     <string name="result_placeholder_score">-- / --</string>
     <string name="result_placeholder_status">--</string>
     <string name="result_placeholder_zero">0</string>
-    <string name="update_downloaded">An update has just been downloaded.</string>
+    <string name="update_downloaded">Kuvugurura kwaramanutse.</string>
     <string name="restart_action">RESTART</string>
-    <string name="status_unknown">UNKNOWN</string>
-    <string name="account_already_exists_with_help">This phone number is already registered. Please login with your phone number or call +250782877442 or +250722877442 for help.</string>
+    <string name="status_unknown">BITAZWI</string>
+    <string name="account_already_exists_with_help">Iyi nimero yamaze kwiyandikisha. Injira ukoresheje nimero yawe cyangwa uhamagare +250782877442 cyangwa +250722877442.</string>
     <string name="accass_up_to_format">Ibizamini Wemerewe Kwiga: %1$d</string>
     <string name="expiry_date_format">Bizifunga: %1$s</string>
 
@@ -373,6 +420,56 @@
     <string name="completion_percentage_format" translatable="false">%1$d%%</string>
 
     <!-- Device registration messages -->
-    <string name="device_already_registered">You already have an account on this device. Please login with the phone number you registered before or call +250782877442 or +250722877442 for help.</string>
+    <string name="device_already_registered">Usanzwe ufite konte kuri iyi mashini. Injira ukoresheje nimero wanditseho mbere cyangwa uhamagare +250782877442 cyangwa +250722877442.</string>
 
+    <!-- Admin console -->
+    <string name="admin_title">Admin Console</string>
+    <string name="admin_dashboard">Dashboard</string>
+    <string name="admin_users">Users</string>
+    <string name="admin_requests">Requests</string>
+    <string name="admin_settings">Settings</string>
+    <string name="admin_welcome">Welcome to the Admin Console</string>
+    <string name="admin_total_users">Total Users</string>
+    <string name="admin_active_users">Active (30d)</string>
+    <string name="admin_total_subscriptions">Subscriptions</string>
+    <string name="admin_total_content">Content Items</string>
+    <string name="admin_recent_activity">Recent Activity</string>
+    <string name="admin_no_activity">No recent activity</string>
+    <string name="admin_load_failed">Something went wrong. Check your connection and try again.</string>
+    <string name="admin_empty_users">No users found</string>
+    <string name="admin_empty_requests">No requests found</string>
+    <string name="admin_retry">Retry</string>
+    <string name="admin_logout">Log Out</string>
+    <string name="admin_console_link">Open Web Console</string>
+    <string name="admin_version">Version</string>
+    <string name="admin_console_desc">Manage users, subscriptions, content and requests from the full web admin console.</string>
+
+    <!-- Role names -->
+    <string name="role_super_admin">Super Admin</string>
+    <string name="role_admin">Admin</string>
+    <string name="role_content_manager">Content Manager</string>
+    <string name="role_teacher">Teacher</string>
+    <string name="role_student">Student</string>
+    <string name="role_premium_user">Premium User</string>
+    <string name="role_free_user">Free User</string>
+    <string name="role_moderator">Moderator</string>
+    <string name="role_support_staff">Support Staff</string>
+    <string name="role_guest">Guest</string>
+
+    <!-- Admin user detail dialog -->
+    <string name="admin_subscription">Subscription</string>
+    <string name="admin_sub_start">Start</string>
+    <string name="admin_sub_end">End</string>
+    <string name="admin_no_subscription">No subscription</string>
+    <string name="admin_sub_active">Active</string>
+    <string name="admin_sub_expired">Expired</string>
+    <string name="admin_user_active">Active</string>
+    <string name="admin_user_inactive">Inactive</string>
+    <string name="admin_no_requests">No requests</string>
+    <string name="admin_close">Close</string>
+    <string name="admin_search_users">Search users…</string>
+    <string name="admin_search_requests">Search requests…</string>
+    <string name="admin_no_matching_users">No users match your search</string>
+    <string name="admin_no_matching_requests">No requests match your search</string>
+    <string name="admin_last_updated">Last updated: %1$s</string>
 </resources>

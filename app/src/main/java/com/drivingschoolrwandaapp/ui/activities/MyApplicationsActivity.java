@@ -7,7 +7,7 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
+import com.drivingschoolrwandaapp.utils.EdgeToEdgeUtils;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -41,7 +41,7 @@ public class MyApplicationsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        EdgeToEdge.enable(this);
+        EdgeToEdgeUtils.enable(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_my_applications);
 
@@ -67,7 +67,8 @@ public class MyApplicationsActivity extends AppCompatActivity {
         iremboViewModel = new ViewModelProvider(this).get(IremboViewModel.class);
         setupObservers();
         
-        iremboViewModel.fetchRecentApplications();
+        // Full list (not the hub's truncated 2-item "Recent Activity").
+        iremboViewModel.fetchAllApplications();
     }
     
     private void setupFilters() {
@@ -113,14 +114,17 @@ public class MyApplicationsActivity extends AppCompatActivity {
 
     private void filterList() {
         List<IremboApplication> filteredList = new ArrayList<>();
+        String query = currentSearchQuery.toLowerCase(Locale.ROOT);
         
         for (IremboApplication app : allApplications) {
             boolean matchesStatus = currentStatusFilter.equals("ALL") || 
                                    (app.getStatus() != null && app.getStatus().toUpperCase(Locale.ROOT).contains(currentStatusFilter));
             
-            boolean matchesSearch = currentSearchQuery.isEmpty() || 
-                                   (app.getReference() != null && app.getReference().toLowerCase(Locale.ROOT).contains(currentSearchQuery.toLowerCase(Locale.ROOT))) ||
-                                   (app.getTitle() != null && app.getTitle().toLowerCase(Locale.ROOT).contains(currentSearchQuery.toLowerCase(Locale.ROOT)));
+            boolean matchesSearch = query.isEmpty() ||
+                                   (app.getReference() != null && app.getReference().toLowerCase(Locale.ROOT).contains(query)) ||
+                                   (app.getTitle() != null && app.getTitle().toLowerCase(Locale.ROOT).contains(query)) ||
+                                   (app.getStatus() != null && app.getStatus().toLowerCase(Locale.ROOT).contains(query)) ||
+                                   (app.getDate() != null && app.getDate().toLowerCase(Locale.ROOT).contains(query));
 
             if (matchesStatus && matchesSearch) {
                 filteredList.add(app);
@@ -128,6 +132,18 @@ public class MyApplicationsActivity extends AppCompatActivity {
         }
         
         adapter.setApplications(filteredList);
+        updateEmptyState(filteredList.isEmpty());
+    }
+
+    private void updateEmptyState(boolean isEmpty) {
+        View emptyLayout = findViewById(R.id.layout_empty);
+        RecyclerView recyclerView = findViewById(R.id.rv_my_applications);
+        if (emptyLayout != null) {
+            emptyLayout.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+        }
+        if (recyclerView != null) {
+            recyclerView.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+        }
     }
     
     private void setupObservers() {
@@ -142,7 +158,13 @@ public class MyApplicationsActivity extends AppCompatActivity {
                 }
             } else if (resource.status == Resource.Status.ERROR) {
                 hideLoadingDialog();
-                Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show();
+                // Offline fallback already served cached data as SUCCESS when available.
+                if (resource.data != null) {
+                    allApplications = resource.data;
+                    filterList();
+                } else {
+                    Toast.makeText(this, resource.message != null ? resource.message : getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }

@@ -20,7 +20,7 @@ import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
+import com.drivingschoolrwandaapp.utils.EdgeToEdgeUtils;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -37,7 +37,7 @@ public class WebViewActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        EdgeToEdge.enable(this);
+        EdgeToEdgeUtils.enable(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web_view);
 
@@ -80,8 +80,12 @@ public class WebViewActivity extends AppCompatActivity {
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setDomStorageEnabled(true);
         webView.getSettings().setDatabaseEnabled(true);
-        webView.getSettings().setAllowFileAccess(true);
-        webView.getSettings().setAllowContentAccess(true);
+        // This WebView only loads trusted HTTPS pages (terms, privacy, admin
+        // console) and never needs to read the device's local files — keep
+        // file/content access disabled so a compromised page cannot exfiltrate
+        // local data via file:// or content:// URLs.
+        webView.getSettings().setAllowFileAccess(false);
+        webView.getSettings().setAllowContentAccess(false);
         // Safe WebViewClient below restricts URL loading via shouldOverrideUrlLoading and handles external links appropriately
         webView.getSettings().setUseWideViewPort(true);
         webView.getSettings().setLoadWithOverviewMode(true);
@@ -158,7 +162,7 @@ public class WebViewActivity extends AppCompatActivity {
                 String cookies = CookieManager.getInstance().getCookie(downloadUrl);
                 request.addRequestHeader("cookie", cookies);
                 request.addRequestHeader("User-Agent", userAgent);
-                request.setDescription("Downloading file...");
+                request.setDescription(getString(R.string.downloading_file));
                 request.setTitle(URLUtil.guessFileName(downloadUrl, contentDisposition, mimetype));
                 request.allowScanningByMediaScanner();
                 request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);

@@ -61,6 +61,11 @@ public class TestQuestionsFragment extends Fragment {
     private String title;
     private AppPreferences appPreferences;
     private int totalQuestions = 0;
+    // Guards against duplicate submission: the countdown timer's onFinish() and a
+    // user tap on the Submit button can race at the same moment. Without this,
+    // calculateResult() would run twice — saving two history entries and
+    // navigating to the result screen twice.
+    private boolean isSubmitting = false;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -310,6 +315,7 @@ public class TestQuestionsFragment extends Fragment {
     }
 
     private void confirmSubmission() {
+        if (isSubmitting) return;
         // Show confirmation dialog
         new androidx.appcompat.app.AlertDialog.Builder(requireContext())
                 .setTitle(getString(R.string.confirm_submission))
@@ -320,6 +326,10 @@ public class TestQuestionsFragment extends Fragment {
     }
 
     private void submitTest() {
+        // First call wins; the timer finishing at the same moment the user taps
+        // Submit must not calculate/persist/navigate twice.
+        if (isSubmitting) return;
+        isSubmitting = true;
         if (timer != null) {
             timer.cancel();
         }

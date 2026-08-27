@@ -6,6 +6,7 @@ import android.util.Log
 import com.drivingschoolrwandaapp.models.LocalExam
 import com.drivingschoolrwandaapp.models.LocalExamWrapper
 import com.google.gson.Gson
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Loads exam data from local JSON assets instead of network API.
@@ -14,10 +15,14 @@ import com.google.gson.Gson
  * Automatically invalidates the cache when the user changes their language
  * preference via [SharedPreferences], ensuring exams are reloaded from the
  * appropriate JSON file on the next access.
+ *
+ * The cache is a [ConcurrentHashMap] because parsing happens on the
+ * repository's background executor while [clearCache] may run on the main
+ * thread (SharedPreferences listener), so the two must never race on the map.
  */
 class LocalExamDataSource(private val context: Context) {
     private val gson = Gson()
-    private val cache = mutableMapOf<String, LocalExamWrapper>()
+    private val cache = ConcurrentHashMap<String, LocalExamWrapper>()
 
     companion object {
         private const val TAG = "LocalExamDataSource"
@@ -101,11 +106,13 @@ class LocalExamDataSource(private val context: Context) {
     /**
      * Get or load cached JSON for the given language.
      * Caches results so JSON is only parsed once per language.
+     * Uses atomic computeIfAbsent so concurrent access (background parse
+     * vs. main-thread clearCache) can never corrupt the map.
      */
     private fun getOrLoad(languageCode: String): LocalExamWrapper {
         val normalizedLang = normalizeLanguage(languageCode)
-        return cache.getOrPut(normalizedLang) {
-            val fileName = LANGUAGE_FILES[normalizedLang]
+        return cache.computeIfAbsent(normalizedLang) { lang ->
+            val fileName = LANGUAGE_FILES[lang]
                 ?: LANGUAGE_FILES["en"]!! // Fallback to English
             loadJsonFromAssets(fileName)
         }

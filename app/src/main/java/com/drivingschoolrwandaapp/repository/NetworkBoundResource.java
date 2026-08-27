@@ -1,5 +1,6 @@
 package com.drivingschoolrwandaapp.repository;
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -26,9 +27,11 @@ public abstract class NetworkBoundResource<ResultType, RequestType> {
     private static final ExecutorService IO_EXECUTOR = Executors.newSingleThreadExecutor();
 
     private final MediatorLiveData<Resource<ResultType>> result = new MediatorLiveData<>();
+    private final Context context;
 
     @MainThread
-    public NetworkBoundResource() {
+    public NetworkBoundResource(Context context) {
+        this.context = context.getApplicationContext();
         result.setValue(Resource.loading(null));
         LiveData<ResultType> dbSource = loadFromDb();
         result.addSource(dbSource, data -> {
@@ -66,7 +69,10 @@ public abstract class NetworkBoundResource<ResultType, RequestType> {
                     });
                 } else {
                     onFetchFailed();
-                    result.addSource(dbSource, newData -> result.setValue(Resource.error(response.message(), newData)));
+                    // HTTP status text (e.g. "Unauthorized") is not localized — show a
+                    // translated generic message instead.
+                    result.addSource(dbSource, newData -> result.setValue(
+                            Resource.error(context.getString(com.drivingschoolrwandaapp.R.string.something_went_wrong), newData)));
                 }
             }
 
@@ -74,7 +80,7 @@ public abstract class NetworkBoundResource<ResultType, RequestType> {
             public void onFailure(@NonNull Call<RequestType> call, @NonNull Throwable t) {
                 onFetchFailed();
                 result.removeSource(dbSource);
-                result.addSource(dbSource, newData -> result.setValue(Resource.error(ErrorUtils.getUserFriendlyMessage(t), newData)));
+                result.addSource(dbSource, newData -> result.setValue(Resource.error(ErrorUtils.getUserFriendlyMessage(context, t), newData)));
             }
         });
     }

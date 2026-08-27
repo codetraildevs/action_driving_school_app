@@ -13,20 +13,59 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:cardCornerRadius="0dp"
-        app:cardElevation="4dp"
+        app:cardElevation="0dp"
         app:cardBackgroundColor="?attr/colorSurface"
-        app:strokeWidth="0dp"
-        android:paddingHorizontal="20dp"
-        android:paddingVertical="16dp">
+        app:strokeWidth="0dp">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/previous_tests_summary"
-            android:textAppearance="?attr/textAppearanceHeadline5"
-            android:textStyle="bold"
-            android:textColor="?attr/colorOnSurface" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="18dp">
 
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                app:cardCornerRadius="26dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="?attr/colorPrimaryContainer">
+
+                <ImageView
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_history"
+                    android:contentDescription="@null"
+                    app:tint="?attr/colorOnPrimaryContainer" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/previous_tests_summary"
+                    android:textAppearance="?attr/textAppearanceHeadline6"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorOnSurface" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/previous_tests_subtitle"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOutline" />
+            </LinearLayout>
+        </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
     <!-- Summary Stats Cards -->
@@ -48,7 +87,7 @@
             android:layout_weight="1"
             android:layout_marginEnd="5dp"
             app:cardCornerRadius="16dp"
-            app:cardElevation="4dp"
+            app:cardElevation="2dp"
             app:strokeWidth="1dp"
             app:strokeColor="?attr/colorOutlineVariant"
             app:cardBackgroundColor="?attr/colorSurface">
@@ -62,18 +101,20 @@
 
                 <!-- Icon circle -->
                 <com.google.android.material.card.MaterialCardView
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    app:cardCornerRadius="22dp"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    app:cardCornerRadius="20dp"
                     app:cardElevation="0dp"
                     app:strokeWidth="0dp"
                     app:cardBackgroundColor="?attr/colorPrimaryContainer">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"                            android:text="@string/emoji_memo"
-                        android:textSize="20sp" />
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_exam"
+                        android:contentDescription="@null"
+                        app:tint="?attr/colorOnPrimaryContainer" />
                 </com.google.android.material.card.MaterialCardView>
 
                 <TextView
@@ -104,7 +145,7 @@
             android:layout_weight="1"
             android:layout_marginHorizontal="5dp"
             app:cardCornerRadius="16dp"
-            app:cardElevation="4dp"
+            app:cardElevation="2dp"
             app:strokeWidth="1dp"
             app:strokeColor="?attr/colorOutlineVariant"
             app:cardBackgroundColor="?attr/colorSurface">
@@ -118,18 +159,20 @@
 
                 <!-- Icon circle -->
                 <com.google.android.material.card.MaterialCardView
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    app:cardCornerRadius="22dp"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    app:cardCornerRadius="20dp"
                     app:cardElevation="0dp"
                     app:strokeWidth="0dp"
                     app:cardBackgroundColor="?attr/colorSecondaryContainer">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"                            android:text="@string/emoji_chart"
-                        android:textSize="20sp" />
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_percent"
+                        android:contentDescription="@null"
+                        app:tint="?attr/colorOnSecondaryContainer" />
                 </com.google.android.material.card.MaterialCardView>
 
                 <TextView
@@ -160,7 +203,7 @@
             android:layout_weight="1"
             android:layout_marginStart="5dp"
             app:cardCornerRadius="16dp"
-            app:cardElevation="4dp"
+            app:cardElevation="2dp"
             app:strokeWidth="1dp"
             app:strokeColor="?attr/colorOutlineVariant"
             app:cardBackgroundColor="?attr/colorSurface">
@@ -174,18 +217,20 @@
 
                 <!-- Icon circle -->
                 <com.google.android.material.card.MaterialCardView
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    app:cardCornerRadius="22dp"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    app:cardCornerRadius="20dp"
                     app:cardElevation="0dp"
                     app:strokeWidth="0dp"
                     app:cardBackgroundColor="?attr/colorTertiaryContainer">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"                            android:text="@string/emoji_trophy"
-                        android:textSize="20sp" />
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_trophy"
+                        android:contentDescription="@null"
+                        app:tint="?attr/colorOnTertiaryContainer" />
                 </com.google.android.material.card.MaterialCardView>
 
                 <TextView
@@ -213,6 +258,7 @@
 
     <!-- Section header for test history -->
     <TextView
+        android:id="@+id/history_header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
@@ -224,7 +270,6 @@
         android:textAllCaps="true"
         android:letterSpacing="0.08"
         android:visibility="gone"
-        android:id="@+id/history_header"
         tools:visibility="visible" />
 
     <!-- Previous Test Results List -->
@@ -262,8 +307,8 @@
             android:layout_marginBottom="24dp">
 
             <ImageView
-                android:layout_width="44dp"
-                android:layout_height="44dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_gravity="center"
                 android:src="@drawable/ic_exam"
                 android:contentDescription="@null"

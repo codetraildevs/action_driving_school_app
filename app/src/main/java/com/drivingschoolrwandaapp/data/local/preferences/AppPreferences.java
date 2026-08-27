@@ -11,6 +11,11 @@ public class AppPreferences {
     private static final String KEY_DISCLAIMER_SHOWN = "disclaimer_shown";
     private static final String KEY_DEVICE_REGISTERED = "device_registered";
     private static final String KEY_REMEMBER_ME = "remember_me";
+    // Price (digits only) of the exam-access plan the user last requested, so
+    // the payment instructions shown while a request is pending use the amount
+    // the user actually asked for instead of a hardcoded default.
+    private static final String KEY_LAST_REQUESTED_PLAN_PRICE = "last_requested_plan_price";
+    private static final String DEFAULT_LAST_REQUESTED_PLAN_PRICE = "2000";
 
     private final SharedPreferences preferences;
 
@@ -75,5 +80,21 @@ public class AppPreferences {
      */
     public void setRememberMe(boolean rememberMe) {
         preferences.edit().putBoolean(KEY_REMEMBER_ME, rememberMe).apply();
+    }
+
+    /**
+     * Remembers the price (digits only, e.g. "2000") of the exam-access plan
+     * the user last requested. Used by the pending-state payment instructions
+     * so the USSD amount matches what was requested.
+     */
+    public void setLastRequestedPlanPrice(String price) {
+        preferences.edit().putString(KEY_LAST_REQUESTED_PLAN_PRICE, price).apply();
+    }
+
+    /**
+     * Returns the last requested exam-access plan price, or "2000" if none.
+     */
+    public String getLastRequestedPlanPrice() {
+        return preferences.getString(KEY_LAST_REQUESTED_PLAN_PRICE, DEFAULT_LAST_REQUESTED_PLAN_PRICE);
     }
 }

@@ -21,6 +21,7 @@ import com.drivingschoolrwandaapp.models.response.ApiResponse;
 import com.drivingschoolrwandaapp.models.response.IremboPaymentResponse;
 import com.drivingschoolrwandaapp.models.response.LoginResponse;
 import com.drivingschoolrwandaapp.models.response.PaginatedResponse;
+import com.drivingschoolrwandaapp.models.response.PdfFilesResponse;
 import com.drivingschoolrwandaapp.models.response.RegisterResponse;
 import com.drivingschoolrwandaapp.models.response.SubscriptionPlansResponse;
 import com.drivingschoolrwandaapp.models.response.UserSubscriptionResponse;
@@ -78,18 +79,19 @@ public interface ApiService {
     @POST("firebase/")
     Call<ApiResponse<Void>> updateFirebaseToken(@Body FirebaseTokenUpdateRequest request);
 
-    // PDF Files
-    @GET("pdfs")
-    Call<ApiResponse<PaginatedResponse<PdfFile>>> getPdfFiles(
+    // PDF Files (backed by /api/files; pass type=pdf to get only PDFs)
+    @GET("files")
+    Call<PdfFilesResponse> getPdfFiles(
             @Query("page") int page,
-            @Query("limit") int limit,
+            @Query("pageSize") int pageSize,
+            @Query("type") String type,
             @Query("search") String search
     );
 
-    @GET("pdfs/{id}")
+    @GET("files/{id}")
     Call<ApiResponse<PdfFile>> getPdfFile(@Path("id") int id);
 
-    @POST("pdfs/{id}/bookmark")
+    @POST("files/{id}/bookmark")
     Call<ApiResponse<Bookmark>> addBookmark(@Path("id") int pdfId, @Body BookmarkRequest request);
 
     // Notifications

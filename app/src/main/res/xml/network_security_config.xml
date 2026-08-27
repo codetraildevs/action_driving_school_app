@@ -7,15 +7,6 @@
         </trust-anchors>
     </base-config>
 
-    <!-- Allow cleartext HTTP only for specific local/API domains -->
-    <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">192.168.1.142</domain>
-        <domain includeSubdomains="true">console.amategekoyumuhanda.rw</domain>
-        <trust-anchors>
-            <certificates src="system" />
-        </trust-anchors>
-    </domain-config>
-
     <!-- Debug override: trust user certs for debugging with proxy tools -->
     <debug-overrides>
         <trust-anchors>

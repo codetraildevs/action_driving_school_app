@@ -11,13 +11,13 @@
         android:layout_height="4dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="16dp"
-        android:background="#D3D3D3" />
+        android:background="@color/colorOutlineVariant" />
 
     <ImageView
-        android:layout_width="64dp"
-        android:layout_height="64dp"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="8dp"
         android:src="@drawable/money_bag_svgrepo_com"
         android:contentDescription="@null"
         app:tint="@color/my_primary" />
@@ -26,20 +26,30 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="16dp"
         android:text="@string/request_access"
-        android:textSize="24sp"
+        android:textColor="@color/colorOnSurface"
+        android:textSize="22sp"
         android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="16dp"
+        android:text="@string/subscription_choose_plan"
+        android:textColor="@color/colorOnSurfaceVariant"
+        android:textSize="13sp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_subscription_options"
         android:layout_width="match_parent"
-        android:orientation="vertical"
-        android:layout_gravity="center_vertical"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
         android:layout_marginBottom="16dp" />
 
     <FrameLayout
+        android:id="@+id/confirm_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp">
@@ -50,9 +60,9 @@
             android:layout_height="wrap_content"
             android:enabled="false"
             android:text="@string/request_access_confirm"
-            app:icon="@drawable/ic_wallet"
-            app:iconGravity="textEnd"
-            app:iconTint="@color/black" />
+            android:textSize="15sp"
+            android:textStyle="bold"
+            app:icon="@drawable/ic_wallet" />
 
         <ProgressBar
             android:id="@+id/dialog_progress_bar"
@@ -61,5 +71,31 @@
             android:layout_gravity="center"
             android:visibility="gone" />
     </FrameLayout>
+
+    <!-- Sent state: after a request is sent the payment options stay visible
+         but the confirm button is disabled so the user cannot send a duplicate.
+         The sheet stays open until the admin grants access (then it auto-closes). -->
+    <LinearLayout
+        android:id="@+id/pending_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:paddingTop="8dp"
+        android:paddingBottom="16dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/pending_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawablePadding="8dp"
+            android:gravity="center"
+            android:lineSpacingMultiplier="1.1"
+            android:text="@string/request_pending_message"
+            android:textColor="@color/colorOnSurfaceVariant"
+            android:textSize="14sp" />
+
+    </LinearLayout>
 
 </LinearLayout>

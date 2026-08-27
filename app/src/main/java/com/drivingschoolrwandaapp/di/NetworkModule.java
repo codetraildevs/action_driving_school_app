@@ -2,6 +2,7 @@ package com.drivingschoolrwandaapp.di;
 
 import android.content.Context;
 
+import com.drivingschoolrwandaapp.api.AdminApiService;
 import com.drivingschoolrwandaapp.api.ApiClient;
 import com.drivingschoolrwandaapp.api.ApiService;
 import com.drivingschoolrwandaapp.api.interceptors.AuthInterceptor;
@@ -63,5 +64,11 @@ public class NetworkModule {
     @Singleton
     public ApiService provideApiService(Retrofit retrofit) {
         return retrofit.create(ApiService.class);
+    }
+
+    @Provides
+    @Singleton
+    public AdminApiService provideAdminApiService(Retrofit retrofit) {
+        return retrofit.create(AdminApiService.class);
     }
 }

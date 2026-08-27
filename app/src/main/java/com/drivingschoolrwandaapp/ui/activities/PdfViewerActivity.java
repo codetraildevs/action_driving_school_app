@@ -17,7 +17,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
+import com.drivingschoolrwandaapp.utils.EdgeToEdgeUtils;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -57,10 +57,12 @@ public class PdfViewerActivity extends AppCompatActivity {
     private PdfViewModel pdfViewModel;
     private SharedPreferences prefs;
     private LinearLayoutManager layoutManager;
+    private boolean suppressPageIndicator;
+    private final Runnable resetPageIndicatorSuppression = () -> suppressPageIndicator = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        EdgeToEdge.enable(this);
+        EdgeToEdgeUtils.enable(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pdf_viewer);
 
@@ -134,6 +136,7 @@ public class PdfViewerActivity extends AppCompatActivity {
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                if (suppressPageIndicator) return;
                 int currentPos = layoutManager.findFirstVisibleItemPosition();
                 if (currentPos != RecyclerView.NO_POSITION) {
                     updatePageIndicator(currentPos);
@@ -152,6 +155,20 @@ public class PdfViewerActivity extends AppCompatActivity {
 
     private void updatePageIndicator(int position) {
         pageNumberText.setText(getString(R.string.page_indicator_format, position + 1, pdfRenderer.getPageCount()));
+    }
+
+    /**
+     * Update the page indicator to the exact target page of a programmatic jump
+     * (go-to-page or bookmark). The RecyclerView's scroll listener reports the
+     * first visible item during the jump's layout pass, which can lag a couple
+     * of pages behind the requested target, so listener updates are suppressed
+     * until the user scrolls manually again.
+     */
+    private void updatePageIndicatorAfterJump(int position) {
+        updatePageIndicator(position);
+        suppressPageIndicator = true;
+        recyclerView.removeCallbacks(resetPageIndicatorSuppression);
+        recyclerView.postDelayed(resetPageIndicatorSuppression, 600);
     }
 
     @Override
@@ -218,6 +235,7 @@ public class PdfViewerActivity extends AppCompatActivity {
                         int page = Integer.parseInt(pageString) - 1;
                         if (page >= 0 && page < pdfRenderer.getPageCount()) {
                             recyclerView.scrollToPosition(page);
+                            updatePageIndicatorAfterJump(page);
                         } else {
                             Toast.makeText(this, getString(R.string.invalid_page_number), Toast.LENGTH_SHORT).show();
                         }
@@ -258,6 +276,7 @@ public class PdfViewerActivity extends AppCompatActivity {
                 BookmarkAdapter adapter = new BookmarkAdapter(bookmarks, 
                     pageNumber -> {
                         recyclerView.scrollToPosition(pageNumber);
+                        updatePageIndicatorAfterJump(pageNumber);
                         dialog.dismiss();
                     },
                     bookmark -> {

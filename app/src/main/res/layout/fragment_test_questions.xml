@@ -189,6 +189,8 @@
             android:padding="8dp"
             android:background="?attr/colorSurface">
 
+            <!-- Submit sits in the bottom bar, above Previous/Next, so it never
+                 covers the question options. Hidden in review mode. -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/submit_button"
                 android:layout_width="match_parent"

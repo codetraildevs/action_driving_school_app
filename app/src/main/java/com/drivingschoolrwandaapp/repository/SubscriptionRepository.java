@@ -34,10 +34,12 @@ public class SubscriptionRepository {
     private final SubscriptionPlanDao subscriptionPlanDao;
     private final UserSubscriptionDao userSubscriptionDao;
     private final ExecutorService executorService;
+    private final Application application;
 
     @Inject
     public SubscriptionRepository(Application application, ApiService apiService) {
         this.apiService = apiService;
+        this.application = application;
         AppDatabase database = AppDatabase.getDatabase(application);
         this.subscriptionPlanDao = database.subscriptionPlanDao();
         this.userSubscriptionDao = database.userSubscriptionDao();
@@ -45,7 +47,7 @@ public class SubscriptionRepository {
     }
 
     public LiveData<Resource<List<SubscriptionPlan>>> getSubscriptionPlans() {
-        return new NetworkBoundResource<List<SubscriptionPlan>, SubscriptionPlansResponse>() {
+        return new NetworkBoundResource<List<SubscriptionPlan>, SubscriptionPlansResponse>(application) {
             @Override
             protected void saveCallResult(SubscriptionPlansResponse item) {
                 if (item != null && item.getData() != null) {
@@ -68,7 +70,7 @@ public class SubscriptionRepository {
     }
 
     public LiveData<Resource<UserSubscriptionWithPlan>> getUserSubscription() {
-        return new NetworkBoundResource<UserSubscriptionWithPlan, UserSubscriptionResponse>() {
+        return new NetworkBoundResource<UserSubscriptionWithPlan, UserSubscriptionResponse>(application) {
             @Override
             protected void saveCallResult(UserSubscriptionResponse item) {
                 if (item != null && item.getData() != null) {

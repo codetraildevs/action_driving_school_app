@@ -3,7 +3,7 @@ package com.drivingschoolrwandaapp.ui.activities;
 import android.content.Intent;
 import android.os.Bundle;
 
-import androidx.activity.EdgeToEdge;
+import com.drivingschoolrwandaapp.utils.EdgeToEdgeUtils;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.drivingschoolrwandaapp.App;
@@ -23,7 +23,7 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
+        EdgeToEdgeUtils.enable(this);
 
         // Load the current locale from preferences. This is essential when the user
         // changes language from the Profile or Welcome page — the language preference
@@ -32,11 +32,21 @@ public class SplashActivity extends AppCompatActivity {
         LanguageUtils.loadAppLanguage(this);
 
         Intent intent;
-        if (tokenManager.isLoggedIn()) {
-
-            intent = new Intent(SplashActivity.this, App.class);
-        } else {
-
+        try {
+            if (tokenManager.isLoggedIn()) {
+                // Route admins to the admin console, everyone else to the user app.
+                if (com.drivingschoolrwandaapp.utils.RoleUtils.isAdminRole(tokenManager.getRoleId())) {
+                    intent = new Intent(SplashActivity.this, AdminActivity.class);
+                } else {
+                    intent = new Intent(SplashActivity.this, App.class);
+                }
+            } else {
+                intent = new Intent(SplashActivity.this, WelcomeActivity.class);
+            }
+        } catch (StackOverflowError e) {
+            // EncryptedSharedPreferences keystore corruption — tokenManager failed to
+            // read. Treat as logged out so the user can re-authenticate.
+            android.util.Log.e("SplashActivity", "Token read failed (keystore corrupted)", e);
             intent = new Intent(SplashActivity.this, WelcomeActivity.class);
         }
 

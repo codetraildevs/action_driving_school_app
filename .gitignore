@@ -64,3 +64,36 @@ out/
 *.log
 appbuildsettext_warnings.txt
 screenshots/
+
+# Local MariaDB/MySQL data (never version-controlled)
+local-db/
+
+# Deployment archives
+*.tar.gz
+
+
+# Production database dumps (may contain real user data)
+docs/*.sql
+
+# On-device test artifacts (DB dumps, token backups, screenshots — personal data)
+.offline_test/
+
+# docs/app-flows.md is referenced from README.md, so keep it despite the *.md rule
+!docs/app-flows.md
+
+# On-device offline test report (deliberate deliverable)
+!docs/offline-test-report-2026-08-16.md
+
+# Firebase service account (keep out of git)
+firebase-service-account.json
+
+# Backend/web files (Android-only branch — not part of the app)
+.env
+public/
+DRIVING_SHOOL_COMPANY_LEGACY/
+*.sql
+check-login.js
+cleanup-stale-files.js
+debug-login.sh
+test-ssl.sh
+*.sh

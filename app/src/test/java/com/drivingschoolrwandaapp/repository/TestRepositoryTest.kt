@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.LiveData
 import com.drivingschoolrwandaapp.database.entities.TestEntity
 import com.drivingschoolrwandaapp.database.entities.TestWithQuestions
 import com.drivingschoolrwandaapp.models.LocalExam
@@ -17,6 +18,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.MockedStatic
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
@@ -59,14 +62,35 @@ class TestRepositoryTest {
             .thenReturn(sharedPreferences)
         // Return English as the current language
         `when`(sharedPreferences.getString("language_code", "rw")).thenReturn("en")
+        // The repository resolves user-facing messages through the context
+        `when`(context.getApplicationContext()).thenReturn(context)
+        `when`(context.getString(anyInt())).thenReturn("Something went wrong")
+        `when`(context.getString(anyInt(), any())).thenReturn("Exam not found")
 
         repository = TestRepository(localExamDataSource, context)
     }
 
     @After
     fun tearDown() {
+        repository.shutdown()
         logMock?.close()
         crashlyticsMock?.close()
+    }
+
+    /**
+     * TestRepository loads exam assets on a background executor and posts the
+     * result, so tests must wait for the value instead of reading it synchronously.
+     */
+    private fun <T> LiveData<T>.awaitValue(timeoutMs: Long = 5000): T {
+        val start = System.currentTimeMillis()
+        while (this.value == null) {
+            if (System.currentTimeMillis() - start > timeoutMs) {
+                throw AssertionError("LiveData value not set within ${timeoutMs}ms")
+            }
+            Thread.sleep(5)
+        }
+        @Suppress("UNCHECKED_CAST")
+        return this.value as T
     }
 
     // ---------------------------------------------------------------------------
@@ -113,7 +137,7 @@ class TestRepositoryTest {
         val exam = sampleExam()
         `when`(localExamDataSource.loadExams("en")).thenReturn(listOf(exam))
 
-        val resource = repository.getTests(false).value!!
+        val resource = repository.getTests(false).awaitValue()
 
         assertEquals(Resource.Status.SUCCESS, resource.status)
         val entities = resource.data!!
@@ -137,7 +161,7 @@ class TestRepositoryTest {
         val exam2 = LocalExam("2", "RANDOM", "Exam Two", "", emptyList())
         `when`(localExamDataSource.loadExams("en")).thenReturn(listOf(exam1, exam2))
 
-        val resource = repository.getTests(false).value!!
+        val resource = repository.getTests(false).awaitValue()
 
         assertEquals(2, resource.data!!.size)
         assertEquals("Exam One", resource.data[0].title)
@@ -151,7 +175,7 @@ class TestRepositoryTest {
         val freeExam = LocalExam("1", "Free", "Free Exam", "", emptyList())
         `when`(localExamDataSource.loadExams("en")).thenReturn(listOf(freeExam))
 
-        val resource = repository.getTests(false).value!!
+        val resource = repository.getTests(false).awaitValue()
 
         assertTrue("Expected isFree=true for exam type 'Free'", resource.data!![0].isFree)
     }
@@ -161,7 +185,7 @@ class TestRepositoryTest {
         val exam = LocalExam("200", "RANDOM", "Test", "", emptyList())
         `when`(localExamDataSource.loadExams("en")).thenReturn(listOf(exam))
 
-        val resource = repository.getTests(false).value!!
+        val resource = repository.getTests(false).awaitValue()
 
         assertEquals(200, resource.data!![0].id)
     }
@@ -171,7 +195,7 @@ class TestRepositoryTest {
         val exam = LocalExam("1", "RANDOM", "Test", "", emptyList())
         `when`(localExamDataSource.loadExams("en")).thenReturn(listOf(exam))
 
-        val resource = repository.getTests(false).value!!
+        val resource = repository.getTests(false).awaitValue()
 
         assertNull("Expected null imageUrl for empty input", resource.data!![0].imageUrl)
     }
@@ -181,7 +205,7 @@ class TestRepositoryTest {
         val exam = LocalExam("1", "RANDOM", "Test", "assets/img.png", emptyList())
         `when`(localExamDataSource.loadExams("en")).thenReturn(listOf(exam))
 
-        val resource = repository.getTests(false).value!!
+        val resource = repository.getTests(false).awaitValue()
 
         assertEquals("file:///android_asset/img.png", resource.data!![0].imageUrl)
     }
@@ -191,7 +215,7 @@ class TestRepositoryTest {
         val exam = LocalExam("1", "RANDOM", "Test", "json_questions_images/img.png", emptyList())
         `when`(localExamDataSource.loadExams("en")).thenReturn(listOf(exam))
 
-        val resource = repository.getTests(false).value!!
+        val resource = repository.getTests(false).awaitValue()
 
         assertEquals("file:///android_asset/json_questions_images/img.png", resource.data!![0].imageUrl)
     }
@@ -206,7 +230,7 @@ class TestRepositoryTest {
         val exam = LocalExam("1", "RANDOM", "Examen", "", emptyList())
         `when`(localExamDataSource.loadExams("fr")).thenReturn(listOf(exam))
 
-        val resource = repository.getTests(false).value!!
+        val resource = repository.getTests(false).awaitValue()
 
         assertEquals(Resource.Status.SUCCESS, resource.status)
         assertEquals("Examen", resource.data!![0].title)
@@ -220,7 +244,7 @@ class TestRepositoryTest {
     fun `getTests handles empty exam list`() {
         `when`(localExamDataSource.loadExams("en")).thenReturn(emptyList())
 
-        val resource = repository.getTests(false).value!!
+        val resource = repository.getTests(false).awaitValue()
 
         assertEquals(Resource.Status.SUCCESS, resource.status)
         assertTrue("Expected empty entity list", resource.data!!.isEmpty())
@@ -230,7 +254,7 @@ class TestRepositoryTest {
     fun `getTests returns error when data source throws exception`() {
         `when`(localExamDataSource.loadExams("en")).thenThrow(RuntimeException("DB error"))
 
-        val resource = repository.getTests(false).value!!
+        val resource = repository.getTests(false).awaitValue()
 
         assertEquals(Resource.Status.ERROR, resource.status)
         assertNotNull("Expected error message", resource.message)
@@ -244,7 +268,7 @@ class TestRepositoryTest {
         // loadExams returns non-null in Kotlin, but the Java catch block handles any exception
         `when`(localExamDataSource.loadExams("en")).thenThrow(NullPointerException("Unexpected null"))
 
-        val resource = repository.getTests(false).value!!
+        val resource = repository.getTests(false).awaitValue()
 
         assertEquals(Resource.Status.ERROR, resource.status)
     }
@@ -254,7 +278,7 @@ class TestRepositoryTest {
         val exam = LocalExam("not-a-number", "RANDOM", "Test", "", emptyList())
         `when`(localExamDataSource.loadExams("en")).thenReturn(listOf(exam))
 
-        val resource = repository.getTests(false).value!!
+        val resource = repository.getTests(false).awaitValue()
 
         assertEquals(Resource.Status.SUCCESS, resource.status)
         assertEquals("Non-numeric quizId should fall back to index 0", 0, resource.data!![0].id)
@@ -265,7 +289,7 @@ class TestRepositoryTest {
         val exam = LocalExam("1", "RANDOM", "Empty Exam", "", emptyList())
         `when`(localExamDataSource.loadExams("en")).thenReturn(listOf(exam))
 
-        val resource = repository.getTests(false).value!!
+        val resource = repository.getTests(false).awaitValue()
 
         assertEquals(Resource.Status.SUCCESS, resource.status)
         assertEquals(0, resource.data!![0].totalMarks)
@@ -284,7 +308,7 @@ class TestRepositoryTest {
         `when`(localExamDataSource.loadExams("en")).thenReturn(listOf(exam))
         `when`(localExamDataSource.loadExamByQuizId("177", "en")).thenReturn(exam)
 
-        val resource = repository.getTestWithQuestions(177).value!!
+        val resource = repository.getTestWithQuestions(177).awaitValue()
 
         assertEquals(Resource.Status.SUCCESS, resource.status)
         val twq = resource.data!!
@@ -309,7 +333,7 @@ class TestRepositoryTest {
         `when`(localExamDataSource.loadExams("en")).thenReturn(listOf(exam))
         `when`(localExamDataSource.loadExamByQuizId("1", "en")).thenReturn(exam)
 
-        val resource = repository.getTestWithQuestions(1).value!!
+        val resource = repository.getTestWithQuestions(1).awaitValue()
         val twq = resource.data!!
         val qwo = twq.questions!![0]
 
@@ -332,7 +356,7 @@ class TestRepositoryTest {
         `when`(localExamDataSource.loadExams("en")).thenReturn(listOf(exam))
         `when`(localExamDataSource.loadExamByQuizId("1", "en")).thenReturn(exam)
 
-        val resource = repository.getTestWithQuestions(1).value!!
+        val resource = repository.getTestWithQuestions(1).awaitValue()
         val options = resource.data!!.questions!![0].options!!
 
         assertEquals(4, options.size)
@@ -354,7 +378,7 @@ class TestRepositoryTest {
         `when`(localExamDataSource.loadExamByQuizId("1", "en")).thenReturn(null)
         `when`(localExamDataSource.loadExamByIndex(0, "en")).thenReturn(exam)
 
-        val resource = repository.getTestWithQuestions(1).value!!
+        val resource = repository.getTestWithQuestions(1).awaitValue()
 
         assertEquals(Resource.Status.SUCCESS, resource.status)
         assertEquals("Practice Test A", resource.data!!.test!!.title)
@@ -368,7 +392,7 @@ class TestRepositoryTest {
         `when`(localExamDataSource.loadExamByQuizId("2", "en")).thenReturn(null)
         `when`(localExamDataSource.loadExamByIndex(1, "en")).thenReturn(exam2)
 
-        val resource = repository.getTestWithQuestions(2).value!!
+        val resource = repository.getTestWithQuestions(2).awaitValue()
 
         assertEquals(Resource.Status.SUCCESS, resource.status)
         assertEquals("Second", resource.data!!.test!!.title)
@@ -380,7 +404,7 @@ class TestRepositoryTest {
         `when`(localExamDataSource.loadExams("en")).thenReturn(listOf(exam))
         `when`(localExamDataSource.loadExamByQuizId("1", "en")).thenReturn(exam)
 
-        val resource = repository.getTestWithQuestions(1).value!!
+        val resource = repository.getTestWithQuestions(1).awaitValue()
 
         assertEquals(Resource.Status.SUCCESS, resource.status)
         assertTrue("Expected empty questions list", resource.data!!.questions!!.isEmpty())
@@ -403,7 +427,7 @@ class TestRepositoryTest {
         `when`(localExamDataSource.loadExams("en")).thenReturn(listOf(exam))
         `when`(localExamDataSource.loadExamByQuizId("1", "en")).thenReturn(exam)
 
-        val resource = repository.getTestWithQuestions(1).value!!
+        val resource = repository.getTestWithQuestions(1).awaitValue()
         val options = resource.data!!.questions!![0].options!!
 
         assertEquals(4, options.size)
@@ -423,7 +447,7 @@ class TestRepositoryTest {
         `when`(localExamDataSource.loadExams("en")).thenReturn(emptyList())
         `when`(localExamDataSource.loadExamByQuizId("999", "en")).thenReturn(null)
 
-        val resource = repository.getTestWithQuestions(999).value!!
+        val resource = repository.getTestWithQuestions(999).awaitValue()
 
         assertEquals(Resource.Status.ERROR, resource.status)
         assertNotNull("Expected error message", resource.message)
@@ -435,7 +459,7 @@ class TestRepositoryTest {
         `when`(localExamDataSource.loadExams("en")).thenReturn(emptyList())
         `when`(localExamDataSource.loadExamByQuizId("0", "en")).thenReturn(null)
 
-        val resource = repository.getTestWithQuestions(0).value!!
+        val resource = repository.getTestWithQuestions(0).awaitValue()
 
         assertEquals(Resource.Status.ERROR, resource.status)
         assertTrue("Error should mention exam not found", resource.message!!.contains("not found"))
@@ -446,7 +470,7 @@ class TestRepositoryTest {
         `when`(localExamDataSource.loadExams("en")).thenReturn(emptyList())
         `when`(localExamDataSource.loadExamByQuizId("-1", "en")).thenReturn(null)
 
-        val resource = repository.getTestWithQuestions(-1).value!!
+        val resource = repository.getTestWithQuestions(-1).awaitValue()
 
         assertEquals(Resource.Status.ERROR, resource.status)
         assertTrue("Error should mention exam not found", resource.message!!.contains("not found"))
@@ -456,7 +480,7 @@ class TestRepositoryTest {
     fun `getTestWithQuestions returns error when data source throws`() {
         `when`(localExamDataSource.loadExams("en")).thenThrow(RuntimeException("Load failed"))
 
-        val resource = repository.getTestWithQuestions(1).value!!
+        val resource = repository.getTestWithQuestions(1).awaitValue()
 
         assertEquals(Resource.Status.ERROR, resource.status)
         assertNotNull("Expected error message", resource.message)

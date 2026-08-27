@@ -213,18 +213,29 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
 
             switch (downloadState.getStatus()) {
                 case DOWNLOADING:
-                    notificationHelper.showProgressNotification(notificationId, "Downloading", "Downloading " + title);
+                    notificationHelper.showProgressNotification(notificationId,
+                            getString(R.string.downloading),
+                            getString(R.string.downloading_material, title));
                     break;
                 case SUCCESS:
-                    notificationHelper.showDownloadCompleteNotification(notificationId, "Download Complete", title + " has been downloaded.");
+                    notificationHelper.showDownloadCompleteNotification(notificationId,
+                            getString(R.string.download_complete),
+                            getString(R.string.download_complete_message, title));
                     if (isAdded() && getContext() != null) {
                         Toast.makeText(getContext(), getString(R.string.download_success), Toast.LENGTH_LONG).show();
                     }
                     break;
                 case FAILURE:
-                    notificationHelper.showDownloadFailedNotification(notificationId, "Download Failed", "Failed to download " + title);
+                    // Prefer the real server/network reason (e.g. "File not found on
+                    // server") so a failed download isn't a mystery to the user.
+                    String reason = downloadState.getMessage();
+                    String failureMessage = (reason != null && !reason.isEmpty())
+                            ? getString(R.string.download_failure_reason, reason)
+                            : getString(R.string.download_failure);
+                    notificationHelper.showDownloadFailedNotification(notificationId,
+                            getString(R.string.download_failed_title), failureMessage);
                     if (isAdded() && getContext() != null) {
-                        Toast.makeText(getContext(), getString(R.string.download_failure), Toast.LENGTH_LONG).show();
+                        Toast.makeText(getContext(), failureMessage, Toast.LENGTH_LONG).show();
                     }
                     break;
             }

@@ -28,6 +28,7 @@
 
   <a href="#-features">Features</a> &middot;
   <a href="#-architecture">Architecture</a> &middot;
+  <a href="#-app-flows">App Flows</a> &middot;
   <a href="#-tech-stack">Tech Stack</a> &middot;
   <a href="#-getting-started">Getting Started</a> &middot;
   <a href="#-project-structure">Project Structure</a>
@@ -118,6 +119,67 @@ The app follows **MVVM (Model-View-ViewModel)** architecture with **Repository p
 | **Object Mapping** | MapStruct for DTO-to-model conversion |
 | **Background Work** | WorkManager for scheduled tasks |
 | **Secure Storage** | AndroidX Security Crypto for encrypted token storage |
+
+---
+
+## 🔄 App Flows
+
+The app is **role-based**: regular users (any role except 1–2) get the learner experience, while
+admins (**super_admin** = 1 / **admin** = 2) are routed to the native **Admin Console**. The diagrams
+below map both flows end-to-end — entry points, guards, and the backend guard layer.
+
+### 👤 User flow
+
+```mermaid
+flowchart TD
+    A[Launch: SplashActivity] --> B{Logged in?<br/>valid token in TokenManager}
+    B -- no --> C[WelcomeActivity]
+    C --> D[Login / Register]
+    B -- yes --> E{Role is admin?<br/>RoleUtils.isAdminRole 1-2}
+    E -- no --> F[App - Main Activity<br/>Home · Exams · Materials · Irembo · Profile]
+    E -- yes --> G[AdminActivity - Admin Console]
+    D --> H{Backend: POST /api/auth/login<br/>valid creds + isActive}
+    H -- 200 --> I[Save accessToken + role]
+    I --> E
+    H -- 401/403 --> D
+    F --> J[Profile tab: role badge]
+```
+
+### 🛡️ Admin flow
+
+```mermaid
+flowchart TD
+    A[Launch: SplashActivity] --> B{Logged in?}
+    B -- yes --> C{Role 1 or 2?<br/>persisted in TokenManager}
+    C -- yes --> D[AdminActivity]
+    C -- no --> E[App - Main Activity]
+    B -- no --> F[WelcomeActivity]
+    D --> G{onCreate re-check:<br/>isAdminRole? defense in depth}
+    G -- no --> E
+    G -- yes --> H[Admin Console<br/>Dashboard · Users · Requests · Settings]
+    H --> I[Admin API calls<br/>Authorization: Bearer token]
+    I --> J{Backend guard<br/>verifyToken + role check}
+    J -- 200 --> K[Dashboard stats · users · requests · user detail]
+    J -- 401 --> L[Missing / invalid / expired token]
+    J -- 403 --> M[Authenticated but not admin]
+    H --> N[Settings: Web Console · Logout]
+```
+
+### 🔐 Backend guard layer — `/api/admin/*`
+
+Every admin screen call passes through the same chain:
+
+```mermaid
+flowchart LR
+    A[AuthInterceptor<br/>Bearer token] --> B[verifyToken JWT<br/>valid + userId]
+    B --> C[Role check<br/>isAdminRoleName<br/>admin / super_admin]
+    C -- ok --> D[200 - data]
+    C -- fail --> E[403 Forbidden]
+    B -- fail --> F[401 Unauthorized]
+```
+
+> 📖 Full annotated version with an entry-point & guard summary table:
+> [`docs/app-flows.md`](docs/app-flows.md) · interactive HTML: [`docs/app-flows.html`](docs/app-flows.html)
 
 ---
 

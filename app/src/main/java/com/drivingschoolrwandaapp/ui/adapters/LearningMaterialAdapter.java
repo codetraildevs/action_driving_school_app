@@ -168,6 +168,9 @@ public class LearningMaterialAdapter extends RecyclerView.Adapter<LearningMateri
             thumbnail = itemView.findViewById(R.id.material_thumbnail);
             title = itemView.findViewById(R.id.material_title);
             fileTypeOrSize = itemView.findViewById(R.id.material_file_type_or_size);
+            // Only the grid layout declares expiration_text; findViewById returns null
+            // for list rows, so bind() must null-check before using it.
+            expirationText = itemView.findViewById(R.id.expiration_text);
             downloadButton = itemView.findViewById(R.id.download_button);
             progressBar = itemView.findViewById(R.id.download_progress_bar);
 
@@ -226,13 +229,10 @@ public class LearningMaterialAdapter extends RecyclerView.Adapter<LearningMateri
                 }
 
                 if (parseSuccess) {
-
-                    if (remainingMillis <= 0) {
-                        {
-                            expirationText.setText(itemView.getContext().getString(R.string.access_expired));
-                            expirationText.setVisibility(View.VISIBLE);
-                            expirationText.setTextColor(Color.RED);
-                        }
+                    if (remainingMillis <= 0 && expirationText != null) {
+                        expirationText.setText(itemView.getContext().getString(R.string.access_expired));
+                        expirationText.setVisibility(View.VISIBLE);
+                        expirationText.setTextColor(Color.RED);
                     }
                 }
             }

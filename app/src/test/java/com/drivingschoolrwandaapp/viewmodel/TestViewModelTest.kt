@@ -12,6 +12,7 @@ import com.drivingschoolrwandaapp.database.entities.TestQuestionEntity
 import com.drivingschoolrwandaapp.database.entities.TestWithQuestions
 import com.drivingschoolrwandaapp.repository.Resource
 import com.drivingschoolrwandaapp.repository.TestRepository
+import com.drivingschoolrwandaapp.repository.TestResultRepository
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -43,6 +44,7 @@ class TestViewModelTest {
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
     private lateinit var testRepository: TestRepository
+    private lateinit var testResultRepository: TestResultRepository
     private lateinit var application: Application
     private lateinit var viewModel: TestViewModel
     private var logMock: MockedStatic<Log>? = null
@@ -53,12 +55,15 @@ class TestViewModelTest {
         try { logMock = mockStatic(Log::class.java) } catch (_: Exception) { }
 
         testRepository = mock(TestRepository::class.java)
+        testResultRepository = mock(TestResultRepository::class.java)
         application = mock(Application::class.java)
 
         // Stub getTests to return a LiveData (required by constructor's switchMap)
         `when`(testRepository.getTests(anyBoolean())).thenReturn(MutableLiveData())
+        // Stub persisted history (required by the constructor's observeForever)
+        `when`(testResultRepository.getHistory()).thenReturn(MutableLiveData())
 
-        viewModel = TestViewModel(application, testRepository)
+        viewModel = TestViewModel(application, testRepository, testResultRepository)
     }
 
     @After
@@ -479,6 +484,17 @@ class TestViewModelTest {
 
         val history = viewModel.getTestResultHistory().value!!
         assertEquals("Each calculateResult call adds a history entry", 2, history.size)
+    }
+
+    @Test
+    fun `calculateResult persists each submission to the repository`() {
+        val liveData = loadQuestionsIntoView(1)
+        liveData.setValue(Resource.success(createOneQuestionTest(correctOptionIndex = 0)))
+
+        viewModel.setAnswer(1, 1)
+        viewModel.calculateResult()
+
+        verify(testResultRepository).saveResult(org.mockito.ArgumentMatchers.any())
     }
 
     @Test

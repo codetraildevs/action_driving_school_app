@@ -89,6 +89,78 @@
     <string name="fill_all_fields">Veuillez remplir tous les champs</string>
     <string name="passwords_not_match">Les mots de passe ne correspondent pas</string>
     <string name="something_went_wrong">Une erreur s\'est produite</string>
+    <string name="unknown_error">Une erreur inconnue s\'est produite</string>
+    <string name="no_whatsapp_groups">Aucun groupe WhatsApp actif trouvé.</string>
+    <string name="national_id_16_digits">Doit contenir 16 chiffres</string>
+    <string name="irembo_fetch_failed">Échec du chargement des demandes récentes</string>
+    <string name="irembo_submit_failed">Échec de l\'envoi de la demande</string>
+    <string name="irembo_application_not_found">Demande introuvable ou une erreur s\'est produite</string>
+    <string name="application_not_found_title">Demande introuvable</string>
+    <string name="request_already_sent_title">Demande déjà envoyée</string>
+    <string name="request_already_sent_message">Vous avez déjà une demande active pour ce service. Veuillez attendre qu\'elle soit traitée avant d\'en envoyer une nouvelle.</string>
+    <string name="error_unknown">Une erreur inconnue s\'est produite. Veuillez réessayer.</string>
+    <string name="error_secure_connection">Impossible d\'établir une connexion sécurisée. Veuillez mettre à jour l\'application et réessayer.</string>
+    <string name="error_connection_interrupted">La connexion a été interrompue. Veuillez réessayer.</string>
+    <string name="whatsapp_fetch_failed">Échec du chargement des groupes WhatsApp.</string>
+    <string name="subscribe_failed">Échec de l\'abonnement. Veuillez réessayer.</string>
+    <string name="request_access_failed">Échec de la demande d\'accès.</string>
+    <string name="cancel_subscription_failed">Échec de l\'annulation de l\'abonnement.</string>
+    <string name="refresh_failed">Impossible d\'actualiser depuis le serveur.</string>
+    <string name="offline_showing_downloaded">Vous êtes hors ligne. Affichage du contenu téléchargé.</string>
+    <string name="no_offline_content">Aucun contenu hors ligne disponible.</string>
+    <string name="could_not_load_offline_content">Impossible de charger le contenu hors ligne.</string>
+    <string name="no_internet_no_offline">Pas d\'internet et aucun contenu hors ligne disponible.</string>
+    <string name="exam_not_found">Examen introuvable pour l\'ID : %1$d</string>
+    <string name="access_expired">Accès expiré</string>
+    <string name="action_required_text">Action requise</string>
+    <string name="active_status">ACTIF</string>
+    <string name="an_error_occurred">Une erreur s\'est produite</string>
+    <string name="app_version_placeholder">Version 1.0.0</string>
+    <string name="share_via">Partager via</string>
+    <string name="application_channel_description">Notifications pour vos demandes.</string>
+    <string name="application_channel_name">Mes demandes</string>
+    <string name="applied_format">Envoyée : %s</string>
+    <string name="bookmark_added_toast">Favori ajouté</string>
+    <string name="could_not_open_link">Impossible d\'ouvrir le lien</string>
+    <string name="district">District</string>
+    <string name="download_failed_msg">Échec du téléchargement : %s</string>
+    <string name="error_loading_location">Erreur lors du chargement des données de localisation</string>
+    <string name="expires_na">Expire : N/A</string>
+    <string name="invalid_link">Lien invalide</string>
+    <string name="invalid_page_number">Numéro de page invalide</string>
+    <string name="irembo_channel_description">Notifications pour les services Irembo.</string>
+    <string name="irembo_channel_name">Irembo</string>
+    <string name="learning_fragment">Apprentissage</string>
+    <string name="license_submitted">Demande de permis envoyée avec succès</string>
+    <string name="link_copied">Lien copié dans le presse-papiers</string>
+    <string name="message_label">Message</string>
+    <string name="momo_pay">MOMO Pay</string>
+    <string name="need_active_subscription">Vous devez avoir un abonnement actif pour %s ce document.</string>
+    <string name="no_additional_message">Aucun message supplémentaire.</string>
+    <string name="no_bookmarks_yet">Aucun favori pour le moment</string>
+    <string name="no_details_available">Aucun détail supplémentaire disponible.</string>
+    <string name="no_link_to_copy">Aucun lien à copier</string>
+    <string name="notifications_permission_denied">Les notifications ne seront pas affichées.</string>
+    <string name="notifications_permission_granted">Autorisation de notifications accordée</string>
+    <string name="page_format">Page %d</string>
+    <string name="permission_denied_call">Permission refusée pour passer un appel</string>
+    <string name="please_select_location">Veuillez sélectionner un emplacement</string>
+    <string name="processing_status">En cours de traitement</string>
+    <string name="province">Province</string>
+    <string name="ref_format">Réf : %s</string>
+    <string name="special_submitted">Demande spéciale envoyée avec succès</string>
+    <string name="subscription_channel_description">Notifications concernant le statut de votre abonnement.</string>
+    <string name="subscription_channel_name">Abonnement</string>
+    <string name="test_access_expired_msg">Votre accès aux examens a expiré. Vous ne pouvez pas %s ce document.</string>
+    <string name="update_flow_failed">Échec de la mise à jour ! Code de résultat : %d</string>
+    <string name="waiting_for_approval">En attente d\'approbation</string>
+    <string name="request_pending_message">Votre demande a \'été envoyée. Dès qu\'un administrateur l\'approuve, vos examens se débloqueront automatiquement - gardez cet écran ouvert jusque-là.</string>
+    <string name="request_sent_button">Demande envoyée</string>
+    <string name="general_channel_name">Annonces générales</string>
+    <string name="general_channel_description">Notifications pour les annonces générales et les mises à jour.</string>
+    <string name="exams_channel_name">Examens</string>
+    <string name="exams_channel_description">Notifications pour les rappels d\'examens et les résultats.</string>
+    <string name="track_failed_title">Impossible de suivre la demande</string>
     <string name="invalid_otp">Entrez un OTP valide à 6 chiffres</string>
     <string name="terms_of_service">Conditions d\'utilisation</string>
     <string name="registration_failed">Échec de l\'inscription. Veuillez réessayer.</string>
@@ -104,6 +176,18 @@
     <string name="no_materials_found">Aucun document trouvé.</string>
     <string name="download_success">Téléchargement terminé !</string>
     <string name="download_failure">Échec du téléchargement.</string>
+    <string name="download_failure_reason">Échec du téléchargement : %1$s</string>
+    <string name="downloading">Téléchargement</string>
+    <string name="downloading_material">Téléchargement de %1$s</string>
+    <string name="download_complete">Téléchargement terminé</string>
+    <string name="download_complete_message">%1$s a été téléchargé.</string>
+    <string name="download_failed_title">Échec du téléchargement</string>
+    <string name="downloading_file">Téléchargement du fichier...</string>
+    <string name="ok">OK</string>
+    <string name="no_thanks">Non, merci</string>
+    <string name="notification_permission_title">Autorisation des notifications requise</string>
+    <string name="notification_permission_message">Cette application utilise les notifications pour vous informer des mises à jour importantes. Veuillez accorder l\'autorisation pour les recevoir.</string>
+    <string name="error_format">Erreur : %1$s</string>
     <string name="download_first">Impossible d\'ouvrir le fichier. Veuillez d\'abord le télécharger.</string>
     <string name="no_app_found">Aucune application ne peut ouvrir ce type de fichier.</string>
     <string name="error_opening_file">Impossible d\'ouvrir le fichier.</string>
@@ -149,6 +233,13 @@
     <string name="payment_instructions_pay3">3. Envoyez l\'argent au 0722877442</string>
 
     <string name="ihavepaid">Commencer les examens</string>
+    <string name="irembo_service_subtitle">Faites votre demande en ligne</string>
+    <string name="payment_title">Paiement</string>
+    <string name="payment_methods_title">Méthodes de paiement</string>
+    <string name="payment_method_mtn">MTN Mobile Money</string>
+    <string name="payment_method_airtel">Airtel Money</string>
+    <string name="payment_dialog_subtitle">Choisissez l\'une des méthodes ci-dessous, puis appuyez sur \"Commencer les examens\" une fois le paiement effectué.</string>
+    <string name="subscription_choose_plan">Choisissez l\'option qui vous convient</string>
 
     <string name="request_access_confirm">Demander</string>
 
@@ -225,6 +316,8 @@ Quand tu arrives à la dernière question, tu appuies sur « Terminer l’examen
     <string name="service_name">Nom du Service</string>
     <string name="special_irembo_service">Service Irembo Spécial (BUSANZA)</string>
     <string name="my_applications">Mes Demandes</string>
+    <string name="no_applications_found">Aucune demande trouvée</string>
+    <string name="no_applications_found_subtitle">Essayez une autre référence ou modifiez le filtre</string>
     <string name="all">Tout</string>
     <string name="pending">En attente</string>
     <string name="payment_required">Paiement Requis</string>
@@ -245,7 +338,7 @@ Quand tu arrives à la dernière question, tu appuies sur « Terminer l’examen
     <string name="_0">0%</string>
     <string name="open_group">Ouvrir le groupe</string>
     <string name="learning_materials_dashboard">Supports pédagogiques</string>
-    <string name="all_services">Demander un code d’accès à l’examen</string>
+    <string name="all_services">Tous les services</string>
     <string name="whatsapp_group_text">Rejoindre les groupes WhatsApp</string>
     <string name="provisional_license">Permis provisoire ou permanent</string>
     <string name="provisional_license_text">Permis provisoire</string>
@@ -265,15 +358,12 @@ Quand tu arrives à la dernière question, tu appuies sur « Terminer l’examen
 
 
     <!-- Chaînes de canaux de notification -->
-    <string name="general_channel_name">Annonces générales</string>
-    <string name="general_channel_description">Notifications pour les annonces générales et les mises à jour.</string>
-    <string name="exams_channel_name">Examens</string>
-    <string name="exams_channel_description">Notifications pour les rappels d\'examens et les résultats.</string>
 
 
     <string name="question_counter_format" tools:ignore="PluralsCandidate">Question %1$d sur %2$d</string>
     <string name="percent_complete_format" tools:ignore="PluralsCandidate">%d%% terminé</string>
     <string name="previous_tests_summary">Vos Résultats</string>
+    <string name="previous_tests_subtitle">Suivez vos scores, votre moyenne et votre taux de réussite</string>
     <string name="total_tests">Total des Tests</string>
     <string name="average_score">Score Moyen</string>
     <string name="pass_rate">Taux de Réussite</string>
@@ -328,4 +418,55 @@ Quand tu arrives à la dernière question, tu appuies sur « Terminer l’examen
     <string name="device_already_registered">Vous avez déjà un compte sur cet appareil. Veuillez vous connecter avec le numéro de téléphone que vous avez utilisé lors de l\'inscription ou appelez le +250782877442 ou +250722877442 pour obtenir de l\'aide.</string>
     <string name="account_already_exists_with_help">Ce numéro de téléphone est déjà inscrit. Veuillez vous connecter avec votre numéro ou appelez le +250782877442 ou +250722877442 pour obtenir de l\'aide.</string>
 
+    <!-- Admin console -->
+    <string name="admin_title">Console d\'administration</string>
+    <string name="admin_dashboard">Tableau de bord</string>
+    <string name="admin_users">Utilisateurs</string>
+    <string name="admin_requests">Demandes</string>
+    <string name="admin_settings">Paramètres</string>
+    <string name="admin_welcome">Bienvenue sur la console d\'administration</string>
+    <string name="admin_total_users">Total utilisateurs</string>
+    <string name="admin_active_users">Actifs (30j)</string>
+    <string name="admin_total_subscriptions">Abonnements</string>
+    <string name="admin_total_content">Contenus</string>
+    <string name="admin_recent_activity">Activité récente</string>
+    <string name="admin_no_activity">Aucune activité récente</string>
+    <string name="admin_load_failed">Une erreur est survenue. Vérifiez votre connexion et réessayez.</string>
+    <string name="admin_empty_users">Aucun utilisateur trouvé</string>
+    <string name="admin_empty_requests">Aucune demande trouvée</string>
+    <string name="admin_retry">Réessayer</string>
+    <string name="admin_logout">Se déconnecter</string>
+    <string name="admin_console_link">Ouvrir la console web</string>
+    <string name="admin_version">Version</string>
+    <string name="version_format">Version %1$s (%2$d)</string>
+    <string name="admin_console_desc">Gérez les utilisateurs, abonnements, contenus et demandes depuis la console d\'administration web complète.</string>
+
+    <!-- Role names -->
+    <string name="role_super_admin">Super administrateur</string>
+    <string name="role_admin">Administrateur</string>
+    <string name="role_content_manager">Gestionnaire de contenu</string>
+    <string name="role_teacher">Enseignant</string>
+    <string name="role_student">Étudiant</string>
+    <string name="role_premium_user">Utilisateur Premium</string>
+    <string name="role_free_user">Utilisateur gratuit</string>
+    <string name="role_moderator">Modérateur</string>
+    <string name="role_support_staff">Personnel d\'assistance</string>
+    <string name="role_guest">Invité</string>
+
+    <!-- Admin user detail dialog -->
+    <string name="admin_subscription">Abonnement</string>
+    <string name="admin_sub_start">Début</string>
+    <string name="admin_sub_end">Fin</string>
+    <string name="admin_no_subscription">Aucun abonnement</string>
+    <string name="admin_sub_active">Actif</string>
+    <string name="admin_sub_expired">Expiré</string>
+    <string name="admin_user_active">Actif</string>
+    <string name="admin_user_inactive">Inactif</string>
+    <string name="admin_no_requests">Aucune demande</string>
+    <string name="admin_close">Fermer</string>
+    <string name="admin_search_users">Rechercher des utilisateurs…</string>
+    <string name="admin_search_requests">Rechercher des demandes…</string>
+    <string name="admin_no_matching_users">Aucun utilisateur ne correspond à votre recherche</string>
+    <string name="admin_no_matching_requests">Aucune demande ne correspond à votre recherche</string>
+    <string name="admin_last_updated">Dernière mise à jour : %1$s</string>
 </resources>

@@ -15,7 +15,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
+import com.drivingschoolrwandaapp.utils.EdgeToEdgeUtils;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.lifecycle.ViewModelProvider;
@@ -51,7 +51,7 @@ public class WhatsAppGroupsActivity extends AppCompatActivity implements WhatsAp
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        EdgeToEdge.enable(this);
+        EdgeToEdgeUtils.enable(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_whatsapp_groups);
 
@@ -88,9 +88,8 @@ public class WhatsAppGroupsActivity extends AppCompatActivity implements WhatsAp
 
     private void setupViewModel() {
         viewModel = new ViewModelProvider(this).get(WhatsAppViewModel.class);
-    }
-
-    private void fetchGroups() {
+        // Register the observer ONCE — the ViewModel owns a single LiveData, so
+        // re-fetching must only re-trigger the request, never stack observers.
         viewModel.getWhatsAppGroups().observe(this, resource -> {
             if (resource == null) return;
             switch (resource.status) {
@@ -103,7 +102,7 @@ public class WhatsAppGroupsActivity extends AppCompatActivity implements WhatsAp
                         allGroups = resource.data;
                         adapter.setGroups(allGroups);
                     } else {
-                        showError("No active WhatsApp groups found.");
+                        showError(getString(R.string.no_whatsapp_groups));
                     }
                     break;
                 case ERROR:
@@ -111,6 +110,10 @@ public class WhatsAppGroupsActivity extends AppCompatActivity implements WhatsAp
                     break;
             }
         });
+    }
+
+    private void fetchGroups() {
+        viewModel.fetchWhatsAppGroups();
     }
 
     private void showLoading() {
@@ -129,7 +132,7 @@ public class WhatsAppGroupsActivity extends AppCompatActivity implements WhatsAp
         progressBar.setVisibility(View.GONE);
         recyclerView.setVisibility(View.GONE);
         layoutError.setVisibility(View.VISIBLE);
-        tvErrorMessage.setText(message != null ? message : "An unknown error occurred");
+        tvErrorMessage.setText(message != null ? message : getString(R.string.unknown_error));
     }
 
     @Override

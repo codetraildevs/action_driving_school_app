@@ -40,7 +40,11 @@ public class ApiClient {
         tokenManager = new TokenManager(appContext);
 
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        // NONE in production: BODY-level logging writes every request/response
+        // body to logcat — including the password on login and the auth token
+        // on refresh — and allocates large strings on low-RAM devices.
+        // Matches NetworkModule's production client.
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.NONE);
 
         okHttpClient = new OkHttpClient.Builder()
                 .addInterceptor(new NetworkInterceptor(appContext))

@@ -1,11 +1,16 @@
 package com.drivingschoolrwandaapp.utils;
 
+import android.content.Context;
+
+import com.drivingschoolrwandaapp.R;
+
 import java.util.Locale;
 
 /**
  * Utility class for converting network/Retrofit exceptions into user-friendly error messages.
  * Uses simple string matching to classify common errors (timeout, DNS, unreachable, etc.)
- * without requiring Android Context for localization.
+ * and resolves the message through {@code R.string} resources so every locale sees a
+ * translated message.
  */
 public final class ErrorUtils {
 
@@ -15,18 +20,19 @@ public final class ErrorUtils {
 
     /**
      * Converts a Throwable from a Retrofit onFailure callback into a
-     * user-friendly error message string.
+     * user-friendly, localized error message string.
      *
-     * @param t the Throwable caught in onFailure (may be null)
-     * @return a human-readable error message
+     * @param context the Context used to resolve the localized string resources
+     * @param t       the Throwable caught in onFailure (may be null)
+     * @return a human-readable error message in the device's locale
      */
-    public static String getUserFriendlyMessage(Throwable t) {
+    public static String getUserFriendlyMessage(Context context, Throwable t) {
         if (t == null) {
-            return "An unknown error occurred. Please try again.";
+            return context.getString(R.string.error_unknown);
         }
         String message = t.getMessage();
         if (message == null) {
-            return "An unknown error occurred. Please try again.";
+            return context.getString(R.string.error_unknown);
         }
         String lower = message.toLowerCase(Locale.ROOT);
 
@@ -35,21 +41,22 @@ public final class ErrorUtils {
                 || lower.contains("failed to connect")
                 || lower.contains("network is unreachable")
                 || lower.contains("no route to host")
-                || lower.contains("connection refused")) {
-            return "Connection failed. Please check your internet connection and try again.";
+                || lower.contains("connection refused")
+                || lower.contains("no internet")) {
+            return context.getString(R.string.network_error);
         }
 
         // Timeout issues
         if (lower.contains("timeout")
                 || lower.contains("timed out")
                 || lower.contains("time out")) {
-            return "Request timed out. The server is not responding. Please try again later.";
+            return context.getString(R.string.request_timeout);
         }
 
         // SSL / security issues
         if (lower.contains("ssl")
                 || lower.contains("certificate")) {
-            return "A secure connection could not be established. Please update your app and try again.";
+            return context.getString(R.string.error_secure_connection);
         }
 
         // Socket / general IO errors
@@ -57,10 +64,10 @@ public final class ErrorUtils {
                 || lower.contains("eof")
                 || lower.contains("end of file")
                 || lower.contains("unexpected end of stream")) {
-            return "Connection was interrupted. Please try again.";
+            return context.getString(R.string.error_connection_interrupted);
         }
 
         // Fallback: return a generic message (the raw exception message is too technical for users)
-        return "Something went wrong. Please try again.";
+        return context.getString(R.string.something_went_wrong);
     }
 }
