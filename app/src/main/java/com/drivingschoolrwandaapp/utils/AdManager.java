@@ -41,14 +41,14 @@ public final class AdManager {
     private static final String TAG = "AdManager";
 
     // ── Test ad-unit IDs (safe to ship in debug/release; Google serves test ads) ────────
-    private static final String BANNER_AD_UNIT_ID       = "ca-app-pub-3940256099942544/6300978111";
-    private static final String INTERSTITIAL_AD_UNIT_ID  = "ca-app-pub-3940256099942544/1033173712";
-    private static final String REWARDED_AD_UNIT_ID      = "ca-app-pub-3940256099942544/5224354917";
+    // private static final String BANNER_AD_UNIT_ID       = "ca-app-pub-3940256099942544/6300978111";
+    // private static final String INTERSTITIAL_AD_UNIT_ID  = "ca-app-pub-3940256099942544/1033173712";
+    // private static final String REWARDED_AD_UNIT_ID      = "ca-app-pub-3940256099942544/5224354917";
 
-    // ── Production ad-unit IDs (uncomment & set once you create ad units in AdMob console)
-    // private static final String BANNER_AD_UNIT_ID      = "ca-app-pub-7698315805599052/XXXXXXXXXX";
-    // private static final String INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-7698315805599052/XXXXXXXXXX";
-    // private static final String REWARDED_AD_UNIT_ID     = "ca-app-pub-7698315805599052/XXXXXXXXXX";
+    // ── Production ad-unit IDs ──────────────────────────────────────────────────────────
+    private static final String BANNER_AD_UNIT_ID       = "ca-app-pub-2864387622629553/4416179690";
+    private static final String INTERSTITIAL_AD_UNIT_ID  = "ca-app-pub-2864387622629553/2665325775";
+    private static final String REWARDED_AD_UNIT_ID      = "ca-app-pub-2864387622629553/5099917426";
 
     private static boolean initialized = false;
     private static InterstitialAd interstitialAd;
