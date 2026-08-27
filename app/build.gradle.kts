@@ -119,7 +119,7 @@ android {
     sourceSets {
         getByName("main") {
             java {
-                setSrcDirs(listOf("src/main/java", "src/main/java/api"))
+                setSrcDirs(listOf("src/main/java"))
             }
         }
     }
