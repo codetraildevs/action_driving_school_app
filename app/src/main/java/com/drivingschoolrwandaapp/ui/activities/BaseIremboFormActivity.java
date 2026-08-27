@@ -8,7 +8,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
+import com.drivingschoolrwandaapp.utils.EdgeToEdgeUtils;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -61,7 +61,7 @@ public abstract class BaseIremboFormActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        EdgeToEdge.enable(this);
+        EdgeToEdgeUtils.enable(this);
         super.onCreate(savedInstanceState);
         setContentView(getFormLayoutId());
 
@@ -180,12 +180,12 @@ public abstract class BaseIremboFormActivity extends AppCompatActivity {
         TextView tvAmount = dialogView.findViewById(R.id.tv_amount);
         Button btnCancel = dialogView.findViewById(R.id.btn_cancel);
 
-        int amount = (int) paymentDetails.getAmount();
+        // Fixed 500 RWF service fee for Irembo processing
+        int serviceFee = 500;
         NumberFormat format = NumberFormat.getNumberInstance(Locale.US);
-        String currency = paymentDetails.getCurrency() != null ? paymentDetails.getCurrency() : "RWF";
-        tvAmount.setText(getString(R.string.amount_with_currency_format, format.format(amount), currency));
+        tvAmount.setText(getString(R.string.amount_with_currency_format, format.format(serviceFee), "RWF"));
 
-        PaymentUtils.setupPaymentMethods(dialogView, this, String.valueOf(amount));
+        PaymentUtils.setupPaymentMethods(dialogView, this, String.valueOf(serviceFee));
 
         btnCancel.setOnClickListener(v -> {
             dialog.dismiss();

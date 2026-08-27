@@ -201,8 +201,8 @@ public class SubscriptionViewModel extends AndroidViewModel {
                 } else {
                     error.setValue(defaultErrorMessage);
                 }
-            } catch (IOException e) {
-                Log.e("SubscriptionVM", "Failed to read API error body", e);
+            } catch (Exception e) {
+                Log.e("SubscriptionVM", "Failed to parse API error body", e);
                 error.setValue(defaultErrorMessage);
             }
         } else {

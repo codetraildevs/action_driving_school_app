@@ -22,8 +22,8 @@ android {
         applicationId = "com.drivingschoolrwandaapp"
         minSdk = 27
         targetSdk = 37
-        versionCode = 100
-        versionName = "1.5.3"
+        versionCode = 102
+        versionName = "1.5.5"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -103,6 +103,9 @@ android {
         viewBinding = true
         buildConfig = true
     }
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
     packaging {
         jniLibs {
             // libdatastore_shared_counter.so is a stripped DataStore helper that
@@ -119,7 +122,7 @@ android {
     sourceSets {
         getByName("main") {
             java {
-                setSrcDirs(listOf("src/main/java", "src/main/java/api"))
+                setSrcDirs(listOf("src/main/java"))
             }
         }
     }

@@ -61,7 +61,11 @@ public class SpecialRequestActivity extends BaseIremboFormActivity {
     }
 
     private void setupSubmit() {
-        findViewById(R.id.btn_submit).setOnClickListener(v -> submit());
+        findViewById(R.id.btn_submit).setOnClickListener(v -> {
+            // Always show payment modal — the 500 RWF payment info is hardcoded
+            // and does not depend on the form data or API response.
+            showPaymentConfirmationDialog(null);
+        });
     }
 
     private void submit() {
@@ -106,12 +110,9 @@ public class SpecialRequestActivity extends BaseIremboFormActivity {
                 showLoadingDialog();
             } else if (resource.status == Resource.Status.SUCCESS) {
                 hideLoadingDialog();
-                if (resource.data != null) {
-                    showPaymentConfirmationDialog(resource.data);
-                } else if (!isFinishing()) {
-                    Toast.makeText(this, getString(R.string.special_submitted), Toast.LENGTH_SHORT).show();
-                    finish();
-                }
+                // Always show payment modal — the payment numbers are hardcoded
+                // (not from the API response), so null data is fine.
+                showPaymentConfirmationDialog(null);
             } else if (resource.status == Resource.Status.ERROR) {
                 hideLoadingDialog();
                 if (!isFinishing()) {
