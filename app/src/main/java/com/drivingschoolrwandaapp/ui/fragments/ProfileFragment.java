@@ -115,6 +115,12 @@ public class ProfileFragment extends Fragment {
         // Refresh session expiry display when user returns to this tab
         updateSessionInfo();
         AnalyticsUtils.logScreenView(getContext(), "profile");
+
+        // Show interstitial when user views profile (natural transition point)
+        if (getActivity() != null) {
+            AdManager.loadInterstitial(requireContext());
+            AdManager.showInterstitialIfReady(getActivity());
+        }
     }
 
     private void setupMenu() {
@@ -251,6 +257,30 @@ public class ProfileFragment extends Fragment {
     @android.annotation.SuppressLint("SetTextI18n")
     private void updateSessionInfo() {
         if (tokenManager == null || tvSessionStatus == null || !isAdded() || getContext() == null) return;
+
+        // Watch ad to extend session - tap on session status
+        tvSessionStatus.setOnClickListener(v -> {
+            if (getActivity() != null && AdManager.isRewardedAdReady()) {
+                AdManager.showRewardedAdIfReady(getActivity(), new AdManager.RewardedAdCallback() {
+                    @Override
+                    public void onRewardEarned(@NonNull com.google.android.gms.ads.rewarded.RewardItem reward) {
+                        if (isAdded()) {
+                            requireActivity().runOnUiThread(() -> {
+                                Toast.makeText(requireContext(), getString(R.string.dsrw_ad_reward_msg), Toast.LENGTH_LONG).show();
+                                userViewModel.loadProfile();
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void onAdFailedToShow() {
+                        if (isAdded()) {
+                            Toast.makeText(requireContext(), getString(R.string.dsrw_ad_error), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            }
+        });
 
         long expiryTime = tokenManager.getTokenExpiryTime();
         long now = System.currentTimeMillis();

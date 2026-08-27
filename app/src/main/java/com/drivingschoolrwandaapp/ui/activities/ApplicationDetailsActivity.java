@@ -17,6 +17,7 @@ import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.models.IremboApplication;
 import com.drivingschoolrwandaapp.repository.Resource;
 import com.drivingschoolrwandaapp.utils.AdManager;
+import com.google.android.gms.ads.rewarded.RewardItem;
 import com.drivingschoolrwandaapp.viewmodel.IremboViewModel;
 import com.google.android.material.appbar.MaterialToolbar;
 
@@ -58,6 +59,9 @@ public class ApplicationDetailsActivity extends AppCompatActivity {
         if (adContainer != null) {
             AdManager.showBanner(this, adContainer, null);
         }
+
+        // Pre-load rewarded ad for user engagement
+        AdManager.loadRewardedAd(this);
 
         iremboViewModel = new ViewModelProvider(this).get(IremboViewModel.class);
         setupObservers();

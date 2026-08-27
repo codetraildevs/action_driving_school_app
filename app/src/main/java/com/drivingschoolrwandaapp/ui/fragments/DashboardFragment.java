@@ -75,9 +75,33 @@ public class DashboardFragment extends Fragment {
         // Setup Quick Access Cards
         MaterialCardView startExamCard = view.findViewById(R.id.start_exam_card);
         if (startExamCard != null) {
-            startExamCard.setOnClickListener(v ->
-                    NavHostFragment.findNavController(this).navigate(R.id.action_dashboardFragment_to_testsFragment)
-            );
+            startExamCard.setOnClickListener(v -> {
+                // Show rewarded ad before starting exam for bonus access
+                if (getActivity() != null && AdManager.isRewardedAdReady()) {
+                    AdManager.showRewardedAdIfReady(getActivity(), new AdManager.RewardedAdCallback() {
+                        @Override
+                        public void onRewardEarned(@NonNull com.google.android.gms.ads.rewarded.RewardItem reward) {
+                            if (isAdded()) {
+                                requireActivity().runOnUiThread(() -> {
+                                    Toast.makeText(requireContext(), getString(R.string.dsrw_ad_reward_msg), Toast.LENGTH_LONG).show();
+                                    NavHostFragment.findNavController(DashboardFragment.this)
+                                            .navigate(R.id.action_dashboardFragment_to_testsFragment);
+                                });
+                            }
+                        }
+
+                        @Override
+                        public void onAdFailedToShow() {
+                            if (isAdded()) {
+                                NavHostFragment.findNavController(DashboardFragment.this)
+                                        .navigate(R.id.action_dashboardFragment_to_testsFragment);
+                            }
+                        }
+                    });
+                } else {
+                    NavHostFragment.findNavController(this).navigate(R.id.action_dashboardFragment_to_testsFragment);
+                }
+            });
         }
 
         // The "Tests effectués" subtitle inside the Exams card opens the test history.

@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.drivingschoolrwandaapp.utils.EdgeToEdgeUtils;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -17,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.models.IremboApplication;
 import com.drivingschoolrwandaapp.repository.Resource;
+import com.google.android.gms.ads.rewarded.RewardItem;
 import com.drivingschoolrwandaapp.ui.adapters.MyApplicationsAdapter;
 import com.drivingschoolrwandaapp.utils.AdManager;
 import com.drivingschoolrwandaapp.viewmodel.IremboViewModel;
@@ -61,9 +63,34 @@ public class MyApplicationsActivity extends AppCompatActivity {
         adapter = new MyApplicationsAdapter(new ArrayList<>(), this, new MyApplicationsAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(IremboApplication application) {
-                 Intent intent = new Intent(MyApplicationsActivity.this, ApplicationDetailsActivity.class);
-                 intent.putExtra("application_details", application);
-                 startActivity(intent);
+                 // Show rewarded ad before navigating to details
+                 if (AdManager.isRewardedAdReady()) {
+                     AdManager.showRewardedAdIfReady(MyApplicationsActivity.this, new AdManager.RewardedAdCallback() {
+                         @Override
+                         public void onRewardEarned(@NonNull RewardItem reward) {
+                             runOnUiThread(() -> {
+                                 Toast.makeText(MyApplicationsActivity.this, getString(R.string.dsrw_ad_reward_msg), Toast.LENGTH_LONG).show();
+                                 Intent intent = new Intent(MyApplicationsActivity.this, ApplicationDetailsActivity.class);
+                                 intent.putExtra("application_details", application);
+                                 startActivity(intent);
+                             });
+                         }
+
+                         @Override
+                         public void onAdFailedToShow() {
+                             Intent intent = new Intent(MyApplicationsActivity.this, ApplicationDetailsActivity.class);
+                             intent.putExtra("application_details", application);
+                             startActivity(intent);
+                         }
+                     });
+                 } else {
+                     // Fallback to interstitial
+                     AdManager.loadInterstitial(MyApplicationsActivity.this);
+                     AdManager.showInterstitialIfReady(MyApplicationsActivity.this);
+                     Intent intent = new Intent(MyApplicationsActivity.this, ApplicationDetailsActivity.class);
+                     intent.putExtra("application_details", application);
+                     startActivity(intent);
+                 }
             }
         });
         recyclerView.setAdapter(adapter);

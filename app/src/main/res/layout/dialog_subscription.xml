@@ -72,36 +72,6 @@
             android:visibility="gone" />
     </FrameLayout>
 
-    <!-- Divider -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="12dp"
-        android:background="@color/colorOutlineVariant" />
-
-    <!-- Watch Ad for free access -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_watch_ad"
-        style="@style/Widget.Material3.Button.OutlinedButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/dsrw_ad_btn"
-        android:textSize="14sp"
-        app:icon="@drawable/ic_play_circle"
-        app:iconTint="@color/my_primary" />
-
-    <TextView
-        android:id="@+id/tv_watch_ad_subtitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/dsrw_ad_subtitle"
-        android:textColor="@color/colorOnSurfaceVariant"
-        android:textSize="12sp"
-        android:gravity="center"
-        android:layout_marginTop="-4dp"
-        android:layout_marginBottom="8dp" />
-
     <!-- Sent state: after a request is sent the payment options stay visible
          but the confirm button is disabled so the user cannot send a duplicate.
          The sheet stays open until the admin grants access (then it auto-closes). -->

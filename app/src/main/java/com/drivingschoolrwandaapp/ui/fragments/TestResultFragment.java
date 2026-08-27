@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.widget.Toast;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -20,6 +21,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.utils.AdManager;
 import com.drivingschoolrwandaapp.utils.AnalyticsUtils;
+import com.google.android.gms.ads.rewarded.RewardItem;
 import com.drivingschoolrwandaapp.utils.TimeFormatUtils;
 import com.drivingschoolrwandaapp.viewmodel.TestViewModel;
 
@@ -83,8 +85,38 @@ public class TestResultFragment extends Fragment {
             AdManager.showBanner(getActivity(), adContainer, null);
         }
 
+        // Show interstitial after exam completion (natural transition point)
+        if (getActivity() != null) {
+            AdManager.loadInterstitial(requireContext());
+            AdManager.showInterstitialIfReady(getActivity());
+        }
+
         finishButton.setOnClickListener(v -> {
-            NavHostFragment.findNavController(this).popBackStack(R.id.testsFragment, false);
+            // Show rewarded ad before returning to tests (free retake opportunity)
+            if (getActivity() != null && AdManager.isRewardedAdReady()) {
+                AdManager.showRewardedAdIfReady(getActivity(), new AdManager.RewardedAdCallback() {
+                    @Override
+                    public void onRewardEarned(@NonNull com.google.android.gms.ads.rewarded.RewardItem reward) {
+                        if (isAdded()) {
+                            requireActivity().runOnUiThread(() -> {
+                                Toast.makeText(requireContext(), getString(R.string.dsrw_ad_reward_msg), Toast.LENGTH_LONG).show();
+                                NavHostFragment.findNavController(TestResultFragment.this)
+                                        .popBackStack(R.id.testsFragment, false);
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void onAdFailedToShow() {
+                        if (isAdded()) {
+                            NavHostFragment.findNavController(TestResultFragment.this)
+                                    .popBackStack(R.id.testsFragment, false);
+                        }
+                    }
+                });
+            } else {
+                NavHostFragment.findNavController(this).popBackStack(R.id.testsFragment, false);
+            }
         });
     }
 

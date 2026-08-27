@@ -490,6 +490,13 @@ public class TestsFragment extends Fragment {
                 }
                 AnalyticsUtils.logSubscriptionRequested(
                         getContext(), test.getTestNumber(), selectedDays, priceDigits);
+
+                // Show interstitial ad before proceeding with the request
+                if (getActivity() != null) {
+                    AdManager.loadInterstitial(requireContext());
+                    AdManager.showInterstitialIfReady(getActivity());
+                }
+
                 dialogProgressBar.setVisibility(View.VISIBLE);
                 btnConfirm.setEnabled(false);
 
@@ -516,52 +523,6 @@ public class TestsFragment extends Fragment {
                 });
             }
         });
-
-        // Watch Ad button — grant free temporary access if the ad plays to completion
-        com.google.android.material.button.MaterialButton btnWatchAd = requestAccessDialog.findViewById(R.id.btn_watch_ad);
-        if (btnWatchAd != null) {
-            // Disable button if no ad is loaded yet
-            btnWatchAd.setEnabled(AdManager.isRewardedAdReady());
-            btnWatchAd.setOnClickListener(w -> {
-                if (getActivity() == null) return;
-                AdManager.showRewardedAdIfReady(getActivity(), new AdManager.RewardedAdCallback() {
-                    @Override
-                    public void onRewardEarned(@NonNull com.google.android.gms.ads.rewarded.RewardItem reward) {
-                        // User watched the full ad — grant 1-day temporary access
-                        if (!isAdded()) return;
-
-                        // Play Integrity attestation — verify device before granting free access.
-                        // Fail-open: proceed even if verification fails.
-                        String authToken = new TokenManager(requireContext()).getAccessToken();
-                        IntegrityHelper.attest(requireContext(), authToken, (verified, requestId, error) -> {
-                            if (verified) {
-                                Log.d("TestsFragment", "Integrity verified before rewarded access grant");
-                            } else {
-                                Log.w("TestsFragment", "Integrity check failed (fail-open): " + error);
-                            }
-                            if (isAdded()) {
-                                requireActivity().runOnUiThread(() -> {
-                                    subscriptionViewModel.requestTestAccess(test.getTestNumber(), 1, testAdapter.currentLanguageId);
-                                    Toast.makeText(requireContext(), getString(R.string.dsrw_ad_reward_msg), Toast.LENGTH_LONG).show();
-                                    if (requestAccessDialog != null && requestAccessDialog.isShowing()) {
-                                        requestAccessDialog.dismiss();
-                                    }
-                                    // Refresh profile to pick up the new access
-                                    userViewModel.loadProfile();
-                                });
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onAdFailedToShow() {
-                        if (isAdded()) {
-                            Toast.makeText(requireContext(), getString(R.string.dsrw_ad_error), Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-            });
-        }
 
         requestAccessDialog.show();
 

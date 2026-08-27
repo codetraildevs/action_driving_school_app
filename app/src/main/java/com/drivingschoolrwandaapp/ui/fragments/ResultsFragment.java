@@ -55,6 +55,12 @@ public class ResultsFragment extends Fragment {
     public void onResume() {
         super.onResume();
         AnalyticsUtils.logScreenView(getContext(), "results");
+
+        // Show interstitial when user views results (natural transition point)
+        if (getActivity() != null) {
+            AdManager.loadInterstitial(requireContext());
+            AdManager.showInterstitialIfReady(getActivity());
+        }
     }
 
     @Override
@@ -266,14 +272,47 @@ public class ResultsFragment extends Fragment {
                 if (testId > 0 && btnRetake != null) {
                     btnRetake.setVisibility(View.VISIBLE);
                     btnRetake.setOnClickListener(v -> {
-                        if (getActivity() != null && isAdded()) {
-                            Bundle args = new Bundle();
-                            args.putInt("testId", testId);
-                            args.putString("title", title);
-                            args.putBoolean("isReviewMode", false);
-                            args.putBoolean("isRealTimeFeedback", true);
-                            NavHostFragment.findNavController(ResultsFragment.this)
-                                    .navigate(R.id.action_global_testQuestionsFragment, args);
+                        // Show rewarded ad before retaking test for free access
+                        if (getActivity() != null && AdManager.isRewardedAdReady()) {
+                            AdManager.showRewardedAdIfReady(getActivity(), new AdManager.RewardedAdCallback() {
+                                @Override
+                                public void onRewardEarned(@NonNull com.google.android.gms.ads.rewarded.RewardItem reward) {
+                                    if (isAdded()) {
+                                        requireActivity().runOnUiThread(() -> {
+                                            Bundle args = new Bundle();
+                                            args.putInt("testId", testId);
+                                            args.putString("title", title);
+                                            args.putBoolean("isReviewMode", false);
+                                            args.putBoolean("isRealTimeFeedback", true);
+                                            NavHostFragment.findNavController(ResultsFragment.this)
+                                                    .navigate(R.id.action_global_testQuestionsFragment, args);
+                                        });
+                                    }
+                                }
+
+                                @Override
+                                public void onAdFailedToShow() {
+                                    if (isAdded()) {
+                                        Bundle args = new Bundle();
+                                        args.putInt("testId", testId);
+                                        args.putString("title", title);
+                                        args.putBoolean("isReviewMode", false);
+                                        args.putBoolean("isRealTimeFeedback", true);
+                                        NavHostFragment.findNavController(ResultsFragment.this)
+                                                .navigate(R.id.action_global_testQuestionsFragment, args);
+                                    }
+                                }
+                            });
+                        } else {
+                            if (isAdded()) {
+                                Bundle args = new Bundle();
+                                args.putInt("testId", testId);
+                                args.putString("title", title);
+                                args.putBoolean("isReviewMode", false);
+                                args.putBoolean("isRealTimeFeedback", true);
+                                NavHostFragment.findNavController(ResultsFragment.this)
+                                        .navigate(R.id.action_global_testQuestionsFragment, args);
+                            }
                         }
                     });
                 } else if (btnRetake != null) {
