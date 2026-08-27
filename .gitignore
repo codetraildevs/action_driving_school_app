@@ -86,3 +86,14 @@ docs/*.sql
 
 # Firebase service account (keep out of git)
 firebase-service-account.json
+
+# Backend/web files (Android-only branch — not part of the app)
+.env
+public/
+DRIVING_SHOOL_COMPANY_LEGACY/
+*.sql
+check-login.js
+cleanup-stale-files.js
+debug-login.sh
+test-ssl.sh
+*.sh
