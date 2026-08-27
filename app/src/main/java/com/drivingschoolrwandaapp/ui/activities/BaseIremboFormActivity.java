@@ -18,6 +18,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.database.entities.User;
 import com.drivingschoolrwandaapp.models.response.IremboPaymentResponse;
+import com.drivingschoolrwandaapp.utils.IntegrityHelper;
 import com.drivingschoolrwandaapp.utils.PaymentUtils;
 import com.drivingschoolrwandaapp.viewmodel.IremboViewModel;
 import com.drivingschoolrwandaapp.viewmodel.UserViewModel;
@@ -44,6 +45,8 @@ import dagger.hilt.android.AndroidEntryPoint;
  */
 @AndroidEntryPoint
 public abstract class BaseIremboFormActivity extends AppCompatActivity {
+
+    private static final String TAG = "BaseIremboForm";
 
     protected IremboViewModel iremboViewModel;
     protected UserViewModel userViewModel;
@@ -196,6 +199,29 @@ public abstract class BaseIremboFormActivity extends AppCompatActivity {
         dialog.show();
         // Keep the dialog within the screen so every method stays reachable.
         PaymentUtils.capDialogHeight(dialog, 0.8f);
+    }
+
+    /**
+     * Run a Play Integrity check in the background before submitting an Irembo request.
+     * Does NOT block the submission — this is fail-open for anti-fraud logging only.
+     * Call from {@code submit()} in concrete form activities.
+     */
+    protected void verifyIntegrityBeforeSubmit() {
+        String token = null;
+        try {
+            token = new com.drivingschoolrwandaapp.data.local.preferences.TokenManager(this)
+                    .getAccessToken();
+        } catch (Exception e) {
+            Log.w(TAG, "Could not read access token for integrity check", e);
+        }
+        IntegrityHelper.attest(this, token, (verified, requestId, error) -> {
+            if (verified) {
+                Log.d(TAG, "Play Integrity verified before Irembo submit (requestId=" + requestId + ")");
+            } else {
+                Log.w(TAG, "Play Integrity check failed before Irembo submit: " + error
+    + " — request allowed (fail-open)");
+            }
+        });
     }
 
     @Override

@@ -28,6 +28,7 @@ import com.drivingschoolrwandaapp.models.entities.Device;
 import com.drivingschoolrwandaapp.models.entities.User;
 import com.drivingschoolrwandaapp.models.response.RegisterResponse;
 import com.drivingschoolrwandaapp.utils.InsetsUtils;
+import com.drivingschoolrwandaapp.utils.IntegrityHelper;
 import com.drivingschoolrwandaapp.utils.PhoneUtils;
 import com.drivingschoolrwandaapp.viewmodel.UserViewModel;
 import com.google.android.material.textfield.TextInputEditText;
@@ -160,6 +161,19 @@ public class RegisterActivity extends AppCompatActivity {
                         tokenManager.saveRole(roleId);
                         Log.d(TAG, "Login after registration successful (role=" + roleId + ").");
                         Toast.makeText(RegisterActivity.this, getString(R.string.login_successful_redirect), Toast.LENGTH_SHORT).show();
+
+                        // Play Integrity attestation — background check for ad-fraud protection.
+                        // Does not block navigation; results are logged and sent to the backend.
+                        IntegrityHelper.attest(RegisterActivity.this, resource.data.getAccessToken(),
+                                (verified, requestId, error) -> {
+                                    if (verified) {
+                                        Log.d(TAG, "Play Integrity verified (requestId=" + requestId + ")");
+                                    } else {
+                                        Log.w(TAG, "Play Integrity check failed: " + error
+    + " — registration allowed (fail-open)");
+                                    }
+                                });
+
                         Intent destination = new Intent(RegisterActivity.this, App.class);
                         destination.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(destination);

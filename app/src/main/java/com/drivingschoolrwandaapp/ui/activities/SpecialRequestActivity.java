@@ -100,6 +100,7 @@ public class SpecialRequestActivity extends BaseIremboFormActivity {
                 serviceName, category, name, phone, nationalId, description
         );
         AnalyticsUtils.logIremboRequestSubmitted(this, "special_service");
+        verifyIntegrityBeforeSubmit();
         iremboViewModel.submitSpecialRequest(request);
     }
 

@@ -186,6 +186,7 @@ public class LicenseRequestActivity extends BaseIremboFormActivity {
         );
 
         AnalyticsUtils.logIremboRequestSubmitted(this, "driving_license");
+        verifyIntegrityBeforeSubmit();
         iremboViewModel.submitLicenseRequest(request);
     }
 
