@@ -484,4 +484,11 @@ Quand tu arrives à la dernière question, tu appuies sur « Terminer l’examen
     <string name="settings_about">À propos</string>
     <string name="settings_app_version">Version de l\'app</string>
     <string name="settings_delete_subtitle">Supprimer définitivement votre compte et vos données</string>
+
+    <!-- Leaderboard -->
+    <string name="leaderboard">Classement</string>
+    <string name="leaderboard_subtitle">Meilleurs performeurs aux examens de code</string>
+    <string name="leaderboard_exams_taken">%1$d examens passés</string>
+    <string name="leaderboard_pass_rate">Taux de réussite : %1$d%%</string>
+    <string name="leaderboard_empty">Aucune donnée de classement</string>
 </resources>

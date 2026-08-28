@@ -22,6 +22,10 @@
             android:icon="@drawable/ic_learning_materials"
             android:title="@string/learning_materials" />
         <item
+            android:id="@+id/leaderboardFragment"
+            android:icon="@android:drawable/ic_menu_sort_by_size"
+            android:title="@string/leaderboard" />
+        <item
             android:id="@+id/iremboActivity"
             android:icon="@drawable/ic_irembo"
             android:title="@string/irembo_services" />

@@ -487,4 +487,11 @@
     <string name="settings_about">Ibyerekeye</string>
     <string name="settings_app_version">Verisiyo y\'Apulikasiyo</string>
     <string name="settings_delete_subtitle">Siba konte yawe n\'amakuru yawe yose</string>
+
+    <!-- Leaderboard -->
+    <string name="leaderboard">Ikibaho</string>
+    <string name="leaderboard_subtitle">Abakuru mu gwiza amategeko y\'umuhanda</string>
+    <string name="leaderboard_exams_taken">Ibizamini %1$d</string>
+    <string name="leaderboard_pass_rate">Igipimo: %1$d%%</string>
+    <string name="leaderboard_empty">Nta makuru y\'ikibaho</string>
 </resources>

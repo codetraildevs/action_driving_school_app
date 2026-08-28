@@ -99,6 +99,12 @@
         android:label="@string/settings"
         tools:layout="@layout/fragment_settings" />
 
+    <fragment
+        android:id="@+id/leaderboardFragment"
+        android:name="com.drivingschoolrwandaapp.ui.fragments.LeaderboardFragment"
+        android:label="@string/leaderboard"
+        tools:layout="@layout/fragment_leaderboard" />
+
     <activity
         android:id="@+id/iremboActivity"
         android:name="com.drivingschoolrwandaapp.ui.activities.IremboActivity"

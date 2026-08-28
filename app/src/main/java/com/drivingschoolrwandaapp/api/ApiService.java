@@ -5,6 +5,7 @@ import com.drivingschoolrwandaapp.models.IremboApplication;
 import com.drivingschoolrwandaapp.models.entities.Bookmark;
 import com.drivingschoolrwandaapp.models.entities.Notification;
 import com.drivingschoolrwandaapp.models.entities.PdfFile;
+import com.drivingschoolrwandaapp.models.entities.LeaderboardEntry;
 import com.drivingschoolrwandaapp.models.entities.User;
 import com.drivingschoolrwandaapp.models.entities.WhatsAppGroup;
 import com.drivingschoolrwandaapp.models.request.BookmarkRequest;
@@ -154,4 +155,10 @@ public interface ApiService {
     // WhatsApp Groups
     @GET("whatsapp-groups")
     Call<List<WhatsAppGroup>> getWhatsAppGroups();
+
+    // Leaderboard
+    @GET("leaderboard")
+    Call<ApiResponse<List<LeaderboardEntry>>> getLeaderboard(
+            @Query("limit") int limit
+    );
 }

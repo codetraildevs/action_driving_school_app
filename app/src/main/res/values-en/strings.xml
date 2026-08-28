@@ -450,4 +450,11 @@ When you reach the last one, you press “Finish Exam,” and you will immediate
     <string name="settings_about">About</string>
     <string name="settings_app_version">App Version</string>
     <string name="settings_delete_subtitle">Permanently delete your account and data</string>
+
+    <!-- Leaderboard -->
+    <string name="leaderboard">Leaderboard</string>
+    <string name="leaderboard_subtitle">Top performers in driving theory exams</string>
+    <string name="leaderboard_exams_taken">%1$d exams taken</string>
+    <string name="leaderboard_pass_rate">Pass rate: %1$d%%</string>
+    <string name="leaderboard_empty">No leaderboard data yet</string>
 </resources>
