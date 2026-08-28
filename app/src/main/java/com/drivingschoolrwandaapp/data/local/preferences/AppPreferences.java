@@ -16,6 +16,10 @@ public class AppPreferences {
     // the user actually asked for instead of a hardcoded default.
     private static final String KEY_LAST_REQUESTED_PLAN_PRICE = "last_requested_plan_price";
     private static final String DEFAULT_LAST_REQUESTED_PLAN_PRICE = "2000";
+    private static final String KEY_DARK_MODE = "dark_mode";
+    private static final int DARK_MODE_FOLLOW_SYSTEM = 0;
+    private static final int DARK_MODE_OFF = 1;
+    private static final int DARK_MODE_ON = 2;
 
     private final SharedPreferences preferences;
 
@@ -96,5 +100,23 @@ public class AppPreferences {
      */
     public String getLastRequestedPlanPrice() {
         return preferences.getString(KEY_LAST_REQUESTED_PLAN_PRICE, DEFAULT_LAST_REQUESTED_PLAN_PRICE);
+    }
+
+    // ── Dark mode ──
+
+    /**
+     * Returns the dark mode preference:
+     * 0 = Follow system, 1 = Off (light), 2 = On (dark).
+     */
+    public int getDarkMode() {
+        return preferences.getInt(KEY_DARK_MODE, DARK_MODE_FOLLOW_SYSTEM);
+    }
+
+    /**
+     * Sets the dark mode preference.
+     * @param mode 0 = Follow system, 1 = Off, 2 = On
+     */
+    public void setDarkMode(int mode) {
+        preferences.edit().putInt(KEY_DARK_MODE, mode).apply();
     }
 }

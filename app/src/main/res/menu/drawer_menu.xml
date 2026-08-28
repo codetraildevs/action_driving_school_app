@@ -38,10 +38,14 @@
                 android:icon="@drawable/whatsapp_svgrepo_com"
                 android:title="@string/whatsapp_group14" />
 
-            <item
-                android:id="@+id/nav_about_us"
-                android:icon="@drawable/ic_info"
-                android:title="@string/aboutus" />
+        <item
+            android:id="@+id/settingsFragment"
+            android:icon="@android:drawable/ic_menu_preferences"
+            android:title="@string/settings" />
+        <item
+            android:id="@+id/nav_about_us"
+            android:icon="@drawable/ic_info"
+            android:title="@string/aboutus" />
 
 
     <group android:id="@+id/group_delete_account" android:checkableBehavior="none">

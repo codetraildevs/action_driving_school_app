@@ -93,6 +93,12 @@
             app:destination="@id/testQuestionsFragment" />
     </fragment>
 
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.drivingschoolrwandaapp.ui.fragments.SettingsFragment"
+        android:label="@string/settings"
+        tools:layout="@layout/fragment_settings" />
+
     <activity
         android:id="@+id/iremboActivity"
         android:name="com.drivingschoolrwandaapp.ui.activities.IremboActivity"

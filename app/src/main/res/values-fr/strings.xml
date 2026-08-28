@@ -71,6 +71,8 @@
     <string name="_4_5_123">4.5 (123)</string>
 
     <string name="english">Anglais</string>
+    <string name="french">Français</string>
+    <string name="kinyarwanda">Kinyarwanda</string>
 
     <string name="home">Accueil</string>
     <string name="exams">Examens</string>
@@ -469,4 +471,17 @@ Quand tu arrives à la dernière question, tu appuies sur « Terminer l’examen
     <string name="admin_no_matching_users">Aucun utilisateur ne correspond à votre recherche</string>
     <string name="admin_no_matching_requests">Aucune demande ne correspond à votre recherche</string>
     <string name="admin_last_updated">Dernière mise à jour : %1$s</string>
+
+    <!-- Settings screen -->
+    <string name="settings_appearance">Apparence</string>
+    <string name="settings_dark_mode_title">Mode sombre</string>
+    <string name="settings_dark_mode_description">Choisissez votre thème préféré</string>
+    <string name="settings_follow_system">Suivre le système</string>
+    <string name="settings_light">Clair</string>
+    <string name="settings_dark">Sombre</string>
+    <string name="settings_general">Général</string>
+    <string name="settings_language">Langue</string>
+    <string name="settings_about">À propos</string>
+    <string name="settings_app_version">Version de l\'app</string>
+    <string name="settings_delete_subtitle">Supprimer définitivement votre compte et vos données</string>
 </resources>

@@ -70,6 +70,8 @@
     <string name="_4_5_123">4.5 (123)</string>
 
     <string name="english">English</string>
+    <string name="french">French</string>
+    <string name="kinyarwanda">Kinyarwanda</string>
 
     <string name="home">Home</string>
     <string name="exams">Exams</string>
@@ -435,4 +437,17 @@ When you reach the last one, you press “Finish Exam,” and you will immediate
     <string name="admin_no_matching_users">No users match your search</string>
     <string name="admin_no_matching_requests">No requests match your search</string>
     <string name="admin_last_updated">Last updated: %1$s</string>
+
+    <!-- Settings screen -->
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_dark_mode_title">Dark Mode</string>
+    <string name="settings_dark_mode_description">Choose your preferred theme</string>
+    <string name="settings_follow_system">Follow system</string>
+    <string name="settings_light">Light</string>
+    <string name="settings_dark">Dark</string>
+    <string name="settings_general">General</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_about">About</string>
+    <string name="settings_app_version">App Version</string>
+    <string name="settings_delete_subtitle">Permanently delete your account and data</string>
 </resources>

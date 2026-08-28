@@ -71,6 +71,8 @@
     <string name="_4_5_123">4.5 (123)</string>
 
     <string name="english">Icyongereza</string>
+    <string name="french">Ikifaransa</string>
+    <string name="kinyarwanda">Ikinyarwanda</string>
 
     <string name="home">Ahabanza</string>
     <string name="exams">Ibizamini</string>
@@ -472,4 +474,17 @@
     <string name="admin_no_matching_users">No users match your search</string>
     <string name="admin_no_matching_requests">No requests match your search</string>
     <string name="admin_last_updated">Last updated: %1$s</string>
+
+    <!-- Settings screen -->
+    <string name="settings_appearance">Imisusire</string>
+    <string name="settings_dark_mode_title">Umwijima</string>
+    <string name="settings_dark_mode_description">Hitamo isura ushaka</string>
+    <string name="settings_follow_system">Kurikira sisitemu</string>
+    <string name="settings_light">Urumuri</string>
+    <string name="settings_dark">Umwijima</string>
+    <string name="settings_general">Rusange</string>
+    <string name="settings_language">Ururimi</string>
+    <string name="settings_about">Ibyerekeye</string>
+    <string name="settings_app_version">Verisiyo y\'Apulikasiyo</string>
+    <string name="settings_delete_subtitle">Siba konte yawe n\'amakuru yawe yose</string>
 </resources>

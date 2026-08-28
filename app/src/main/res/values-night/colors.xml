@@ -1,12 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Base colors -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="correct_answer_green">#00FF00</color>
-    <color name="incorrect_answer_red">#FF0000</color>
-    
-    <color name="shimmer_placeholder">#3C3C3C</color>
 
+    <!-- Primary (dark version) -->
+    <color name="colorPrimary">#1A3A4A</color>
+    <color name="my_primary">#5CC8E0</color>
+    <color name="colorOnPrimary">#5CC8E0</color>
+    <color name="colorPrimaryContainer">#0D2B38</color>
+
+    <!-- Surface & Background -->
+    <color name="colorSurface">#1A1C1E</color>
+    <color name="colorOnSurface">#E1E3E5</color>
+    <color name="colorSurfaceVariant">#2C2F33</color>
+
+    <!-- Outline -->
+    <color name="colorOutline">#8E9296</color>
+    <color name="colorOutlineVariant">#44474A</color>
+    <color name="colorOnSurfaceVariant">#C3C6C9</color>
+    <color name="colorErrorContainer">#5C1A1A</color>
+
+    <!-- Quiz colors -->
+    <color name="correct_answer_green">#4ADE80</color>
+    <color name="incorrect_answer_red">#FF6B6B</color>
+
+    <!-- Status -->
+    <color name="status_action_text">#FF8A80</color>
+    <color name="status_green">#66BB6A</color>
+    <color name="status_red">#EF5350</color>
+
+    <!-- Shimmer -->
+    <color name="shimmer_placeholder">#2C2F33</color>
+
+    <!-- Bottom nav -->
     <color name="bottom_nav_bg">#1A1C1E</color>
-    <color name="bottom_nav_outline">#303030</color>
+    <color name="bottom_nav_outline">#303033</color>
+
+    <!-- Additional dark theme colors -->
+    <color name="card_background">#232528</color>
+    <color name="divider_color">#333639</color>
+    <color name="text_primary_dark">#E1E3E5</color>
+    <color name="text_secondary_dark">#9AA0A6</color>
+    <color name="input_background">#2C2F33</color>
+    <color name="toolbar_dark_bg">#1A1C1E</color>
 </resources>
