@@ -1,0 +1,15 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.drivingschoolrwandaapp",
+      "sha256_cert_fingerprints": [
+        "E2:0D:D2:4F:DC:7C:2D:56:BB:E1:49:94:73:91:73:FD:3E:2B:14:9E:5F:5F:E7:24:7B:4C:6F:A9:C1:1A:25:CC"
+      ]
+    }
+  }
+]
