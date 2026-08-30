@@ -1,0 +1,19 @@
+What's new in v1.5.8:
+
+✅ Bug Fixes:
+- Fixed profile showing wrong user's data after login
+- Fixed admin profile edit where middle name was overwriting first name
+- Login now correctly matches your phone number every time
+
+✅ Crash Fixes (reduced crash rate significantly):
+- Fixed crash on TECNO and Infinix phones (Android 9-10) when opening the app
+- Fixed app freezing when EncryptedSharedPreferences is corrupted
+- Fixed navigation crashes when quickly switching between screens
+- Fixed subscription error handling crashes
+
+✅ Improvements:
+- Faster and more reliable login process
+- Better offline handling for learning materials
+- Improved app stability across all devices
+
+Version: 1.5.8 (versionCode 105)

@@ -1,0 +1,19 @@
+Quoi de neuf dans la version 1.5.8 :
+
+✅ Corrections de bugs :
+- Correction du profil affichant les données d'un mauvais utilisateur après la connexion
+- Correction de l'édition du profil admin où le nom de famille écrasait le prénom
+- La connexion correspond maintenant correctement à votre numéro de téléphone à chaque fois
+
+✅ Corrections de plantages (réduction significative du taux de plantage) :
+- Correction du plantage sur les téléphones TECNO et Infinix (Android 9-10) lors de l'ouverture de l'application
+- Correction du gel de l'application lorsque EncryptedSharedPreferences est corrompu
+- Correction des plantages de navigation lors du basculement rapide entre les écrans
+- Correction des plantages de gestion des erreurs d'abonnement
+
+✅ Améliorations :
+- Processus de connexion plus rapide et plus fiable
+- Meilleure gestion hors ligne pour les supports d'apprentissage
+- Stabilité améliorée de l'application sur tous les appareils
+
+Version : 1.5.8 (versionCode 105)
