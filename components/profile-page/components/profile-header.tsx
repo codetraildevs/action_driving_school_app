@@ -165,15 +165,15 @@ export default function ProfileHeader({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="edit-firstName">Middle Name *</Label>
+                <Label htmlFor="edit-middleName">Middle Name</Label>
                 <Input
                   id="edit-middleName"
-                  placeholder="John"
+                  placeholder="Middle"
                   value={formData.middleName}
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      firstName: e.target.value,
+                      middleName: e.target.value,
                     }))
                   }
                 />
