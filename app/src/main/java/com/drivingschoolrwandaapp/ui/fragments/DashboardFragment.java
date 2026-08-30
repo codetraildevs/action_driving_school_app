@@ -65,9 +65,15 @@ public class DashboardFragment extends Fragment {
         // Setup Quick Access Cards
         MaterialCardView startExamCard = view.findViewById(R.id.start_exam_card);
         if (startExamCard != null) {
-            startExamCard.setOnClickListener(v ->
-                    NavHostFragment.findNavController(this).navigate(R.id.action_dashboardFragment_to_testsFragment)
-            );
+            startExamCard.setOnClickListener(v -> {
+                if (isAdded() && getContext() != null) {
+                    try {
+                        NavHostFragment.findNavController(this).navigate(R.id.action_dashboardFragment_to_testsFragment);
+                    } catch (Exception e) {
+                        android.util.Log.e("DashboardFragment", "Navigation failed", e);
+                    }
+                }
+            });
         }
 
         // The "Tests effectués" subtitle inside the Exams card opens the test history.
@@ -83,9 +89,15 @@ public class DashboardFragment extends Fragment {
 
         MaterialCardView learningMaterialsCard = view.findViewById(R.id.learning_materials_card);
         if (learningMaterialsCard != null) {
-            learningMaterialsCard.setOnClickListener(v ->
-                    NavHostFragment.findNavController(this).navigate(R.id.action_dashboardFragment_to_materialsFragment)
-            );
+            learningMaterialsCard.setOnClickListener(v -> {
+                if (isAdded() && getContext() != null) {
+                    try {
+                        NavHostFragment.findNavController(this).navigate(R.id.action_dashboardFragment_to_materialsFragment);
+                    } catch (Exception e) {
+                        android.util.Log.e("DashboardFragment", "Navigation failed", e);
+                    }
+                }
+            });
         }
 
         MaterialCardView iremboServiceCard = view.findViewById(R.id.irembo_service_card);
@@ -112,9 +124,15 @@ public class DashboardFragment extends Fragment {
 
         MaterialCardView profileCard = view.findViewById(R.id.profile_card);
         if (profileCard != null) {
-            profileCard.setOnClickListener(v ->
-                    NavHostFragment.findNavController(this).navigate(R.id.action_dashboardFragment_to_profileFragment)
-            );
+            profileCard.setOnClickListener(v -> {
+                if (isAdded() && getContext() != null) {
+                    try {
+                        NavHostFragment.findNavController(this).navigate(R.id.action_dashboardFragment_to_profileFragment);
+                    } catch (Exception e) {
+                        android.util.Log.e("DashboardFragment", "Navigation failed", e);
+                    }
+                }
+            });
         }
 
         setupMenu();

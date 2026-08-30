@@ -101,16 +101,21 @@ public class TokenManager {
      *                   if false, tokens expire after 1 hour (session-only).
      */
     public void saveTokens(String accessToken, String refreshToken, boolean rememberMe) {
-        SharedPreferences.Editor editor = encryptedPreferences.edit();
-        editor.putString(KEY_ACCESS_TOKEN, accessToken);
-        editor.putString(KEY_REFRESH_TOKEN, refreshToken);
-        long expiry = rememberMe
-            ? System.currentTimeMillis() + (30L * 24 * 60 * 60 * 1000)  // 30 days
-            : System.currentTimeMillis() + (60L * 60 * 1000);            // 1 hour
-        editor.putLong(KEY_TOKEN_EXPIRY, expiry);
-        editor.putBoolean(KEY_REMEMBER_ME, rememberMe);
-        editor.apply();
-        Log.d(TAG, "Tokens saved successfully (rememberMe=" + rememberMe + ")");
+        try {
+            SharedPreferences.Editor editor = encryptedPreferences.edit();
+            editor.putString(KEY_ACCESS_TOKEN, accessToken);
+            editor.putString(KEY_REFRESH_TOKEN, refreshToken);
+            long expiry = rememberMe
+                ? System.currentTimeMillis() + (30L * 24 * 60 * 60 * 1000)  // 30 days
+                : System.currentTimeMillis() + (60L * 60 * 1000);            // 1 hour
+            editor.putLong(KEY_TOKEN_EXPIRY, expiry);
+            editor.putBoolean(KEY_REMEMBER_ME, rememberMe);
+            editor.apply();
+            Log.d(TAG, "Tokens saved successfully (rememberMe=" + rememberMe + ")");
+        } catch (StackOverflowError e) {
+            Log.e(TAG, "StackOverflow saving tokens — switching to fallback", e);
+            switchToFallback();
+        }
     }
 
     public String getAccessToken() {
@@ -166,6 +171,9 @@ public class TokenManager {
     public void saveRole(int roleId) {
         try {
             encryptedPreferences.edit().putInt(KEY_ROLE_ID, roleId).apply();
+        } catch (StackOverflowError e) {
+            Log.e(TAG, "StackOverflow saving role", e);
+            switchToFallback();
         } catch (Exception e) {
             Log.e(TAG, "Error saving role", e);
         }
@@ -186,6 +194,9 @@ public class TokenManager {
     public void saveUserId(int userId) {
         try {
             encryptedPreferences.edit().putInt(KEY_USER_ID, userId).apply();
+        } catch (StackOverflowError e) {
+            Log.e(TAG, "StackOverflow saving user id", e);
+            switchToFallback();
         } catch (Exception e) {
             Log.e(TAG, "Error saving user id", e);
         }
