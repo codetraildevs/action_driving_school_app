@@ -21,6 +21,7 @@ public class TokenManager {
     private static final String KEY_TOKEN_EXPIRY = "token_expiry";
     private static final String KEY_REMEMBER_ME = "remember_me";
     private static final String KEY_ROLE_ID = "role_id";
+    private static final String KEY_USER_ID = "user_id";
 
     private volatile SharedPreferences encryptedPreferences;
     private final Context appContext;
@@ -150,6 +151,7 @@ public class TokenManager {
             editor.remove(KEY_REFRESH_TOKEN);
             editor.remove(KEY_TOKEN_EXPIRY);
             editor.remove(KEY_ROLE_ID);
+            editor.remove(KEY_USER_ID);
             editor.apply();
             Log.d(TAG, "Tokens cleared");
         } catch (Exception e) {
@@ -175,6 +177,26 @@ public class TokenManager {
             return encryptedPreferences.getInt(KEY_ROLE_ID, 0);
         } catch (StackOverflowError e) {
             Log.e(TAG, "StackOverflow reading role id — keystore corrupted", e);
+            switchToFallback();
+            return 0;
+        }
+    }
+
+    /** Persists the signed-in user's id so Room queries can filter by it. */
+    public void saveUserId(int userId) {
+        try {
+            encryptedPreferences.edit().putInt(KEY_USER_ID, userId).apply();
+        } catch (Exception e) {
+            Log.e(TAG, "Error saving user id", e);
+        }
+    }
+
+    /** Returns the persisted user id, or 0 if not set. */
+    public int getUserId() {
+        try {
+            return encryptedPreferences.getInt(KEY_USER_ID, 0);
+        } catch (StackOverflowError e) {
+            Log.e(TAG, "StackOverflow reading user id — keystore corrupted", e);
             switchToFallback();
             return 0;
         }

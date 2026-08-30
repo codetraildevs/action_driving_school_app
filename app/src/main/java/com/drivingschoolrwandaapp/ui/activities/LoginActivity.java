@@ -186,7 +186,21 @@ public class LoginActivity extends AppCompatActivity {
                         // Persist the role so the app can route admins to the admin console.
                         int roleId = resource.data.getUser() != null ? resource.data.getUser().getRole() : 0;
                         tokenManager.saveRole(roleId);
-                        Log.d(TAG, "Login successful (rememberMe=" + rememberMe + ", role=" + roleId + ").");
+                        // Persist the user id so Room queries can filter by the
+                        // currently logged-in user and never show stale data.
+                        int userId = resource.data.getUser() != null ? resource.data.getUser().getId() : 0;
+                        if (userId > 0) {
+                            tokenManager.saveUserId(userId);
+                        }
+                        Log.d(TAG, "Login successful (rememberMe=" + rememberMe + ", role=" + roleId + ", userId=" + userId + ").");
+                        // Clear any stale user data from Room so the profile screen
+                        // never shows a previous user's data while fetching the new one.
+                        userViewModel.clearCachedUser();
+                        // Also save the login response user to Room so the profile
+                        // screen has data to display immediately.
+                        if (resource.data.getUser() != null) {
+                            userViewModel.saveLoginUser(resource.data.getUser());
+                        }
                         Toast.makeText(this, getString(R.string.login_successful_redirect), Toast.LENGTH_SHORT).show();
                         Intent destination = com.drivingschoolrwandaapp.utils.RoleUtils.isAdminRole(roleId)
                                 ? new Intent(LoginActivity.this, AdminActivity.class)
