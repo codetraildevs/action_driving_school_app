@@ -1,0 +1,19 @@
+Ivyabaye mu version 1.5.8 :
+
+✅ Gukemura ikosa ry'ibikorwa :
+- Gukemura ikosa ry'urupapuro rugaragaza amakuru y'ukoresha wrong nyuma yo guhitamwo
+- Gukemura ikosa ry'okwandika profile yo mu buto aho izina ry'umunyeshuri ryari ryandika izina ry'imbere
+- Ubufasha bw'inyemezo bukemewe neza nomuburonzi wawe buri gihe
+
+✅ Gukemura ikosa ry'apuriyo (guhindura ingano y'ikosa ry'apuriyo) :
+- Gukemura ikosa ry'apuriyo kuri telefone TECNO na Infinix (Android 9-10) iyo app ifungurwa
+- Gukemura ikosa ry'apuriyo iyo EncryptedSharedPreferences yamenetse
+- Gukemura ikosa ry'apuriyo ry'ihinduka ryerekeye guhindura ecran vuba
+- Gukemura ikosa ry'apuriyo ry'ibibazo by'ubusabane
+
+✅ Vyiyongereye :
+- Inzira y'inyemezo yoroshye kandi yizewe
+- Ubufasha bw'apuriyo bw'ibikoresho bya ikiremwamuntu buza neza
+- Ubufasha bw'apuriyo bw'apuriyo bushya kuri telefone zose
+
+Version : 1.5.8 (versionCode 105)

@@ -185,8 +185,8 @@ public class SubscriptionViewModel extends AndroidViewModel {
     }
 
     private <T> void handleApiError(Response<T> response, String defaultErrorMessage) {
-        if (response.errorBody() != null) {
-            try {
+        try {
+            if (response.errorBody() != null) {
                 String errorBody = response.errorBody().string();
                 Gson gson = new Gson();
                 ApiResponse<?> apiResponse = gson.fromJson(errorBody, ApiResponse.class);
@@ -201,11 +201,11 @@ public class SubscriptionViewModel extends AndroidViewModel {
                 } else {
                     error.setValue(defaultErrorMessage);
                 }
-            } catch (Exception e) {
-                Log.e("SubscriptionVM", "Failed to parse API error body", e);
+            } else {
                 error.setValue(defaultErrorMessage);
             }
-        } else {
+        } catch (Exception e) {
+            Log.e("SubscriptionVM", "Failed to parse API error body", e);
             error.setValue(defaultErrorMessage);
         }
     }

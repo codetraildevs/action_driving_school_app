@@ -227,6 +227,28 @@ public class UserRepository {
         return userDao.getUser();
     }
 
+    /**
+     * Clears all cached user data from Room so the next profile load starts fresh.
+     * Called on successful login to prevent stale data from a previous session
+     * from being shown while the network profile fetch is in progress.
+     */
+    public void clearCachedUser() {
+        executeSafely(() -> userDao.deleteAll());
+    }
+
+    /**
+     * Saves the login response user to Room so the profile screen can display
+     * data immediately while the full profile fetch runs in the background.
+     */
+    public void saveLoginUser(com.drivingschoolrwandaapp.models.entities.User networkUser) {
+        if (networkUser == null) return;
+        executeSafely(() -> {
+            com.drivingschoolrwandaapp.database.entities.User dbUser = mapUser(networkUser);
+            userDao.insert(dbUser);
+            tokenManager.saveUserId(dbUser.getId());
+        });
+    }
+
     public void updateUser(User user) {
         executeSafely(() -> userDao.insert(user));
     }
@@ -281,18 +303,28 @@ public class UserRepository {
     }
 
     public LiveData<Resource<com.drivingschoolrwandaapp.database.entities.User>> getProfile() {
+        // Use the persisted user id so Room always returns the correct user,
+        // even when stale data from a previous session exists in the DB.
+        int userId = tokenManager.getUserId();
         return new NetworkBoundResource<com.drivingschoolrwandaapp.database.entities.User, ApiResponse<com.drivingschoolrwandaapp.models.entities.User>>(context) {
             @Override
             protected void saveCallResult(@NonNull ApiResponse<com.drivingschoolrwandaapp.models.entities.User> item) {
                 if (item.getData() != null) {
                     com.drivingschoolrwandaapp.database.entities.User dbUser = mapUser(item.getData());
                     userDao.insert(dbUser);
+                    // Keep the persisted user id in sync with the server response.
+                    tokenManager.saveUserId(dbUser.getId());
                 }
             }
 
             @NonNull
             @Override
             protected LiveData<com.drivingschoolrwandaapp.database.entities.User> loadFromDb() {
+                // Prefer filtering by the current user id to avoid showing stale
+                // data from a previous session that was never properly logged out.
+                if (userId > 0) {
+                    return userDao.getUserById(userId);
+                }
                 return userDao.getUser();
             }
 

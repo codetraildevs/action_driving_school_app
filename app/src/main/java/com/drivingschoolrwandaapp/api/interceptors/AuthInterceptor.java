@@ -27,7 +27,15 @@ public class AuthInterceptor implements Interceptor {
             return chain.proceed(originalRequest);
         }
 
-        String accessToken = tokenManager.getAccessToken();
+        String accessToken;
+        try {
+            accessToken = tokenManager.getAccessToken();
+        } catch (StackOverflowError e) {
+            // EncryptedSharedPreferences keystore corruption — skip auth header
+            // so the request fails with 401 and triggers logout.
+            android.util.Log.e("AuthInterceptor", "StackOverflow reading token", e);
+            return chain.proceed(originalRequest);
+        }
         if (accessToken != null && !accessToken.isEmpty()) {
             requestBuilder.addHeader("Authorization", "Bearer " + accessToken);
         }
