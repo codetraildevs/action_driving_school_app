@@ -1,0 +1,13 @@
+*.apk
+*.aab
+*.zip
+node_modules/
+tmp/
+.env
+.env.local
+.gradle/
+.idea/
+.kotlin/
+.vscode/
+*.log
+.DS_Store
