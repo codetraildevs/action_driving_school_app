@@ -49,21 +49,35 @@ export async function POST(request: NextRequest) {
 
    let userData: any = null;
    const resp= await prisma.$transaction(async (tx) => {
-      const user = await tx.user.findFirst({
-        where: {
-          OR: [{ phoneNumber: { in: phoneVariants(identifier) } }],
-        },
+      const variants = phoneVariants(identifier);
+
+      // 1. Try an exact match first (fastest & most reliable).
+      let user = await tx.user.findFirst({
+        where: { phoneNumber: identifier },
         include: {
           role: true,
           language: true,
-          userTimezone: {
-            include: {
-              timezone: true,
-            },
-          },
+          userTimezone: { include: { timezone: true } },
           devices: true,
         },
       });
+
+      // 2. Fall back to variant matching only when no exact match exists.
+      //    When multiple variants match different rows, prefer the exact
+      //    phone format that the user typed (it's first in the list) so we
+      //    never silently return the wrong account.
+      if (!user) {
+        user = await tx.user.findFirst({
+          where: { phoneNumber: { in: variants } },
+          orderBy: { id: 'asc' },
+          include: {
+            role: true,
+            language: true,
+            userTimezone: { include: { timezone: true } },
+            devices: true,
+          },
+        });
+      }
 
       if (!user) {
         return NextResponse.json(
