@@ -64,6 +64,7 @@ gradlew.bat
 local.properties
 upload-keystore.jks
 *.apk
+*.aab
 google-services.json
 firebase-service-account.json
 
