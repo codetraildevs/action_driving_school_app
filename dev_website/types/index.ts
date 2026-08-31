@@ -28,6 +28,7 @@ export interface IFAQ {
 export interface IPricing {
     name: string;
     price: number | string;
+    currency?: string;
     features: string[];
 }
 

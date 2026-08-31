@@ -5,6 +5,7 @@ export interface Translations {
     nav: {
         features: string;
         howItWorks: string;
+        pricing: string;
         download: string;
         getApp: string;
         toggleDarkMode: string;
@@ -97,12 +98,35 @@ export interface Translations {
             description: string;
         }[];
     };
+
+    // Testimonials
+    testimonials: {
+        title: string;
+        subtitle: string;
+    };
+
+    // Screenshots
+    screenshots: {
+        title: string;
+        subtitle: string;
+    };
+
+    // Pricing
+    pricing: {
+        title: string;
+        subtitle: string;
+        perMonth: string;
+        getStarted: string;
+        features: string;
+        everythingInBasic: string;
+    };
 }
 
 const en: Translations = {
     nav: {
         features: 'Features',
         howItWorks: 'How It Works',
+        pricing: 'Pricing',
         download: 'Download',
         getApp: 'Get App',
         toggleDarkMode: 'Toggle dark mode',
@@ -241,12 +265,32 @@ const en: Translations = {
             { title: 'Bilingual', description: 'Study in Kinyarwanda or English — switch languages anytime.' },
         ],
     },
+
+    testimonials: {
+        title: 'What Our Students Say',
+        subtitle: 'Join thousands of successful drivers who passed their exam with our app.',
+    },
+
+    screenshots: {
+        title: 'App Screenshots',
+        subtitle: 'Take a look at the app interface and features that will help you prepare for your driving exam.',
+    },
+
+    pricing: {
+        title: 'Choose Your Plan',
+        subtitle: 'Start for free or upgrade to Premium for full access to all features.',
+        perMonth: 'month',
+        getStarted: 'Get Started',
+        features: 'FEATURES',
+        everythingInBasic: 'Everything in basic, plus...',
+    },
 };
 
 const fr: Translations = {
     nav: {
         features: 'Fonctionnalités',
         howItWorks: 'Comment ça marche',
+        pricing: 'Tarifs',
         download: 'Télécharger',
         getApp: "Obtenir l'app",
         toggleDarkMode: 'Basculer le mode sombre',
@@ -385,12 +429,32 @@ const fr: Translations = {
             { title: 'Bilingue', description: 'Étudiez en Kinyarwanda ou en Anglais — changez de langue à tout moment.' },
         ],
     },
+
+    testimonials: {
+        title: 'Ce que disent nos étudiants',
+        subtitle: 'Rejoignez des milliers de conducteurs qui ont réussi leur examen avec notre application.',
+    },
+
+    screenshots: {
+        title: 'Captures d\'écran',
+        subtitle: 'Découvrez l\'interface et les fonctionnalités de l\'application qui vous aideront à préparer votre examen de conduite.',
+    },
+
+    pricing: {
+        title: 'Choisissez votre forfait',
+        subtitle: 'Commencez gratuitement ou passez à Premium pour un accès complet à toutes les fonctionnalités.',
+        perMonth: 'mois',
+        getStarted: 'Commencer',
+        features: 'FONCTIONNALITÉS',
+        everythingInBasic: 'Tout est inclus, plus...',
+    },
 };
 
 const rw: Translations = {
     nav: {
         features: 'Ibintu',
         howItWorks: 'Uko bigenda',
+        pricing: 'Igiciro',
         download: 'Kurura',
         getApp: 'Shakisha App',
         toggleDarkMode: 'Hindura uburiri bw\'umwijima',
@@ -528,6 +592,25 @@ const rw: Translations = {
             { title: 'Kurikirana iterambere', description: 'Raba iterambere ryawe mu gihe rikomeza ukoresheje uburyo bw\'iterambere bw\'amakuru.' },
             { title: 'Ubuvangabuzima', description: 'Soma mu Kinyarwanda cyangwa mu Kinyarwanda — hindura ururimi uhitamwo mu gihe cyose.' },
         ],
+    },
+
+    testimonials: {
+        title: 'Ico Abanyeshuli Batubwira',
+        subtitle: 'Joina abanyeshuli ibihumbi batashye ikizamini cabo ukoresheje app yacu.',
+    },
+
+    screenshots: {
+        title: 'Ibisanzwe by\'App',
+        subtitle: 'Raba uburyo bw\'app n\'ibintu igiye kukugufasha gutegura ikizamini cy\'ubushoferi.',
+    },
+
+    pricing: {
+        title: 'Hitamwo Igiciro',
+        subtitle: 'Tangira ubusa cyangwa ushyize ku Premium kugira ngo ufungure ibintu vyose.',
+        perMonth: 'ukwezi',
+        getStarted: 'Tangira',
+        features: 'IBINTU',
+        everythingInBasic: 'Ibintu vyose, plus...',
     },
 };
 

@@ -60,7 +60,7 @@ export default function HowItWorksContent() {
                                 <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-bold text-foreground">
                                     {index + 1}
                                 </div>
-                                <div className="text-gray-500 dark:text-gray-400">
+                                <div className="text-muted-foreground">
                                     {stepIcons[index]}
                                 </div>
                             </div>

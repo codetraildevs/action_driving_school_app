@@ -18,7 +18,7 @@ const CTA: React.FC = () => {
                         <h2 className="text-2xl sm:text-3xl md:text-5xl md:leading-tight font-semibold mb-6 max-w-3xl">
                             {t.cta.heading}
                         </h2>
-                        <p className="mx-auto max-w-xl md:px-5 text-gray-300 leading-relaxed mb-8">
+                        <p className="mx-auto max-w-xl md:px-5 text-white/70 leading-relaxed mb-8">
                             {t.cta.subheading}
                         </p>
                         <div className="flex justify-center">

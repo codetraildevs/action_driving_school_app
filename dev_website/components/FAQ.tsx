@@ -17,7 +17,7 @@ const FAQ: React.FC = () => {
                     <p className="lg:mt-8 text-foreground-accent text-center lg:text-left">
                         {t.faq.askUs}
                     </p>
-                    <a href="mailto:info@amategekoyumuhanda.rw" className="mt-4 block text-xl lg:text-3xl text-blue-600 font-semibold hover:underline text-center lg:text-left">
+                    <a href="mailto:info@amategekoyumuhanda.rw" className="mt-4 block text-xl lg:text-3xl text-primary font-semibold hover:underline text-center lg:text-left">
                         {t.faq.emailLabel}
                     </a>
                 </div>
@@ -32,8 +32,8 @@ const FAQ: React.FC = () => {
                                             <DisclosureButton className="flex items-center justify-between w-full px-4 py-6 text-lg text-left border-b border-border">
                                                 <span className="text-xl font-semibold pr-4">{faq.question}</span>
                                                 {open
-                                                    ? <BiMinus className="w-5 h-5 text-gray-600 dark:text-gray-400 flex-shrink-0" />
-                                                    : <BiPlus className="w-5 h-5 text-gray-600 dark:text-gray-400 flex-shrink-0" />
+                                                    ? <BiMinus className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                                                    : <BiPlus className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                                                 }
                                             </DisclosureButton>
                                             <DisclosurePanel className="px-4 pt-2 pb-6 text-foreground-accent leading-relaxed">

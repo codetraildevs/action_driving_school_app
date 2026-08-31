@@ -5,7 +5,7 @@ import { PiGlobeFill } from "react-icons/pi";
 const Stats: React.FC = () => {
     const { t } = useLanguage();
     const stats = [
-        { title: t.stats.studentsCount, icon: <BsBarChartFill size={34} className="text-blue-500" />, description: t.stats.studentsDesc },
+        { title: t.stats.studentsCount, icon: <BsBarChartFill size={34} className="text-primary" />, description: t.stats.studentsDesc },
         { title: t.stats.ratingCount, icon: <BsFillStarFill size={34} className="text-yellow-500" />, description: t.stats.ratingDesc },
         { title: t.stats.questionsCount, icon: <PiGlobeFill size={34} className="text-green-600" />, description: t.stats.questionsDesc },
     ];

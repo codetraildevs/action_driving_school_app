@@ -6,6 +6,8 @@ import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 import { siteDetails } from "@/data/siteDetails";
 import { LanguageProvider } from "@/lib/LanguageContext";
+import ScrollToTop from "@/components/ScrollToTop";
+import WhatsAppButton from "@/components/WhatsAppButton";
 
 // Render all pages on-demand instead of pre-rendering them at build time.
 // Required for this cPanel host: static generation spawns export workers
@@ -99,6 +101,8 @@ export default function RootLayout({
                         {children}
                     </LanguageProvider>
                 </Suspense>
+                <ScrollToTop />
+                <WhatsAppButton />
                 <Toaster position="top-right" richColors />
             </body>
         </html>
