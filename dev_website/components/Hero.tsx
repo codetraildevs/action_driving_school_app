@@ -1,8 +1,10 @@
 import React from 'react';
 import { heroDetails } from '@/data/hero';
 import PlayStoreButton from './PlayStoreButton';
+import { useLanguage } from '@/lib/LanguageContext';
 
 const Hero: React.FC = () => {
+    const { t } = useLanguage();
     return (
         <section id="hero" className="relative pb-0 pt-24 md:pt-32 px-6">
             {/* Grid pattern background */}
@@ -19,10 +21,10 @@ const Hero: React.FC = () => {
                 {/* Left: Text Content */}
                 <div className="w-full md:w-1/2 text-center md:text-left">
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight tracking-tight">
-                        {heroDetails.heading}
+                        {t.hero.heading}
                     </h1>
                     <p className="mt-5 text-xl text-foreground-accent max-w-xl mx-auto md:mx-0 leading-relaxed">
-                        {heroDetails.subheading}
+                        {t.hero.subheading}
                     </p>
                     <div className="mt-7 flex justify-center md:justify-start">
                         <PlayStoreButton />

@@ -1,10 +1,14 @@
+'use client';
+
 import Link from 'next/link';
 import React from 'react';
 import { siteDetails } from '@/data/siteDetails';
 import { footerDetails } from '@/data/footer';
 import { getPlatformIconByName } from '@/utils';
+import { useLanguage } from '@/lib/LanguageContext';
 
 const Footer: React.FC = () => {
+    const { t } = useLanguage();
     return (
         <footer className="bg-hero-background text-foreground py-16 px-6">
             <div className="max-w-7xl mx-auto">
@@ -17,11 +21,11 @@ const Footer: React.FC = () => {
                             </h3>
                         </Link>
                         <p className="mt-4 text-sm text-foreground-accent leading-relaxed max-w-sm">
-                            {footerDetails.subheading}
+                            {t.footer.subheading}
                         </p>
                     </div>
                     <div>
-                        <h4 className="text-sm font-semibold uppercase tracking-wider mb-5">Quick Links</h4>
+                        <h4 className="text-sm font-semibold uppercase tracking-wider mb-5">{t.footer.quickLinks}</h4>
                         <ul className="space-y-3">
                             {footerDetails.quickLinks.map(link => (
                                 <li key={link.text}>
@@ -33,7 +37,7 @@ const Footer: React.FC = () => {
                         </ul>
                     </div>
                     <div>
-                        <h4 className="text-sm font-semibold uppercase tracking-wider mb-5">Contact Us</h4>
+                        <h4 className="text-sm font-semibold uppercase tracking-wider mb-5">{t.footer.contactUs}</h4>
                         <div className="space-y-3">
                             {footerDetails.email && (
                                 <a href={`mailto:${footerDetails.email}`} className="block text-sm text-foreground-accent hover:text-foreground transition-colors">
@@ -62,8 +66,8 @@ const Footer: React.FC = () => {
                     </div>
                 </div>
                 <div className="mt-12 pt-8 border-t border-border md:text-center text-foreground-accent">
-                    <p className="text-sm">Copyright &copy; {new Date().getFullYear()} {siteDetails.siteName}. All rights reserved.</p>
-                    <p className="text-xs mt-2 text-muted-foreground">Made by <a href="https://nexilaunch.com" target="_blank" className="hover:underline">Nexi Launch</a></p>
+                    <p className="text-sm">Copyright &copy; {new Date().getFullYear()} {siteDetails.siteName}. {t.footer.copyright}</p>
+                    <p className="text-xs mt-2 text-muted-foreground">{t.footer.madeBy} <a href="https://codebridgecademy.com/" target="_blank" className="hover:underline text-blue-500 hover:text-blue-600 italic">Fidele Software Engineer</a></p>
                 </div>
             </div>
         </footer>

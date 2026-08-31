@@ -7,19 +7,20 @@ import { FiSun, FiMoon, FiGlobe } from 'react-icons/fi';
 import { BsDownload } from 'react-icons/bs';
 
 import { siteDetails } from '@/data/siteDetails';
-import { menuItems } from '@/data/menuItems';
+import { useLanguage } from '@/lib/LanguageContext';
+import { Locale } from '@/lib/translations';
 
-const languages = [
+const languages: { code: Locale; label: string }[] = [
     { code: 'en', label: 'EN' },
     { code: 'fr', label: 'FR' },
     { code: 'rw', label: 'RW' },
 ];
 
 const Header: React.FC = () => {
+    const { locale, setLocale, t } = useLanguage();
     const [isOpen, setIsOpen] = useState(false);
     const [darkMode, setDarkMode] = useState(false);
     const [langOpen, setLangOpen] = useState(false);
-    const [currentLang, setCurrentLang] = useState('en');
     const [scrolled, setScrolled] = useState(false);
 
     useEffect(() => {
@@ -58,8 +59,12 @@ const Header: React.FC = () => {
 
                     {/* Desktop Menu */}
                     <ul className="hidden md:flex items-center gap-8">
-                        {menuItems.map(item => (
-                            <li key={item.text}>
+                        {[
+                            { url: '/features', text: t.nav.features },
+                            { url: '/how-it-works', text: t.nav.howItWorks },
+                            { url: '/download', text: t.nav.download },
+                        ].map(item => (
+                            <li key={item.url}>
                                 <Link href={item.url} className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
                                     {item.text}
                                 </Link>
@@ -76,15 +81,15 @@ const Header: React.FC = () => {
                                 className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                             >
                                 <FiGlobe size={15} />
-                                {languages.find(l => l.code === currentLang)?.label}
+                                {languages.find(l => l.code === locale)?.label}
                             </button>
                             {langOpen && (
                                 <div className="absolute right-0 mt-2 w-28 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden z-50">
                                     {languages.map(lang => (
                                         <button
                                             key={lang.code}
-                                            onClick={() => { setCurrentLang(lang.code); setLangOpen(false); }}
-                                            className={`block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${currentLang === lang.code ? 'text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-900/20' : 'text-gray-700 dark:text-gray-300'}`}
+                                            onClick={() => { setLocale(lang.code); setLangOpen(false); }}
+                                            className={`block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${locale === lang.code ? 'text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-900/20' : 'text-gray-700 dark:text-gray-300'}`}
                                         >
                                             {lang.label}
                                         </button>
@@ -97,7 +102,7 @@ const Header: React.FC = () => {
                         <button
                             onClick={toggleDark}
                             className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                            aria-label="Toggle dark mode"
+                            aria-label={t.nav.toggleDarkMode}
                         >
                             {darkMode ? <FiSun size={17} /> : <FiMoon size={17} />}
                         </button>
@@ -110,7 +115,7 @@ const Header: React.FC = () => {
                             className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-full transition-all hover:shadow-lg hover:shadow-blue-600/25"
                         >
                             <BsDownload size={15} />
-                            Get App
+                            {t.nav.getApp}
                         </a>
                     </div>
 
@@ -122,7 +127,7 @@ const Header: React.FC = () => {
                         <button
                             onClick={() => setIsOpen(!isOpen)}
                             className="p-2 text-gray-600 dark:text-gray-300"
-                            aria-label="Toggle menu"
+                            aria-label={t.nav.toggleMenu}
                         >
                             {isOpen ? <HiOutlineXMark className="h-6 w-6" /> : <HiBars3 className="h-6 w-6" />}
                         </button>
@@ -135,8 +140,12 @@ const Header: React.FC = () => {
                 <div className="md:hidden bg-white dark:bg-gray-950 border-t border-gray-100 dark:border-gray-800 shadow-lg">
                     <div className="max-w-7xl mx-auto px-6 py-4">
                         <ul className="space-y-1">
-                            {menuItems.map(item => (
-                                <li key={item.text}>
+                            {[
+                                { url: '/features', text: t.nav.features },
+                                { url: '/how-it-works', text: t.nav.howItWorks },
+                                { url: '/download', text: t.nav.download },
+                            ].map(item => (
+                                <li key={item.url}>
                                     <Link href={item.url} className="block px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl transition-colors" onClick={() => setIsOpen(false)}>
                                         {item.text}
                                     </Link>
@@ -149,8 +158,8 @@ const Header: React.FC = () => {
                                 {languages.map(lang => (
                                     <button
                                         key={lang.code}
-                                        onClick={() => setCurrentLang(lang.code)}
-                                        className={`px-4 py-2 text-xs font-semibold rounded-full border transition-all ${currentLang === lang.code ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-blue-600'}`}
+                                        onClick={() => setLocale(lang.code)}
+                                        className={`px-4 py-2 text-xs font-semibold rounded-full border transition-all ${locale === lang.code ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-blue-600'}`}
                                     >
                                         {lang.label}
                                     </button>
@@ -164,7 +173,7 @@ const Header: React.FC = () => {
                                 onClick={() => setIsOpen(false)}
                             >
                                 <BsDownload size={15} />
-                                Get App
+                                {t.nav.getApp}
                             </a>
                         </div>
                     </div>

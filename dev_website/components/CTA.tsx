@@ -1,7 +1,10 @@
-import { ctaDetails } from "@/data/cta"
+'use client';
+
 import PlayStoreButton from "./PlayStoreButton"
+import { useLanguage } from "@/lib/LanguageContext"
 
 const CTA: React.FC = () => {
+    const { t } = useLanguage();
     return (
         <section id="cta" className="py-16 md:py-24 px-6">
             <div className="relative h-full w-full z-10 mx-auto max-w-7xl">
@@ -13,10 +16,10 @@ const CTA: React.FC = () => {
 
                     <div className="h-full flex flex-col items-center justify-center text-white text-center px-8 py-16 md:py-24">
                         <h2 className="text-2xl sm:text-3xl md:text-5xl md:leading-tight font-semibold mb-6 max-w-3xl">
-                            {ctaDetails.heading}
+                            {t.cta.heading}
                         </h2>
                         <p className="mx-auto max-w-xl md:px-5 text-gray-300 leading-relaxed mb-8">
-                            {ctaDetails.subheading}
+                            {t.cta.subheading}
                         </p>
                         <div className="flex justify-center">
                             <PlayStoreButton />

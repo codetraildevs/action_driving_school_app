@@ -5,3 +5,4 @@ tmp/
 .env.local
 .env.production
 .env*.local
+tsconfig.tsbuildinfo

@@ -2,28 +2,29 @@
 import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/react";
 import { BiMinus, BiPlus } from "react-icons/bi";
 import SectionTitle from "./SectionTitle";
-import { faqs } from "@/data/faq";
+import { useLanguage } from "@/lib/LanguageContext";
 
 const FAQ: React.FC = () => {
+    const { t } = useLanguage();
     return (
         <section id="faq" className="py-16 md:py-24 px-6">
             <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-12 lg:gap-20">
                 <div className="lg:w-1/3">
-                    <p className="hidden lg:block text-sm font-semibold text-foreground-accent uppercase tracking-wider mb-4">FAQ&apos;S</p>
+                    <p className="hidden lg:block text-sm font-semibold text-foreground-accent uppercase tracking-wider mb-4">{t.faq.label}</p>
                     <SectionTitle>
-                        <h2 className="my-3 !leading-snug lg:max-w-sm text-center lg:text-left">Frequently Asked Questions</h2>
+                        <h2 className="my-3 !leading-snug lg:max-w-sm text-center lg:text-left">{t.faq.title}</h2>
                     </SectionTitle>
                     <p className="lg:mt-8 text-foreground-accent text-center lg:text-left">
-                        Ask us anything!
+                        {t.faq.askUs}
                     </p>
                     <a href="mailto:info@amategekoyumuhanda.rw" className="mt-4 block text-xl lg:text-3xl text-blue-600 font-semibold hover:underline text-center lg:text-left">
-                        info@amategekoyumuhanda.rw
+                        {t.faq.emailLabel}
                     </a>
                 </div>
 
                 <div className="lg:w-2/3 lg:max-w-2xl">
                     <div className="border-t border-border">
-                        {faqs.map((faq, index) => (
+                        {t.faq.questions.map((faq, index) => (
                             <div key={index} className="mb-0">
                                 <Disclosure>
                                     {({ open }) => (
