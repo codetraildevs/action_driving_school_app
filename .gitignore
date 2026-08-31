@@ -1,6 +1,7 @@
-# Ignore everything
+# Ignore everything at root level
 *
 
 # Except dev_website and git basics
 !dev_website/
+!dev_website/**
 !.gitignore
