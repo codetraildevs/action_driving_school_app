@@ -61,8 +61,9 @@ const Footer: React.FC = () => {
                         )}
                     </div>
                 </div>
-                <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700 md:text-center text-foreground-accent">
-                    <p className="text-sm">Copyright &copy; {new Date().getFullYear()} {siteDetails.siteName}. All rights reserved.</p>                                <p className="text-xs mt-2 text-gray-500">Made by <a href="https://nexilaunch.com" target="_blank" className="hover:underline">Nexi Launch</a></p>
+                <div className="mt-12 pt-8 border-t border-border md:text-center text-foreground-accent">
+                    <p className="text-sm">Copyright &copy; {new Date().getFullYear()} {siteDetails.siteName}. All rights reserved.</p>
+                    <p className="text-xs mt-2 text-muted-foreground">Made by <a href="https://nexilaunch.com" target="_blank" className="hover:underline">Nexi Launch</a></p>
                 </div>
             </div>
         </footer>

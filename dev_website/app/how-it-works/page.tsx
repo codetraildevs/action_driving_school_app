@@ -64,11 +64,11 @@ export default function HowItWorksPage() {
 
                 {/* 5 Steps */}
                 <div className="max-w-7xl mx-auto">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-6">
                         {steps.map((step) => (
                             <div key={step.number} className="flex flex-col">
                                 {/* Image */}
-                                <div className="w-full h-48 rounded-2xl overflow-hidden mb-5 bg-gray-100 dark:bg-gray-800">
+                                <div className="w-full h-48 rounded-2xl overflow-hidden mb-5 bg-muted">
                                     <img
                                         src={step.image}
                                         alt={step.title}
@@ -78,7 +78,7 @@ export default function HowItWorksPage() {
 
                                 {/* Number + Icon */}
                                 <div className="flex items-center gap-3 mb-3">
-                                    <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-sm font-bold text-gray-900 dark:text-white">
+                                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-bold text-foreground">
                                         {step.number}
                                     </div>
                                     <div className="text-gray-500 dark:text-gray-400">
@@ -87,12 +87,12 @@ export default function HowItWorksPage() {
                                 </div>
 
                                 {/* Title */}
-                                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                                <h3 className="text-xl font-bold text-foreground mb-2">
                                     {step.title}
                                 </h3>
 
                                 {/* Description */}
-                                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                                <p className="text-sm text-foreground-accent leading-relaxed">
                                     {step.description}
                                 </p>
                             </div>
@@ -104,36 +104,36 @@ export default function HowItWorksPage() {
                 <div className="max-w-7xl mx-auto mt-20">
                     <h2 className="text-3xl font-bold text-center mb-12">Why Students Love Our App</h2>
                     <div className="grid md:grid-cols-2 gap-8">
-                        <div className="p-6 rounded-2xl bg-background border">
+                        <div className="p-6 rounded-2xl bg-background border border-border">
                             <div className="flex items-center gap-2 mb-2">
-                                <FiWifiOff size={18} className="text-blue-600" />
+                                <FiWifiOff size={18} className="text-primary" />
                                 <h3 className="text-lg font-semibold">Works Offline</h3>
                             </div>
                             <p className="text-foreground-accent">
                                 Download questions once and practice anywhere, even without internet.
                             </p>
                         </div>
-                        <div className="p-6 rounded-2xl bg-background border">
+                        <div className="p-6 rounded-2xl bg-background border border-border">
                             <div className="flex items-center gap-2 mb-2">
-                                <FiRefreshCw size={18} className="text-blue-600" />
+                                <FiRefreshCw size={18} className="text-primary" />
                                 <h3 className="text-lg font-semibold">Always Updated</h3>
                             </div>
                             <p className="text-foreground-accent">
                                 Our question bank is regularly updated to match the latest exam format.
                             </p>
                         </div>
-                        <div className="p-6 rounded-2xl bg-background border">
+                        <div className="p-6 rounded-2xl bg-background border border-border">
                             <div className="flex items-center gap-2 mb-2">
-                                <FiBarChart2 size={18} className="text-blue-600" />
+                                <FiBarChart2 size={18} className="text-primary" />
                                 <h3 className="text-lg font-semibold">Track Progress</h3>
                             </div>
                             <p className="text-foreground-accent">
                                 See your improvement over time with detailed progress tracking.
                             </p>
                         </div>
-                        <div className="p-6 rounded-2xl bg-background border">
+                        <div className="p-6 rounded-2xl bg-background border border-border">
                             <div className="flex items-center gap-2 mb-2">
-                                <FiGlobe size={18} className="text-blue-600" />
+                                <FiGlobe size={18} className="text-primary" />
                                 <h3 className="text-lg font-semibold">Bilingual</h3>
                             </div>
                             <p className="text-foreground-accent">

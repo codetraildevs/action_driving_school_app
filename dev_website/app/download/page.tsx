@@ -38,19 +38,19 @@ export default function DownloadPage() {
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-8 mt-16">
-                        <div className="p-6 rounded-2xl bg-background border">
+                        <div className="p-6 rounded-2xl bg-background border border-border">
                             <h3 className="text-xl font-semibold mb-3">Real Exam Questions</h3>
                             <p className="text-foreground-accent">
                                 Practice with actual Rwanda driving theory exam questions updated regularly.
                             </p>
                         </div>
-                        <div className="p-6 rounded-2xl bg-background border">
+                        <div className="p-6 rounded-2xl bg-background border border-border">
                             <h3 className="text-xl font-semibold mb-3">Mock Tests</h3>
                             <p className="text-foreground-accent">
                                 Simulate the real exam experience with timed practice tests.
                             </p>
                         </div>
-                        <div className="p-6 rounded-2xl bg-background border">
+                        <div className="p-6 rounded-2xl bg-background border border-border">
                             <h3 className="text-xl font-semibold mb-3">Bilingual Support</h3>
                             <p className="text-foreground-accent">
                                 Available in both Kinyarwanda and English for your convenience.

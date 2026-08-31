@@ -12,8 +12,8 @@ const PricingColumn: React.FC<Props> = ({ tier, highlight }: Props) => {
     const { name, price, features } = tier;
 
     return (
-        <div className={clsx("w-full max-w-sm mx-auto bg-white rounded-xl border border-gray-200 lg:max-w-full", { "shadow-lg": highlight })}>
-            <div className="p-6 border-b border-gray-200 rounded-t-xl">
+        <div className={clsx("w-full max-w-sm mx-auto bg-card rounded-xl border border-border lg:max-w-full", { "shadow-lg": highlight })}>
+            <div className="p-6 border-b border-border rounded-t-xl">
                 <h3 className="text-2xl font-semibold mb-4">{name}</h3>
                 <p className="text-3xl md:text-5xl font-bold mb-6">
                     <span className={clsx({ "text-secondary": highlight })}>
@@ -21,7 +21,7 @@ const PricingColumn: React.FC<Props> = ({ tier, highlight }: Props) => {
                     </span>
                     {typeof price === 'number' && <span className="text-lg font-normal text-gray-600">/mo</span>}
                 </p>
-                <button className={clsx("w-full py-3 px-4 rounded-full transition-colors", { "bg-primary hover:bg-primary-accent": highlight, "bg-hero-background hover:bg-gray-200": !highlight })}>
+                <button className={clsx("w-full py-3 px-4 rounded-full transition-colors", { "bg-primary hover:bg-primary-accent text-foreground font-semibold": highlight, "bg-hero-background hover:bg-muted text-foreground": !highlight })}>
                     Get Started
                 </button>
             </div>

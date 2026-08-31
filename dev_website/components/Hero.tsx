@@ -21,7 +21,7 @@ const Hero: React.FC = () => {
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight tracking-tight">
                         {heroDetails.heading}
                     </h1>
-                    <p className="mt-5 text-xl text-foreground max-w-xl mx-auto md:mx-0 leading-relaxed">
+                    <p className="mt-5 text-xl text-foreground-accent max-w-xl mx-auto md:mx-0 leading-relaxed">
                         {heroDetails.subheading}
                     </p>
                     <div className="mt-7 flex justify-center md:justify-start">
