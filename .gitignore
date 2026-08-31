@@ -1,0 +1,6 @@
+# Ignore everything
+*
+
+# Except dev_website and git basics
+!dev_website/
+!.gitignore
