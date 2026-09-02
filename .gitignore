@@ -97,3 +97,9 @@ cleanup-stale-files.js
 debug-login.sh
 test-ssl.sh
 *.sh
+
+# dev_website (only on dev-website branch)
+dev_website/
+student1.jpg
+student2.png
+student3.jpg
