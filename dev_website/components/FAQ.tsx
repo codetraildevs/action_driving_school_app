@@ -17,7 +17,7 @@ const FAQ: React.FC = () => {
                     <p className="lg:mt-8 text-foreground-accent text-center lg:text-left">
                         {t.faq.askUs}
                     </p>
-                    <a href="mailto:info@amategekoyumuhanda.rw" className="mt-4 block text-xl lg:text-3xl text-primary font-semibold hover:underline text-center lg:text-left">
+                    <a href="mailto:info@amategekoyumuhanda.rw" className="mt-4 block text-xl lg:text-3xl text-foreground-accent hover:text-foreground font-semibold hover:underline text-center lg:text-left">
                         {t.faq.emailLabel}
                     </a>
                 </div>

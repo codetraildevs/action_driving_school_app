@@ -22,7 +22,7 @@ const PricingColumn: React.FC<Props> = ({ tier, highlight }: Props) => {
             <div className="p-6 border-b border-border rounded-t-xl">
                 <h3 className="text-2xl font-semibold text-foreground mb-4">{name}</h3>
                 <p className="text-3xl md:text-5xl font-bold mb-6">
-                    <span className={clsx("text-foreground", { "text-primary": highlight })}>
+                    <span className={clsx("text-foreground", { "text-foreground font-semibold": highlight })}>
                         {typeof price === 'number' ? `${price.toLocaleString()} ${currency || ''}` : price}
                     </span>
                     {typeof price === 'number' && <span className="text-lg font-normal text-muted-foreground">/{t.pricing.perMonth}</span>}
@@ -40,7 +40,7 @@ const PricingColumn: React.FC<Props> = ({ tier, highlight }: Props) => {
                 <ul className="space-y-4 mb-8">
                     {features.map((feature, index) => (
                         <li key={index} className="flex items-center">
-                            <BsFillCheckCircleFill className={clsx("h-5 w-5 mr-2", { "text-primary": highlight, "text-muted-foreground": !highlight })} />
+                            <BsFillCheckCircleFill className={clsx("h-5 w-5 mr-2", { "text-foreground-accent": highlight, "text-muted-foreground": !highlight })} />
                             <span className="text-foreground-accent">{feature}</span>
                         </li>
                     ))}

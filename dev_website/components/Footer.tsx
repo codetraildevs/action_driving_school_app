@@ -67,7 +67,7 @@ const Footer: React.FC = () => {
                 </div>
                 <div className="mt-12 pt-8 border-t border-border md:text-center text-foreground-accent">
                     <p className="text-sm">Copyright &copy; {new Date().getFullYear()} {siteDetails.siteName}. {t.footer.copyright}</p>
-                    <p className="text-xs mt-2 text-muted-foreground">{t.footer.madeBy} <a href="https://codebridgecademy.com/" target="_blank" className="hover:underline text-primary hover:text-primary-accent italic">Fidele Software Engineer</a></p>
+                    <p className="text-xs mt-2 text-muted-foreground">{t.footer.madeBy} <a href="https://codebridgecademy.com/" target="_blank" className="hover:underline text-foreground-accent hover:text-primary italic">Fidele Software Engineer</a></p>
                 </div>
             </div>
         </footer>

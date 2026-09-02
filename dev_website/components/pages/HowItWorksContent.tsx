@@ -20,10 +20,10 @@ const stepImages = [
 ];
 
 const whyIcons = [
-    <FiWifiOff size={18} className="text-primary" />,
-    <FiRefreshCw size={18} className="text-primary" />,
-    <FiBarChart2 size={18} className="text-primary" />,
-    <FiGlobe size={18} className="text-primary" />,
+    <FiWifiOff size={18} className="text-foreground-accent" />,
+    <FiRefreshCw size={18} className="text-foreground-accent" />,
+    <FiBarChart2 size={18} className="text-foreground-accent" />,
+    <FiGlobe size={18} className="text-foreground-accent" />,
 ];
 
 export default function HowItWorksContent() {

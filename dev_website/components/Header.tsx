@@ -90,7 +90,7 @@ const Header: React.FC = () => {
                                         <button
                                             key={lang.code}
                                             onClick={() => { setLocale(lang.code); setLangOpen(false); }}
-                                            className={`block w-full text-left px-4 py-2.5 text-sm hover:bg-muted transition-colors ${locale === lang.code ? 'text-primary font-semibold bg-primary/10' : 'text-foreground'}`}
+                                            className={`block w-full text-left px-4 py-2.5 text-sm hover:bg-muted transition-colors ${locale === lang.code ? 'text-foreground font-semibold bg-primary/10' : 'text-foreground'}`}
                                         >
                                             {lang.label}
                                         </button>
