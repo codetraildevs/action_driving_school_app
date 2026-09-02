@@ -10,6 +10,6 @@ export const siteDetails = {
     },
     language: 'en-us',
     locale: 'en_RW',
-    siteLogo: `${process.env.BASE_PATH || ''}/images/logo.png`,
+    siteLogo: `${typeof process !== 'undefined' ? process.env.BASE_PATH || '' : ''}/images/logo.png`,
     googleAnalyticsId: '',
 }
