@@ -111,3 +111,13 @@ lib/generated/
 
 # Package lock (will be regenerated)
 package-lock.json
+
+# Deployment scripts (keep local only — contain credentials)
+server-setup.sh
+go-live.sh
+monitor-vps.sh
+cleanup-logs.sh
+prebuild.js
+deploy-vps.sh
+nginx-*.conf
+
