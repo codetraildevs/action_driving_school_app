@@ -9,7 +9,7 @@
 #   1. Pulls latest code from git
 #   2. Installs new dependencies
 #   3. Runs Prisma generate
-#   4. Builds Next.js
+#   4. Builds Next.js (with memory optimization)
 #   5. Restarts PM2 with zero downtime
 # ──────────────────────────────────────────────────────────────────
 
@@ -41,9 +41,9 @@ npm install --omit=dev --legacy-peer-deps
 echo "[3/6] Running Prisma generate..."
 npx prisma generate
 
-# ── 4. Build Next.js ──
+# ── 4. Build Next.js (with memory optimization to avoid SIGBUS) ──
 echo "[4/6] Building Next.js..."
-npm run build
+NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS="--max-old-space-size=1536" npm run build
 
 # ── 5. Restart PM2 (zero-downtime reload) ──
 echo "[5/6] Restarting PM2..."
