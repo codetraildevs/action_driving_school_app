@@ -122,6 +122,24 @@
 
         </LinearLayout>
 
+        <!-- Debug: shows the device ANDROID_ID so testers can share it for API login -->
+        <TextView
+            android:id="@+id/debug_android_id"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="32dp"
+            android:layout_marginTop="16dp"
+            android:background="#F5F5F5"
+            android:fontFamily="monospace"
+            android:padding="8dp"
+            android:textColor="#666666"
+            android:textSize="11sp"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/register_prompt"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
         <include
             android:id="@+id/contact_us_layout"
             layout="@layout/layout_contact_us"
@@ -130,7 +148,7 @@
             android:layout_marginTop="24dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/register_prompt" />
+            app:layout_constraintTop_toBottomOf="@id/debug_android_id" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

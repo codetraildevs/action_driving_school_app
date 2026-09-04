@@ -178,7 +178,11 @@ public class TestQuestionsFragment extends Fragment {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
         if (itemId == android.R.id.home) {
-            NavHostFragment.findNavController(this).popBackStack();
+            try {
+                NavHostFragment.findNavController(this).popBackStack();
+            } catch (Exception e) {
+                android.util.Log.e("TestQuestionsFragment", "Navigation failed", e);
+            }
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -335,7 +339,11 @@ public class TestQuestionsFragment extends Fragment {
         }
         testViewModel.calculateResult();
         if (isAdded()) {
-            NavHostFragment.findNavController(this).navigate(R.id.action_testQuestionsFragment_to_testResultFragment);
+            try {
+                NavHostFragment.findNavController(this).navigate(R.id.action_testQuestionsFragment_to_testResultFragment);
+            } catch (Exception e) {
+                android.util.Log.e("TestQuestionsFragment", "Navigation failed", e);
+            }
         }
     }
 

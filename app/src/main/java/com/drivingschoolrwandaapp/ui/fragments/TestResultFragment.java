@@ -76,7 +76,11 @@ public class TestResultFragment extends Fragment {
         observeViewModel();
 
         finishButton.setOnClickListener(v -> {
-            NavHostFragment.findNavController(this).popBackStack(R.id.testsFragment, false);
+            try {
+                NavHostFragment.findNavController(this).popBackStack(R.id.testsFragment, false);
+            } catch (Exception e) {
+                android.util.Log.e("TestResultFragment", "Navigation failed", e);
+            }
         });
     }
 
@@ -100,7 +104,7 @@ public class TestResultFragment extends Fragment {
         }
         
         testViewModel.getTestResult().observe(getViewLifecycleOwner(), result -> {
-            if (result != null) {
+            if (result != null && isAdded() && getContext() != null) {
                 int percentage = (result.getTotalMarks() > 0)
                         ? (result.getScore() * 100) / result.getTotalMarks()
                         : 0;

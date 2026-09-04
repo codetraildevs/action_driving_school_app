@@ -166,7 +166,9 @@ public class ApplicationDetailsActivity extends AppCompatActivity {
                 loadingDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
             }
         }
-        loadingDialog.show();
+        if (!isFinishing() && !loadingDialog.isShowing()) {
+            loadingDialog.show();
+        }
     }
 
     private void hideLoadingDialog() {

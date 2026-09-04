@@ -65,74 +65,56 @@ public class DashboardFragment extends Fragment {
         // Setup Quick Access Cards
         MaterialCardView startExamCard = view.findViewById(R.id.start_exam_card);
         if (startExamCard != null) {
-            startExamCard.setOnClickListener(v -> {
-                if (isAdded() && getContext() != null) {
-                    try {
-                        NavHostFragment.findNavController(this).navigate(R.id.action_dashboardFragment_to_testsFragment);
-                    } catch (Exception e) {
-                        android.util.Log.e("DashboardFragment", "Navigation failed", e);
-                    }
-                }
-            });
+            startExamCard.setOnClickListener(v -> safeNavigate(R.id.action_dashboardFragment_to_testsFragment));
         }
 
         // The "Tests effectués" subtitle inside the Exams card opens the test history.
         android.widget.TextView previousTestsSubtitle = view.findViewById(R.id.previous_tests_subtitle);
         if (previousTestsSubtitle != null) {
-            previousTestsSubtitle.setOnClickListener(v -> {
-                if (isAdded()) {
-                    NavHostFragment.findNavController(DashboardFragment.this)
-                            .navigate(R.id.action_dashboardFragment_to_resultsFragment);
-                }
-            });
+            previousTestsSubtitle.setOnClickListener(v -> safeNavigate(R.id.action_dashboardFragment_to_resultsFragment));
         }
 
         MaterialCardView learningMaterialsCard = view.findViewById(R.id.learning_materials_card);
         if (learningMaterialsCard != null) {
-            learningMaterialsCard.setOnClickListener(v -> {
-                if (isAdded() && getContext() != null) {
-                    try {
-                        NavHostFragment.findNavController(this).navigate(R.id.action_dashboardFragment_to_materialsFragment);
-                    } catch (Exception e) {
-                        android.util.Log.e("DashboardFragment", "Navigation failed", e);
-                    }
-                }
-            });
+            learningMaterialsCard.setOnClickListener(v -> safeNavigate(R.id.action_dashboardFragment_to_materialsFragment));
         }
 
         MaterialCardView iremboServiceCard = view.findViewById(R.id.irembo_service_card);
         if (iremboServiceCard != null) {
             iremboServiceCard.setOnClickListener(v -> {
                 if (!isAdded() || getActivity() == null) return;
-                Intent intent = new Intent(getActivity(), IremboActivity.class);
-                startActivity(intent);
+                try {
+                    Intent intent = new Intent(getActivity(), IremboActivity.class);
+                    startActivity(intent);
+                } catch (Exception e) {
+                    android.util.Log.e("DashboardFragment", "Failed to open IremboActivity", e);
+                }
             });
         }
 
         MaterialCardView whatsappGroupCard = view.findViewById(R.id.whatsapp_group_card);
         if (whatsappGroupCard != null) {
             whatsappGroupCard.setOnClickListener(v -> {
-                Intent intent = new Intent(requireContext(), WhatsAppGroupsActivity.class);
-                startActivity(intent);
+                if (!isAdded() || getContext() == null) return;
+                try {
+                    Intent intent = new Intent(getContext(), WhatsAppGroupsActivity.class);
+                    startActivity(intent);
+                } catch (Exception e) {
+                    android.util.Log.e("DashboardFragment", "Failed to open WhatsAppGroupsActivity", e);
+                }
             });
         }
 
         MaterialCardView instructionsCard = view.findViewById(R.id.instructions_card);
         if (instructionsCard != null) {
-            instructionsCard.setOnClickListener(v -> showInstructionsDialog());
+            instructionsCard.setOnClickListener(v -> {
+                if (isAdded()) showInstructionsDialog();
+            });
         }
 
         MaterialCardView profileCard = view.findViewById(R.id.profile_card);
         if (profileCard != null) {
-            profileCard.setOnClickListener(v -> {
-                if (isAdded() && getContext() != null) {
-                    try {
-                        NavHostFragment.findNavController(this).navigate(R.id.action_dashboardFragment_to_profileFragment);
-                    } catch (Exception e) {
-                        android.util.Log.e("DashboardFragment", "Navigation failed", e);
-                    }
-                }
-            });
+            profileCard.setOnClickListener(v -> safeNavigate(R.id.action_dashboardFragment_to_profileFragment));
         }
 
         setupMenu();
@@ -183,6 +165,20 @@ public class DashboardFragment extends Fragment {
                 return false;
             }
         }, getViewLifecycleOwner(), Lifecycle.State.RESUMED);
+    }
+
+    /**
+     * Safely navigate to a destination, guarding against IllegalStateException and
+     * IllegalArgumentException that can occur when the fragment is not attached to a
+     * NavController (e.g. during back navigation or configuration changes).
+     */
+    private void safeNavigate(int actionId) {
+        if (!isAdded() || getContext() == null) return;
+        try {
+            NavHostFragment.findNavController(this).navigate(actionId);
+        } catch (Exception e) {
+            android.util.Log.e("DashboardFragment", "Navigation failed", e);
+        }
     }
 
     private void showInstructionsDialog() {

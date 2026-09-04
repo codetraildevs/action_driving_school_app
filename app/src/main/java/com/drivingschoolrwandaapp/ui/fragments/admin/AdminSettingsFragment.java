@@ -44,7 +44,8 @@ public class AdminSettingsFragment extends Fragment {
                 BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE));
 
         view.findViewById(R.id.open_console_button).setOnClickListener(v -> {
-            Intent intent = new Intent(requireContext(), WebViewActivity.class);
+            if (!isAdded() || getContext() == null) return;
+            Intent intent = new Intent(getContext(), WebViewActivity.class);
             intent.putExtra("url", ApiClient.SITE_URL);
             intent.putExtra("title", getString(R.string.admin_title));
             startActivity(intent);
@@ -52,20 +53,24 @@ public class AdminSettingsFragment extends Fragment {
 
         // Language + About are shared with the user app — the same picker
         // dialog and the same About dialog, so the experience is identical.
-        view.findViewById(R.id.change_language_button).setOnClickListener(v ->
-                LanguageUtils.showLanguageDialog(requireContext()));
+        view.findViewById(R.id.change_language_button).setOnClickListener(v -> {
+            if (isAdded() && getContext() != null) {
+                LanguageUtils.showLanguageDialog(getContext());
+            }
+        });
 
         view.findViewById(R.id.about_button).setOnClickListener(v -> {
-            if (getActivity() != null) {
+            if (isAdded() && getActivity() != null) {
                 AboutUtils.showAboutDialog(getActivity());
             }
         });
 
         view.findViewById(R.id.logout_button).setOnClickListener(v -> {
+            if (!isAdded() || getContext() == null) return;
             tokenManager.clearTokens();
             // Same destination as every other logout path (Profile tab,
             // UserRepository, token expiry) — the shared login screen.
-            Intent intent = new Intent(requireContext(), LoginActivity.class);
+            Intent intent = new Intent(getContext(), LoginActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         });

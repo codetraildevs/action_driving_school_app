@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import java.util.Locale;
 
+import com.drivingschoolrwandaapp.BuildConfig;
 import com.drivingschoolrwandaapp.utils.EdgeToEdgeUtils;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -105,6 +106,14 @@ public class LoginActivity extends AppCompatActivity {
                     startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
                 }
             });
+        }
+
+        // Debug: show the device ANDROID_ID so testers can share it for API login testing
+        TextView debugAndroidId = findViewById(R.id.debug_android_id);
+        if (debugAndroidId != null && BuildConfig.DEBUG) {
+            String androidId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+            debugAndroidId.setText("Device ID: " + androidId);
+            debugAndroidId.setVisibility(View.VISIBLE);
         }
 
         loginButton.setOnClickListener(v -> {

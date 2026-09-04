@@ -231,14 +231,18 @@ public class TestsFragment extends Fragment {
         testAdapter.setOnTestClickListener((test, isLocked, title) -> {
             if (isLocked) {
                 showRequestAccessDialog(test);
-            } else {
-                Bundle args = new Bundle();
-                args.putInt("testId", test.getId());
-                args.putString("title", title);
-                args.putBoolean("isRealTimeFeedback", true);
-                args.putBoolean("isFree", test.isFree());
-                NavHostFragment.findNavController(this)
-                        .navigate(R.id.action_global_testQuestionsFragment, args);
+            } else if (isAdded() && getContext() != null) {
+                try {
+                    Bundle args = new Bundle();
+                    args.putInt("testId", test.getId());
+                    args.putString("title", title);
+                    args.putBoolean("isRealTimeFeedback", true);
+                    args.putBoolean("isFree", test.isFree());
+                    NavHostFragment.findNavController(this)
+                            .navigate(R.id.action_global_testQuestionsFragment, args);
+                } catch (Exception e) {
+                    android.util.Log.e("TestsFragment", "Navigation failed", e);
+                }
             }
         });
     }
@@ -615,9 +619,13 @@ public class TestsFragment extends Fragment {
             return true;
         }
         if (item.getItemId() == R.id.action_test_history) {
-            if (isAdded()) {
-                NavHostFragment.findNavController(this)
-                        .navigate(R.id.action_testsFragment_to_resultsFragment);
+            if (isAdded() && getContext() != null) {
+                try {
+                    NavHostFragment.findNavController(this)
+                            .navigate(R.id.action_testsFragment_to_resultsFragment);
+                } catch (Exception e) {
+                    android.util.Log.e("TestsFragment", "Navigation failed", e);
+                }
             }
             return true;
         }

@@ -360,13 +360,14 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
     }
 
     private void openFile(LearningMaterial material) {
-        File internalStroageDir = requireContext().getFilesDir();
+        if (!isAdded() || getContext() == null) return;
+        File internalStroageDir = getContext().getFilesDir();
         String fileName = FileUtils.getSafeFileName(material);
         File file = new File(internalStroageDir, fileName);
 
         if (file.exists()) {
-            String authority = requireContext().getPackageName() + ".provider";
-            Uri fileUri = FileProvider.getUriForFile(requireContext(), authority, file);
+            String authority = getContext().getPackageName() + ".provider";
+            Uri fileUri = FileProvider.getUriForFile(getContext(), authority, file);
             
             if ("application/pdf".equals(material.getFileType())) {
                 Intent intent = new Intent(getContext(), PdfViewerActivity.class);
@@ -462,7 +463,13 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            NavHostFragment.findNavController(this).popBackStack();
+            if (isAdded() && getContext() != null) {
+                try {
+                    NavHostFragment.findNavController(this).popBackStack();
+                } catch (Exception e) {
+                    android.util.Log.e("MaterialsFragment", "Navigation failed", e);
+                }
+            }
             return true;
         }
         return super.onOptionsItemSelected(item);
