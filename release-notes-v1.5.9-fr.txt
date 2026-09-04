@@ -1,0 +1,14 @@
+Nouveautés dans v1.5.9
+
+Corrections de bugs
+- Correction de crashes critiques dans l'application
+- Correction du crash du DashboardFragment lors de la navigation
+- Correction des crashes lors du démarrage ou de la reprise des examens
+- Correction du crash lors de la consultation des résultats
+- Correction du crash lors de l'ouverture des supports d'apprentissage
+- Correction du crash dans les paramètres administrateur
+- Correction du crash lors de la sélection des réponses pendant les examens
+- Ajout de tests de prévention des régressions
+
+Amélioration de la stabilité
+- Toutes les opérations de navigation sont maintenant protégées

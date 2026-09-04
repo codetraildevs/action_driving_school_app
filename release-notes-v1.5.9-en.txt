@@ -1,0 +1,17 @@
+What's New in v1.5.9
+
+Bug Fixes
+- Fixed critical crashes across the app that caused the crash rate to exceed Play Store limits
+- Fixed DashboardFragment crash when navigating between screens
+- Fixed crashes when starting or retaking exams
+- Fixed crash when viewing test results
+- Fixed crash when opening learning materials
+- Fixed crash in admin settings
+- Fixed crash when viewing application details
+- Fixed crash in answer selection during exams
+- Added crash prevention tests to stop regressions
+
+稳定性改进
+- 修复了多个导致应用崩溃的问题
+- 所有导航操作现在都受到保护，不会在屏幕切换时崩溃
+- 修复了考试选择答案时可能出现的崩溃

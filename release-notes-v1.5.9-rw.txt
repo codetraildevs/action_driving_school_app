@@ -1,0 +1,13 @@
+Ibyo twagushije mu v1.5.9
+
+Gukemura ibibazo
+- Twagize ibibazo bikomeye byo guhembera muアプリ
+- Twagize ikibazo mu DashboardFragment igihe wimura
+- Twagize ibibazo icoresha amaprice y'ipimo
+- Twagize ikibazo mugereza ibisubizo by'ipimo
+- Twagize ikibazo mu bushyinguro bw'amasomo
+- Twagize ikibazo mu mikoreshereze y'abo watchesinze
+- Twagize ikibazo mu hitamwo ibisubizo mu gihe c'ipimo
+
+Komeza ubwigunge
+- Amakuru yose yo kuzamura nako yarindwa
