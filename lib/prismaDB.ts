@@ -25,6 +25,40 @@ function parseDatabaseUrl(url: string) {
  * crashed every DB query. Falls back to the engine-based client if the
  * adapter cannot be initialized for any reason.
  */
+// Read operations are safe to retry — they have no side effects, so a retry
+// after a transient DB blip cannot corrupt data. Writes are deliberately NOT
+// retried: a timeout may have committed server-side, and retrying could
+// duplicate rows (e.g. double-register a user or double-accept a request).
+const RETRYABLE_OPERATIONS = new Set([
+  "findMany",
+  "findUnique",
+  "findFirst",
+  "findUniqueOrThrow",
+  "findFirstOrThrow",
+  "count",
+  "aggregate",
+  "groupBy",
+]);
+
+const READ_RETRY_ATTEMPTS = 3;
+const READ_RETRY_BASE_DELAY_MS = 300;
+
+// Signals a transient connection/pool problem worth retrying: pool timeout,
+// refused/terminated connections, or Prisma's connection error codes.
+function isTransientDbError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return (
+    /pool timeout/.test(message) ||
+    /failed to retrieve a connection/.test(message) ||
+    /ECONNREFUSED/.test(message) ||
+    /ECONNRESET/.test(message) ||
+    /connect ETIMEDOUT/.test(message) ||
+    /P1001/.test(message) || // Can't reach DB
+    /P1002/.test(message) || // Timed out
+    /P2028/.test(message) // Transaction API error (includes pool timeouts)
+  );
+}
+
 function createPrismaClient(): PrismaClient {
   try {
     const url = process.env.DATABASE_URL;
@@ -42,7 +76,36 @@ function createPrismaClient(): PrismaClient {
       // key retrieval is safe here.
       allowPublicKeyRetrieval: true,
     });
-    return new PrismaClient({ adapter });
+    const base = new PrismaClient({ adapter });
+
+    // Retry transient failures on read operations (with backoff) so the app
+    // rides through brief DB restarts instead of 500ing every request.
+    return base.$extends({
+      query: {
+        $allModels: {
+          async $allOperations({ operation, args, query }) {
+            if (!RETRYABLE_OPERATIONS.has(operation)) {
+              return query(args);
+            }
+            let lastError: unknown;
+            for (let attempt = 1; attempt <= READ_RETRY_ATTEMPTS; attempt++) {
+              try {
+                return await query(args);
+              } catch (error) {
+                lastError = error;
+                if (attempt >= READ_RETRY_ATTEMPTS || !isTransientDbError(error)) {
+                  throw error;
+                }
+                await new Promise((resolve) =>
+                  setTimeout(resolve, READ_RETRY_BASE_DELAY_MS * attempt)
+                );
+              }
+            }
+            throw lastError;
+          },
+        },
+      },
+    }) as unknown as PrismaClient;
   } catch (e) {
     console.error(
       "Driver adapter init failed, falling back to default client:",
