@@ -31,7 +31,17 @@ function createPrismaClient(): PrismaClient {
     if (!url) {
       throw new Error("DATABASE_URL is not set");
     }
-    const adapter = new PrismaMariaDb(parseDatabaseUrl(url));
+    const adapter = new PrismaMariaDb({
+      ...parseDatabaseUrl(url),
+      // MySQL 8.x creates users with the caching_sha2_password plugin by
+      // default. Over a plain (non-TLS) connection that plugin needs the
+      // server's RSA public key to exchange the password; the driver refuses
+      // to fetch it by default and every query dies with
+      // ER_CANNOT_RETRIEVE_RSA_KEY -> "pool timeout" -> 500s. The connection
+      // is loopback-only (DATABASE_URL points at localhost), so allowing the
+      // key retrieval is safe here.
+      allowPublicKeyRetrieval: true,
+    });
     return new PrismaClient({ adapter });
   } catch (e) {
     console.error(

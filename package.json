@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev ",
-    "prebuild": "node prebuild.js",
+    "prebuild": "node -e \"require('fs').existsSync('prebuild.js') && require('child_process').execSync('node prebuild.js',{stdio:'inherit'})\"",
     "build": "next build --experimental-build-mode compile",
     "start": "next start",
     "lint": "eslint",

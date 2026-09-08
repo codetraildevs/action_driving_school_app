@@ -60,7 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       localStorage.setItem("admin_token", data.accessToken);
       localStorage.setItem("admin_user", JSON.stringify(data.user));
-        localStorage.setItem("admin_refresh_token",  data.accessToken.refreshToken)
+      localStorage.setItem("admin_refresh_token", data.refreshToken);
 
 
       setToken(data.accessToken);
