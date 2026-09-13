@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getGoogleAccessToken } from "@/lib/google-oauth";
 
 // Never cache: attestation must always be fresh.
 export const dynamic = "force-dynamic";
@@ -19,9 +20,10 @@ export const dynamic = "force-dynamic";
  * Protected by middleware (requires a Bearer token), so only signed-in app
  * users can call it. Tune `acceptedDeviceVerdicts` for your risk appetite.
  *
- * Setup: set GOOGLE_CLOUD_API_KEY in the backend .env — an API key for a
- * Google Cloud project with the "Google Play Integrity API" enabled (see
- * docs/admob-prep.md for the full checklist).
+ * Setup: the Play Integrity API does NOT accept API keys — this route
+ * authenticates with the FIREBASE_* service account (OAuth2 JWT flow, see
+ * lib/google-oauth.ts). The service account's Google Cloud project must have
+ * the "Google Play Integrity API" enabled and be linked to the Play listing.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -36,24 +38,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const apiKey = process.env.GOOGLE_CLOUD_API_KEY;
-    if (!apiKey) {
+    const accessToken = await getGoogleAccessToken();
+    if (!accessToken) {
       return NextResponse.json(
         { verified: false, error: "server_not_configured" },
         { status: 500 }
       );
     }
 
-    // Correct Play Integrity v1 endpoint: decode the token for OUR app.
-    // (The previous URL, /v1/verifyPlayIntegrity, never existed — every real
-    // verification 502'd with Google's 404 HTML page.) The key is optional
-    // for this API; package name comes from the app's build config.
+    // Play Integrity v1: POST /v1/{package}:decodeIntegrityToken with an
+    // OAuth2 bearer token (API keys are rejected by this API). The verdict
+    // comes back inside { tokenPayloadExternal: … }.
     const packageName = process.env.INTEGRITY_PACKAGE_NAME || "com.drivingschoolrwandaapp";
     const googleRes = await fetch(
-      `https://playintegrity.googleapis.com/v1/packages/${encodeURIComponent(packageName)}:decodeIntegrityToken?key=${apiKey}`,
+      `https://playintegrity.googleapis.com/v1/${encodeURIComponent(packageName)}:decodeIntegrityToken`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
         body: JSON.stringify({ integrity_token: integrityToken }),
       }
     );
