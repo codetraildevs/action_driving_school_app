@@ -44,8 +44,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Correct Play Integrity v1 endpoint: decode the token for OUR app.
+    // (The previous URL, /v1/verifyPlayIntegrity, never existed — every real
+    // verification 502'd with Google's 404 HTML page.) The key is optional
+    // for this API; package name comes from the app's build config.
+    const packageName = process.env.INTEGRITY_PACKAGE_NAME || "com.drivingschoolrwandaapp";
     const googleRes = await fetch(
-      `https://playintegrity.googleapis.com/v1/verifyPlayIntegrity?key=${apiKey}`,
+      `https://playintegrity.googleapis.com/v1/packages/${encodeURIComponent(packageName)}:decodeIntegrityToken?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -62,7 +67,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const verdict = await googleRes.json();
+    const verdictEnvelope = await googleRes.json();
+    // decodeIntegrityToken returns { tokenPayloadExternal: { …verdict fields… } }
+    const verdict = verdictEnvelope?.tokenPayloadExternal ?? verdictEnvelope;
 
     // Google echoes the request hash (base64) it stamped at request time;
     // it must equal the nonce the app generated for this call.
