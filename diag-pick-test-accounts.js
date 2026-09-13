@@ -39,7 +39,7 @@ const prisma = new PrismaClient({
   });
   if (admin) {
     console.log("Admin (phone-only login, no device id needed):");
-    console.log(`  id=${admin.id} phone=${admin.phoneNumber} role=${admin.role.role_name}`);
+    console.log(`  id=${admin.id} phone=${admin.phoneNumber} role=${admin.role.roleName}`);
   }
 
   const users = await prisma.user.findMany({
