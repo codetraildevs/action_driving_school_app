@@ -34,7 +34,7 @@ const prisma = new PrismaClient({
 
   const admin = await prisma.user.findFirst({
     where: { role: { roleName: { in: ["admin", "super_admin"] } } },
-    select: { id: true, phoneNumber: true, isActive: true, role: { select: { role_name: true } } },
+    select: { id: true, phoneNumber: true, isActive: true, role: { select: { roleName: true } } },
     orderBy: { id: "asc" },
   });
   if (admin) {
