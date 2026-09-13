@@ -418,7 +418,7 @@ export default function UsersPage() {
           <div className="space-y-1">
             <h3 className="text-xl font-bold">
               {user.firstName} {user.lastName}{" "}
-              <span className="text-sm">({user.language.nativeName})</span>
+              <span className="text-sm">({user.language?.nativeName ?? '—'})</span>
             </h3>
 
             <a
@@ -673,7 +673,7 @@ export default function UsersPage() {
                               {user.devices.length > 0 &&
                                 user.devices[0].manufacturer}
                             </TableCell>
-                            <TableCell>{user.language.nativeName}</TableCell>
+                            <TableCell>{user.language?.nativeName ?? '—'}</TableCell>
                             <TableCell>
                               <Badge variant="outline">
                                 {user.role.roleName}

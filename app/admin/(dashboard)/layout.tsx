@@ -452,7 +452,7 @@ export default function DashboardLayout({
                                       </div>
                                       
                                       <p className="text-sm text-muted-foreground truncate">
-                                        Language: {req.user.Pendinglanguage.nativeName}
+                                        Language: {req.user.Pendinglanguage?.nativeName ?? '—'}
                                       </p>
                                       <p className="text-sm font-medium mt-1">
                                         Tests: {req.requestedTests}
