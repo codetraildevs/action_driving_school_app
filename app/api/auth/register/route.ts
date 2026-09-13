@@ -102,21 +102,28 @@ export async function POST(request: NextRequest) {
             OR: [{ phoneNumber: normalizedPhone }],
           },
         });
-        const existingDevice = await tx.device.findFirst({
-          where: { physicalAddress: userDevice.physicalAddress },
-        });
-        
-        if (existingDevice) {
-          return {
-            error: true,
-            response: NextResponse.json(
-              {
-                success: false,
-                message: "This device already has associated user",
-              },
-              { status: 409 },
-            ),
-          };
+        // Guard: Prisma treats an undefined where-value as "no filter" —
+        // a device-less registration would match the FIRST device row in
+        // the table and falsely 409 (and send the FCM welcome to a random
+        // device). Only run the device check when a device was provided.
+        const deviceAddress = typeof userDevice?.physicalAddress === "string" ? userDevice.physicalAddress.trim() : "";
+        if (deviceAddress) {
+          const existingDevice = await tx.device.findFirst({
+            where: { physicalAddress: deviceAddress },
+          });
+
+          if (existingDevice) {
+            return {
+              error: true,
+              response: NextResponse.json(
+                {
+                  success: false,
+                  message: "This device already has associated user",
+                },
+                { status: 409 },
+              ),
+            };
+          }
         }
 
         if (existingUser) {
@@ -236,9 +243,11 @@ export async function POST(request: NextRequest) {
           });
         }
 
-        const firebaseDevice = await tx.firebaseDevice.findFirst({
-          where: { physicalDeviceId: userDevice.physicalAddress },
-        });
+        const firebaseDevice = deviceAddress
+          ? await tx.firebaseDevice.findFirst({
+              where: { physicalDeviceId: deviceAddress },
+            })
+          : null;
 
         if (firebaseDevice) {
           let notificationMessage;
@@ -277,7 +286,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Create device if provided
-        if (userDevice && Object.keys(userDevice).length > 0) {
+        if (deviceAddress) {
           await tx.device.create({
             data: {
               userId: user.id,
