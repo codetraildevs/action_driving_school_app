@@ -199,6 +199,18 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void validateAndRegister() {
+        // Canonicalize the phone field FIRST so validation, the on-screen value
+        // and the submitted account all use the backend's stored format
+        // (07XXXXXXXX). The user sees their number flip to canonical form the
+        // moment they hit Register — and only ONE account can ever exist for
+        // that number, in any format they typed it.
+        CharSequence preText = phoneField.getText();
+        String canonical = PhoneUtils.toCanonicalLocal(preText != null ? preText.toString().trim() : "");
+        if (!canonical.isEmpty() && preText != null && !canonical.contentEquals(preText)) {
+            phoneField.setText(canonical);
+            phoneField.setSelection(canonical.length());
+        }
+
         if (!validateFullName() | !validatePhone()) {
             return; // Validation failed
         }
@@ -235,8 +247,11 @@ public class RegisterActivity extends AppCompatActivity {
 
         CharSequence phoneText = phoneField.getText();
         String rawPhone = phoneText != null ? phoneText.toString().trim() : "";
-        String phone = PhoneUtils.normalize(rawPhone);
-        Log.d(TAG, "Normalised phone for registration: " + rawPhone + " → " + phone);
+        // Field is already canonical (07XXXXXXXX) after validateAndRegister's
+        // normalization; toCanonicalLocal is idempotent so this is a no-op
+        // safeguard. Submitting the exact stored format, not a re-rendering.
+        String phone = PhoneUtils.toCanonicalLocal(rawPhone);
+        Log.d(TAG, "Canonical phone for registration: " + rawPhone + " → " + phone);
         @SuppressLint("HardwareIds")
         String password = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
 
