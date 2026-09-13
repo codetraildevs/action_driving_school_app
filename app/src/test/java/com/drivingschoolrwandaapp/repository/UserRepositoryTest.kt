@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import com.drivingschoolrwandaapp.R
 import com.drivingschoolrwandaapp.api.ApiService
 import com.drivingschoolrwandaapp.database.dao.UserDao
+import com.drivingschoolrwandaapp.database.dao.UserSubscriptionDao
 import com.drivingschoolrwandaapp.database.entities.User as DbUser
 import com.drivingschoolrwandaapp.data.local.preferences.TokenManager
 import com.drivingschoolrwandaapp.models.entities.User as NetworkUser
@@ -56,6 +57,7 @@ class UserRepositoryTest {
 
     private lateinit var apiService: ApiService
     private lateinit var userDao: UserDao
+    private lateinit var userSubscriptionDao: UserSubscriptionDao
     private lateinit var tokenManager: TokenManager
     private lateinit var context: Context
     private lateinit var repository: UserRepository
@@ -80,6 +82,7 @@ class UserRepositoryTest {
 
         apiService = mock(ApiService::class.java)
         userDao = mock(UserDao::class.java)
+        userSubscriptionDao = mock(UserSubscriptionDao::class.java)
         tokenManager = mock(TokenManager::class.java)
         context = mock(Context::class.java)
         `when`(context.getApplicationContext()).thenReturn(context)
@@ -93,7 +96,7 @@ class UserRepositoryTest {
         `when`(context.getString(R.string.device_not_allowed))
             .thenReturn("You are not allowed to login from this device. Please contact support at +250782877442 or +250722877442.")
 
-        repository = UserRepository(context, apiService, userDao, tokenManager)
+        repository = UserRepository(context, apiService, userDao, userSubscriptionDao, tokenManager)
     }
 
     @After
@@ -497,6 +500,7 @@ class UserRepositoryTest {
 
         // Local logout is executed on the repository's background executor.
         verify(userDao, timeout(2000)).deleteAll()
+        verify(userSubscriptionDao, timeout(2000)).delete()
         verify(tokenManager, timeout(2000)).clearTokens()
     }
 
@@ -511,6 +515,7 @@ class UserRepositoryTest {
         captor.value.onFailure(mockCall(), RuntimeException("network down"))
 
         verify(userDao, timeout(2000)).deleteAll()
+        verify(userSubscriptionDao, timeout(2000)).delete()
         verify(tokenManager, timeout(2000)).clearTokens()
     }
 
@@ -525,6 +530,7 @@ class UserRepositoryTest {
         captor.value.onResponse(mockCall(), mockResponse())
 
         verify(userDao, timeout(2000)).deleteAll()
+        verify(userSubscriptionDao, timeout(2000)).delete()
         verify(tokenManager, timeout(2000)).clearTokens()
     }
 
@@ -539,6 +545,7 @@ class UserRepositoryTest {
         captor.value.onFailure(mockCall(), RuntimeException("boom"))
 
         verify(userDao, timeout(2000)).deleteAll()
+        verify(userSubscriptionDao, timeout(2000)).delete()
         verify(tokenManager, timeout(2000)).clearTokens()
     }
 
@@ -575,13 +582,25 @@ class UserRepositoryTest {
     // ---------------------------------------------------------------------------
 
     @Test
-    fun `loadFromDb returns dao live data`() {
+    fun `loadFromDb returns current user's dao live data`() {
+        `when`(tokenManager.getUserId()).thenReturn(1)
         val dbLiveData = MutableLiveData<DbUser>()
-        `when`(userDao.getUser()).thenReturn(dbLiveData)
+        `when`(userDao.getUserById(1)).thenReturn(dbLiveData)
 
         val result = repository.loadFromDb()
 
         assertEquals(dbLiveData, result)
+    }
+
+    @Test
+    fun `loadFromDb emits null when no user id is persisted`() {
+        `when`(tokenManager.getUserId()).thenReturn(0)
+
+        val result = repository.loadFromDb()
+
+        assertNull(result.value)
+        verify(userDao, never()).getUser()
+        verify(userDao, never()).getUserById(anyInt())
     }
 
     // ---------------------------------------------------------------------------
@@ -595,8 +614,9 @@ class UserRepositoryTest {
 
     @Test
     fun `getProfile starts loading and fetches after db emits`() {
+        `when`(tokenManager.getUserId()).thenReturn(1)
         val dbSource = MutableLiveData<DbUser>()
-        `when`(userDao.getUser()).thenReturn(dbSource)
+        `when`(userDao.getUserById(1)).thenReturn(dbSource)
         val call = mockCall<ApiResponse<NetworkUser>>()
         `when`(apiService.getProfile()).thenReturn(call)
 
@@ -612,8 +632,9 @@ class UserRepositoryTest {
 
     @Test
     fun `getProfile unsuccessful response emits error with server message`() {
+        `when`(tokenManager.getUserId()).thenReturn(1)
         val dbSource = MutableLiveData<DbUser>()
-        `when`(userDao.getUser()).thenReturn(dbSource)
+        `when`(userDao.getUserById(1)).thenReturn(dbSource)
         val call = mockCall<ApiResponse<NetworkUser>>()
         `when`(apiService.getProfile()).thenReturn(call)
 
@@ -635,8 +656,9 @@ class UserRepositoryTest {
 
     @Test
     fun `getProfile network failure emits friendly error`() {
+        `when`(tokenManager.getUserId()).thenReturn(1)
         val dbSource = MutableLiveData<DbUser>()
-        `when`(userDao.getUser()).thenReturn(dbSource)
+        `when`(userDao.getUserById(1)).thenReturn(dbSource)
         val call = mockCall<ApiResponse<NetworkUser>>()
         `when`(apiService.getProfile()).thenReturn(call)
 

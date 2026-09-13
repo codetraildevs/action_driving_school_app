@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.drivingschoolrwandaapp.api.ApiService;
 import com.drivingschoolrwandaapp.database.dao.UserDao;
+import com.drivingschoolrwandaapp.database.dao.UserSubscriptionDao;
 import com.drivingschoolrwandaapp.data.local.preferences.TokenManager;
 import com.drivingschoolrwandaapp.repository.UserRepository;
 import com.drivingschoolrwandaapp.repository.WhatsAppRepository;
@@ -26,9 +27,10 @@ public class RepositoryModule {
             @ApplicationContext Context context,
             ApiService apiService,
             UserDao userDao,
+            UserSubscriptionDao userSubscriptionDao,
             TokenManager tokenManager
     ) {
-        return new UserRepository(context, apiService, userDao, tokenManager);
+        return new UserRepository(context, apiService, userDao, userSubscriptionDao, tokenManager);
     }
 
     @Provides

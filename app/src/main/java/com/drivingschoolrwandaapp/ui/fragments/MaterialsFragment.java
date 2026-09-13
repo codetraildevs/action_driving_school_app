@@ -38,6 +38,7 @@ import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.data.models.LearningMaterial;
 import com.drivingschoolrwandaapp.database.AppDatabase;
 import com.drivingschoolrwandaapp.database.dao.UserDao;
+import com.drivingschoolrwandaapp.data.local.preferences.TokenManager;
 import com.drivingschoolrwandaapp.ui.activities.PdfViewerActivity;
 import com.drivingschoolrwandaapp.ui.adapters.LearningMaterialAdapter;
 import com.drivingschoolrwandaapp.utils.FileUtils;
@@ -69,6 +70,7 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
     private TextView errorTextView;
     private ShimmerFrameLayout shimmerFrameLayout;
     private UserDao userDao;
+    private TokenManager tokenManager;
     private NotificationHelper notificationHelper;
     // Cache the user from LiveData observation to avoid synchronous DB reads
     // on the main thread. Populated by observeUser().
@@ -85,6 +87,7 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
         setHasOptionsMenu(true);
 
         userDao = appDatabase.userDao();
+        tokenManager = new TokenManager(requireContext());
         notificationHelper = new NotificationHelper(requireContext());
     }
 
@@ -136,12 +139,19 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
     }
 
     private void observeUser() {
-        userDao.getUser().observe(getViewLifecycleOwner(), user -> {
-            cachedUser = user;
-            if (adapter != null) {
-                adapter.setCurrentUser(user);
-            }
-        });
+        // Observe ONLY the current user's row. userDao.getUser() is
+        // SELECT * FROM users LIMIT 1 with no ORDER BY — after an account
+        // switch it could surface a stale row from the previous account
+        // before the fresh profile fetch lands.
+        int userId = tokenManager.getUserId();
+        if (userId > 0) {
+            userDao.getUserById(userId).observe(getViewLifecycleOwner(), user -> {
+                cachedUser = user;
+                if (adapter != null) {
+                    adapter.setCurrentUser(user);
+                }
+            });
+        }
     }
 
     private void observeViewModel() {
