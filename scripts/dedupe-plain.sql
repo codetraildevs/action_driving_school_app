@@ -140,42 +140,44 @@ UPDATE devices                         SET `user` = (SELECT merged_into FROM use
 UPDATE sessions                        SET `user` = (SELECT merged_into FROM users_dedupe_archive WHERE id = sessions.`user`)       WHERE `user` IN (SELECT id FROM users_dedupe_archive);
 UPDATE user_activities                 SET `user` = (SELECT merged_into FROM users_dedupe_archive WHERE id = user_activities.`user`)    WHERE `user` IN (SELECT id FROM users_dedupe_archive);
 UPDATE user_notifications              SET `user` = (SELECT merged_into FROM users_dedupe_archive WHERE id = user_notifications.`user`) WHERE `user` IN (SELECT id FROM users_dedupe_archive);
-UPDATE user_learning_materials         SET `user` = (SELECT merged_into FROM users_dedupe_archive WHERE id = user_learning_materials.`user`) WHERE `user` IN (SELECT id FROM users_dedupe_archive);
+UPDATE user_learning_materials         SET `user_id` = (SELECT merged_into FROM users_dedupe_archive WHERE id = user_learning_materials.`user_id`) WHERE `user_id` IN (SELECT id FROM users_dedupe_archive);
 UPDATE user_permissions                SET `user` = (SELECT merged_into FROM users_dedupe_archive WHERE id = user_permissions.`user`) WHERE `user` IN (SELECT id FROM users_dedupe_archive);
-UPDATE privacy_policy_acceptances      SET `user` = (SELECT merged_into FROM users_dedupe_archive WHERE id = privacy_policy_acceptances.`user`) WHERE `user` IN (SELECT id FROM users_dedupe_archive);
-UPDATE terms_of_service_acceptances    SET `user` = (SELECT merged_into FROM users_dedupe_archive WHERE id = terms_of_service_acceptances.`user`) WHERE `user` IN (SELECT id FROM users_dedupe_archive);
+UPDATE privacy_policy_acceptances      SET `user_id` = (SELECT merged_into FROM users_dedupe_archive WHERE id = privacy_policy_acceptances.`user_id`) WHERE `user_id` IN (SELECT id FROM users_dedupe_archive);
+UPDATE terms_of_service_acceptances    SET `user_id` = (SELECT merged_into FROM users_dedupe_archive WHERE id = terms_of_service_acceptances.`user_id`) WHERE `user_id` IN (SELECT id FROM users_dedupe_archive);
 UPDATE bookmarks                       SET `user` = (SELECT merged_into FROM users_dedupe_archive WHERE id = bookmarks.`user`)      WHERE `user` IN (SELECT id FROM users_dedupe_archive);
 UPDATE ratings                         SET `user` = (SELECT merged_into FROM users_dedupe_archive WHERE id = ratings.`user`)        WHERE `user` IN (SELECT id FROM users_dedupe_archive);
-UPDATE user_ratings                    SET `user` = (SELECT merged_into FROM users_dedupe_archive WHERE id = user_ratings.`user`)   WHERE `user` IN (SELECT id FROM users_dedupe_archive);
+UPDATE user_ratings                    SET `user_id` = (SELECT merged_into FROM users_dedupe_archive WHERE id = user_ratings.`user_id`)   WHERE `user_id` IN (SELECT id FROM users_dedupe_archive);
 UPDATE test_attempts                   SET `user` = (SELECT merged_into FROM users_dedupe_archive WHERE id = test_attempts.`user`)  WHERE `user` IN (SELECT id FROM users_dedupe_archive);
 UPDATE test_results                    SET `user` = (SELECT merged_into FROM users_dedupe_archive WHERE id = test_results.`user`) WHERE `user` IN (SELECT id FROM users_dedupe_archive);
 UPDATE transactions                    SET `user` = (SELECT merged_into FROM users_dedupe_archive WHERE id = transactions.`user`)   WHERE `user` IN (SELECT id FROM users_dedupe_archive);
 UPDATE user_subscriptions_request      SET `user` = (SELECT merged_into FROM users_dedupe_archive WHERE id = user_subscriptions_request.`user`) WHERE `user` IN (SELECT id FROM users_dedupe_archive);
-UPDATE irembo_driving_license_requests SET `user` = (SELECT merged_into FROM users_dedupe_archive WHERE id = irembo_driving_license_requests.`user`) WHERE `user` IN (SELECT id FROM users_dedupe_archive);
-UPDATE irembo_special_requests         SET `user` = (SELECT merged_into FROM users_dedupe_archive WHERE id = irembo_special_requests.`user`) WHERE `user` IN (SELECT id FROM users_dedupe_archive);
+UPDATE irembo_driving_license_requests SET `user_id` = (SELECT merged_into FROM users_dedupe_archive WHERE id = irembo_driving_license_requests.`user_id`) WHERE `user_id` IN (SELECT id FROM users_dedupe_archive);
+UPDATE irembo_special_requests         SET `user_id` = (SELECT merged_into FROM users_dedupe_archive WHERE id = irembo_special_requests.`user_id`) WHERE `user_id` IN (SELECT id FROM users_dedupe_archive);
 
--- Optional tables (guard with information_schema — absent in older schemas)
+-- Optional tables (guard with information_schema — absent in older schemas).
+-- Real table names per schema: loginAttemps (sic), privacyConsent,
+-- DataDeletionRequests, permissionlogs. All four use column `user`.
 SET @ddl = IF(
-  EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'login_attempts'),
-  'UPDATE login_attempts SET `user` = (SELECT merged_into FROM users_dedupe_archive a WHERE a.id = login_attempts.`user`) WHERE `user` IN (SELECT id FROM users_dedupe_archive)',
+  EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'loginAttemps'),
+  'UPDATE loginAttemps SET `user` = (SELECT merged_into FROM users_dedupe_archive a WHERE a.id = loginAttemps.`user`) WHERE `user` IN (SELECT id FROM users_dedupe_archive)',
   'SELECT 1');
 PREPARE s FROM @ddl; EXECUTE s; DEALLOCATE PREPARE s;
 
 SET @ddl = IF(
-  EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'privacy_consents'),
-  'UPDATE privacy_consents SET `user` = (SELECT merged_into FROM users_dedupe_archive a WHERE a.id = privacy_consents.`user`) WHERE `user` IN (SELECT id FROM users_dedupe_archive)',
+  EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'privacyConsent'),
+  'UPDATE privacyConsent SET `user` = (SELECT merged_into FROM users_dedupe_archive a WHERE a.id = privacyConsent.`user`) WHERE `user` IN (SELECT id FROM users_dedupe_archive)',
   'SELECT 1');
 PREPARE s FROM @ddl; EXECUTE s; DEALLOCATE PREPARE s;
 
 SET @ddl = IF(
-  EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'data_deletion_requests'),
-  'UPDATE data_deletion_requests SET `user` = (SELECT merged_into FROM users_dedupe_archive a WHERE a.id = data_deletion_requests.`user`) WHERE `user` IN (SELECT id FROM users_dedupe_archive)',
+  EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'DataDeletionRequests'),
+  'UPDATE DataDeletionRequests SET `user` = (SELECT merged_into FROM users_dedupe_archive a WHERE a.id = DataDeletionRequests.`user`) WHERE `user` IN (SELECT id FROM users_dedupe_archive)',
   'SELECT 1');
 PREPARE s FROM @ddl; EXECUTE s; DEALLOCATE PREPARE s;
 
 SET @ddl = IF(
-  EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'permission_logs'),
-  'UPDATE permission_logs SET `user` = (SELECT merged_into FROM users_dedupe_archive a WHERE a.id = permission_logs.`user`) WHERE `user` IN (SELECT id FROM users_dedupe_archive)',
+  EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'permissionlogs'),
+  'UPDATE permissionlogs SET `user` = (SELECT merged_into FROM users_dedupe_archive a WHERE a.id = permissionlogs.`user`) WHERE `user` IN (SELECT id FROM users_dedupe_archive)',
   'SELECT 1');
 PREPARE s FROM @ddl; EXECUTE s; DEALLOCATE PREPARE s;
 

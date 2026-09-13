@@ -174,24 +174,26 @@ BEGIN
     UPDATE sessions                        SET `user` = p_keep_id WHERE `user` = p_drop_id;  SET v_moved = v_moved + ROW_COUNT();
     UPDATE user_activities                 SET `user` = p_keep_id WHERE `user` = p_drop_id;  SET v_moved = v_moved + ROW_COUNT();
     UPDATE user_notifications              SET `user` = p_keep_id WHERE `user` = p_drop_id;  SET v_moved = v_moved + ROW_COUNT();
-    UPDATE user_learning_materials         SET `user` = p_keep_id WHERE `user` = p_drop_id;  SET v_moved = v_moved + ROW_COUNT();
+    UPDATE user_learning_materials         SET `user_id` = p_keep_id WHERE `user_id` = p_drop_id;  SET v_moved = v_moved + ROW_COUNT();
     UPDATE user_permissions                SET `user` = p_keep_id WHERE `user` = p_drop_id;  SET v_moved = v_moved + ROW_COUNT();
-    UPDATE privacy_policy_acceptances      SET `user` = p_keep_id WHERE `user` = p_drop_id;  SET v_moved = v_moved + ROW_COUNT();
-    UPDATE terms_of_service_acceptances    SET `user` = p_keep_id WHERE `user` = p_drop_id;  SET v_moved = v_moved + ROW_COUNT();
+    UPDATE privacy_policy_acceptances      SET `user_id` = p_keep_id WHERE `user_id` = p_drop_id;  SET v_moved = v_moved + ROW_COUNT();
+    UPDATE terms_of_service_acceptances    SET `user_id` = p_keep_id WHERE `user_id` = p_drop_id;  SET v_moved = v_moved + ROW_COUNT();
     UPDATE bookmarks                       SET `user` = p_keep_id WHERE `user` = p_drop_id;  SET v_moved = v_moved + ROW_COUNT();
     UPDATE ratings                         SET `user` = p_keep_id WHERE `user` = p_drop_id;  SET v_moved = v_moved + ROW_COUNT();
-    UPDATE user_ratings                    SET `user` = p_keep_id WHERE `user` = p_drop_id;  SET v_moved = v_moved + ROW_COUNT();
+    UPDATE user_ratings                    SET `user_id` = p_keep_id WHERE `user_id` = p_drop_id;  SET v_moved = v_moved + ROW_COUNT();
     UPDATE test_attempts                   SET `user` = p_keep_id WHERE `user` = p_drop_id;  SET v_moved = v_moved + ROW_COUNT();
     UPDATE test_results                    SET `user` = p_keep_id WHERE `user` = p_drop_id;  SET v_moved = v_moved + ROW_COUNT();
     UPDATE transactions                    SET `user` = p_keep_id WHERE `user` = p_drop_id;  SET v_moved = v_moved + ROW_COUNT();
     UPDATE user_subscriptions_request      SET `user` = p_keep_id WHERE `user` = p_drop_id;  SET v_moved = v_moved + ROW_COUNT();
-    UPDATE irembo_driving_license_requests SET `user` = p_keep_id WHERE `user` = p_drop_id;  SET v_moved = v_moved + ROW_COUNT();
-    UPDATE irembo_special_requests         SET `user` = p_keep_id WHERE `user` = p_drop_id;  SET v_moved = v_moved + ROW_COUNT();
+    UPDATE irembo_driving_license_requests SET `user_id` = p_keep_id WHERE `user_id` = p_drop_id;  SET v_moved = v_moved + ROW_COUNT();
+    UPDATE irembo_special_requests         SET `user_id` = p_keep_id WHERE `user_id` = p_drop_id;  SET v_moved = v_moved + ROW_COUNT();
 
     -- Optional tables (present in newer schemas, absent in older dumps):
     -- login_attempts, privacy_consents, data_deletion_requests, permission_logs.
     -- Guarded with information_schema so this runs on any schema version.
-    SET @opt_tables = 'login_attempts,privacy_consents,data_deletion_requests,permission_logs';
+    -- Real table names per schema: loginAttemps (sic), privacyConsent,
+    -- DataDeletionRequests, permissionlogs. All four use column `user`.
+    SET @opt_tables = 'loginAttemps,privacyConsent,DataDeletionRequests,permissionlogs';
     opt_loop: REPEAT
       SET @t = SUBSTRING_INDEX(@opt_tables, ',', 1);
       SET @opt_tables = SUBSTRING(@opt_tables, LENGTH(@t) + 2);
