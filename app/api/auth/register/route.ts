@@ -11,6 +11,29 @@ import { sendFCMNotification } from "@/lib/notification";
 // admins only. The client-supplied role is intentionally ignored.
 const STUDENT_ROLE_ID = 5;
 
+/**
+ * Canonical storage format for Rwandan phone numbers: local `07XXXXXXXX`
+ * (10 digits, no spaces). Registration normalizes every submission to this
+ * ONE format so the same number can never exist as two rows (`07…` AND
+ * `+250…`). That duplicate-format pair is exactly what caused the
+ * cross-user profile leak — production was deduped on 2026-09-13; this
+ * prevents new pairs from forming.
+ * Returns null for anything that is not a valid Rwandan number.
+ */
+function normalizeRwandaPhone(raw: string): string | null {
+  const digits = raw.replace(/\D/g, "");
+  if (!digits) return null;
+  let local: string;
+  if (digits.startsWith("250")) {
+    local = "0" + digits.slice(3); // +250732657995 → 0732657995
+  } else if (digits.startsWith("0")) {
+    local = digits; // 0732657995 → unchanged
+  } else {
+    local = "0" + digits; // 732657995 → 0732657995
+  }
+  return /^0\d{9}$/.test(local) ? local : null;
+}
+
 const loginSchema = z.object({
   firstName: z.string(),
   middleName: z.string().optional(),
@@ -36,7 +59,7 @@ const loginSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    console.log(body);
+    // Never log the raw body: it contains the password.
 
     const {
       firstName,
@@ -53,15 +76,30 @@ export async function POST(request: NextRequest) {
       device,
     } = loginSchema.parse(body);
 
+    // Normalize the phone BEFORE any uniqueness check so a number already
+    // registered in the other format is correctly detected as taken.
+    const normalizedPhone = normalizeRwandaPhone(phoneNumber);
+    if (!normalizedPhone) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Invalid Rwandan phone number. Use e.g. 0732657995 or +250732657995.",
+        },
+        { status: 400 },
+      );
+    }
+
     const userAddress = { ...body.address };
     const userDevice = { ...body.device };
 
     const result = await prisma.$transaction(
       async (tx) => {
-        // Check for existing user
+        // Check for existing user — the stored format is already canonical,
+        // so an exact match is a true duplicate across all formats.
         const existingUser = await tx.user.findFirst({
           where: {
-            OR: [{ phoneNumber: phoneNumber }],
+            OR: [{ phoneNumber: normalizedPhone }],
           },
         });
         const existingDevice = await tx.device.findFirst({
@@ -157,7 +195,7 @@ export async function POST(request: NextRequest) {
             firstName,
             lastName,
             middleName,
-            phoneNumber,
+            phoneNumber: normalizedPhone,
             isActive: true,
             email,
             roleId: userRole.id,
@@ -280,6 +318,17 @@ export async function POST(request: NextRequest) {
     }
 
     console.error("Registration error:", error);
+    // Concurrent registrations of the same number lose the unique-index
+    // race: surface it as the same 409 the pre-check produces.
+    if ((error as { code?: string })?.code === "P2002") {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "User with that phone number already exists",
+        },
+        { status: 409 },
+      );
+    }
     return NextResponse.json(
       {
         success: false,
