@@ -4,8 +4,8 @@
 # 07…/+250… account pairs in production.
 #
 # Usage (on the VPS, from /home/project3):
-#   bash sql/dedupe-duplicates.sh           # interactive: backup → preview → confirm → merge → verify
-#   bash sql/dedupe-duplicates.sh --report  # read-only preview, no changes
+#   bash scripts/dedupe-duplicates.sh           # interactive: backup → preview → confirm → merge → verify
+#   bash scripts/dedupe-duplicates.sh --report  # read-only preview, no changes
 #
 # Reads DB credentials from .env (DATABASE_URL), same as the app.
 # ============================================================================
@@ -81,7 +81,7 @@ fi
 # ── 4. Run the merge ─────────────────────────────────────────────────────────
 echo ""
 echo "[4/4] Running merge…"
-$MYSQL < sql/dedupe-accounts.sql
+$MYSQL < scripts/dedupe-accounts.sql
 
 echo ""
 echo "═══════════════════════════════════════════════════════"
