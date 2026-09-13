@@ -33,7 +33,7 @@ const prisma = new PrismaClient({
   const count = parseInt(process.argv[2] || "6", 10);
 
   const admin = await prisma.user.findFirst({
-    where: { role: { role_name: { in: ["admin", "super_admin"] } } },
+    where: { role: { roleName: { in: ["admin", "super_admin"] } } },
     select: { id: true, phoneNumber: true, isActive: true, role: { select: { role_name: true } } },
     orderBy: { id: "asc" },
   });
