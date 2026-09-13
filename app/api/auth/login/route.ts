@@ -45,8 +45,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { identifier, password, deviceId, clientType } = loginSchema.parse(body);
-    // [AUTH-DEBUG] Never log the body here: it contains the raw password.
-    console.log(`[AUTH-DEBUG] login attempt: identifier=${identifier} deviceId=${deviceId ? 'present' : 'absent'} clientType=${clientType ?? 'console'}`);
+    // Never log the body here: it contains the raw password.
 
    let userData: any = null;
    const resp= await prisma.$transaction(async (tx) => {
@@ -88,7 +87,6 @@ export async function POST(request: NextRequest) {
       }
 
       if (candidates.length === 0) {
-        console.log(`[AUTH-DEBUG] login failed: no account matches identifier=${identifier}`);
         return NextResponse.json(
           {
             success: false,
@@ -97,12 +95,6 @@ export async function POST(request: NextRequest) {
           { status: 401 }
         );
       }
-
-      // [AUTH-DEBUG] Show every account the lookup resolved to.
-      console.log(
-        `[AUTH-DEBUG] login candidates for identifier=${identifier}: ` +
-          candidates.map((c) => `userId=${c.id} phone=${c.phoneNumber}`).join(" | ")
-      );
 
       // Console roles (admin / super_admin) can sign in from any device; regular
       // users are bound to their registered device (one account per device).
@@ -120,8 +112,6 @@ export async function POST(request: NextRequest) {
         if (!isAdminRoleName(candidate.role.roleName)) {
           const deviceMatch = deviceId && candidate.devices.some((d) => d.physicalAddress === deviceId);
           if (!deviceMatch) {
-            sawDeviceMismatch = true;
-            console.log(`[AUTH-DEBUG] login device mismatch: userId=${candidate.id} deviceId=${deviceId} registered=${candidate.devices.map((d) => d.physicalAddress).join(",") || "none"}`);
             continue;
           }
         }
@@ -137,7 +127,6 @@ export async function POST(request: NextRequest) {
             : await bcrypt.compare(password, candidate.password);
         if (!isPasswordValid) {
           sawBadPassword = true;
-          console.log(`[AUTH-DEBUG] login invalid password: userId=${candidate.id} phone=${candidate.phoneNumber}`);
           continue;
         }
         user = candidate;
@@ -189,10 +178,6 @@ export async function POST(request: NextRequest) {
 
       const accessToken = generateAccessToken(tokenPayload);
       const refreshToken = generateRefreshToken(tokenPayload);
-      // [AUTH-DEBUG] The token's embedded userId MUST equal the looked-up
-      // account. If these ever diverge, the token would authenticate profile
-      // requests as a different user.
-      console.log(`[AUTH-DEBUG] login token issued: token.userId=${tokenPayload.userId} db.userId=${user.id} phone=${user.phoneNumber}`);
       const device = await tx.device.findFirst({
         where: { userId: user.id, physicalAddress: deviceId },
       });
@@ -216,8 +201,6 @@ export async function POST(request: NextRequest) {
       });
       
       userData = user;
-      
-      console.log(`[AUTH-DEBUG] login success: requested=${identifier} resolved.userId=${user.id} resolved.phone=${user.phoneNumber} response.phone=${user.phoneNumber}`);
       
       return NextResponse.json(
         {

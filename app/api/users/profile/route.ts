@@ -50,13 +50,11 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ success: false, error: "No editable fields provided" }, { status: 400 });
     }
 
-    console.log(`[AUTH-DEBUG] /profile PUT: token.userId=${userId} fields=${Object.keys(data).join(",")}`);
-
     await prisma.user.update({
       where: { id: userId },
       data,
     });
-
+
     // Re-read the full profile so the response shape matches GET exactly.
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -78,7 +76,7 @@ export async function PUT(request: NextRequest) {
         { status: 404 }
       );
     }
-
+
     const timezoneName = await resolveTimezoneName(user.userTimezone, user.timezoneId);
 
     const userProfile = {
@@ -97,8 +95,6 @@ export async function PUT(request: NextRequest) {
       createdAt: user.createdAt.toISOString(),
       userTestAccess:user.userTestAccess
     };
-
-    console.log(`[AUTH-DEBUG] /profile PUT response: token.userId=${userId} response.userId=${userProfile.id}`);
 
     const res = NextResponse.json({
       success: true,
@@ -133,9 +129,6 @@ export async function GET(request: NextRequest) {
     
    
     const userId = payload.userId;
-    // [AUTH-DEBUG] The profile MUST be resolved from the token's userId —
-    // never from a query/body id, a default/first row, or cached state.
-    console.log(`[AUTH-DEBUG] /profile request: token.userId=${userId}`);
 
  
     const user = await prisma.user.findUnique({
@@ -180,8 +173,6 @@ export async function GET(request: NextRequest) {
       createdAt: user.createdAt.toISOString(),
       userTestAccess:user.userTestAccess
     };
-    console.log(`[AUTH-DEBUG] /profile response: token.userId=${userId} response.userId=${userProfile.id} response.phone=${userProfile.phoneNumber}`);
-
     const res = NextResponse.json({
       success: true,
       data: userProfile,

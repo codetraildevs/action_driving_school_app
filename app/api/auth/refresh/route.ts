@@ -70,10 +70,6 @@ export async function POST(request: NextRequest) {
     const newAccessToken = generateAccessToken(tokenPayload);
     const newRefreshToken = generateRefreshToken(tokenPayload);
 
-    // [AUTH-DEBUG] Refreshed tokens must keep the SAME userId as the incoming
-    // refresh token — a mismatch here would silently switch user identity.
-    console.log(`[AUTH-DEBUG] refresh: incoming.userId=${payload.userId} new-token.userId=${tokenPayload.userId}`);
-
     const res = NextResponse.json(
       {
         success: true,

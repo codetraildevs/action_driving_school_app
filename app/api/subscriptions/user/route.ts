@@ -36,9 +36,6 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // [AUTH-DEBUG] Subscription row must belong to the token's user.
-    console.log(`[AUTH-DEBUG] /subscriptions/user GET: token.userId=${payload.userId} row.userId=${userSubscription ? userSubscription.userId : 'none'}`);
-
     const res = NextResponse.json({ success: true, data: userSubscription });
     // Private, per-user response: never let an intermediary cache serve one
     // user's subscription to another.
