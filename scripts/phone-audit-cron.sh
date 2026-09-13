@@ -24,6 +24,21 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
+# ── Self-rotation: keep logs/phone-audit.log under 5 MB ───────────────────
+# Rotates the AUDIT log (and its own wrapper log, when run from cron) so the
+# weekly output never grows unbounded. No root needed, no logrotate config.
+rotate_log() {
+  local f="$1" max=$((5 * 1024 * 1024))
+  [ -f "$f" ] || return 0
+  if [ "$(stat -c%s "$f" 2>/dev/null || echo 0)" -ge "$max" ]; then
+    mv "$f" "$f.1"
+    # Keep at most 2 old generations (current + .1), drop anything older.
+    rm -f "$f.2"
+  fi
+}
+rotate_log logs/phone-audit.log
+rotate_log logs/phone-audit-cron.log
+
 mkdir -p logs
 LOG="logs/phone-audit.log"
 STAMP="$(date '+%Y-%m-%d %H:%M:%S %Z')"
