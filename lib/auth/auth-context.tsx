@@ -75,6 +75,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     localStorage.removeItem("admin_token");
     localStorage.removeItem("admin_user");
+    // Also drop the refresh token: leaving it behind lets a stray 401 after
+    // logout mint a fresh access token for the PREVIOUS user (apiClient
+    // refreshes from localStorage), so the next account could see the old
+    // account's data. This is a cross-account data-leak bug, not a nicety.
+    localStorage.removeItem("admin_refresh_token");
     setToken(null);
     setUser(null);
     router.push("/admin/login");

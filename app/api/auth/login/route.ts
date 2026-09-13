@@ -45,41 +45,50 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { identifier, password, deviceId, clientType } = loginSchema.parse(body);
-    console.log(body)
+    // [AUTH-DEBUG] Never log the body here: it contains the raw password.
+    console.log(`[AUTH-DEBUG] login attempt: identifier=${identifier} deviceId=${deviceId ? 'present' : 'absent'} clientType=${clientType ?? 'console'}`);
 
    let userData: any = null;
    const resp= await prisma.$transaction(async (tx) => {
       const variants = phoneVariants(identifier);
 
-      // 1. Try an exact match first (fastest & most reliable).
-      let user = await tx.user.findFirst({
-        where: { phoneNumber: identifier },
-        include: {
-          role: true,
-          language: true,
-          userTimezone: { include: { timezone: true } },
-          devices: true,
-        },
-      });
-
-      // 2. Fall back to variant matching only when no exact match exists.
-      //    When multiple variants match different rows, prefer the exact
-      //    phone format that the user typed (it's first in the list) so we
-      //    never silently return the wrong account.
-      if (!user) {
-        user = await tx.user.findFirst({
-          where: { phoneNumber: { in: variants } },
-          orderBy: { id: 'asc' },
+      // Collect EVERY account matching the typed number in any supported
+      // format, in typed-format priority (exact first, then +250…, then 250…).
+      //
+      // Why not pick one row before the credential checks? The production
+      // database contains duplicate account pairs for the same phone number
+      // stored in different formats (legacy 07… rows next to newer +250…
+      // rows — see diag-phone-audit.js). Committing to a single row before
+      // verifying password/device can authenticate the WRONG person and issue
+      // their token — exactly the reported "logged in as A, profile shows B"
+      // bug. Identity is only known after the credential checks, so every
+      // candidate is evaluated and the first one that passes device +
+      // password checks wins.
+      const fetchCandidateRows = (phone: string) =>
+        tx.user.findMany({
+          where: { phoneNumber: phone },
           include: {
             role: true,
             language: true,
             userTimezone: { include: { timezone: true } },
             devices: true,
           },
+          orderBy: { id: "asc" },
         });
+
+      const candidates: Awaited<ReturnType<typeof fetchCandidateRows>> = [];
+      const seenIds = new Set<number>();
+      for (const variant of variants) {
+        for (const row of await fetchCandidateRows(variant)) {
+          if (!seenIds.has(row.id)) {
+            seenIds.add(row.id);
+            candidates.push(row);
+          }
+        }
       }
 
-      if (!user) {
+      if (candidates.length === 0) {
+        console.log(`[AUTH-DEBUG] login failed: no account matches identifier=${identifier}`);
         return NextResponse.json(
           {
             success: false,
@@ -89,22 +98,65 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      if (!user.isActive) {
-        return NextResponse.json(
-          {
-            success: false,
-            message: "Account is not active. Please contact support.",
-          },
-          { status: 403 }
-        );
-      }
+      // [AUTH-DEBUG] Show every account the lookup resolved to.
+      console.log(
+        `[AUTH-DEBUG] login candidates for identifier=${identifier}: ` +
+          candidates.map((c) => `userId=${c.id} phone=${c.phoneNumber}`).join(" | ")
+      );
 
       // Console roles (admin / super_admin) can sign in from any device; regular
       // users are bound to their registered device (one account per device).
-      if (!isAdminRoleName(user.role.roleName)) {
-        // Optional chaining guards against legacy accounts without a device
-        // record, so they get a clear 403 instead of a 500 crash.
-        if (user.devices[0]?.physicalAddress != deviceId) {
+      // Device matching considers ALL of the user's registered devices —
+      // checking only devices[0] silently ignored every device after the first.
+      let user: (typeof candidates)[number] | null = null;
+      let sawInactive = false;
+      let sawDeviceMismatch = false;
+      let sawBadPassword = false;
+      for (const candidate of candidates) {
+        if (!candidate.isActive) {
+          sawInactive = true;
+          continue;
+        }
+        if (!isAdminRoleName(candidate.role.roleName)) {
+          const deviceMatch = deviceId && candidate.devices.some((d) => d.physicalAddress === deviceId);
+          if (!deviceMatch) {
+            sawDeviceMismatch = true;
+            console.log(`[AUTH-DEBUG] login device mismatch: userId=${candidate.id} deviceId=${deviceId} registered=${candidate.devices.map((d) => d.physicalAddress).join(",") || "none"}`);
+            continue;
+          }
+        }
+        // Verify password. Admins logging in from the native Android app use
+        // phone-only (shared login from any device), so their password check
+        // is skipped when the request explicitly originates from the app. The
+        // web console does not send clientType, so console logins ALWAYS
+        // require the real password. Regular users are unchanged (their
+        // password is their device id).
+        const isPasswordValid =
+          isAdminRoleName(candidate.role.roleName) && clientType === "android_app"
+            ? true
+            : await bcrypt.compare(password, candidate.password);
+        if (!isPasswordValid) {
+          sawBadPassword = true;
+          console.log(`[AUTH-DEBUG] login invalid password: userId=${candidate.id} phone=${candidate.phoneNumber}`);
+          continue;
+        }
+        user = candidate;
+        break;
+      }
+
+      if (!user) {
+        // No candidate passed the credential checks. Preserve the original
+        // single-account error precedence: inactive → device → credentials.
+        if (sawInactive && candidates.every((c) => !c.isActive)) {
+          return NextResponse.json(
+            {
+              success: false,
+              message: "Account is not active. Please contact support.",
+            },
+            { status: 403 }
+          );
+        }
+        if (sawDeviceMismatch && !sawBadPassword) {
           return NextResponse.json(
             {
               success: false,
@@ -114,19 +166,6 @@ export async function POST(request: NextRequest) {
             { status: 403 }
           );
         }
-      }
-
-      // Verify password.
-      // Admins logging in from the native Android app use phone-only (shared
-      // login from any device), so their password check is skipped when the
-      // request explicitly originates from the app. The web console does not
-      // send clientType, so console logins ALWAYS require the real password.
-      // Regular users are unchanged (their password is their device id).
-      const isPasswordValid =
-        isAdminRoleName(user.role.roleName) && clientType === "android_app"
-          ? true
-          : await bcrypt.compare(password, user.password);
-      if (!isPasswordValid) {
         return NextResponse.json(
           {
             success: false,
@@ -150,6 +189,10 @@ export async function POST(request: NextRequest) {
 
       const accessToken = generateAccessToken(tokenPayload);
       const refreshToken = generateRefreshToken(tokenPayload);
+      // [AUTH-DEBUG] The token's embedded userId MUST equal the looked-up
+      // account. If these ever diverge, the token would authenticate profile
+      // requests as a different user.
+      console.log(`[AUTH-DEBUG] login token issued: token.userId=${tokenPayload.userId} db.userId=${user.id} phone=${user.phoneNumber}`);
       const device = await tx.device.findFirst({
         where: { userId: user.id, physicalAddress: deviceId },
       });
@@ -173,6 +216,8 @@ export async function POST(request: NextRequest) {
       });
       
       userData = user;
+      
+      console.log(`[AUTH-DEBUG] login success: requested=${identifier} resolved.userId=${user.id} resolved.phone=${user.phoneNumber} response.phone=${user.phoneNumber}`);
       
       return NextResponse.json(
         {

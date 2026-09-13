@@ -70,7 +70,11 @@ export async function POST(request: NextRequest) {
     const newAccessToken = generateAccessToken(tokenPayload);
     const newRefreshToken = generateRefreshToken(tokenPayload);
 
-    return NextResponse.json(
+    // [AUTH-DEBUG] Refreshed tokens must keep the SAME userId as the incoming
+    // refresh token — a mismatch here would silently switch user identity.
+    console.log(`[AUTH-DEBUG] refresh: incoming.userId=${payload.userId} new-token.userId=${tokenPayload.userId}`);
+
+    const res = NextResponse.json(
       {
         success: true,
         message: "Token refreshed successfully",
@@ -79,6 +83,8 @@ export async function POST(request: NextRequest) {
       },
       { status: 200 }
     );
+    res.headers.set('Cache-Control', 'no-store, private');
+    return res;
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(

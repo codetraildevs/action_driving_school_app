@@ -36,7 +36,14 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ success: true, data: userSubscription });
+    // [AUTH-DEBUG] Subscription row must belong to the token's user.
+    console.log(`[AUTH-DEBUG] /subscriptions/user GET: token.userId=${payload.userId} row.userId=${userSubscription ? userSubscription.userId : 'none'}`);
+
+    const res = NextResponse.json({ success: true, data: userSubscription });
+    // Private, per-user response: never let an intermediary cache serve one
+    // user's subscription to another.
+    res.headers.set('Cache-Control', 'no-store, private');
+    return res;
   } catch (error) {
     console.error("Get user subscription error:", error);
     return NextResponse.json(
