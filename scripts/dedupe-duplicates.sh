@@ -4,13 +4,21 @@
 # 07…/+250… account pairs in production.
 #
 # Usage (on the VPS, from /home/project3):
-#   bash scripts/dedupe-duplicates.sh           # interactive: backup → preview → confirm → merge → verify
-#   bash scripts/dedupe-duplicates.sh --report  # read-only preview, no changes
+#   bash scripts/dedupe-duplicates.sh              # interactive: backup → preview → confirm → merge → verify
+#   bash scripts/dedupe-duplicates.sh --report     # read-only preview, no changes
+#   bash scripts/dedupe-duplicates.sh --plain      # fallback: plain-SQL dedupe (no stored procedures)
 #
 # Reads DB credentials from .env (DATABASE_URL), same as the app.
 # ============================================================================
 set -euo pipefail
 cd "$(dirname "$0")/.."
+
+# ── Select the merge script ──────────────────────────────────────────────────
+MERGE_SQL="scripts/dedupe-accounts.sql"          # stored-procedure version (default)
+if [[ "${1:-}" == "--plain" ]]; then
+  MERGE_SQL="scripts/dedupe-plain.sql"           # plain DELETE/UPDATE fallback
+  echo ">> Fallback mode: plain-SQL dedupe (no stored procedures)"
+fi
 
 # ── Load .env ────────────────────────────────────────────────────────────────
 for line in $(cat .env); do
@@ -80,8 +88,8 @@ fi
 
 # ── 4. Run the merge ─────────────────────────────────────────────────────────
 echo ""
-echo "[4/4] Running merge…"
-$MYSQL < scripts/dedupe-accounts.sql
+echo "[4/4] Running merge ($MERGE_SQL)…"
+$MYSQL < "$MERGE_SQL"
 
 echo ""
 echo "═══════════════════════════════════════════════════════"
