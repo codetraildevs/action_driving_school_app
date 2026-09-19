@@ -25,6 +25,7 @@ Thumbs.db
 
 # Build artifacts
 *.tar.gz
+tsconfig.tsbuildinfo
 *.zip
 
 # SQL dumps (too large for git)
@@ -43,6 +44,7 @@ cleanup-stale-files.js
 check-login.js
 debug-login2.js
 reset-password.js
+diag-login.js
 
 # Android files (NOT needed for backend)
 baseline-profile/
