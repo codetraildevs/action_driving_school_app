@@ -1,6 +1,5 @@
 {
     "files.exclude": {
-        "/dev_website": true,
         "/app": true,
         "/build": true,
         "/.gradle": true,
@@ -49,7 +48,6 @@
         "/*.aab": true
     },
     "search.exclude": {
-        "/dev_website": true,
         "/node_modules": true,
         "/diag-*.js": true,
         "/.gradle": true,
