@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — Rwanda Traffic Rule</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      color: #1f2937; background: #0F0F23; line-height: 1.75; overflow-x: hidden;
+    }
+
+    /* ── Animated background ──────────────────────── */
+    .bg-wrap { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .bg-wrap .orb {
+      position: absolute; border-radius: 50%; filter: blur(100px); opacity: .35;
+      animation: drift 18s ease-in-out infinite alternate;
+    }
+    .bg-wrap .orb:nth-child(1) { width: 500px; height: 500px; background: #00039E; top: -10%; left: -10%; }
+    .bg-wrap .orb:nth-child(2) { width: 400px; height: 400px; background: #3B82F6; bottom: -5%; right: -10%; animation-delay: -6s; }
+    .bg-wrap .orb:nth-child(3) { width: 300px; height: 300px; background: #F97316; top: 40%; left: 50%; animation-delay: -12s; }
+    @keyframes drift {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(40px, -30px) scale(1.15); }
+    }
+
+    /* ── Hero ─────────────────────────────────────── */
+    .hero {
+      position: relative; z-index: 1; text-align: center;
+      padding: 5rem 1.5rem 4rem; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(0,3,158,.25) 0%, transparent 60%);
+    }
+    .hero .shield {
+      width: 80px; height: 80px; margin: 0 auto 1.5rem;
+      background: linear-gradient(135deg, #00039E 0%, #3B82F6 100%);
+      border-radius: 24px; display: flex; align-items: center; justify-content: center;
+      font-size: 2.2rem; box-shadow: 0 0 40px rgba(0,3,158,.5);
+      animation: pulse-glow 3s ease-in-out infinite;
+    }
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 40px rgba(0,3,158,.4); }
+      50% { box-shadow: 0 0 60px rgba(0,3,158,.6), 0 0 100px rgba(59,130,246,.3); }
+    }
+    .hero h1 {
+      font-size: 2.4rem; font-weight: 800; color: #fff;
+      background: linear-gradient(135deg, #fff 0%, #93c5fd 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; margin-bottom: .5rem;
+    }
+    .hero p { color: rgba(255,255,255,.7); font-size: 1.05rem; max-width: 480px; margin: 0 auto; }
+    .hero .badge {
+      display: inline-flex; align-items: center; gap: .4rem; margin-top: 1.25rem;
+      background: rgba(255,255,255,.08); backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,.12); border-radius: 999px;
+      padding: .4rem 1.2rem; font-size: .8rem; color: rgba(255,255,255,.8); font-weight: 600;
+    }
+    .badge::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #34d399; }
+
+    /* ── Container ────────────────────────────────── */
+    .container {
+      position: relative; z-index: 1;
+      max-width: 780px; margin: -1.5rem auto 4rem; padding: 0 1.25rem;
+    }
+
+    /* ── Glass card ───────────────────────────────── */
+    .card {
+      background: rgba(255,255,255,.05); backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,.08); border-radius: 20px;
+      padding: 2rem; margin-bottom: 1.25rem; transition: transform .25s, border-color .25s;
+    }
+    .card:hover { transform: translateY(-3px); border-color: rgba(0,3,158,.3); }
+    .card-header { display: flex; align-items: center; gap: .75rem; margin-bottom: 1.1rem; }
+    .card-header .num {
+      width: 36px; height: 36px; border-radius: 12px; display: flex;
+      align-items: center; justify-content: center; font-weight: 700;
+      font-size: .85rem; color: #fff; flex-shrink: 0;
+      background: linear-gradient(135deg, #00039E, #3B82F6);
+    }
+    .card-header h2 { font-size: 1.2rem; font-weight: 700; color: #f1f5f9; }
+
+    /* ── Typography ───────────────────────────────── */
+    p { font-size: .92rem; color: rgba(255,255,255,.65); margin-bottom: .5rem; }
+    h3 { font-size: .95rem; font-weight: 600; margin: 1rem 0 .5rem; color: #60A5FA; }
+    strong { color: rgba(255,255,255,.85); }
+    code { background: rgba(0,3,158,.2); padding: .15rem .4rem; border-radius: 4px; font-size: .82rem; color: #60A5FA; }
+
+    /* ── Data table ───────────────────────────────── */
+    .data-table { width: 100%; border-collapse: collapse; margin: .75rem 0; }
+    .data-table th, .data-table td {
+      text-align: left; padding: .65rem .8rem; font-size: .88rem;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .data-table th { color: #60A5FA; font-weight: 600; }
+    .data-table td { color: rgba(255,255,255,.6); }
+    .data-table tr:hover td { background: rgba(0,3,158,.08); }
+
+    /* ── Lists ────────────────────────────────────── */
+    ul.data-list { list-style: none; padding: 0; }
+    ul.data-list li {
+      padding: .55rem 0; border-bottom: 1px solid rgba(255,255,255,.05);
+      display: flex; align-items: flex-start; gap: .55rem; font-size: .9rem;
+      color: rgba(255,255,255,.65);
+    }
+    ul.data-list li::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #00039E; margin-top: 8px; flex-shrink: 0; }
+    ul.rights-list { list-style: none; padding: 0; }
+    ul.rights-list li {
+      padding: .65rem 0; border-bottom: 1px solid rgba(255,255,255,.05);
+      font-size: .9rem; color: rgba(255,255,255,.65);
+    }
+    ul.rights-list li strong { color: #3B82F6; }
+
+    /* ── Highlight box ────────────────────────────── */
+    .highlight {
+      background: rgba(0,3,158,.08); border-left: 3px solid #3B82F6;
+      border-radius: 0 14px 14px 0; padding: 1rem 1.25rem; margin: .75rem 0;
+    }
+    .highlight p { color: #93c5fd; margin: 0; }
+    .highlight.warn {
+      background: rgba(249,115,22,.08); border-left-color: #F97316;
+    }
+    .highlight.warn p { color: #FB923C; }
+
+    /* ── Contact ──────────────────────────────────── */
+    .contact-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem; margin-top: 1rem;
+    }
+    .contact-item {
+      background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+      border-radius: 16px; padding: 1.25rem; text-align: center;
+      transition: border-color .25s, transform .25s;
+    }
+    .contact-item:hover { border-color: rgba(0,3,158,.4); transform: translateY(-2px); }
+    .contact-item .label { font-size: .7rem; color: rgba(255,255,255,.4); text-transform: uppercase; letter-spacing: .08em; }
+    .contact-item .value { font-weight: 700; color: #f1f5f9; margin-top: .3rem; font-size: .95rem; }
+
+    /* ── Footer ───────────────────────────────────── */
+    .footer {
+      position: relative; z-index: 1;
+      text-align: center; padding: 2.5rem 1.25rem; font-size: .8rem; color: rgba(255,255,255,.3);
+    }
+
+    /* ── Scroll reveal ────────────────────────────── */
+    .reveal {
+      opacity: 0; transform: translateY(24px);
+      transition: opacity .5s ease, transform .5s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── Responsive ───────────────────────────────── */
+    @media (max-width: 640px) {
+      .hero { padding: 3.5rem 1rem 3rem; }
+      .hero h1 { font-size: 1.7rem; }
+      .hero .shield { width: 64px; height: 64px; font-size: 1.7rem; border-radius: 18px; }
+      .container { margin-top: -1rem; padding: 0 .75rem; }
+      .card { padding: 1.35rem; border-radius: 16px; }
+      .data-table th, .data-table td { padding: .45rem .5rem; font-size: .82rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-wrap"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="shield">&#x1F6E1;&#xFE0F;</div>
+    <h1>Privacy Policy</h1>
+    <p>Your privacy matters to us. Here's how Rwanda Traffic Rule handles your data.</p>
+    <span class="badge">Last updated: April 2026</span>
+  </header>
+
+  <main class="container">
+
+    <section class="card reveal">
+      <div class="card-header">
+        <span class="num">1</span>
+        <h2>Introduction</h2>
+      </div>
+      <p>Rwanda Traffic Rule (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;) is committed to protecting your personal data and respecting your privacy. This Privacy Policy explains what data we collect, how we use it, and your rights regarding that data.</p>
+      <p>This policy applies to the <strong>Rwanda Traffic Rule</strong> mobile application (the &ldquo;App&rdquo;), available on Android.</p>
+    </section>
+
+    <section class="card reveal">
+      <div class="card-header">
+        <span class="num">2</span>
+        <h2>Data We Collect</h2>
+      </div>
+      <h3>2.1 Account Information</h3>
+      <ul class="data-list">
+        <li><strong>Full name</strong> &mdash; to personalise your experience</li>
+        <li><strong>Phone number</strong> &mdash; used as your unique login credential</li>
+      </ul>
+      <h3>2.2 Device Identifier</h3>
+      <p>We collect a <strong>SHA-256 hashed Android ID</strong> (a device fingerprint). This is a one-way hash of your device's <code>Settings.Secure.ANDROID_ID</code>. It cannot be reversed to reveal the original identifier.</p>
+      <div class="highlight">
+        <p>&#x1F512; The device ID is stored only as a cryptographic hash &mdash; never in plaintext.</p>
+      </div>
+      <div class="highlight warn">
+        <p>&#x26A0;&#xFE0F; <strong>Security Login Check:</strong> For your protection, the app verifies both your <strong>phone number</strong> and your <strong>registered device ID</strong> at login. No password is required. If you log in from a new or unregistered device, access will be denied. Contact us to register a new device.</p>
+      </div>
+      <h3>2.3 Exam Results &amp; Progress</h3>
+      <p>We store your practice exam scores, quiz attempts, and learning progress so you can track your improvement over time.</p>
+      <h3>2.4 Subscription Data</h3>
+      <p>If you subscribe to premium features, we record your subscription tier and activation date. Payment is processed externally via <strong>MTN MoMo Pay</strong> &mdash; we do <strong>not</strong> store or have access to your Mobile Money PIN or financial account details.</p>
+      <h3>2.5 Offline Cache</h3>
+      <p>The App caches exam data and your results locally on your device so you can study without internet. This data syncs to our server when connectivity is restored.</p>
+    </section>
+
+    <section class="card reveal">
+      <div class="card-header">
+        <span class="num">3</span>
+        <h2>How We Use Your Data</h2>
+      </div>
+      <table class="data-table">
+        <thead><tr><th>Purpose</th><th>Data Used</th></tr></thead>
+        <tbody>
+          <tr><td>Account authentication</td><td>Phone number, name</td></tr>
+          <tr><td>Account security</td><td>Hashed device ID</td></tr>
+          <tr><td>Learning analytics</td><td>Exam results, progress</td></tr>
+          <tr><td>Offline functionality</td><td>Cached exam data</td></tr>
+          <tr><td>Subscription management</td><td>Subscription tier, activation date</td></tr>
+        </tbody>
+      </table>
+      <div class="highlight">
+        <p>We do <strong>not</strong> use your data for advertising, profiling, or any purpose unrelated to the App's educational function.</p>
+      </div>
+    </section>
+
+    <section class="card reveal">
+      <div class="card-header">
+        <span class="num">4</span>
+        <h2>Data Storage &amp; Security</h2>
+      </div>
+      <ul class="data-list">
+        <li>All data is transmitted over <strong>HTTPS</strong> (TLS 1.2+). The App does not permit cleartext HTTP traffic.</li>
+        <li>Personal data is stored on secured servers.</li>
+        <li>The device identifier is stored only as a <strong>SHA-256 hash</strong> &mdash; never in plaintext.</li>
+        <li>We employ industry-standard security measures including input validation, parameterised database queries, and access controls.</li>
+      </ul>
+    </section>
+
+    <section class="card reveal">
+      <div class="card-header">
+        <span class="num">5</span>
+        <h2>Data Sharing</h2>
+      </div>
+      <p>We do <strong>not</strong> sell, trade, rent, or share your personal data with any third party.</p>
+      <ul class="data-list">
+        <li>No third-party analytics SDKs are embedded in the App</li>
+        <li>No advertising networks receive your data</li>
+        <li>No data is shared with government bodies, examination authorities, or driving schools</li>
+      </ul>
+      <p style="margin-top:.5rem;">Data may only be disclosed if required by applicable law or a valid court order.</p>
+    </section>
+
+    <section class="card reveal">
+      <div class="card-header">
+        <span class="num">6</span>
+        <h2>Data Retention</h2>
+      </div>
+      <ul class="data-list">
+        <li>Your data is retained for as long as your account is active.</li>
+        <li>If you delete your account (via Profile &rarr; Delete Account), all personal data is permanently erased from our servers within 30 days.</li>
+        <li>Locally cached data is removed when the App is uninstalled.</li>
+      </ul>
+    </section>
+
+    <section class="card reveal">
+      <div class="card-header">
+        <span class="num">7</span>
+        <h2>Your Rights</h2>
+      </div>
+      <ul class="rights-list">
+        <li><strong>Access</strong> &mdash; View your personal data at any time through the App (Profile section)</li>
+        <li><strong>Correct</strong> &mdash; Update your name or phone number through your profile settings</li>
+        <li><strong>Delete</strong> &mdash; Remove your account and all associated data</li>
+        <li><strong>Withdraw consent</strong> &mdash; By deleting your account</li>
+        <li><strong>Data portability</strong> &mdash; Contact us to request a copy of your data</li>
+      </ul>
+    </section>
+
+    <section class="card reveal">
+      <div class="card-header">
+        <span class="num">8</span>
+        <h2>Children's Privacy</h2>
+      </div>
+      <p>The App is intended for driving theory exam preparation. We do not knowingly collect personal data from children under 16. If you believe a child has provided us with personal data, please contact us and we will delete it promptly.</p>
+    </section>
+
+    <section class="card reveal">
+      <div class="card-header">
+        <span class="num">9</span>
+        <h2>Changes to This Policy</h2>
+      </div>
+      <p>We may update this Privacy Policy from time to time. The &ldquo;Last updated&rdquo; date at the top will reflect the latest revision. Continued use of the App after changes constitutes acceptance of the revised policy.</p>
+    </section>
+
+    <section class="card reveal">
+      <div class="card-header">
+        <span class="num">10</span>
+        <h2>Contact Us</h2>
+      </div>
+      <p>If you have questions or concerns about this Privacy Policy:</p>
+      <div class="contact-grid">
+        <div class="contact-item">
+          <div class="label">Email</div>
+          <div class="value">iamlearningtrafficrules.edu@gmail.com</div>
+        </div>
+        <div class="contact-item">
+          <div class="label">Phone / WhatsApp</div>
+          <div class="value">+250 789 914 099</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="highlight warn reveal" style="margin-top:.5rem;">
+      <p>&#x26A0;&#xFE0F; Rwanda Traffic Rule is an independent educational application. It is <strong>NOT</strong> affiliated with, endorsed by, or connected to any government authority, examination body, or driving school in Rwanda.</p>
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    &copy; 2026 Rwanda Traffic Rule. All rights reserved.
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+      }, { threshold: 0.12 });
+      document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+    });
+  </script>
+</body>
+</html>

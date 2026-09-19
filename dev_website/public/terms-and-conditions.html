@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terms &amp; Conditions — Rwanda Traffic Rule</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      color: #1f2937; background: #0F0F23; line-height: 1.75; overflow-x: hidden;
+    }
+
+    /* ── Animated background ──────────────────────── */
+    .bg-wrap { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .bg-wrap .orb {
+      position: absolute; border-radius: 50%; filter: blur(100px); opacity: .3;
+      animation: drift 20s ease-in-out infinite alternate;
+    }
+    .bg-wrap .orb:nth-child(1) { width: 480px; height: 480px; background: #F97316; top: -8%; right: -8%; }
+    .bg-wrap .orb:nth-child(2) { width: 420px; height: 420px; background: #00039E; bottom: -5%; left: -10%; animation-delay: -7s; }
+    .bg-wrap .orb:nth-child(3) { width: 280px; height: 280px; background: #FB923C; top: 50%; left: 40%; animation-delay: -14s; }
+    @keyframes drift {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(-35px, 25px) scale(1.12); }
+    }
+
+    /* ── Hero ─────────────────────────────────────── */
+    .hero {
+      position: relative; z-index: 1; text-align: center;
+      padding: 5rem 1.5rem 4rem; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(249,115,22,.2) 0%, transparent 60%);
+    }
+    .hero .shield {
+      width: 80px; height: 80px; margin: 0 auto 1.5rem;
+      background: linear-gradient(135deg, #F97316 0%, #FB923C 100%);
+      border-radius: 24px; display: flex; align-items: center; justify-content: center;
+      font-size: 2.2rem; box-shadow: 0 0 40px rgba(249,115,22,.4);
+      animation: pulse-glow 3s ease-in-out infinite;
+    }
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 40px rgba(249,115,22,.4); }
+      50% { box-shadow: 0 0 60px rgba(249,115,22,.6), 0 0 100px rgba(251,146,60,.3); }
+    }
+    .hero h1 {
+      font-size: 2.4rem; font-weight: 800; color: #fff;
+      background: linear-gradient(135deg, #fff 0%, #FDBA74 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; margin-bottom: .5rem;
+    }
+    .hero p { color: rgba(255,255,255,.7); font-size: 1.05rem; max-width: 480px; margin: 0 auto; }
+    .hero .badge {
+      display: inline-flex; align-items: center; gap: .4rem; margin-top: 1.25rem;
+      background: rgba(255,255,255,.08); backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,.12); border-radius: 999px;
+      padding: .4rem 1.2rem; font-size: .8rem; color: rgba(255,255,255,.8); font-weight: 600;
+    }
+    .badge::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #34d399; }
+
+    /* ── Container ────────────────────────────────── */
+    .container {
+      position: relative; z-index: 1;
+      max-width: 780px; margin: -1.5rem auto 4rem; padding: 0 1.25rem;
+    }
+
+    /* ── Glass card ───────────────────────────────── */
+    .card {
+      background: rgba(255,255,255,.05); backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,.08); border-radius: 20px;
+      padding: 2rem; margin-bottom: 1.25rem; transition: transform .25s, border-color .25s;
+    }
+    .card:hover { transform: translateY(-3px); border-color: rgba(249,115,22,.3); }
+    .card-header { display: flex; align-items: center; gap: .75rem; margin-bottom: 1.1rem; }
+    .card-header .num {
+      width: 36px; height: 36px; border-radius: 12px; display: flex;
+      align-items: center; justify-content: center; font-weight: 700;
+      font-size: .85rem; color: #fff; flex-shrink: 0;
+      background: linear-gradient(135deg, #F97316, #FB923C);
+    }
+    .card-header h2 { font-size: 1.2rem; font-weight: 700; color: #f1f5f9; }
+
+    /* ── Typography ───────────────────────────────── */
+    p { font-size: .92rem; color: rgba(255,255,255,.65); margin-bottom: .5rem; }
+    h3 { font-size: .95rem; font-weight: 600; margin: 1rem 0 .5rem; color: #FDBA74; }
+    strong { color: rgba(255,255,255,.85); }
+
+    /* ── Lists ────────────────────────────────────── */
+    ul.data-list { list-style: none; padding: 0; }
+    ul.data-list li {
+      padding: .55rem 0; border-bottom: 1px solid rgba(255,255,255,.05);
+      display: flex; align-items: flex-start; gap: .55rem; font-size: .9rem;
+      color: rgba(255,255,255,.65);
+    }
+    ul.data-list li::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #F97316; margin-top: 8px; flex-shrink: 0; }
+
+    /* ── Highlight box ────────────────────────────── */
+    .highlight {
+      background: rgba(249,115,22,.08); border-left: 3px solid #F97316;
+      border-radius: 0 14px 14px 0; padding: 1rem 1.25rem; margin: .75rem 0;
+    }
+    .highlight p { color: #FB923C; margin: 0; }
+    .highlight.info { background: rgba(0,3,158,.08); border-left-color: #3B82F6; }
+    .highlight.info p { color: #60A5FA; }
+    .highlight.danger { background: rgba(220,38,38,.08); border-left-color: #dc2626; }
+    .highlight.danger p { color: #fca5a5; }
+
+    /* ── Blockquote ───────────────────────────────── */
+    blockquote {
+      background: rgba(220,38,38,.08); border-left: 3px solid #dc2626;
+      border-radius: 0 14px 14px 0; padding: 1rem 1.25rem; margin: .75rem 0;
+      font-size: .9rem; color: #fca5a5;
+    }
+    blockquote strong { color: #fecaca; }
+
+    /* ── Contact ──────────────────────────────────── */
+    .contact-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem; margin-top: 1rem;
+    }
+    .contact-item {
+      background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+      border-radius: 16px; padding: 1.25rem; text-align: center;
+      transition: border-color .25s, transform .25s;
+    }
+    .contact-item:hover { border-color: rgba(249,115,22,.3); transform: translateY(-2px); }
+    .contact-item .label { font-size: .7rem; color: rgba(255,255,255,.4); text-transform: uppercase; letter-spacing: .08em; }
+    .contact-item .value { font-weight: 700; color: #f1f5f9; margin-top: .3rem; font-size: .95rem; }
+
+    /* ── Footer ───────────────────────────────────── */
+    .footer {
+      position: relative; z-index: 1;
+      text-align: center; padding: 2.5rem 1.25rem; font-size: .8rem; color: rgba(255,255,255,.3);
+    }
+
+    /* ── Scroll reveal ────────────────────────────── */
+    .reveal {
+      opacity: 0; transform: translateY(24px);
+      transition: opacity .5s ease, transform .5s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── Responsive ───────────────────────────────── */
+    @media (max-width: 640px) {
+      .hero { padding: 3.5rem 1rem 3rem; }
+      .hero h1 { font-size: 1.7rem; }
+      .hero .shield { width: 64px; height: 64px; font-size: 1.7rem; border-radius: 18px; }
+      .container { margin-top: -1rem; padding: 0 .75rem; }
+      .card { padding: 1.35rem; border-radius: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-wrap"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="shield">&#x2696;&#xFE0F;</div>
+    <h1>Terms &amp; Conditions</h1>
+    <p>Please read these terms carefully before using Rwanda Traffic Rule.</p>
+    <span class="badge">Last updated: April 2026</span>
+  </header>
+
+  <main class="container">
+
+    <section class="card reveal">
+      <div class="card-header">
+        <span class="num">1</span>
+        <h2>Acceptance of Terms</h2>
+      </div>
+      <p>By creating an account and using the Rwanda Traffic Rule mobile application (the &ldquo;App&rdquo;), you agree to be bound by these Terms &amp; Conditions. If you do not agree, please do not use the App.</p>
+    </section>
+
+    <section class="card reveal">
+      <div class="card-header">
+        <span class="num">2</span>
+        <h2>Description of Service</h2>
+      </div>
+      <p>Rwanda Traffic Rule is an <strong>independent educational application</strong> designed to help users study and practise for the Rwandan driving theory exam. The App provides:</p>
+      <ul class="data-list">
+        <li>Multiple-choice practice questions inspired by Rwandan driving exam topics, combined with our own prepared questions</li>
+        <li>Timed mock exams simulating test conditions</li>
+        <li>Progress tracking and performance analytics</li>
+        <li>Study materials in English, French, and Kinyarwanda</li>
+      </ul>
+      <blockquote>
+        <strong>The App is NOT affiliated with, endorsed by, or connected to any government authority, official examination body, or driving school in Rwanda.</strong> All content is for educational and practice purposes only. Questions are inspired by official exam topics and supplemented with our own prepared material &mdash; they are not official exam questions. Using the App does not guarantee passing any official exam.
+      </blockquote>
+    </section>
+
+    <section class="card reveal">
+      <div class="card-header">
+        <span class="num">3</span>
+        <h2>User Accounts</h2>
+      </div>
+      <ul class="data-list">
+        <li>You must provide a valid phone number and your real name to create an account.</li>
+        <li>You are responsible for maintaining the confidentiality of your account credentials.</li>
+        <li>You must not share your account with others or create multiple accounts.</li>
+        <li>We reserve the right to suspend or terminate accounts that violate these terms.</li>
+      </ul>
+    </section>
+
+    <section class="card reveal">
+      <div class="card-header">
+        <span class="num">4</span>
+        <h2>Subscription &amp; Payment</h2>
+      </div>
+      <h3>4.1 Premium Access</h3>
+      <p>Some features require a paid subscription. Available plans and pricing are displayed in the App and may vary by locale.</p>
+      <h3>4.2 Payment Method</h3>
+      <p>Payment is processed via <strong>MTN MoMo Pay</strong> (Mobile Money). The App initiates a USSD payment request on your device &mdash; you complete the transaction directly with your mobile money provider. We do <strong>not</strong> collect, store, or have access to your Mobile Money PIN or account balance.</p>
+      <h3>4.3 Refunds</h3>
+      <p>Due to the digital nature of the service, refunds are generally not provided once a subscription is activated. If you experience a technical issue, please contact our support team.</p>
+      <h3>4.4 Pricing Changes</h3>
+      <p>We reserve the right to adjust subscription pricing. Existing active subscriptions will not be affected by price changes until their current period expires.</p>
+    </section>
+
+    <section class="card reveal">
+      <div class="card-header">
+        <span class="num">5</span>
+        <h2>Acceptable Use</h2>
+      </div>
+      <p>You agree <strong>not</strong> to:</p>
+      <ul class="data-list">
+        <li>Use the App for any unlawful purpose</li>
+        <li>Attempt to gain unauthorized access to other users' accounts or our servers</li>
+        <li>Reverse-engineer, decompile, or disassemble the App</li>
+        <li>Distribute, reproduce, or publicly display App content without written permission</li>
+        <li>Use automated bots or scraping tools to extract data from the App</li>
+      </ul>
+    </section>
+
+    <section class="card reveal">
+      <div class="card-header">
+        <span class="num">6</span>
+        <h2>Intellectual Property</h2>
+      </div>
+      <p>All content in the App &mdash; including questions, explanations, UI design, and branding &mdash; is the property of Rwanda Traffic Rule or used with appropriate rights. Practice questions inspired by official exam topics are presented in our own format with original explanations.</p>
+    </section>
+
+    <section class="card reveal">
+      <div class="card-header">
+        <span class="num">7</span>
+        <h2>Limitation of Liability</h2>
+      </div>
+      <ul class="data-list">
+        <li>The App is provided on an &ldquo;as is&rdquo; and &ldquo;as available&rdquo; basis.</li>
+        <li>We do not guarantee uninterrupted or error-free service.</li>
+        <li>We are not liable for any direct, indirect, or consequential damages arising from your use of the App.</li>
+        <li>We are not responsible for exam outcomes. The App is a study aid, not a substitute for comprehensive preparation.</li>
+      </ul>
+    </section>
+
+    <section class="card reveal">
+      <div class="card-header">
+        <span class="num">8</span>
+        <h2>Account Deletion</h2>
+      </div>
+      <p>You may delete your account at any time from the Profile section. Upon deletion:</p>
+      <ul class="data-list">
+        <li>All personal data will be permanently removed from our servers within 30 days</li>
+        <li>Your subscription (if active) will not be refunded for the remaining period</li>
+        <li>Locally cached data will be cleared</li>
+      </ul>
+    </section>
+
+    <section class="card reveal">
+      <div class="card-header">
+        <span class="num">9</span>
+        <h2>Modifications to Terms</h2>
+      </div>
+      <p>We may update these Terms from time to time. The &ldquo;Last updated&rdquo; date will reflect the latest revision. Continued use of the App after changes constitutes acceptance of the updated terms.</p>
+    </section>
+
+    <section class="card reveal">
+      <div class="card-header">
+        <span class="num">10</span>
+        <h2>Governing Law</h2>
+      </div>
+      <p>These Terms are governed by the laws of the Republic of Rwanda. Any disputes shall be resolved under the jurisdiction of the competent courts of Kigali, Rwanda.</p>
+    </section>
+
+    <section class="card reveal">
+      <div class="card-header">
+        <span class="num">11</span>
+        <h2>Contact Us</h2>
+      </div>
+      <p>If you have questions about these Terms &amp; Conditions:</p>
+      <div class="contact-grid">
+        <div class="contact-item">
+          <div class="label">Email</div>
+          <div class="value">iamlearningtrafficrules.edu@gmail.com</div>
+        </div>
+        <div class="contact-item">
+          <div class="label">Phone / WhatsApp</div>
+          <div class="value">+250 789 914 099</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="highlight reveal" style="margin-top:.5rem;">
+      <p>&#x26A0;&#xFE0F; Rwanda Traffic Rule is an independent educational application. It is <strong>NOT</strong> affiliated with, endorsed by, or connected to any government authority, examination body, or driving school in Rwanda.</p>
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    &copy; 2026 Rwanda Traffic Rule. All rights reserved.
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+      }, { threshold: 0.12 });
+      document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+    });
+  </script>
+</body>
+</html>
