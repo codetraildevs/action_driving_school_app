@@ -6,6 +6,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Static export for shared hosting that only serves static files.
+  // Produces an `out/` folder containing pure HTML/CSS/JS to upload and extract.
+  output: 'export',
+  trailingSlash: true,
   // This repo lives inside a larger parent directory (D:\software\DRIVINGSCHOOL2)
   // that also has its own package-lock.json. Next.js then misdetects the parent
   // as a monorepo workspace root and its output file tracing walks up through

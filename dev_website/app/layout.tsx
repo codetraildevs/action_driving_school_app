@@ -9,13 +9,6 @@ import { LanguageProvider } from "@/lib/LanguageContext";
 import ScrollToTop from "@/components/ScrollToTop";
 import WhatsAppButton from "@/components/WhatsAppButton";
 
-// Render all pages on-demand instead of pre-rendering them at build time.
-// Required for this cPanel host: static generation spawns export workers
-// which exceed the account's CloudLinux process/thread (NPROC) limit
-// ("spawn ... EAGAIN"). Dynamic rendering also avoids running DB/FCM
-// code during the build and is the correct mode for an authenticated console.
-export const dynamic = "force-dynamic";
-
 const inter = Syne({ subsets: ["latin"] });
 
 export const metadata: Metadata = {

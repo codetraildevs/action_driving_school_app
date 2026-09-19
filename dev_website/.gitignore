@@ -7,3 +7,6 @@ tmp/
 .env*.local
 tsconfig.tsbuildinfo
 storybook-static/
+out/
+*.zip
+*.log
