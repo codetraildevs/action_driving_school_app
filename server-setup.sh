@@ -26,7 +26,7 @@ set -euo pipefail
 
 # ── Configuration ──────────────────────────────────────────────────
 APP_DIR="/home/project3"
-APP_USER="deploy"
+APP_USER="fidele"
 APP_NAME="driving-school"
 NODE_VERSION="22"
 DB_NAME="sxlvhdzo_driving_school"
