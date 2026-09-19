@@ -119,11 +119,6 @@ lib/generated/
 package-lock.json
 
 # Deployment scripts (tracked so they arrive via git pull on the server)
-server-setup.sh
-go-live.sh
-monitor-vps.sh
-cleanup-logs.sh
-deploy-vps.sh
 
 # Android signing credentials (live on disk for the app branch)
 keystore.properties
