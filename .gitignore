@@ -121,5 +121,12 @@ monitor-vps.sh
 cleanup-logs.sh
 prebuild.js
 deploy-vps.sh
+
+# Android signing credentials (live on disk for the app branch)
+keystore.properties
+
+# Android release notes (belong to the app branch)
+release-notes-*.txt
+play-console-release-notes-*.txt
 nginx-*.conf
 
