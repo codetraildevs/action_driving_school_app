@@ -98,6 +98,7 @@ cleanup-stale-files.js
 debug-login.sh
 test-ssl.sh
 *.sh
+*.txt
 tsconfig.tsbuildinfo
 .next/
 
