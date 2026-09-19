@@ -90,6 +90,8 @@ interface User {
     id: number;
     roleName: string;
   };
+  // Non-null in Prisma schema — declaration is truthful; keep it that way so
+  // strictNullChecks keeps guarding every read.
   language: Language;
   userTestAccess: UserTestAccess;
   devices: Device[];

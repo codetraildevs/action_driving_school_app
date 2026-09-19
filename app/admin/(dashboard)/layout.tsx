@@ -53,10 +53,13 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
-interface userWithLanguage extends User{
-  language:Language,
-  Pendinglanguage:Language
-
+// Nullable relations must be declared nullable — Prisma's User type marks
+// `Pendinglanguage` as `Language?` (pendingLanguageId is Int?). Lying here
+// (non-null) disables strictNullChecks and caused a prod crash
+// (Cannot read properties of null — see docs/incident-report-2026-09.md).
+interface userWithLanguage extends User {
+  language: Language;
+  Pendinglanguage: Language | null;
 }
 interface SubscriptionRequest extends UserSubscriptionRequest {
   user: userWithLanguage;

@@ -61,8 +61,11 @@ interface UserSubscriptionRequest extends userRequestType {
     lastName: string;
     email: string;
     phoneNumber:string;
-    language:Language;
-    Pendinglanguage:Language;
+    language: Language;
+    // Nullable in Prisma (pendingLanguageId Int?) — must stay nullable so
+    // strictNullChecks forces a guard before reading properties (prod crash
+    // 2026-09: null.nativeName in admin console).
+    Pendinglanguage: Language | null;
   };
   pending: false | boolean;
 }
@@ -300,7 +303,7 @@ export function UserSubscriptionRequests() {
             request.user.middleName || ""
           } ${request.user.lastName} (${request.user.phoneNumber})`.trim(),
           userEmail: request.user.email,
-          userLanguage: request?.user?.Pendinglanguage?.nativeName,
+          userLanguage: request?.user?.Pendinglanguage?.nativeName ?? "—",
           requests: [],
           pendingCount: 0,
           acceptedCount: 0,
