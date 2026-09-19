@@ -29,6 +29,7 @@
         "/package-lock.json": true,
         "/tsconfig.tsbuildinfo": true,
         "/*.sh": true,
+        "/diag-*.js": true,
         "/diag-login.js": true,
         "/check-login.js": true,
         "/cleanup-stale-files.js": true,
@@ -50,6 +51,7 @@
     "search.exclude": {
         "/dev_website": true,
         "/node_modules": true,
+        "/diag-*.js": true,
         "/.gradle": true,
         "/build": true,
         "/.next": true,
