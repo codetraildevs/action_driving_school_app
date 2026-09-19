@@ -23,7 +23,7 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdgeUtils.enable(this);
+        EdgeToEdgeUtils.enable(getWindow());
 
         // Load the current locale from preferences. This is essential when the user
         // changes language from the Profile or Welcome page — the language preference

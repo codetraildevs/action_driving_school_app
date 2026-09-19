@@ -48,7 +48,7 @@ public class IremboActivity extends AppCompatActivity implements IremboServiceAd
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        EdgeToEdgeUtils.enable(this);
+        EdgeToEdgeUtils.enable(getWindow());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_irembo);
 

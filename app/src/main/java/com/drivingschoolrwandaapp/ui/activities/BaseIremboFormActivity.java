@@ -61,7 +61,7 @@ public abstract class BaseIremboFormActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        EdgeToEdgeUtils.enable(this);
+        EdgeToEdgeUtils.enable(getWindow());
         super.onCreate(savedInstanceState);
         setContentView(getFormLayoutId());
 

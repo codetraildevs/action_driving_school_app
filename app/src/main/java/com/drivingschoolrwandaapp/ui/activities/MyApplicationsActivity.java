@@ -41,7 +41,7 @@ public class MyApplicationsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        EdgeToEdgeUtils.enable(this);
+        EdgeToEdgeUtils.enable(getWindow());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_my_applications);
 
