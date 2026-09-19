@@ -46,6 +46,10 @@ debug-login2.js
 reset-password.js
 diag-login.js
 
+# Diagnostic and identity-testing scripts (keep local only)
+diag-*.js
+test-identity.sh
+
 # Android files (NOT needed for backend)
 baseline-profile/
 build/
