@@ -501,3 +501,29 @@ tasks.named("preBuild") {
 tasks.named("check") {
     dependsOn("verifyNoFormattedStringsInLayouts")
 }
+
+// ─────────────────────────────────────────────────────────────────────────────────
+// Versioned AAB copy: after every `:app:bundleRelease`, copy app-release.aab to
+// app-<versionName>.aab so successive Play Console uploads stay distinguishable
+// (Gradle always overwrites app-release.aab in place).
+// ─────────────────────────────────────────────────────────────────────────────────
+val releaseVersionName = android.defaultConfig.versionName ?: "unknown"
+// Plain doLast copy (no declared task outputs) on purpose: a Copy task writing
+// into outputs/bundle/release collides with AGP output ownership and fails
+// Gradle 9's implicit-dependency validation.
+val copyVersionedAab = tasks.register("copyVersionedAab") {
+    doLast {
+        val src = layout.buildDirectory.file("outputs/bundle/release/app-release.aab").get().asFile
+        if (src.exists()) {
+            val dst = File(src.parentFile, "app-$releaseVersionName.aab")
+            src.copyTo(dst, overwrite = true)
+            logger.lifecycle("Copied release bundle to ${dst.name}")
+        }
+    }
+}
+
+// finalizedBy runs the copy after bundleRelease succeeds; if no AAB was
+// produced the doLast body simply does nothing.
+tasks.matching { it.name == "bundleRelease" }.configureEach {
+    finalizedBy(copyVersionedAab)
+}
