@@ -118,12 +118,11 @@ lib/generated/
 # Package lock (will be regenerated)
 package-lock.json
 
-# Deployment scripts (keep local only — contain credentials)
+# Deployment scripts (tracked so they arrive via git pull on the server)
 server-setup.sh
 go-live.sh
 monitor-vps.sh
 cleanup-logs.sh
-prebuild.js
 deploy-vps.sh
 
 # Android signing credentials (live on disk for the app branch)
