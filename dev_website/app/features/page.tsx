@@ -6,7 +6,7 @@ import { pageMetadata } from "@/lib/pageMetadata";
 
 export const metadata: Metadata = pageMetadata(
     '/features/',
-    "Features | Action Driving School App - Best Rwanda Driving Exam Practice",
+    "Features | Rwanda Driving Exam Practice - Action Driving School",
     "Discover all powerful features of Action Driving School App: real Rwanda driving exam questions 2026/2026, road signs, traffic laws in Kinyarwanda & English, progress tracking, mock tests and more."
 );
 

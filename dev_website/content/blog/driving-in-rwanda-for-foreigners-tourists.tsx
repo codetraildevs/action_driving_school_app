@@ -113,7 +113,7 @@ export const drivingInRwandaForTourists: BlogPost = {
         },
         fr: {
             lang: "fr",
-            title: "Conduire au Rwanda en tant que touriste ou étranger : les règles à connaître",
+            title: "Conduire au Rwanda : règles pour touristes et étrangers",
             description:
                 "De passage au Rwanda et envie de conduire ? Permis international, location de voiture, limitations, contrôles de police et règles qui surprennent les étrangers — expliqués clairement.",
             Content: () => (

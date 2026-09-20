@@ -97,7 +97,7 @@ export const rwandaLicenseRenewalReplacement: BlogPost = {
         },
         fr: {
             lang: "fr",
-            title: "Renouvellement et remplacement du permis de conduire au Rwanda : guide pas à pas",
+            title: "Renouveler ou remplacer son permis de conduire au Rwanda",
             description:
                 "Comment renouveler un permis de conduire rwandais qui expire ou remplacer un permis perdu ou endommagé : où déposer la demande, documents à préparer et risques du permis expiré.",
             Content: () => (
@@ -167,7 +167,7 @@ export const rwandaLicenseRenewalReplacement: BlogPost = {
         },
         rw: {
             lang: "rw",
-            title: "Gusubiza impamyabushobozi y'Ubushoferi mu Rwanda: Intambwe ku Intambwe",
+            title: "Gusubiza Impamyabushobozi y'Ubushoferi mu Rwanda",
             description:
                 "Uko usubiza impamyabushobozi y'ubushoferi imara igihe cyangwa ubone iyindi iyo ubuze: aho usaba, indangaruhushya ukena, n'ibyago byo gutwara iyo imara.",
             Content: () => (

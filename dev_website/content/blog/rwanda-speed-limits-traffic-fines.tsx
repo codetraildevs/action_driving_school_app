@@ -113,7 +113,7 @@ export const rwandaSpeedLimitsTrafficFines: BlogPost = {
         },
         fr: {
             lang: "fr",
-            title: "Limitations de vitesse et amendes au Rwanda : ce que tout conducteur doit savoir",
+            title: "Limitations de vitesse et amendes au Rwanda : l'essentiel",
             description:
                 "Les limitations de vitesse couramment appliquées au Rwanda, le fonctionnement des amendes et les règles les plus fréquentes à l'examen théorique — expliquées simplement.",
             Content: () => (
@@ -190,7 +190,7 @@ export const rwandaSpeedLimitsTrafficFines: BlogPost = {
         },
         rw: {
             lang: "rw",
-            title: "Ibipimo cy'Umuvuduko n'Ibihano by'Amategeko y'Umuhanda mu Rwanda",
+            title: "Ibipimo cy'Umuvuduko n'Ibihano ku Muhanda mu Rwanda",
             description:
                 "Ibipimo cy'umuvuduko bikoreshwa mu Rwanda, uko ibihano bigenda, n'amategeko agaragara cyane ku kizamini cy'ubushoferi — bisobanurwe mu buryo bworoshye.",
             Content: () => (

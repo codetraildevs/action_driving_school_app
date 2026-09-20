@@ -46,7 +46,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const variant = post.translations[lang];
     return pageMetadata(
         `/blog/${post.slug}/${lang}/`,
-        `${variant.title} | ${siteDetails.siteName}`,
+        variant.title,
         variant.description,
         languagesFor(post.slug),
         OG_LOCALE[lang]

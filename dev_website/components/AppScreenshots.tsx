@@ -5,14 +5,14 @@ import SectionTitle from './SectionTitle';
 import { useLanguage } from '@/lib/LanguageContext';
 
 const screenshots = [
-    { src: '/images/Screenshot_2026-01-02_015142-removebg-preview.png', alt: 'App Dashboard' },
-    { src: '/images/Screenshot_2026-01-02_015203-removebg-preview.png', alt: 'Quiz Interface' },
-    { src: '/images/Screenshot_2026-01-02_015320-removebg-preview.png', alt: 'Mock Test' },
-    { src: '/images/Screenshot_2026-01-02_015333-removebg-preview.png', alt: 'Progress Tracking' },
-    { src: '/images/Screenshot_2026-01-02_015350-removebg-preview.png', alt: 'Road Signs' },
-    { src: '/images/Screenshot_2026-01-02_015409-removebg-preview.png', alt: 'Results' },
-    { src: '/images/Screenshot_2026-01-02_015423-removebg-preview.png', alt: 'Settings' },
-    { src: '/images/Screenshot_2026-01-02_015559-removebg-preview.png', alt: 'Profile' },
+    { src: '/images/Screenshot_2026-01-02_015142-removebg-preview.png', alt: 'Action Driving School app dashboard for Rwanda driving test preparation' },
+    { src: '/images/Screenshot_2026-01-02_015203-removebg-preview.png', alt: 'Driving exam practice quiz with real Rwanda theory test questions' },
+    { src: '/images/Screenshot_2026-01-02_015320-removebg-preview.png', alt: 'Timed mock test simulating the Rwanda driving theory exam' },
+    { src: '/images/Screenshot_2026-01-02_015333-removebg-preview.png', alt: 'Progress tracking for driving exam practice in the Action Driving School app' },
+    { src: '/images/Screenshot_2026-01-02_015350-removebg-preview.png', alt: 'Rwanda road signs study guide with images and descriptions' },
+    { src: '/images/Screenshot_2026-01-02_015409-removebg-preview.png', alt: 'Instant quiz results with explanations for Rwanda driving test questions' },
+    { src: '/images/Screenshot_2026-01-02_015423-removebg-preview.png', alt: 'App settings with Kinyarwanda, English and French language options' },
+    { src: '/images/Screenshot_2026-01-02_015559-removebg-preview.png', alt: 'User profile showing driving theory exam learning progress' },
 ];
 
 const AppScreenshots: React.FC = () => {

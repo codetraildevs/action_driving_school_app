@@ -123,7 +123,7 @@ export const howToPassRwandaDrivingTest: BlogPost = {
         },
         fr: {
             lang: "fr",
-            title: "10 conseils éprouvés pour réussir votre examen de conduite au Rwanda du premier coup",
+            title: "Réussir son examen de conduite au Rwanda : 10 conseils",
             description:
                 "La stratégie exacte des candidats qui réussissent l'examen théorique de conduite rwandais du premier coup : planning de révision, tests blancs, entraînement aux panneaux et habitudes du jour J.",
             Content: () => (

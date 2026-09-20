@@ -33,7 +33,7 @@ export const drivingVocabularyArticle: BlogPost = {
     translations: {
         en: {
             lang: "en",
-            title: "Driving Exam Vocabulary: Key Terms in Kinyarwanda, English & French",
+            title: "Driving Exam Vocabulary: Kinyarwanda, English, French",
             description:
                 "The driving terms that appear in the Rwanda theory exam, side by side in Kinyarwanda, English and French — so a language switch on exam day never surprises you.",
             Content: () => (
@@ -112,7 +112,7 @@ export const drivingVocabularyArticle: BlogPost = {
         },
         fr: {
             lang: "fr",
-            title: "Vocabulaire de l'examen de conduite : les termes clés en Kinyarwanda, Anglais et Français",
+            title: "Vocabulaire de l'examen de conduite (3 langues)",
             description:
                 "Les termes de conduite qui reviennent à l'examen théorique rwandais, côte à côte en Kinyarwanda, Anglais et Français — pour qu'un changement de langue le jour J ne vous surprenne jamais.",
             Content: () => (
@@ -174,7 +174,7 @@ export const drivingVocabularyArticle: BlogPost = {
         },
         rw: {
             lang: "rw",
-            title: "Amagambo y'ingenzi y'ikizamini c'ubushoferi: Ikinyarwanda, Icyongereza n'Igifaransa",
+            title: "Amagambo y'ingenzi y'ikizamini c'ubushoferi",
             description:
                 "Amagambo agaragara cyane ku kizamini cy'ubushoferi mu Rwanda, hamwe mu Kinyarwanda, Icyongereza n'Igifaransa — kugira ngo guhindura ururimi ku munsi w'ikizamini bigutempere.",
             Content: () => (

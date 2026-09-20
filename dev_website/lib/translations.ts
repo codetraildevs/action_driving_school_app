@@ -136,8 +136,8 @@ const en: Translations = {
     },
 
     hero: {
-        heading: 'Learn to Drive Safely in Rwanda',
-        subheading: 'Master the Rwanda driving theory exam with real practice questions, road signs, and mock tests. Available in Kinyarwanda, English, and French.',
+        heading: 'Learn Rwanda Traffic Rules. Pass Your Driving Exam.',
+        subheading: 'Action Driving School helps you master the Rwanda driving theory test with real exam questions, road signs and mock tests — in Kinyarwanda, English and French.',
     },
 
     stats: {

@@ -168,7 +168,7 @@ export const rwandaPracticalDrivingTestDay: BlogPost = {
         },
         rw: {
             lang: "rw",
-            title: "Ikizamini cy'Imodoka (Practical) mu Rwanda: Ibigenda ku Munsi wa Kizamini",
+            title: "Ikizamini cy'Imodoka (Practical): Ibigenda ku Munsi wa Kizamini",
             description:
                 "Uko ikizamini cy'imodoka gikora mu Rwanda: indangaruhushya ukena kuzana, ibyo umupolisi asuzuma, ibyaha bituma abantu bipfa ako kanya n'uko witwara neza.",
             Content: () => (

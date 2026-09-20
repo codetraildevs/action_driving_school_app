@@ -199,7 +199,7 @@ export const rwandaDrivingLicenseRequirements: BlogPost = {
         },
         rw: {
             lang: "rw",
-            title: "Impamyabushobozi y'Ubushoferi mu Rwanda: Ibiakenewe, Intambwe n'Ibiciro (2026)",
+            title: "Impamyabushobozi y'Ubushoferi: Ibiakenewe n'Ibiciro (2026)",
             description:
                 "Inzira yuzuye yo kubona impamyabushobozi y'ubushoferi mu Rwanda: ibiakenewe, intambwe zo mu ishuri n'ibizamini, indangaruhushya ikenewe n'ibiciro birenze.",
             Content: () => (

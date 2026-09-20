@@ -132,7 +132,7 @@ export const rwandaDrivingTheoryExamGuide: BlogPost = {
         },
         fr: {
             lang: "fr",
-            title: "Le guide complet de l'examen théorique de conduite au Rwanda (2026)",
+            title: "L'examen théorique de conduite au Rwanda : guide (2026)",
             description:
                 "Tout ce qu'il faut savoir sur l'examen théorique de conduite au Rwanda : le programme, le déroulement, la préparation efficace et les erreurs à éviter. Mis à jour pour 2026.",
             Content: () => (

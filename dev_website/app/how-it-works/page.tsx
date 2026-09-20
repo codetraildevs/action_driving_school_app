@@ -7,7 +7,7 @@ import { pageMetadata } from "@/lib/pageMetadata";
 
 export const metadata: Metadata = pageMetadata(
     '/how-it-works/',
-    "How It Works | Action Driving School App - Rwanda Driving Test Preparation",
+    "How It Works | Rwanda Driving Test Prep - Action Driving School",
     "Learn how to use Action Driving School App to prepare for Rwanda driving theory exam. Step-by-step guide: practice real questions, road signs, mock tests and get your driving license faster."
 );
 

@@ -12,7 +12,7 @@ export const amategekoYumuhandaIkizamini: BlogPost = {
     translations: {
         rw: {
             lang: "rw",
-            title: "Amategeko y'Umuhanda mu Rwanda: Uko Witegura Ikizamini cy'Ubushoferi",
+            title: "Amategeko y'Umuhanda: Witegura Ikizamini cy'Ubushoferi",
             description:
                 "Ibyo ukena kumenya ku bipimo n'amategeko y'imodoka mu Rwanda, ibimenyetso by'umuhanda, n'uko witegura neza ikizamini cy'ubushoferi ukoresheje ibibazo nyacyo.",
             Content: () => (

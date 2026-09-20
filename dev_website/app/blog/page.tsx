@@ -9,7 +9,7 @@ import { siteDetails } from "@/data/siteDetails";
 
 export const metadata: Metadata = pageMetadata(
     '/blog/',
-    "Blog & Study Guides | Rwanda Driving Exam Tips - Action Driving School App",
+    "Blog | Rwanda Driving Exam Tips & Study Guides",
     "Free study guides and articles for the Rwanda driving theory exam — in Kinyarwanda, English and French: traffic laws, road signs, mock tests and tips to pass your driving license exam on the first try."
 );
 

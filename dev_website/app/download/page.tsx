@@ -7,7 +7,7 @@ import { pageMetadata } from "@/lib/pageMetadata";
 
 export const metadata: Metadata = pageMetadata(
     '/download/',
-    "Download Action Driving School App - Rwanda Driving Exam Practice",
+    "Download App | Rwanda Driving Test Practice - Action Driving School",
     "Download Action Driving School App now! Practice real Rwanda driving theory test questions 2026/2026. Available on Google Play Store + Direct APK download for Rwanda users."
 );
 
