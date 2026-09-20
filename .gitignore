@@ -5,3 +5,4 @@
 !dev_website/
 !dev_website/**
 !.gitignore
+!NEXT_SESSION.md
