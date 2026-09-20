@@ -8,12 +8,14 @@ const WhatsAppButton: React.FC = () => {
     const phoneNumber = '+250780765548';
     const defaultMessage = 'Hello! I have a question about Action Driving School App.';
 
-    const handleWhatsAppClick = (message?: string) => {
-        const text = message || defaultMessage;
-        const url = `https://wa.me/${phoneNumber.replace('+', '')}?text=${encodeURIComponent(text)}`;
-        window.open(url, '_blank');
-        setIsOpen(false);
-    };
+    const waLink = (message: string) =>
+        `https://wa.me/${phoneNumber.replace('+', '')}?text=${encodeURIComponent(message)}`;
+
+    const options = [
+        'Hello! I have a question about Action Driving School App.',
+        'I need help with the app.',
+        'I would like to know about premium plans.',
+    ];
 
     return (
         <div className="fixed bottom-6 left-6 z-50">
@@ -24,6 +26,7 @@ const WhatsAppButton: React.FC = () => {
                         <button
                             onClick={() => setIsOpen(false)}
                             className="text-muted-foreground hover:text-foreground"
+                            aria-label="Close WhatsApp options"
                         >
                             <FiX size={18} />
                         </button>
@@ -32,24 +35,22 @@ const WhatsAppButton: React.FC = () => {
                         Have questions? Chat with us on WhatsApp!
                     </p>
                     <div className="space-y-2">
-                        <button
-                            onClick={() => handleWhatsAppClick('Hello! I have a question about Action Driving School App.')}
-                            className="w-full text-left px-3 py-2 text-sm bg-muted hover:bg-muted/80 text-foreground rounded-lg transition-colors"
-                        >
-                            General inquiry
-                        </button>
-                        <button
-                            onClick={() => handleWhatsAppClick('I need help with the app.')}
-                            className="w-full text-left px-3 py-2 text-sm bg-muted hover:bg-muted/80 text-foreground rounded-lg transition-colors"
-                        >
-                            Need support
-                        </button>
-                        <button
-                            onClick={() => handleWhatsAppClick('I would like to know about premium plans.')}
-                            className="w-full text-left px-3 py-2 text-sm bg-muted hover:bg-muted/80 text-foreground rounded-lg transition-colors"
-                        >
-                            Premium plans
-                        </button>
+                        {options.map((message) => (
+                            <a
+                                key={message}
+                                href={waLink(message)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={() => setIsOpen(false)}
+                                className="block w-full text-left px-3 py-2 text-sm bg-muted hover:bg-muted/80 text-foreground rounded-lg transition-colors"
+                            >
+                                {message === options[0]
+                                    ? 'General inquiry'
+                                    : message === options[1]
+                                      ? 'Need support'
+                                      : 'Premium plans'}
+                            </a>
+                        ))}
                     </div>
                 </div>
             )}
