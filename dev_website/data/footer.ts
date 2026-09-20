@@ -18,6 +18,10 @@ export const footerDetails: {
             url: "#benefits"
         },
         {
+            text: "Blog",
+            url: "/blog/"
+        },
+        {
             text: "FAQ",
             url: "#faq"
         }

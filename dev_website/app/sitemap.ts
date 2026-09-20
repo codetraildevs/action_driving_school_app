@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { siteDetails } from "@/data/siteDetails";
+import { blogPosts } from "@/content/blog";
 
 // Required for `output: 'export'` — renders sitemap.xml at build time.
 export const dynamic = "force-static";
@@ -38,5 +39,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
             changeFrequency: 'monthly',
             priority: 0.8,
         },
+        {
+            url: `${base}/blog/`,
+            lastModified,
+            changeFrequency: 'weekly',
+            priority: 0.7,
+        },
+        ...blogPosts.map((post) => ({
+            url: `${base}/blog/${post.slug}/`,
+            lastModified: new Date(post.date),
+            changeFrequency: 'monthly' as const,
+            priority: 0.6,
+        })),
     ];
 }

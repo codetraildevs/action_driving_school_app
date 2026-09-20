@@ -7,6 +7,7 @@ export interface Translations {
         howItWorks: string;
         pricing: string;
         download: string;
+        blog: string;
         getApp: string;
         toggleDarkMode: string;
         toggleMenu: string;
@@ -128,6 +129,7 @@ const en: Translations = {
         howItWorks: 'How It Works',
         pricing: 'Pricing',
         download: 'Download',
+        blog: 'Blog',
         getApp: 'Get App',
         toggleDarkMode: 'Toggle dark mode',
         toggleMenu: 'Toggle menu',
@@ -292,6 +294,7 @@ const fr: Translations = {
         howItWorks: 'Comment ça marche',
         pricing: 'Tarifs',
         download: 'Télécharger',
+        blog: 'Blog',
         getApp: "Obtenir l'app",
         toggleDarkMode: 'Basculer le mode sombre',
         toggleMenu: 'Basculer le menu',
@@ -456,6 +459,7 @@ const rw: Translations = {
         howItWorks: 'Uko bigenda',
         pricing: 'Igiciro',
         download: 'Kurura',
+        blog: 'Inkuru',
         getApp: 'Shakisha App',
         toggleDarkMode: 'Hindura uburiri bw\'umwijima',
         toggleMenu: 'Hindura ibikubiyemo',

@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { Syne } from "next/font/google";
@@ -104,6 +105,22 @@ export default function RootLayout({
                 <ScrollToTop />
                 <WhatsAppButton />
                 <Toaster position="top-right" richColors />
+                {siteDetails.googleAnalyticsId && (
+                    <>
+                        <Script
+                            src={`https://www.googletagmanager.com/gtag/js?id=${siteDetails.googleAnalyticsId}`}
+                            strategy="afterInteractive"
+                        />
+                        <Script id="ga4-init" strategy="afterInteractive">
+                            {`
+                                window.dataLayer = window.dataLayer || [];
+                                function gtag(){dataLayer.push(arguments);}
+                                gtag('js', new Date());
+                                gtag('config', '${siteDetails.googleAnalyticsId}');
+                            `}
+                        </Script>
+                    </>
+                )}
             </body>
         </html>
     );

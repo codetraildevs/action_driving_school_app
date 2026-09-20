@@ -63,6 +63,7 @@ const Header: React.FC = () => {
                             { url: '/features', text: t.nav.features },
                             { url: '/how-it-works', text: t.nav.howItWorks },
                             { url: '/#pricing', text: t.nav.pricing },
+                            { url: '/blog', text: t.nav.blog },
                             { url: '/download', text: t.nav.download },
                         ].map(item => (
                             <li key={item.url}>
@@ -145,6 +146,7 @@ const Header: React.FC = () => {
                                 { url: '/features', text: t.nav.features },
                                 { url: '/how-it-works', text: t.nav.howItWorks },
                                 { url: '/#pricing', text: t.nav.pricing },
+                                { url: '/blog', text: t.nav.blog },
                                 { url: '/download', text: t.nav.download },
                             ].map(item => (
                                 <li key={item.url}>
