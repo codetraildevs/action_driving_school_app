@@ -11,5 +11,8 @@ export const siteDetails = {
     language: 'en-us',
     locale: 'en_RW',
     siteLogo: `${typeof process !== 'undefined' ? process.env.BASE_PATH || '' : ''}/images/logo.png`,
+    /** Direct gtag.js GA4 Measurement ID (G-XXXXXXX). Leave empty when using GTM instead. */
     googleAnalyticsId: '',
+    /** Google Tag Manager container ID (GTM-XXXXXXX). Takes priority over googleAnalyticsId. */
+    googleTagManagerId: 'GTM-N48729S6',
 }
