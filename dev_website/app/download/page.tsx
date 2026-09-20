@@ -3,11 +3,13 @@ import Footer from "@/components/Footer";
 import CTA from "@/components/CTA";
 import type { Metadata } from "next";
 import DownloadContent from "@/components/pages/DownloadContent";
+import { pageMetadata } from "@/lib/pageMetadata";
 
-export const metadata: Metadata = {
-    title: "Download Action Driving School App - Rwanda Driving Exam Practice",
-    description: "Download Action Driving School App now! Practice real Rwanda driving theory test questions 2026/2026. Available on Google Play Store + Direct APK download for Rwanda users.",
-};
+export const metadata: Metadata = pageMetadata(
+    '/download/',
+    "Download Action Driving School App - Rwanda Driving Exam Practice",
+    "Download Action Driving School App now! Practice real Rwanda driving theory test questions 2026/2026. Available on Google Play Store + Direct APK download for Rwanda users."
+);
 
 export default function DownloadPage() {
     return (

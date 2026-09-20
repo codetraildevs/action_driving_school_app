@@ -15,7 +15,7 @@ const Footer: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
                     <div>
                         <Link href="/" className="flex items-center gap-3">
-                            <img src="/logo.png" alt="Logo" className="w-9 h-9 rounded-full" />
+                            <img src="/logo.png" alt="Action Driving School App logo" className="w-9 h-9 rounded-full" />
                             <h3 className="text-lg font-bold">
                                 {siteDetails.siteName}
                             </h3>

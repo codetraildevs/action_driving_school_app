@@ -5,6 +5,7 @@ import { Syne } from "next/font/google";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 import { siteDetails } from "@/data/siteDetails";
+import { structuredDataJsonLd } from "@/lib/structuredData";
 import { LanguageProvider } from "@/lib/LanguageContext";
 import ScrollToTop from "@/components/ScrollToTop";
 import WhatsAppButton from "@/components/WhatsAppButton";
@@ -12,6 +13,7 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 const inter = Syne({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
+    metadataBase: new URL(siteDetails.siteUrl),
     title: siteDetails.metadata.title,
     description: siteDetails.metadata.description,
     keywords: siteDetails.metadata.keywords,
@@ -21,6 +23,7 @@ export const metadata: Metadata = {
     icons: {
         icon: '/favicon.ico',
     },
+    manifest: '/site.webmanifest',
     appleWebApp: {
         capable: true,
         title: siteDetails.metadata.title,
@@ -38,7 +41,7 @@ export const metadata: Metadata = {
         type: 'website',
         images: [
             {
-                url: `${siteDetails.siteUrl}/og-image.jpg`,
+                url: `${siteDetails.siteUrl}/og-image.png`,
                 width: 1200,
                 height: 675,
                 alt: siteDetails.siteName,
@@ -49,7 +52,7 @@ export const metadata: Metadata = {
         card: 'summary_large_image',
         title: siteDetails.metadata.title,
         description: siteDetails.metadata.description,
-        images: [`${siteDetails.siteUrl}/og-image.jpg`],
+        images: [`${siteDetails.siteUrl}/og-image.png`],
     },
     alternates: {
         canonical: siteDetails.siteUrl,
@@ -83,6 +86,10 @@ export default function RootLayout({
                 <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
             </head>
             <body className={inter.className}>
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: structuredDataJsonLd }}
+                />
                 <Suspense
                     fallback={
                         <div className="flex items-center justify-center min-h-screen">

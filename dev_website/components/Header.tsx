@@ -51,7 +51,7 @@ const Header: React.FC = () => {
                 <nav className="flex justify-between items-center h-16 md:h-20">
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-3">
-                        <img src="/logo.png" alt="Logo" className="w-9 h-9 rounded-full" />
+                        <img src="/logo.png" alt="Action Driving School App logo" className="w-9 h-9 rounded-full" />
                         <span className="text-lg font-bold text-foreground tracking-tight">
                             {siteDetails.siteName}
                         </span>

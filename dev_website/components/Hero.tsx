@@ -35,7 +35,7 @@ const Hero: React.FC = () => {
                 <div className="w-full md:w-1/2 flex justify-center">
                     <img
                         src={heroDetails.centerImageSrc}
-                        alt="app mockup"
+                        alt="Action Driving School app showing Rwanda driving exam practice questions"
                         className="max-w-xs md:max-w-sm w-full relative z-10"
                     />
                 </div>
