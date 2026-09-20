@@ -5,11 +5,16 @@ import { siteDetails } from "@/data/siteDetails";
  * Builds complete per-page metadata: canonical URL, Open Graph and Twitter
  * cards. Every non-home page must use this (or its own alternates) so it does
  * not inherit the root layout's homepage canonical.
+ *
+ * `languages` (hreflang map) and `ogLocale` are used by the trilingual blog
+ * posts to cross-link their language variants.
  */
 export function pageMetadata(
     path: string,
     title: string,
-    description: string
+    description: string,
+    languages?: Record<string, string>,
+    ogLocale?: string
 ): Metadata {
     const url = `${siteDetails.siteUrl}${path}`;
     const image = {
@@ -24,13 +29,14 @@ export function pageMetadata(
         description,
         alternates: {
             canonical: url,
+            ...(languages ? { languages } : {}),
         },
         openGraph: {
             title,
             description,
             url,
             siteName: `${siteDetails.siteName} Rwanda`,
-            locale: siteDetails.locale,
+            locale: ogLocale ?? siteDetails.locale,
             type: 'website',
             images: [image],
         },

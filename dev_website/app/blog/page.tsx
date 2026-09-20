@@ -3,13 +3,14 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { blogPosts } from "@/content/blog";
+import { BLOG_LANGS, LANG_LABEL } from "@/content/blog/types";
 import { pageMetadata } from "@/lib/pageMetadata";
 import { siteDetails } from "@/data/siteDetails";
 
 export const metadata: Metadata = pageMetadata(
     '/blog/',
     "Blog & Study Guides | Rwanda Driving Exam Tips - Action Driving School App",
-    "Free study guides and articles for the Rwanda driving theory exam: traffic laws, road signs, mock tests and tips to pass your driving license exam on the first try."
+    "Free study guides and articles for the Rwanda driving theory exam — in Kinyarwanda, English and French: traffic laws, road signs, mock tests and tips to pass your driving license exam on the first try."
 );
 
 function formatDate(iso: string) {
@@ -35,7 +36,8 @@ export default function BlogPage() {
                     <p className="text-xl text-foreground-accent mb-12 max-w-2xl leading-relaxed">
                         Everything you need to pass the Rwanda driving theory
                         exam — traffic laws, road signs, and proven preparation
-                        strategies.
+                        strategies. Every guide is available in Kinyarwanda,
+                        English and French.
                     </p>
 
                     <div className="grid gap-6">
@@ -49,25 +51,39 @@ export default function BlogPage() {
                                     className="text-sm text-muted-foreground"
                                 >
                                     {formatDate(post.date)}
-                                    {post.lang === "rw" ? " · Kinyarwanda" : ""}
                                 </time>
                                 <h2 className="text-2xl md:text-3xl font-bold mt-2 mb-3">
                                     <Link
                                         href={`/blog/${post.slug}/`}
                                         className="hover:text-primary transition-colors"
                                     >
-                                        {post.title}
+                                        {post.translations.en.title}
                                     </Link>
                                 </h2>
                                 <p className="text-foreground-accent leading-relaxed mb-4">
-                                    {post.description}
+                                    {post.translations.en.description}
                                 </p>
-                                <Link
-                                    href={`/blog/${post.slug}/`}
-                                    className="text-primary font-semibold hover:underline"
-                                >
-                                    Read the guide →
-                                </Link>
+                                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                    {BLOG_LANGS.map((lang, i) => (
+                                        <span key={lang}>
+                                            {i > 0 && (
+                                                <span className="text-muted-foreground mr-2">
+                                                    ·
+                                                </span>
+                                            )}
+                                            <Link
+                                                href={
+                                                    lang === "en"
+                                                        ? `/blog/${post.slug}/`
+                                                        : `/blog/${post.slug}/${lang}/`
+                                                }
+                                                className="text-primary font-semibold hover:underline"
+                                            >
+                                                {LANG_LABEL[lang]}
+                                            </Link>
+                                        </span>
+                                    ))}
+                                </div>
                             </article>
                         ))}
                     </div>
