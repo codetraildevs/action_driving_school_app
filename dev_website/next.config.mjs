@@ -18,9 +18,6 @@ const nextConfig = {
   // app itself so the build only ever looks inside this project.
   outputFileTracingRoot: __dirname,
   serverExternalPackages: ['prisma', '@prisma/client', '@prisma/adapter-mariadb', 'firebase-admin', 'nodemailer', 'ffmpeg-static'],
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
