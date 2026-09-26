@@ -124,7 +124,22 @@ Note on logs: the console server block logs to `driving-school_access.log` (not 
 
 ### 8.4 Remaining open
 
-1. Restore-path drill (§7.1) and off-site backups (§7.2) remain open.
+1. Off-site backups (§7.2): `db-backup.sh` now auto-uploads to B2 via rclone once the `b2` remote is configured on the VPS (non-fatal no-op until then); B2 chosen over Wasabi/R2 for the 10 GB free tier (nightly dump ≈ 1.5 MB).
+2. ~~Restore-path drill (§7.1)~~ — **done Sep 26, see §8.5.**
+
+### 8.5 Restore-path drill — first run, findings, fixes (Sep 26)
+
+**Result: ✅ PASSED.** Newest nightly dump restored into a scratch DB (`restore_drill_<ts>`) as root over the socket: 57/57 tables, 10 core tables row-verified against live (gap=0), newest `users.created_at` identical to the millisecond, scratch DB dropped. Scheduled weekly (Mondays 03:00). The drill script is tracked at `scripts/restore-drill.sh`.
+
+The first runs failed three times, and each failure was a real finding:
+
+1. **ERROR 1044** — the app user cannot write into the root-created scratch DB. Fix: restore and verify entirely as root (a real disaster restore runs as root anyway; no grants to manage).
+2. **Row-equality false positive** — a Sep-13 backup can never row-match a live DB 13 days later (522 new users). Fix: age-aware model — fail on restore errors / schema>live / empty-where-live-isn't / restored>live / data-newer-than-live; report organic-growth gaps as informational. Crucially the drill now **fails when the newest backup exceeds 48h**, so a dead pipeline can never silently pass.
+3. **Empty-table false positive** — `transactions` has 0 rows in the live DB too (unused). Fix: empty only fails when live is non-empty.
+
+**Bonus root-cause found by the drill's staleness check:** the nightly backup cron had produced nothing since **Sep 13** — `backup.log` showed daily `Permission denied`. Cause: the repo tracked the shell scripts as mode 100644, so every `git pull` stripped the executable bit that the cron invocation needs. Fix: exec bits now recorded in git (100755) for `scripts/db-backup.sh` + `scripts/restore-drill.sh`, so pulls *restore* the bit instead of destroying it.
+
+**Lessons:** (a) verify backup *freshness*, not just restorability; (b) never let a drill compare dynamic row counts across time; (c) executable bits are data — record them in git for anything cron invokes.
 
 *Addendum added Sep 26, 2026.*
 
