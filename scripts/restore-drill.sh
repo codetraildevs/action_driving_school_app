@@ -108,14 +108,18 @@ for t in users user_subscriptions tests questions learning_materials pdf_files \
   EXISTS=$(q "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='$SCRATCH' AND table_name='$t'")
   [ "$EXISTS" -eq 1 ] || continue
   LIVE=$(get_count "$DB_NAME" "$t"); REST=$(get_count "$SCRATCH" "$t")
-  if [ "$REST" -eq 0 ]; then
-    fail "core table $t is EMPTY in the restored copy"
+  if [ "$REST" -eq 0 ] && [ "$LIVE" -gt 0 ]; then
+    fail "core table $t is EMPTY in the restored copy but has $LIVE rows live — restore lost data"
   elif [ "$REST" -gt "$LIVE" ]; then
     fail "$t restored ($REST) > live ($LIVE) — corrupt/inconsistent dump"
   fi
   GAP=$((LIVE - REST))
   [ "$GAP" -gt "$GAP_WORST" ] && GAP_WORST=$GAP
-  echo "[$STAMP]   ✅ $t: $REST rows (live=$LIVE, gap=$GAP)"
+  if [ "$LIVE" -eq 0 ]; then
+    echo "[$STAMP]   ✅ $t: empty in live and restore (unused table — consistent)"
+  else
+    echo "[$STAMP]   ✅ $t: $REST rows (live=$LIVE, gap=$GAP)"
+  fi
   CHECKS=$((CHECKS+1))
 done
 [ "$CHECKS" -ge 3 ] || fail "fewer than 3 core tables found — verify table names"
