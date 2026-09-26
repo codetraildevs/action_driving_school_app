@@ -44,11 +44,14 @@ cleanup-stale-files.js
 check-login.js
 debug-login2.js
 reset-password.js
-diag-login.js
 
-# Diagnostic and identity-testing scripts (keep local only)
-diag-*.js
-test-identity.sh
+# One-off credential generators (NEVER commit — run locally or on the server,
+# then delete. Anyone with repo access could re-run them to seize accounts.)
+reset-admin-hash.js
+
+# Diagnostic and identity-testing scripts are now TRACKED (they read secrets
+# from .env at runtime and contain no embedded data); test-identity.sh is the
+# curl-based variant used in the Sep-2026 identity verification.
 
 # Android files (NOT needed for backend)
 baseline-profile/
