@@ -82,6 +82,45 @@ Corroborating symptom: every deploy banner had shown **`cpu: 99.9%` / `ram: 84.5
 2. **Off-site backups:** current backups live on the same VPS; copy `db-backups/` off-server (rclone → object storage) so a full VPS loss can't take them too.
 3. **journald retention:** `wtmpdb` began only Sep 13 — the Sep 8 infection's login history is lost; `sudo journalctl -u ssh --since "2026-09-08"` may still hold evidence for the entry-vector review if journald kept it.
 4. **Clean-OS reinstall** remains the gold standard when a maintenance window allows; nothing found suggests a rootkit, so it is optional, not urgent.
-5. Optional: `unattended-upgrades` for automatic security patches; consider moving SSH off port 10040 → 22 behind the provider firewall, or WireGuard-only admin access.
+5. Optional: consider moving SSH off port 10040 → 22 behind the provider firewall, or WireGuard-only admin access.
+
+---
+
+## 8. Addendum — Sep 26, 2026
+
+### 8.1 Follow-ups closed
+
+| Item from §5/§7 | Action (Sep 26) |
+|---|---|
+| `unattended-upgrades` (§7.5) | **Enabled** — `systemctl enable --now unattended-upgrades` (was installed but inactive) |
+| Admin password rotation | Rotated via the app's own API (`POST /api/auth/change-password`) with full verification: login → change → new password works → old password rejected. Full identity chain re-verified afterwards (login/token/profile/dashboard/refresh all OK) |
+| Diagnostic scripts | All `diag-*.js` + `test-identity.sh` now **tracked in git** (commit `33a6fa4`) after review: they read credentials from `.env` at runtime; hardcoded real phone numbers removed from their CLI defaults first |
+| `reset-admin-hash.js` | **Removed from git** (kept local-only, gitignored) — it overwrites the admin hash on whatever DB the local `.env` points at, so traveling with the repo would let anyone with a deploy seize the admin account |
+
+### 8.2 Port 3001 — investigation, incident, and hardening
+
+**What 3001 is:** the *marketing site* (`amategekoyumuhanda.rw`, the static `dev_website` export), served by a second nginx `server` block. The LB terminates SSL for both hostnames and forwards the apex site into VPS port 3001 (console traffic goes to port 80). The listener isn't in `sites-enabled/` — it lives in `sites-available/amategekoyumuhanda.rw`, which is why the first grep found nothing.
+
+**Key discovery — VM/NAT ingress:** the VPS is a VM behind host NAT. ALL inbound traffic (LB-forwarded included) reaches nginx appearing to come from `192.168.122.1` (the libvirt bridge gateway), never from the LB's public IP. Proven with a marker test: three unique URLs fetched from outside appeared in the access log sourced from `192.168.122.1`.
+
+**Consequence:** "allow only from the LB's public IP" is impossible at the VPS layer. Correct hardening is a source rule for `192.168.122.1` instead of a world-open port.
+
+**Mini-incident during hardening (lesson learned):** the open `3001/tcp` rule was deleted before the replacement was in place, based on an earlier wrong conclusion that "3001 is already filtered upstream" (direct probes timed out — that was the LB simply not forwarding raw internet traffic, not provider filtering). Result: the marketing site went down (~20 min) until the rule was restored. **Lesson: never delete the old firewall rule until the replacement is active and verified with real traffic.**
+
+**Final state (verified externally after the change):**
+
+```
+sudo ufw insert 1 allow from 192.168.122.1 to any port 3001 proto tcp
+```
+
+- `https://amategekoyumuhanda.rw` → 200 OK (through the hardened path)
+- raw `:3001` from the internet → blocked
+
+### 8.3 Open after this addendum
+
+1. **Port 80 same-pattern hardening (optional):** identical exposure and identical fix (`allow from 192.168.122.1`, delete the open rule) — with the delete/insert ordering lesson from §8.2 applied.
+2. Restore-path drill (§7.1) and off-site backups (§7.2) remain open.
+
+*Addendum added Sep 26, 2026.*
 
 *Report generated Sep 13, 2026 — remediation performed jointly by fidele and Codebuff.*
