@@ -60,6 +60,20 @@ fi
 
 SIZE=$(du -h "$FILE" | cut -f1)
 
+# ── Off-site copy (rclone → B2) ─────────────────────────────────────────
+# Non-fatal by design: the local backup stays the source of truth; a failed
+# upload must never stop the nightly dump. Requires a configured rclone
+# remote named "b2" (see docs/incident-report-2026-09.md §8.5).
+if command -v rclone >/dev/null 2>&1 && rclone listremotes 2>/dev/null | grep -qi '^b2:$'; then
+  if rclone copy "$FILE" "b2:${B2_BUCKET:-driving-school-backups}/mysql" --transfers 2 --checkers 4; then
+    echo "[$STAMP] off-site copy uploaded to b2:${B2_BUCKET:-driving-school-backups}"
+  else
+    echo "[$STAMP] WARN: off-site upload FAILED — local backup intact, check rclone/b2"
+  fi
+else
+  echo "[$STAMP] note: rclone remote 'b2' not configured — skipping off-site copy"
+fi
+
 # ── Retention: delete daily backups older than $RETENTION_DAYS ─────────────
 DELETED=$(find "$BACKUP_DIR" -name "${DB_NAME}_*.sql.gz" -mtime +"$RETENTION_DAYS" -print -delete 2>/dev/null | wc -l)
 
