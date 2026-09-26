@@ -116,10 +116,13 @@ sudo ufw insert 1 allow from 192.168.122.1 to any port 3001 proto tcp
 - `https://amategekoyumuhanda.rw` → 200 OK (through the hardened path)
 - raw `:3001` from the internet → blocked
 
-### 8.3 Open after this addendum
+### 8.3 Port 80 hardening (completed later on Sep 26)
 
-1. **Port 80 same-pattern hardening (optional):** identical exposure and identical fix (`allow from 192.168.122.1`, delete the open rule) — with the delete/insert ordering lesson from §8.2 applied.
-2. Restore-path drill (§7.1) and off-site backups (§7.2) remain open.
+The same fix was applied to port 80 (console path), with insert-before-delete ordering: `allow from 192.168.122.1 to any port 80` inserted first, then the world-open `80/tcp` rule removed. External verification after the change: `/api/health` 200 ×3, `/admin/login` 200, marketing site unaffected. Console traffic continuing to flow with only the bridge rule in place empirically confirms the LB→:80 path also ingresses via `192.168.122.1`. (Note: the console nginx block logs to a different access log than the site block — its marker lines were not in `/var/log/nginx/access.log`.)
+
+### 8.4 Remaining open
+
+1. Restore-path drill (§7.1) and off-site backups (§7.2) remain open.
 
 *Addendum added Sep 26, 2026.*
 
