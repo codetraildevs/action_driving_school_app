@@ -7,9 +7,10 @@
 #   1. Picks the newest ${DB_NAME}_*.sql.gz in /home/fidele/db-backups (or the
 #      file given as $1).
 #   2. Creates a scratch database restore_drill_<timestamp> on the same server.
-#   3. gunzips and restores the dump into it (clean restore — no --force, so
-#      any definer/permission noise counts as a failure, as it would in a real
-#      disaster).
+#   3. gunzips and restores the dump into it AS ROOT (sudo mysql socket) — the
+#      way a real disaster restore runs. (The app user's grants only cover the
+#      live DB, so piping the dump in as the app user fails with ERROR 1044;
+#      root needs no extra grants.)
 #   4. Verifies: table count matches the live DB, row counts of core tables
 #      match the live DB, and the newest user row is as fresh as the live one.
 #   5. Drops the scratch DB (on success; kept for inspection on failure).
@@ -59,10 +60,10 @@ HAVE_MB=$(df -m /home | awk 'NR==2{print $4}')
 SCRATCH="restore_drill_$(date '+%Y%m%d_%H%M%S')"
 sudo mysql -N -B -e "SELECT 1" >/dev/null 2>&1 || fail "no mysql root via 'sudo mysql' — grant fidele sudo NOPASSWD for mysql or run as root"
 
-# ── 3. Restore ───────────────────────────────────────────────────────────────
+# ── 3. Restore (as root over the socket — no app-user grants needed) ────
 echo "[$STAMP] Restoring into scratch DB: $SCRATCH …"
 sudo mysql -e "CREATE DATABASE \`$SCRATCH\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
-if ! gunzip < "$FILE" | mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" -p"$DB_PASS" "$SCRATCH" 2>/tmp/restore-drill.err; then
+if ! gunzip < "$FILE" | sudo mysql "$SCRATCH" 2>/tmp/restore-drill.err; then
   echo "[$STAMP] Restore errors (kept scratch DB $SCRATCH for inspection):"
   tail -5 /tmp/restore-drill.err
   echo "[$STAMP] Clean up later with: sudo mysql -e 'DROP DATABASE \`$SCRATCH\`'"
@@ -70,21 +71,19 @@ if ! gunzip < "$FILE" | mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" -p"$DB_P
 fi
 rm -f /tmp/restore-drill.err
 
-# ── 4. Verify against the live DB ────────────────────────────────────────────
-get_count() { mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" -p"$DB_PASS" -N -B -e "SELECT COUNT(*) FROM \`$1\`.\`$2\`" 2>/dev/null; }
+# ── 4. Verify against the live DB (root socket for everything) ────────────
+q() { sudo mysql -N -B -e "$1" 2>/dev/null; }
+get_count() { q "SELECT COUNT(*) FROM \`$1\`.\`$2\`"; }
 
-LIVE_TABLES=$(mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" -p"$DB_PASS" -N -B \
-  -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='$DB_NAME'")
-DRILL_TABLES=$(mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" -p"$DB_PASS" -N -B \
-  -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='$SCRATCH'")
+LIVE_TABLES=$(q "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='$DB_NAME'")
+DRILL_TABLES=$(q "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='$SCRATCH'")
 echo "[$STAMP] Tables: live=$LIVE_TABLES restored=$DRILL_TABLES"
 [ "$DRILL_TABLES" -eq "$LIVE_TABLES" ] || fail "table count mismatch"
 
 CHECKS=0
 for t in users user_subscriptions tests questions learning_materials pdf_files \
          transactions test_attempts user_activities irembo_driving_license_requests; do
-  EXISTS=$(mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" -p"$DB_PASS" -N -B \
-    -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='$SCRATCH' AND table_name='$t'")
+  EXISTS=$(q "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='$SCRATCH' AND table_name='$t'")
   [ "$EXISTS" -eq 1 ] || continue
   LIVE=$(get_count "$DB_NAME" "$t"); REST=$(get_count "$SCRATCH" "$t")
   if [ "$LIVE" = "$REST" ]; then
@@ -96,8 +95,8 @@ for t in users user_subscriptions tests questions learning_materials pdf_files \
 done
 [ "$CHECKS" -ge 3 ] || fail "fewer than 3 core tables found — verify table names"
 
-FRESH_LIVE=$(mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" -p"$DB_PASS" -N -B -e "SELECT MAX(created_at) FROM \`$DB_NAME\`.users")
-FRESH_REST=$(mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" -p"$DB_PASS" -N -B -e "SELECT MAX(created_at) FROM \`$SCRATCH\`.users")
+FRESH_LIVE=$(q "SELECT MAX(created_at) FROM \`$DB_NAME\`.users")
+FRESH_REST=$(q "SELECT MAX(created_at) FROM \`$SCRATCH\`.users")
 echo "[$STAMP] Newest user row: live=$FRESH_LIVE restored=$FRESH_REST"
 
 sudo mysql -e "DROP DATABASE \`$SCRATCH\`"
