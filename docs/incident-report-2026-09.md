@@ -118,7 +118,9 @@ sudo ufw insert 1 allow from 192.168.122.1 to any port 3001 proto tcp
 
 ### 8.3 Port 80 hardening (completed later on Sep 26)
 
-The same fix was applied to port 80 (console path), with insert-before-delete ordering: `allow from 192.168.122.1 to any port 80` inserted first, then the world-open `80/tcp` rule removed. External verification after the change: `/api/health` 200 ×3, `/admin/login` 200, marketing site unaffected. Console traffic continuing to flow with only the bridge rule in place empirically confirms the LB→:80 path also ingresses via `192.168.122.1`. (Note: the console nginx block logs to a different access log than the site block — its marker lines were not in `/var/log/nginx/access.log`.)
+The same fix was applied to port 80 (console path), with insert-before-delete ordering: `allow from 192.168.122.1 to any port 80` inserted first, then the world-open `80/tcp` rule removed. External verification after the change: `/api/health` 200 ×3, `/admin/login` 200, marketing site unaffected. Console traffic continuing to flow with only the bridge rule in place empirically confirms the LB→:80 path also ingresses via `192.168.122.1`.
+
+Note on logs: the console server block logs to `driving-school_access.log` (not the default `access.log`) and resolves the *client's public IP* from the LB's `X-Forwarded-For` (realip) — its marker lines show the origin IP, e.g. `197.157.145.20` (one's own public IP when the request originates from the operator's machine, since nginx resolves the real client IP from the LB's `X-Forwarded-For`). The TCP-level peer — the layer ufw actually filters — remains the bridge gateway `192.168.122.1`, which is what the allow rule matches and what the post-change traffic test proves.
 
 ### 8.4 Remaining open
 
