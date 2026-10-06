@@ -25,7 +25,8 @@ class NavigationSafetyTest {
     private val menuItemIds = setOf(
         "action_search", "action_logout", "action_test_history",
         "action_toggle_layout", "action_instructions",
-        "action_bookmark", "action_go_to_page", "action_view_bookmarks"
+        "action_bookmark", "action_go_to_page", "action_view_bookmarks",
+        "action_privacy_options"
     )
 
     private val fragmentActions: List<Pair<String, String>> by lazy {

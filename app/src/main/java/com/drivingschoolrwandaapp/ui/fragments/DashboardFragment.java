@@ -117,7 +117,6 @@ public class DashboardFragment extends Fragment {
         if (iremboServiceCard != null) {
             iremboServiceCard.setOnClickListener(v -> {
                 if (!isAdded() || getActivity() == null) return;
-                if (!isAdded() || getActivity() == null) return;
                 // Show interstitial before Irembo if ready
                 try {
                     if (AdManager.showInterstitialIfReady(getActivity())) {
@@ -131,7 +130,6 @@ public class DashboardFragment extends Fragment {
                     }
                 } catch (Exception e) {
                     android.util.Log.e("DashboardFragment", "Failed to open IremboActivity", e);
-                }
                 }
             });
         }
@@ -153,7 +151,6 @@ public class DashboardFragment extends Fragment {
                     }
                 } catch (Exception e) {
                     android.util.Log.e("DashboardFragment", "Failed to open WhatsAppGroupsActivity", e);
-                }
                 }
             });
         }
