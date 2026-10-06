@@ -52,7 +52,7 @@ public class WhatsAppGroupsActivity extends AppCompatActivity implements WhatsAp
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        EdgeToEdgeUtils.enable(this);
+        EdgeToEdgeUtils.enable(getWindow());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_whatsapp_groups);
 

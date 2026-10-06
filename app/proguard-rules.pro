@@ -66,3 +66,21 @@
 
 # ─── PDFBox-Android (optional) ───
 -dontwarn com.gemalto.jp2.**
+
+# ─── Strip calls to Android 15-deprecated window color APIs ───
+#
+# Play Console flags any shipped call to Window.setStatusBarColor / setNavigationBar
+# Color (deprecated in Android 15) and LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES.
+# First-party code no longer uses them (EdgeToEdgeUtils calls
+# Window.setDecorFitsSystemWindows directly), but androidx.core 1.19.0's
+# WindowCompat (kept because AppCompatDelegateImpl references it) and Material's
+# BottomSheetDialog/SheetDialog/EdgeToEdgeUtils still invoke the setters.
+#
+# Safe to strip unconditionally: on API 35+ the platform ignores these setters
+# anyway, on API 30+ bar colors come from the Material 3 theme, and on API <30
+# the app never enables edge-to-edge (EdgeToEdgeUtils returns early below 30).
+# The only effect is losing legacy dialog-bar tinting on very old devices.
+-assumenosideeffects class android.view.Window {
+   *** setStatusBarColor(...);
+   *** setNavigationBarColor(...);
+}

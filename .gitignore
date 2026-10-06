@@ -93,7 +93,17 @@ public/
 DRIVING_SHOOL_COMPANY_LEGACY/
 *.sql
 check-login.js
+diag-login.js
 cleanup-stale-files.js
 debug-login.sh
 test-ssl.sh
 *.sh
+*.txt
+tsconfig.tsbuildinfo
+.next/
+
+# dev_website (only on dev-website branch)
+dev_website/
+student1.jpg
+student2.png
+student3.jpg

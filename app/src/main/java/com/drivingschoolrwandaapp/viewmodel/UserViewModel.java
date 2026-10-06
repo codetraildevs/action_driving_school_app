@@ -174,6 +174,22 @@ public class UserViewModel extends AndroidViewModel {
     public void updateUser(User user) {
         userRepository.updateUser(user);
     }
+
+    /**
+     * Clears cached user data from Room so the next profile load starts fresh.
+     * Call this on successful login before navigating to the main app.
+     */
+    public void clearCachedUser() {
+        userRepository.clearCachedUser();
+    }
+
+    /**
+     * Saves the login response user to Room so the profile screen can display
+     * data immediately while the full profile fetch runs in the background.
+     */
+    public void saveLoginUser(com.drivingschoolrwandaapp.models.entities.User user) {
+        userRepository.saveLoginUser(user);
+    }
     
     public void sleepSubscription(int languageId) {
         if (currentSleepSubscriptionLiveData != null && currentSleepSubscriptionObserver != null) {

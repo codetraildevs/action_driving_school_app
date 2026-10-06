@@ -1,0 +1,12 @@
+<resources>
+    <!-- API 30+ can safely use LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS.
+         On API 28-29 TECNO/Infinix devices this value throws
+         UnsupportedOperationException from PhoneWindow.generateLayout. -->
+    <style name="Base.Theme.drivingSchoolRwandaApp" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">always</item>
+        <item name="android:fontFamily">@font/montserrat</item>
+        <item name="fontFamily">@font/montserrat</item>
+        <item name="materialButtonStyle">@style/Widget.drivingSchoolRwandaApp.Button</item>
+    </style>
+</resources>

@@ -47,7 +47,7 @@ public class ApplicationDetailsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        EdgeToEdgeUtils.enable(this);
+        EdgeToEdgeUtils.enable(getWindow());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_application_details);
 
@@ -177,7 +177,9 @@ public class ApplicationDetailsActivity extends AppCompatActivity {
                 loadingDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
             }
         }
-        loadingDialog.show();
+        if (!isFinishing() && !loadingDialog.isShowing()) {
+            loadingDialog.show();
+        }
     }
 
     private void hideLoadingDialog() {

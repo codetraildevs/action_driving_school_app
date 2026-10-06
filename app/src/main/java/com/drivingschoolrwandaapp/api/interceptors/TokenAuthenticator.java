@@ -43,7 +43,14 @@ public class TokenAuthenticator implements Authenticator {
     @Override
     public Request authenticate(@Nullable Route route, @NonNull Response response) {
         synchronized (this) {
-            final String refreshToken = tokenManager.getRefreshToken();
+            String refreshToken;
+            try {
+                refreshToken = tokenManager.getRefreshToken();
+            } catch (StackOverflowError e) {
+                Log.e("TokenAuthenticator", "StackOverflow reading refresh token", e);
+                logoutUser();
+                return null;
+            }
 
             if (refreshToken == null || refreshToken.isEmpty()) {
                 logoutUser();

@@ -7,6 +7,7 @@ import com.drivingschoolrwandaapp.database.dao.PdfDao;
 import com.drivingschoolrwandaapp.database.dao.TestDao;
 import com.drivingschoolrwandaapp.database.dao.TestResultDao;
 import com.drivingschoolrwandaapp.database.dao.UserDao;
+import com.drivingschoolrwandaapp.database.dao.UserSubscriptionDao;
 
 import javax.inject.Singleton;
 
@@ -36,6 +37,11 @@ public class DatabaseModule {
     @Provides
     public UserDao provideUserDao(AppDatabase appDatabase) {
         return appDatabase.userDao();
+    }
+
+    @Provides
+    public UserSubscriptionDao provideUserSubscriptionDao(AppDatabase appDatabase) {
+        return appDatabase.userSubscriptionDao();
     }
 
     @Provides

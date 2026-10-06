@@ -86,9 +86,13 @@ public class ResultsFragment extends Fragment {
         com.google.android.material.button.MaterialButton startPracticeBtn = view.findViewById(R.id.start_practice_btn);
         if (startPracticeBtn != null) {
             startPracticeBtn.setOnClickListener(v -> {
-                if (getActivity() != null && isAdded()) {
-                    NavHostFragment.findNavController(ResultsFragment.this)
-                            .navigate(R.id.testsFragment);
+                if (isAdded() && getContext() != null) {
+                    try {
+                        NavHostFragment.findNavController(ResultsFragment.this)
+                                .navigate(R.id.testsFragment);
+                    } catch (Exception e) {
+                        android.util.Log.e("ResultsFragment", "Navigation failed", e);
+                    }
                 }
             });
         }
@@ -284,8 +288,12 @@ public class ResultsFragment extends Fragment {
                                             args.putString("title", title);
                                             args.putBoolean("isReviewMode", false);
                                             args.putBoolean("isRealTimeFeedback", true);
-                                            NavHostFragment.findNavController(ResultsFragment.this)
-                                                    .navigate(R.id.action_global_testQuestionsFragment, args);
+                                            try {
+                                                NavHostFragment.findNavController(ResultsFragment.this)
+                                                        .navigate(R.id.action_global_testQuestionsFragment, args);
+                                            } catch (Exception e) {
+                                                android.util.Log.e("ResultsFragment", "Navigation failed", e);
+                                            }
                                         });
                                     }
                                 }
@@ -298,13 +306,17 @@ public class ResultsFragment extends Fragment {
                                         args.putString("title", title);
                                         args.putBoolean("isReviewMode", false);
                                         args.putBoolean("isRealTimeFeedback", true);
-                                        NavHostFragment.findNavController(ResultsFragment.this)
-                                                .navigate(R.id.action_global_testQuestionsFragment, args);
+                                        try {
+                                            NavHostFragment.findNavController(ResultsFragment.this)
+                                                    .navigate(R.id.action_global_testQuestionsFragment, args);
+                                        } catch (Exception e) {
+                                            android.util.Log.e("ResultsFragment", "Navigation failed", e);
+                                        }
                                     }
                                 }
                             });
-                        } else {
-                            if (isAdded()) {
+                        } else if (isAdded() && getContext() != null) {
+                            try {
                                 Bundle args = new Bundle();
                                 args.putInt("testId", testId);
                                 args.putString("title", title);
@@ -312,6 +324,8 @@ public class ResultsFragment extends Fragment {
                                 args.putBoolean("isRealTimeFeedback", true);
                                 NavHostFragment.findNavController(ResultsFragment.this)
                                         .navigate(R.id.action_global_testQuestionsFragment, args);
+                            } catch (Exception e) {
+                                android.util.Log.e("ResultsFragment", "Navigation failed", e);
                             }
                         }
                     });

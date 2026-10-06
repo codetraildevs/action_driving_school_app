@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import java.util.Locale;
 
+import com.drivingschoolrwandaapp.BuildConfig;
 import com.drivingschoolrwandaapp.utils.EdgeToEdgeUtils;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -55,7 +56,7 @@ public class LoginActivity extends AppCompatActivity {
     @SuppressLint("HardwareIds")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdgeUtils.enable(this);
+        EdgeToEdgeUtils.enable(getWindow());
 //        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
         setContentView(R.layout.activity_login);
 
@@ -106,6 +107,14 @@ public class LoginActivity extends AppCompatActivity {
                     startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
                 }
             });
+        }
+
+        // Debug: show the device ANDROID_ID so testers can share it for API login testing
+        TextView debugAndroidId = findViewById(R.id.debug_android_id);
+        if (debugAndroidId != null && BuildConfig.DEBUG) {
+            String androidId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+            debugAndroidId.setText("Device ID: " + androidId);
+            debugAndroidId.setVisibility(View.VISIBLE);
         }
 
         loginButton.setOnClickListener(v -> {
@@ -187,7 +196,21 @@ public class LoginActivity extends AppCompatActivity {
                         // Persist the role so the app can route admins to the admin console.
                         int roleId = resource.data.getUser() != null ? resource.data.getUser().getRole() : 0;
                         tokenManager.saveRole(roleId);
-                        Log.d(TAG, "Login successful (rememberMe=" + rememberMe + ", role=" + roleId + ").");
+                        // Persist the user id so Room queries can filter by the
+                        // currently logged-in user and never show stale data.
+                        int userId = resource.data.getUser() != null ? resource.data.getUser().getId() : 0;
+                        if (userId > 0) {
+                            tokenManager.saveUserId(userId);
+                        }
+                        Log.d(TAG, "Login successful (rememberMe=" + rememberMe + ", role=" + roleId + ", userId=" + userId + ").");
+                        // Clear any stale user data from Room so the profile screen
+                        // never shows a previous user's data while fetching the new one.
+                        userViewModel.clearCachedUser();
+                        // Also save the login response user to Room so the profile
+                        // screen has data to display immediately.
+                        if (resource.data.getUser() != null) {
+                            userViewModel.saveLoginUser(resource.data.getUser());
+                        }
                         Toast.makeText(this, getString(R.string.login_successful_redirect), Toast.LENGTH_SHORT).show();
 
                         // Play Integrity attestation — background check for ad-fraud protection.

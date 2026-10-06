@@ -27,7 +27,15 @@ public class MyApplicationsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         MaterialToolbar toolbar = view.findViewById(R.id.toolbar);
-        toolbar.setNavigationOnClickListener(v -> NavHostFragment.findNavController(this).navigateUp());
+        toolbar.setNavigationOnClickListener(v -> {
+            if (isAdded() && getContext() != null) {
+                try {
+                    NavHostFragment.findNavController(this).navigateUp();
+                } catch (Exception e) {
+                    android.util.Log.e("MyApplicationsFragment", "Navigation failed", e);
+                }
+            }
+        });
 
         myApplicationsRecyclerView = view.findViewById(R.id.rv_my_applications);
 

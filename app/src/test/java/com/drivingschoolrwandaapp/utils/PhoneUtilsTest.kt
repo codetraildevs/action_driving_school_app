@@ -217,6 +217,68 @@ class PhoneUtilsTest {
     }
 
     // ---------------------------------------------------------------------------
+    // toCanonicalLocal() — backend's canonical storage format (07XXXXXXXX)
+    // ---------------------------------------------------------------------------
+
+    @Test
+    fun `toCanonicalLocal converts local format unchanged`() {
+        assertEquals("0782877442", PhoneUtils.toCanonicalLocal("0782877442"))
+    }
+
+    @Test
+    fun `toCanonicalLocal converts E164 to local`() {
+        assertEquals("0782877442", PhoneUtils.toCanonicalLocal("+250782877442"))
+    }
+
+    @Test
+    fun `toCanonicalLocal converts bare country code to local`() {
+        assertEquals("0782877442", PhoneUtils.toCanonicalLocal("250782877442"))
+    }
+
+    @Test
+    fun `toCanonicalLocal converts 00 prefix to local`() {
+        assertEquals("0782877442", PhoneUtils.toCanonicalLocal("00250782877442"))
+    }
+
+    @Test
+    fun `toCanonicalLocal converts formatted numbers to local`() {
+        assertEquals("0782877442", PhoneUtils.toCanonicalLocal("+250 78 287 7442"))
+        assertEquals("0782877442", PhoneUtils.toCanonicalLocal("078-287-7442"))
+    }
+
+    @Test
+    fun `toCanonicalLocal all Rwandan formats collapse to one string`() {
+        val results = setOf(
+            PhoneUtils.toCanonicalLocal("0782877442"),
+            PhoneUtils.toCanonicalLocal("+250782877442"),
+            PhoneUtils.toCanonicalLocal("250782877442"),
+            PhoneUtils.toCanonicalLocal("00250782877442"),
+            PhoneUtils.toCanonicalLocal("+250 78 287 7442"),
+            PhoneUtils.toCanonicalLocal("078-287-7442")
+        )
+        assertEquals("All formats must collapse to the one canonical 07… string", 1, results.size)
+   }
+
+    @Test
+    fun `toCanonicalLocal is idempotent`() {
+        assertEquals("0782877442", PhoneUtils.toCanonicalLocal("0782877442"))
+        assertEquals(PhoneUtils.toCanonicalLocal("0782877442"),
+                     PhoneUtils.toCanonicalLocal(PhoneUtils.toCanonicalLocal("0782877442")))
+    }
+
+    @Test
+    fun `toCanonicalLocal keeps non-Rwandan numbers in E164`() {
+        assertEquals("+12024567890", PhoneUtils.toCanonicalLocal("+12024567890"))
+        assertEquals("+447911123456", PhoneUtils.toCanonicalLocal("+447911123456"))
+    }
+
+    @Test
+    fun `toCanonicalLocal empty and null return empty`() {
+        assertEquals("", PhoneUtils.toCanonicalLocal(""))
+        assertEquals("", PhoneUtils.toCanonicalLocal(null))
+    }
+
+    // ---------------------------------------------------------------------------
     // isValid()
     // ---------------------------------------------------------------------------
 

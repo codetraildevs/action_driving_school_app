@@ -61,6 +61,30 @@ public final class PhoneUtils {
     }
 
     /**
+     * Normalize to the BACKEND'S CANONICAL STORAGE format for Rwandan numbers:
+     * local "07XXXXXXXX" (what the API stores in the users table).
+     * <p>
+     * All input formats of the same Rwandan number (07…, +250…, 250…, 00250…,
+     * spaced/dashed) collapse to the identical local string, so what the user
+     * sees on the registration screen is exactly the account that will be
+     * created — and no second "other-format" account can exist for it.
+     * <p>
+     * Non-Rwandan numbers are returned in E.164 (unchanged behavior); null or
+     * empty input returns "".
+     */
+    public static String toCanonicalLocal(String raw) {
+        String e164 = normalize(raw);
+        if (e164.isEmpty() || !e164.startsWith("+")) {
+            return e164;
+        }
+        // Rwanda: country code 250 + 9 national digits → E.164 length 13.
+        if (e164.startsWith("+250") && e164.length() == 13) {
+            return "0" + e164.substring(4); // +250782877442 → 0782877442
+        }
+        return e164; // non-Rwandan: keep international format
+    }
+
+    /**
      * Validate whether a phone number is a valid number for its region.
      *
      * @param raw the phone number as entered by the user

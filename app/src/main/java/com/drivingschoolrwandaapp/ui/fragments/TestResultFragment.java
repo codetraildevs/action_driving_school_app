@@ -100,8 +100,12 @@ public class TestResultFragment extends Fragment {
                         if (isAdded()) {
                             requireActivity().runOnUiThread(() -> {
                                 Toast.makeText(requireContext(), getString(R.string.dsrw_ad_reward_msg), Toast.LENGTH_LONG).show();
-                                NavHostFragment.findNavController(TestResultFragment.this)
-                                        .popBackStack(R.id.testsFragment, false);
+                                try {
+                                    NavHostFragment.findNavController(TestResultFragment.this)
+                                            .popBackStack(R.id.testsFragment, false);
+                                } catch (Exception e) {
+                                    android.util.Log.e("TestResultFragment", "Navigation failed", e);
+                                }
                             });
                         }
                     }
@@ -109,13 +113,21 @@ public class TestResultFragment extends Fragment {
                     @Override
                     public void onAdFailedToShow() {
                         if (isAdded()) {
-                            NavHostFragment.findNavController(TestResultFragment.this)
-                                    .popBackStack(R.id.testsFragment, false);
+                            try {
+                                NavHostFragment.findNavController(TestResultFragment.this)
+                                        .popBackStack(R.id.testsFragment, false);
+                            } catch (Exception e) {
+                                android.util.Log.e("TestResultFragment", "Navigation failed", e);
+                            }
                         }
                     }
                 });
             } else {
-                NavHostFragment.findNavController(this).popBackStack(R.id.testsFragment, false);
+                try {
+                    NavHostFragment.findNavController(this).popBackStack(R.id.testsFragment, false);
+                } catch (Exception e) {
+                    android.util.Log.e("TestResultFragment", "Navigation failed", e);
+                }
             }
         });
     }
@@ -140,7 +152,7 @@ public class TestResultFragment extends Fragment {
         }
         
         testViewModel.getTestResult().observe(getViewLifecycleOwner(), result -> {
-            if (result != null) {
+            if (result != null && isAdded() && getContext() != null) {
                 AnalyticsUtils.logExamCompleted(
                         getContext(),
                         testViewModel.getTestId() != null ? testViewModel.getTestId() : 0,
@@ -153,7 +165,6 @@ public class TestResultFragment extends Fragment {
                         result.getWrongCount(),
                         result.getSkippedCount(),
                         result.getElapsedSeconds());
-
                 int percentage = (result.getTotalMarks() > 0)
                         ? (result.getScore() * 100) / result.getTotalMarks()
                         : 0;

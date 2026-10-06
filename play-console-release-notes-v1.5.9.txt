@@ -1,0 +1,7 @@
+Bug fixes and stability improvements.
+
+- Fixed crashes when navigating between screens
+- Fixed crashes during exam start and retake
+- Fixed crash when viewing test results
+- Fixed crash in answer selection
+- Improved app stability across all screens

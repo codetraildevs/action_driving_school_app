@@ -121,10 +121,10 @@ public class QuestionOptionAdapter extends RecyclerView.Adapter<QuestionOptionAd
                 }
 
                 int previousSelectedPosition = selectedPosition;
-                selectedPosition = getAdapterPosition();
+                selectedPosition = position;
 
-                if (listener != null) {
-                    listener.onOptionSelected(options.get(selectedPosition).getId());
+                if (listener != null && position < options.size()) {
+                    listener.onOptionSelected(options.get(position).getId());
                 }
 
                 if (isRealTimeFeedback) {

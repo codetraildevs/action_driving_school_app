@@ -7,11 +7,13 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.api.ApiService;
 import com.drivingschoolrwandaapp.database.dao.UserDao;
+import com.drivingschoolrwandaapp.database.dao.UserSubscriptionDao;
 import com.drivingschoolrwandaapp.database.entities.User;
 import com.drivingschoolrwandaapp.data.local.preferences.TokenManager;
 import com.drivingschoolrwandaapp.models.request.ForgotPasswordRequest;
@@ -39,15 +41,18 @@ import retrofit2.Response;
 public class UserRepository {
     private final ApiService apiService;
     private final UserDao userDao;
+    private final UserSubscriptionDao userSubscriptionDao;
     private final Context context;
     private final TokenManager tokenManager;
     private final ExecutorService executorService;
     private final Gson gson = new Gson();
 
-    public UserRepository(Context context, ApiService apiService, UserDao userDao, TokenManager tokenManager) {
+    public UserRepository(Context context, ApiService apiService, UserDao userDao,
+                          UserSubscriptionDao userSubscriptionDao, TokenManager tokenManager) {
         this.context = context.getApplicationContext();
         this.apiService = apiService;
         this.userDao = userDao;
+        this.userSubscriptionDao = userSubscriptionDao;
         this.tokenManager = tokenManager;
         this.executorService = Executors.newSingleThreadExecutor();
     }
@@ -223,8 +228,48 @@ public class UserRepository {
     }
 
 
+    /**
+     * Direct Room access scoped to the CURRENT user id. Never falls back to
+     * userDao.getUser() (SELECT ... LIMIT 1): with no ORDER BY that can
+     * return a stale row from a previously logged-in account.
+     */
     public LiveData<com.drivingschoolrwandaapp.database.entities.User> loadFromDb() {
-        return userDao.getUser();
+        int userId = tokenManager.getUserId();
+        if (userId > 0) {
+            return userDao.getUserById(userId);
+        }
+        MediatorLiveData<com.drivingschoolrwandaapp.database.entities.User> empty =
+                new MediatorLiveData<>();
+        empty.setValue(null);
+        return empty;
+    }
+
+    /**
+     * Clears all cached user data from Room so the next profile load starts
+     * fresh. Called on successful login to prevent stale data from a previous
+     * session from being shown while the network profile fetch is in progress.
+     * Also drops the cached subscription row: without this, account A's plan
+     * stays visible to account B until the network fetch completes (or
+     * indefinitely while offline) — a cross-account data leak.
+     */
+    public void clearCachedUser() {
+        executeSafely(() -> {
+            userDao.deleteAll();
+            userSubscriptionDao.delete();
+        });
+    }
+
+    /**
+     * Saves the login response user to Room so the profile screen can display
+     * data immediately while the full profile fetch runs in the background.
+     */
+    public void saveLoginUser(com.drivingschoolrwandaapp.models.entities.User networkUser) {
+        if (networkUser == null) return;
+        executeSafely(() -> {
+            com.drivingschoolrwandaapp.database.entities.User dbUser = mapUser(networkUser);
+            userDao.insert(dbUser);
+            tokenManager.saveUserId(dbUser.getId());
+        });
     }
 
     public void updateUser(User user) {
@@ -269,6 +314,9 @@ public class UserRepository {
     private void performLocalLogout() {
         executeSafely(() -> {
             userDao.deleteAll();
+            // Drop the per-user subscription cache too: the user_subscription
+            // table is single-row and must never outlive its account.
+            userSubscriptionDao.delete();
             tokenManager.clearTokens();
             navigateToLogin();
         });
@@ -287,13 +335,28 @@ public class UserRepository {
                 if (item.getData() != null) {
                     com.drivingschoolrwandaapp.database.entities.User dbUser = mapUser(item.getData());
                     userDao.insert(dbUser);
+                    // Keep the persisted user id in sync with the server response.
+                    tokenManager.saveUserId(dbUser.getId());
                 }
             }
 
             @NonNull
             @Override
             protected LiveData<com.drivingschoolrwandaapp.database.entities.User> loadFromDb() {
-                return userDao.getUser();
+                // Only ever read the CURRENT user's row. Never fall back to
+                // userDao.getUser() (SELECT ... LIMIT 1): with no ORDER BY it
+                // can return a STALE row from a previously logged-in account
+                // and show that person's profile. With no persisted id there
+                // is nothing safe to display — emit null and let the network
+                // fetch repopulate Room for the correct user.
+                int currentUserId = tokenManager.getUserId();
+                if (currentUserId > 0) {
+                    return userDao.getUserById(currentUserId);
+                }
+                MediatorLiveData<com.drivingschoolrwandaapp.database.entities.User> empty =
+                        new MediatorLiveData<>();
+                empty.setValue(null);
+                return empty;
             }
 
             @NonNull

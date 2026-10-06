@@ -22,8 +22,8 @@ android {
         applicationId = "com.drivingschoolrwandaapp"
         minSdk = 27
         targetSdk = 37
-        versionCode = 103
-        versionName = "1.5.6"
+        versionCode = 109
+        versionName = "1.5.12"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -41,21 +41,28 @@ android {
 
     signingConfigs {
         create("release") {
-            val keystorePropertiesFile = rootProject.file("keystore.properties")
-            if (keystorePropertiesFile.exists()) {
-                val properties = Properties()
-                properties.load(keystorePropertiesFile.inputStream())
-                storeFile = file(properties.getProperty("storeFile", "upload-keystore.jks"))
-                storePassword = properties.getProperty("storePassword", "Password123.")
-                keyAlias = properties.getProperty("keyAlias", "upload")
-                keyPassword = properties.getProperty("keyPassword", "Password123.")
-            } else {
-                // Fallback: use env vars (GitHub Actions) or hardcoded defaults (local dev)
-                storeFile = file(System.getenv("KEYSTORE_FILE") ?: "upload-keystore.jks")
-                storePassword = System.getenv("KEYSTORE_STORE_PASSWORD") ?: "Password123."
-                keyAlias = System.getenv("KEYSTORE_KEY_ALIAS") ?: "upload"
-                keyPassword = System.getenv("KEYSTORE_KEY_PASSWORD") ?: "Password123."
+            // Credentials come from (in order): keystore.properties (gitignored,
+            // see keystore.properties.example) or KEYSTORE_* environment
+            // variables (GitHub Actions). No hardcoded fallbacks — a missing
+            // config fails fast with a clear message when a release task runs.
+            val propsFile = rootProject.file("keystore.properties")
+            fun env(name: String): String? = System.getenv(name)?.takeIf { it.isNotBlank() }
+
+            if (propsFile.exists()) {
+                val p = Properties().apply { propsFile.inputStream().use { load(it) } }
+                storeFile = file(p.getProperty("storeFile", "upload-keystore.jks"))
+                storePassword = p.getProperty("storePassword")
+                    ?: error("keystore.properties is missing 'storePassword'")
+                keyAlias = p.getProperty("keyAlias", "upload")
+                keyPassword = p.getProperty("keyPassword") ?: storePassword
+            } else if (env("KEYSTORE_STORE_PASSWORD") != null) {
+                storeFile = file(env("KEYSTORE_FILE") ?: "upload-keystore.jks")
+                storePassword = env("KEYSTORE_STORE_PASSWORD")!!
+                keyAlias = env("KEYSTORE_KEY_ALIAS") ?: "upload"
+                keyPassword = env("KEYSTORE_KEY_PASSWORD") ?: storePassword
             }
+            // else: leave unset — debug builds sign with the debug key; release
+            // builds fail fast via the taskGraph guard below.
         }
     }
 
@@ -511,4 +518,47 @@ tasks.named("preBuild") {
 }
 tasks.named("check") {
     dependsOn("verifyNoFormattedStringsInLayouts")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────────
+// Versioned AAB copy: after every `:app:bundleRelease`, copy app-release.aab to
+// app-<versionName>.aab so successive Play Console uploads stay distinguishable
+// (Gradle always overwrites app-release.aab in place).
+// ─────────────────────────────────────────────────────────────────────────────────
+val releaseVersionName = android.defaultConfig.versionName ?: "unknown"
+// Plain doLast copy (no declared task outputs) on purpose: a Copy task writing
+// into outputs/bundle/release collides with AGP output ownership and fails
+// Gradle 9's implicit-dependency validation.
+val copyVersionedAab = tasks.register("copyVersionedAab") {
+    doLast {
+        val src = layout.buildDirectory.file("outputs/bundle/release/app-release.aab").get().asFile
+        if (src.exists()) {
+            val dst = File(src.parentFile, "app-$releaseVersionName.aab")
+            src.copyTo(dst, overwrite = true)
+            logger.lifecycle("Copied release bundle to ${dst.name}")
+        }
+    }
+}
+
+// finalizedBy runs the copy after bundleRelease succeeds; if no AAB was
+// produced the doLast body simply does nothing.
+tasks.matching { it.name == "bundleRelease" }.configureEach {
+    finalizedBy(copyVersionedAab)
+}
+
+// Fail fast when a release task is requested without signing credentials,
+// instead of failing deep inside packaging with a cryptic error.
+gradle.taskGraph.whenReady {
+    val wantsRelease = allTasks.any { it.name.contains("Release") }
+    val wantsReleaseSigning = allTasks.any { it.name.startsWith("bundle") || it.name.startsWith("assemble") }
+    if (wantsRelease && wantsReleaseSigning) {
+        val cfg = android.signingConfigs.findByName("release")
+        if (cfg == null || cfg.storePassword == null || cfg.keyPassword == null) {
+            throw GradleException(
+                "Release signing credentials not configured. Create keystore.properties " +
+                "(see keystore.properties.example) or set the KEYSTORE_STORE_PASSWORD / " +
+                "KEYSTORE_KEY_PASSWORD environment variables."
+            )
+        }
+    }
 }

@@ -29,7 +29,7 @@ public class ResetPasswordActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdgeUtils.enable(this);
+        EdgeToEdgeUtils.enable(getWindow());
         setContentView(R.layout.activity_reset_password);
 
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
