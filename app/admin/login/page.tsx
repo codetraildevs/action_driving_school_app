@@ -324,11 +324,13 @@ export default function AdminLoginPage() {
                     <Label htmlFor="identifier">Email or phone number</Label>
                     <Input
                       id="identifier"
-                      placeholder="admin@amategekoyumuhanda.rw or 0732657995"
+                      placeholder="you@example.com or 07xxxxxxxx"
+                      aria-label="Email or phone number"
                       value={identifier}
                       onChange={(e) => setIdentifier(e.target.value)}
                       required
                       disabled={isLoading}
+                      autoComplete="username"
                     />
                   </div>
                   {error && (

@@ -112,6 +112,12 @@ export async function POST(request: NextRequest) {
         if (!isAdminRoleName(candidate.role.roleName)) {
           const deviceMatch = deviceId && candidate.devices.some((d) => d.physicalAddress === deviceId);
           if (!deviceMatch) {
+            // Remember WHY this candidate was skipped so the error below can
+            // tell a user on a new/reinstalled device (their ANDROID_ID no
+            // longer matches the registered device) apart from a typo'd
+            // password. Without this flag the device case surfaced as the
+            // misleading "Invalid credentials".
+            sawDeviceMismatch = true;
             continue;
           }
         }
@@ -151,6 +157,21 @@ export async function POST(request: NextRequest) {
               success: false,
               message:
                 "You are not allowed to login from this device. Please contact support.",
+            },
+            { status: 403 }
+          );
+        }
+        // The Android app sends ANDROID_ID as the password for student
+        // accounts. When it changed (app reinstall / new phone) neither the
+        // device nor the password matches — surface THAT case specifically so
+        // support knows the fix is re-binding the device, not a password
+        // reset.
+        if (sawDeviceMismatch && sawBadPassword) {
+          return NextResponse.json(
+            {
+              success: false,
+              message:
+                "This account is registered to a different device. If you reinstalled the app or changed phones, contact support to re-register your device.",
             },
             { status: 403 }
           );
