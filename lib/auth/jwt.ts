@@ -52,6 +52,10 @@ export function verifyRefreshToken(token: string): TokenPayload | null {
 //   });
 // }
 
+// How long a password-reset code stays usable, shared by forgot-password /
+// verify-otp / reset-password so all three enforce the same TTL.
+export const RESET_TOKEN_TTL_MS = 15 * 60 * 1000;
+
 export function generateResetToken(payload: ResetTokenPayload): string {
   const array = new Uint32Array(1);
   crypto.getRandomValues(array);
