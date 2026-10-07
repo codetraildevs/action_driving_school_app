@@ -87,10 +87,13 @@ export async function POST(request: NextRequest) {
       }
 
       if (candidates.length === 0) {
+        // Console-facing message: the admin console only sends phone+password,
+        // so distinguish "number not found" from a wrong password (below).
         return NextResponse.json(
           {
             success: false,
-            message: "Invalid credentials",
+            message:
+              "No account found for this phone number. Check the number or contact support.",
           },
           { status: 401 }
         );
@@ -146,7 +149,8 @@ export async function POST(request: NextRequest) {
           return NextResponse.json(
             {
               success: false,
-              message: "Account is not active. Please contact support.",
+              message:
+                "This account is deactivated. Please contact support to reactivate it.",
             },
             { status: 403 }
           );
@@ -176,10 +180,13 @@ export async function POST(request: NextRequest) {
             { status: 403 }
           );
         }
+        // Everything else reaching here means the number matched at least one
+        // active account whose device (if required) matched, but the password
+        // was wrong — including the admin console's no-deviceId path.
         return NextResponse.json(
           {
             success: false,
-            message: "Invalid credentials",
+            message: "Incorrect password. Please try again.",
           },
           { status: 401 }
         );
