@@ -48,6 +48,8 @@ interface ReportResult {
   dateRange: { startDate: string | null; endDate: string | null };
   results: any[];
   count: number;
+  total?: number;
+  pagination?: { page: number; pageSize: number; total: number; pages: number };
 }
 
 const reportTypes: { value: ReportType; label: string; icon: any }[] = [
@@ -71,6 +73,13 @@ export default function AnalyticsReportsPage() {
   const [report, setReport] = useState<ReportResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+
+  // Changing the report definition resets paging to the first page.
+  useEffect(() => {
+    setPage(1);
+  }, [reportType, startDate, endDate]);
 
   const fetchReport = useCallback(async () => {
     try {
@@ -80,6 +89,8 @@ export default function AnalyticsReportsPage() {
         type: reportType,
         startDate,
         endDate,
+        page: String(page),
+        pageSize: String(pageSize),
       });
       const data = await apiClient.get<{ data: ReportResult }>(
         `/api/admin/analytics/reports?${params.toString()}`
@@ -92,7 +103,7 @@ export default function AnalyticsReportsPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [reportType, startDate, endDate]);
+  }, [reportType, startDate, endDate, page, pageSize]);
 
   useEffect(() => {
     fetchReport();
@@ -135,6 +146,27 @@ export default function AnalyticsReportsPage() {
     a.click();
     URL.revokeObjectURL(url);
     toast.success("Report exported successfully");
+  };
+
+  const totalPages = report?.pagination?.pages ?? 1;
+  const totalRecords = report?.pagination?.total ?? report?.total ?? report?.count ?? 0;
+  const currentPage = report?.pagination?.page ?? page;
+  const rangeStart =
+    totalRecords === 0
+      ? 0
+      : (currentPage - 1) * (report?.pagination?.pageSize ?? pageSize) + 1;
+  const rangeEnd = Math.min(
+    currentPage * (report?.pagination?.pageSize ?? pageSize),
+    totalRecords,
+  );
+
+  /** Compact page-number window around the current page. */
+  const pageWindow = (): number[] => {
+    const start = Math.max(1, Math.min(currentPage - 2, totalPages - 4));
+    const end = Math.min(totalPages, start + 4);
+    const numbers: number[] = [];
+    for (let i = start; i <= end; i++) numbers.push(i);
+    return numbers;
   };
 
   const renderReportTable = () => {
@@ -440,13 +472,13 @@ export default function AnalyticsReportsPage() {
               </CardTitle>
               <CardDescription>
                 {report
-                  ? `${report.count} records found`
+                  ? `Showing ${rangeStart.toLocaleString()}–${rangeEnd.toLocaleString()} of ${totalRecords.toLocaleString()} records`
                   : "Loading..."}
               </CardDescription>
             </div>
-            {report && report.count > 0 && (
+            {report && totalRecords > 0 && (
               <Badge variant="secondary">
-                {report.count} records
+                {totalRecords.toLocaleString()} records
               </Badge>
             )}
           </div>
@@ -468,7 +500,64 @@ export default function AnalyticsReportsPage() {
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           ) : (
+            <>
             <div className="overflow-x-auto">{renderReportTable()}</div>
+            {totalRecords > 0 && (
+              <div className="mt-4 flex flex-col items-center justify-between gap-3 sm:flex-row">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <span>Rows per page</span>
+                  <Select
+                    value={String(pageSize)}
+                    onValueChange={(v) => {
+                      setPageSize(Number(v));
+                      setPage(1);
+                    }}
+                  >
+                    <SelectTrigger className="h-8 w-[70px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[10, 25, 50, 100].map((size) => (
+                        <SelectItem key={size} value={String(size)}>
+                          {size}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage <= 1 || isLoading}
+                    onClick={() => setPage((v) => Math.max(1, v - 1))}
+                  >
+                    Prev
+                  </Button>
+                  {pageWindow().map((number) => (
+                    <Button
+                      key={number}
+                      variant={number === currentPage ? "default" : "outline"}
+                      size="sm"
+                      className="w-9"
+                      disabled={isLoading}
+                      onClick={() => setPage(number)}
+                    >
+                      {number}
+                    </Button>
+                  ))}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage >= totalPages || isLoading}
+                    onClick={() => setPage((v) => Math.min(totalPages, v + 1))}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            )}
+            </>
           )}
         </CardContent>
       </Card>
