@@ -154,6 +154,19 @@ const updateMaterialHandler = withPermission(PERMISSIONS.PDF_UPDATE)(
       },
     });
 
+    // Audit trail for the Audit Log page (non-fatal).
+    try {
+      await prisma.userActivity.create({
+        data: {
+          userId: context.user.userId,
+          activityType: "MATERIAL_UPDATE",
+          description: `Updated learning material "${updatedMaterial.title}"`,
+        },
+      });
+    } catch (logError) {
+      console.error("Audit log write failed:", logError);
+    }
+
     return NextResponse.json(updatedMaterial);
   } catch (error) {
     console.error("Error updating learning material:", error);
@@ -225,6 +238,19 @@ const deleteMaterialHandler = withPermission(PERMISSIONS.PDF_DELETE)(
     await prisma.learningMaterial.delete({
       where: { id: parseInt(id) },
     });
+
+    // Audit trail for the Audit Log page (non-fatal).
+    try {
+      await prisma.userActivity.create({
+        data: {
+          userId: context.user.userId,
+          activityType: "MATERIAL_DELETE",
+          description: `Deleted learning material "${existingMaterial.title}"`,
+        },
+      });
+    } catch (logError) {
+      console.error("Audit log write failed:", logError);
+    }
 
     return NextResponse.json({
       message: "Learning material deleted successfully",

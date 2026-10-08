@@ -211,6 +211,10 @@ export default function LearningMaterialsPage() {
 
     setIsSubmitting(true);
 
+    // Captured outside the optimistic insert so the catch block can revert
+    // THE SAME row — Date.now() inside catch would be a different id.
+    let tempId: number | null = null;
+
     try {
       const selectedFile = files.find((f) => f.id.toString() === formData.file);
 
@@ -226,6 +230,7 @@ export default function LearningMaterialsPage() {
         createdAt: new Date().toISOString(),
       };
 
+      tempId = newMaterial.id;
       setMaterials((prev) => [newMaterial, ...prev]);
 
       const uploadData = {
@@ -235,10 +240,15 @@ export default function LearningMaterialsPage() {
         isPublic: formData.isPublic.toString(),
       };
 
-      const response = (await apiClient.post(
-        "/api/learning-materials/upload",
-        uploadData
-      )) as any;
+      const response = await apiClient.post<
+        Partial<LearningMaterial> & { error?: string }
+      >("/api/learning-materials/upload", uploadData);
+
+      // The upload route returns the created material (with a real id) on
+      // success and { error } on failure — never treat a bad body as success.
+      if (!response || typeof response.id !== "number") {
+        throw new Error(response?.error || "Server returned an unexpected response");
+      }
 
       toast.success("Material created successfully");
       setIsUploadModalOpen(false);
@@ -247,15 +257,20 @@ export default function LearningMaterialsPage() {
       // Replace temporary material with actual data
       setMaterials((prev) =>
         prev.map((material) =>
-          material.id === newMaterial.id ? response : material
+          material.id === newMaterial.id
+            ? (response as LearningMaterial)
+            : material
         )
       );
     } catch (error) {
-      // Revert optimistic update
-      setMaterials((prev) =>
-        prev.filter((material) => material.id !== Date.now())
-      );
-      toast.error("Failed to create material");
+      // Revert the optimistic row — must compare against the SAME temp id
+      // inserted above (a fresh Date.now() here would never match it).
+      setMaterials((prev) => prev.filter((material) => material.id !== tempId));
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : "Failed to create material";
+      toast.error(message);
       console.error("Upload error:", error);
     } finally {
       setIsSubmitting(false);

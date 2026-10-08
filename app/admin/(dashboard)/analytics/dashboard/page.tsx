@@ -119,7 +119,7 @@ export default function AnalyticsDashboardPage() {
     {
       title: "Subscriptions",
       value: stats ? formatNumber(stats.totalSubscriptions) : "0",
-      description: "Active subscriptions",
+      description: "Users with active learning access",
       icon: CreditCard,
       color: "text-green-600",
       bgColor: "bg-green-50",

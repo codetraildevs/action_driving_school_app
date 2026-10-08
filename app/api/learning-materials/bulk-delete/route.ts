@@ -4,7 +4,7 @@ import { PERMISSIONS } from "@/lib/auth/permissions";
 import { prisma } from "@/lib/prismaDB";
 
 const bulkDeleteHandler = withPermission(PERMISSIONS.PDF_DELETE)(
-  async (request: NextRequest) => {
+  async (request: NextRequest, { user }) => {
     try {
       const { ids } = await request.json();
 
@@ -26,6 +26,19 @@ const bulkDeleteHandler = withPermission(PERMISSIONS.PDF_DELETE)(
       await prisma.learningMaterial.deleteMany({
         where: { id: { in: numericIds } },
       });
+
+      // Audit trail for the Audit Log page (non-fatal).
+      try {
+        await prisma.userActivity.create({
+          data: {
+            userId: user.userId,
+            activityType: "MATERIAL_BULK_DELETE",
+            description: `Bulk deleted ${numericIds.length} learning material(s)`,
+          },
+        });
+      } catch (logError) {
+        console.error("Audit log write failed:", logError);
+      }
 
       return NextResponse.json({
         message: `${numericIds.length} material(s) deleted successfully`,

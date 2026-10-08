@@ -10,10 +10,10 @@ import { generateThumbnail } from "@/lib/thum-utils";
 import { prisma } from "@/lib/prismaDB";
 
 const uploadMaterialHandler = withPermission(PERMISSIONS.PDF_UPLOAD)(
-  async (request: NextRequest) => {
+  async (request: NextRequest, { user }) => {
   try {
     const formData = await request.json();
-    const file = formData["fileId"] as any;
+    const file = formData["fileId"] as string | undefined;
     const title = formData["title"] as string;
     const description = formData["description"] as string;
     const isPublic = formData["isPublic"] === "true";
@@ -30,8 +30,17 @@ const uploadMaterialHandler = withPermission(PERMISSIONS.PDF_UPLOAD)(
         where: { id: parseInt(file) },
       });
 
-      const thumbnailPath = fileTouse?.thumbnailUrl;
-      const filePath = fileTouse?.filePath;
+      // A material must reference a real File Manager entry. Creating one
+      // against a missing file leaves an orphan row with an empty path.
+      if (!fileTouse) {
+        return NextResponse.json(
+          { error: "Selected file was not found in the File Manager. Re-upload the file and try again." },
+          { status: 400 }
+        );
+      }
+
+      const thumbnailPath = fileTouse.thumbnailUrl;
+      const filePath = fileTouse.filePath;
 
       const material = await prisma.learningMaterial.create({
         data: {
@@ -43,6 +52,21 @@ const uploadMaterialHandler = withPermission(PERMISSIONS.PDF_UPLOAD)(
           thumbnailUrl: thumbnailPath,
         },
       });
+
+      // Audit trail for the Audit Log page. Non-fatal: a failed log write
+      // must not turn an already-created material into a 500.
+      try {
+        await prisma.userActivity.create({
+          data: {
+            userId: user.userId,
+            activityType: "MATERIAL_CREATE",
+            description: `Created learning material "${title}"`,
+          },
+        });
+      } catch (logError) {
+        console.error("Audit log write failed:", logError);
+      }
+
       return NextResponse.json(material, { status: 201 });
     }
 

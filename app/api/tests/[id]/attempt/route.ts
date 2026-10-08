@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { PrismaClient } from '@/lib/generated/prisma';
+import { PrismaClient, UserTestAccessStatus } from '@/lib/generated/prisma';
 import { verifyToken } from '@/lib/auth/jwt';
+import { isAdminRoleName } from '@/lib/auth/roles';
 
 import { prisma } from "@/lib/prismaDB";
 
@@ -30,21 +31,46 @@ const userId = payload.userId;
 
     // Verify test access and create attempt
     const result = await prisma.$transaction(async (tx) => {
-      // Check user subscription
-      const userSubscription = await tx.userSubscription.findUnique({
-        where: { userId: userId }
-      });
-
-      const test = await tx.test.findUnique({
-        where: { id: testId }
-      });
+      // Defense-in-depth: mirror the real access gate in
+      // app/api/tests/[id]/questions/route.ts — learning access comes from
+      // user_test_access (status ACTIVE|PENDING; expiresAt is display-only),
+      // console admins bypass, free tests are open to everyone.
+      const [test, viewer, userTestAccess] = await Promise.all([
+        tx.test.findUnique({
+          where: { id: testId }
+        }),
+        tx.user.findUnique({
+          where: { id: userId },
+          select: { role: { select: { roleName: true } } },
+        }),
+        tx.userTestAccess?.findFirst({
+          where: {
+            userId,
+            status: {
+              in: [UserTestAccessStatus.ACTIVE, UserTestAccessStatus.PENDING],
+            },
+          },
+          select: { maxTest: true },
+        }),
+      ]);
 
       if (!test) {
         throw new Error('Test not found');
       }
 
-      if (test.subscriptionId > (userSubscription?.subscriptionPlanId || 1)) {
-        throw new Error('Subscription required');
+      const isAdmin = isAdminRoleName(viewer?.role.roleName);
+      if (!isAdmin) {
+        if (!userTestAccess) {
+          throw new Error('ACCESS_DENIED');
+        }
+
+        const hasAccess =
+          test.isFree ||
+          (test.testNumber != null && test.testNumber <= userTestAccess.maxTest);
+
+        if (!hasAccess) {
+          throw new Error('ACCESS_DENIED');
+        }
       }
 
       // Create test attempt

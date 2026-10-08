@@ -5,27 +5,46 @@ import { PERMISSIONS } from '@/lib/auth/permissions';
 import { z } from 'zod';
 
 import { prisma } from "@/lib/prismaDB";
+import { UserTestAccessStatus } from "@/lib/generated/prisma";
 
 // GET all subscription plans
 const getPlansHandler = withPermission(PERMISSIONS.SUBSCRIPTION_READ)(
   async (req, { user }) => {
     try {
-      const plans = await prisma.subscriptionPlan.findMany({
-        include: {
-          permissions: true,
-          _count: {
-            select: {
-              userSubscriptions: true,
-              transactions: true,
+      // Per-plan "subscriber" counts read from user_subscriptions are legacy:
+      // that table is no longer written by the register/accept flows, and
+      // plans have no link to user_test_access, so a truthful per-plan figure
+      // is not derivable. Return the real platform-wide access-ledger count
+      // instead and let the UI present it once at page level.
+      const [plans, activeLearningAccess] = await Promise.all([
+        prisma.subscriptionPlan.findMany({
+          include: {
+            permissions: true,
+            _count: {
+              select: {
+                userSubscriptions: true,
+                transactions: true,
+              }
             }
-          }
-        },
-        orderBy: { amount: 'asc' }
-      });
+          },
+          orderBy: { amount: 'asc' }
+        }),
+        // Same definition as the admin dashboard metric: mirrors the access
+        // gate in app/api/tests/[id]/questions/route.ts (status only;
+        // expiresAt is display-only and never enforced when serving content).
+        prisma.userTestAccess?.count({
+          where: {
+            status: {
+              in: [UserTestAccessStatus.ACTIVE, UserTestAccessStatus.PENDING],
+            },
+          },
+        }),
+      ]);
 
       return NextResponse.json({
         success: true,
-        data: plans
+        data: plans,
+        activeLearningAccess,
       });
     } catch (error) {
       console.error('Fetch plans error:', error);

@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/lib/auth/jwt";
 import { isAdminRoleName } from "@/lib/auth/roles";
 import { prisma } from "@/lib/prismaDB";
+import { UserRequestStatus, UserTestAccessStatus } from "@/lib/generated/prisma";
 
 export async function GET(request: NextRequest) {
   try {
@@ -44,7 +45,20 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const totalSubscriptions = await prisma.userSubscription.count();
+    // "Active subscriptions" = users the access gate currently treats as
+    // having learning access. The real access ledger is user_test_access
+    // (written on registration and when an admin accepts a request);
+    // user_subscriptions is legacy and no longer written by those flows.
+    // The gate in app/api/tests/[id]/questions/route.ts checks status ∈
+    // {ACTIVE, PENDING} only — expiresAt is display-only and never enforced
+    // when serving content — so this count mirrors the gate exactly.
+    const totalSubscriptions = await prisma.userTestAccess?.count({
+      where: {
+        status: {
+          in: [UserTestAccessStatus.ACTIVE, UserTestAccessStatus.PENDING],
+        },
+      },
+    });
     const totalTests = await prisma.test.count();
     const totalLearningMaterials = await prisma.learningMaterial.count();
     const totalPdfFiles = await prisma.pdfFile.count();
@@ -62,21 +76,18 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const recentSubscriptions = await prisma.userSubscription.findMany({
+    // Recent "subscriptions" = recently approved access requests. The legacy
+    // user_subscriptions table is no longer written by the accept flow.
+    const recentSubscriptions = await prisma.userSubscriptionRequest.findMany({
       take: 5,
-      orderBy: { createdAt: "desc" },
+      where: { status: UserRequestStatus.ACCEPTED },
+      orderBy: { updatedAt: "desc" },
       include: {
         user: {
           select: {
             firstName: true,
             lastName: true,
             email: true,
-          },
-        },
-        subscriptionPlan: {
-          select: {
-            planName: true,
-            amount: true,
           },
         },
       },
@@ -101,16 +112,16 @@ export async function GET(request: NextRequest) {
       ...recentSubscriptions.map((sub) => ({
         id: sub.id,
         type: "subscription",
-        title: "New Subscription",
-        description: `${sub.user.firstName} ${sub.user.lastName} subscribed to ${sub.subscriptionPlan.planName}`,
-        timestamp: sub.createdAt,
+        title: "Subscription Approved",
+        description: `${sub.user.firstName} ${sub.user.lastName} gained access to ${sub.requestedTests} tests for ${sub.requestedDays} days`,
+        timestamp: sub.updatedAt,
         user: {
           name: `${sub.user.firstName} ${sub.user.lastName}`,
           email: sub.user.email,
         },
         subscription: {
-          plan: sub.subscriptionPlan.planName,
-          amount: sub.subscriptionPlan.amount,
+          plan: `${sub.requestedTests} tests`,
+          amount: `${sub.requestedDays} days`,
         },
       })),
     ]

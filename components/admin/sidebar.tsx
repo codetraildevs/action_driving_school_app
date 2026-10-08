@@ -24,6 +24,7 @@ import {
   Group,
   Network,
   BarChart3,
+  ScrollText,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth/auth-context";
 import { Button } from "@/components/ui/button";
@@ -75,6 +76,11 @@ const navigation = [
     name: "Requests",
     href: "/admin/user-requests",
     icon: Logs,
+  },
+  {
+    name: "Audit Log",
+    href: "/admin/audit-log",
+    icon: ScrollText,
   },
   {
     name: "Irembo Services",

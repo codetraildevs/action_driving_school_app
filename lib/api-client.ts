@@ -143,7 +143,20 @@ export class ApiClient {
       headers: customHeaders,
     });
 
-    
+    // Must throw on failure like get/put/patch/delete do. Without this check
+    // a failed POST (400/401/500) resolved with the error body, so callers
+    // showed "success" toasts for operations that never happened — e.g.
+    // materials that vanished on refresh.
+    if (!response.ok) {
+      let message = `Request failed with status ${response.status}`;
+      try {
+        const error = await response.json();
+        message = error.error || error.message || message;
+      } catch {
+        // Non-JSON error body (e.g. an HTML error page) — keep the status message.
+      }
+      throw new Error(message);
+    }
 
     return response.json();
   }

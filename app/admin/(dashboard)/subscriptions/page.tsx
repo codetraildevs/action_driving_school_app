@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -18,9 +18,6 @@ interface SubscriptionPlan {
   amount: string;
   duration: number;
   permissions: Array<{ id: number; permissionName: string }>;
-  _count: {
-    userSubscriptions: number;
-  };
   createdAt: string;
 }
 
@@ -45,6 +42,7 @@ const defaultPermissions = [
 export default function SubscriptionsPage() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeLearningAccess, setActiveLearningAccess] = useState<number | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null);
@@ -64,8 +62,11 @@ export default function SubscriptionsPage() {
 
   const fetchPlans = async () => {
     try {
-      const data = await apiClient.get<{ data: SubscriptionPlan[] }>("/api/subscriptions");
+      const data = await apiClient.get<{ data: SubscriptionPlan[]; activeLearningAccess: number }>(
+        "/api/admin/subscriptions"
+      );
       setPlans(data.data || []);
+      setActiveLearningAccess(typeof data.activeLearningAccess === "number" ? data.activeLearningAccess : null);
     } catch (error) {
       toast.error("Failed to fetch plans");
     } finally {
@@ -233,6 +234,12 @@ export default function SubscriptionsPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Subscription Plans</h1>
           <p className="text-muted-foreground">Manage subscription tiers and pricing</p>
+          {activeLearningAccess !== null && (
+            <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
+              <Users className="h-4 w-4" />
+              {activeLearningAccess.toLocaleString()} users with active learning access
+            </p>
+          )}
         </div>
         <Button onClick={handleCreateNew}>
           <Plus className="mr-2 h-4 w-4" />
@@ -248,9 +255,6 @@ export default function SubscriptionsPage() {
               <div className="flex items-start justify-between">
                 <div>
                   <CardTitle className="text-xl">{plan.planName}</CardTitle>
-                  <CardDescription>
-                    {plan._count.userSubscriptions} subscriber{plan._count.userSubscriptions !== 1 ? "s" : ""}
-                  </CardDescription>
                 </div>
                 <Badge variant="secondary">
                   {plan.permissions.length} permissions
@@ -268,10 +272,6 @@ export default function SubscriptionsPage() {
                 <div className="flex items-center gap-2 text-sm">
                   <Clock className="h-4 w-4 text-muted-foreground" />
                   <span>{plan.duration} days</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                  <span>{plan._count.userSubscriptions} active</span>
                 </div>
               </div>
 

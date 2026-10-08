@@ -140,7 +140,7 @@ export default function DashboardPage() {
     {
       title: "Active Subscriptions",
       value: stats ? formatNumber(stats.totalSubscriptions) : "0",
-      description: "Current subscribers",
+      description: "Users with active learning access",
       icon: CreditCard,
       color: "text-green-600",
       bgColor: "bg-green-50",

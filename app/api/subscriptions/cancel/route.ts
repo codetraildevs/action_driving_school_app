@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
- ;
-import { verifyToken } from "@/lib/auth/jwt";
-
+ ;import { verifyToken } from "@/lib/auth/jwt";
 import { prisma } from "@/lib/prismaDB";
+import { UserTestAccessStatus } from "@/lib/generated/prisma";
 
 
 export async function POST(request: NextRequest) {
@@ -22,8 +21,22 @@ export async function POST(request: NextRequest) {
      const userId = payload.userId;
 
     await prisma.$transaction(async (tx) => {
-      // Delete user subscription
-      await tx.userSubscription.delete({
+      // Revoke learning access in the REAL ledger: the content gate in
+      // app/api/tests/[id]/questions/route.ts checks userTestAccess.status,
+      // so flipping it to INACTIVE (and clearing maxTest) is what actually
+      // locks the user out of tests. updateMany (not update) so cancelling
+      // still succeeds for a user with no access row.
+      await tx.userTestAccess?.updateMany({
+        where: { userId },
+        data: {
+          status: UserTestAccessStatus.INACTIVE,
+          maxTest: 0,
+        },
+      });
+
+      // Legacy cleanup. deleteMany (not delete): most users have no
+      // user_subscriptions row, and delete would throw P2025 -> 500 for them.
+      await tx.userSubscription.deleteMany({
         where: { userId:userId }
       });
 
