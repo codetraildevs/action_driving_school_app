@@ -1,0 +1,40 @@
+import org.gradle.api.Project
+
+/**
+ * Crashlytics mapping upload guard (local-only release build path).
+ *
+ * This project's release build uploads Crashlytics mapping files by default.
+ * The task is fine on CI / networked machines, but it fails here with a 400
+ * response during assembly, which blocks the build even though the APK itself
+ * already built. For a local hand-off build we disable that upload so
+ * assembleRelease can complete and the APK can be verified.
+ *
+ * Once a networked machine or CI runs the same commit, rerun the upload task
+ * separately so Crashlytics symbolication is complete:
+ *   ./gradlew :app:uploadCrashlyticsMappingFileRelease
+ *
+ * NOTE: this file intentionally does NOT disable minification or the release
+ * signing task graph guard -- only the Crashlytics upload step is gated here.
+ * Do not commit a variant that skips R8 / signing; keep that for the real
+ * release pipeline.
+ */
+
+def crashlyticsUploadGuard = tasks.register('skipCrashlyticsUploadForLocalRelease') {
+    description = 'Prevents :app:uploadCrashlyticsMappingFileRelease from running during a local release assemble.'
+    doLast {
+        logger.lifecycle(
+            'Local-release guard: skipping Crashlytics mapping upload ' +
+            '(run :app:uploadCrashlyticsMappingFileRelease separately on a networked machine)'
+        )
+    }
+}
+
+afterEvaluate {
+    def assembleRelease = tasks.findByName('assembleRelease')
+    def crashlyticsUpload = tasks.findByName('uploadCrashlyticsMappingFileRelease')
+    if (assembleRelease != null && crashlyticsUpload != null) {
+        assembleRelease.dependsOn crashlyticsUploadGuard
+        assembleRelease.mustRunAfter crashlyticsUploadGuard
+        crashlyticsUpload.enabled = false
+    }
+}

@@ -362,9 +362,12 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
     }
 
     /**
-     * Shows a dialog offering the user to watch a rewarded ad for temporary
-     * access to the material. If the ad plays to completion, the material
-     * is opened directly.
+     * Shows a dialog offering the user to watch a rewarded ad (rewarded or
+     * rewarded interstitial) for temporary access to the material. If the ad
+     * plays to completion, the material is opened directly.
+     *
+     * Tries the rewarded interstitial first (better view-through experience),
+     * falling back to the standard rewarded ad if it is not ready.
      */
     private void showWatchAdDialog(String action) {
         if (!isAdded() || getActivity() == null || getContext() == null) return;
@@ -375,20 +378,23 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
 
         builder.setPositiveButton(getString(R.string.dsrw_ad_btn), (dialog, which) -> {
             if (getActivity() == null) return;
+            // Pre-load both rewarded ad formats so one is likely ready.
             AdManager.loadRewardedAd(requireContext());
+            AdManager.loadRewardedInterstitial(requireContext());
+
+            // Try rewarded interstitial first.
+            if (AdManager.showRewardedInterstitialIfReady(getActivity())) {
+                // Reward earned: grant access.
+                grantMaterialAccess();
+                return;
+            }
+
+            // Fall back to the standard rewarded ad.
             AdManager.showRewardedAdIfReady(getActivity(), new AdManager.RewardedAdCallback() {
                 @Override
                 public void onRewardEarned(@NonNull com.google.android.gms.ads.rewarded.RewardItem reward) {
                     if (!isAdded()) return;
-                    Toast.makeText(requireContext(), getString(R.string.watch_ad_material_reward_msg), Toast.LENGTH_LONG).show();
-                    // Grant temporary access and perform the action
-                    if (pendingMaterial != null) {
-                        if ("download".equals(pendingAction)) {
-                            viewModel.downloadLearningMaterial(pendingMaterial);
-                        } else if ("view".equals(pendingAction)) {
-                            openFile(pendingMaterial);
-                        }
-                    }
+                    grantMaterialAccess();
                 }
 
                 @Override
@@ -402,6 +408,22 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
 
         builder.setNegativeButton(android.R.string.cancel, null);
         builder.show();
+    }
+
+    /**
+     * Grants temporary access to the pending material and performs the pending
+     * action (view or download). Shows a confirmation toast.
+     */
+    private void grantMaterialAccess() {
+        if (!isAdded() || getContext() == null) return;
+        Toast.makeText(requireContext(), getString(R.string.watch_ad_material_reward_msg), Toast.LENGTH_LONG).show();
+        if (pendingMaterial != null) {
+            if ("download".equals(pendingAction)) {
+                viewModel.downloadLearningMaterial(pendingMaterial);
+            } else if ("view".equals(pendingAction)) {
+                openFile(pendingMaterial);
+            }
+        }
     }
 
     @Override

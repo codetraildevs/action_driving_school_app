@@ -28,14 +28,14 @@ import com.google.android.gms.ads.rewarded.RewardItem;
  * <p>Usage:
  * <ol>
  *   <li>Call {@link #initialize(Context)} once from {@code MainApplication.onCreate()}.
- *   <li>Use {@link #showBanner(Activity, FrameLayout, String)} to load a banner into a container.
- *   <li>Use {@link #loadInterstitial} / {@link #showInterstitialIfReady} for interstitials.
- *   <li>Use {@link #loadRewardedAd} / {@link #showRewardedAdIfReady} for rewarded ads.
- * </ol>
- *
- * <p>Ad-unit IDs below are the <b>test</b> IDs shipped by Google. Replace with your
- * production IDs before publishing.
- */
+ *   <li>Use {@link #showBanner(Activity, FrameLayout, String)} to load a banner into a container.     * <li>Use {@link #loadInterstitial} / {@link #showInterstitialIfReady} for interstitials.
+     * <li>Use {@link #loadRewardedInterstitial} / {@link #showRewardedInterstitialIfReady} for rewarded interstitials.
+     * <li>Use {@link #loadRewardedAd} / {@link #showRewardedAdIfReady} for rewarded ads.
+     * </ol>
+ *     * <p>Ad-unit IDs below are the <b>production</b> IDs for publisher
+     * {@code 2864387622629553}. Replace with your own IDs before publishing a new app/r
+     * or if you create new ad units in the AdMob console.
+     */
 public final class AdManager {
 
     private static final String TAG = "AdManager";
@@ -46,13 +46,15 @@ public final class AdManager {
     // private static final String REWARDED_AD_UNIT_ID      = "ca-app-pub-3940256099942544/5224354917";
 
     // ── Production ad-unit IDs ──────────────────────────────────────────────────────────
-    private static final String BANNER_AD_UNIT_ID       = "ca-app-pub-2864387622629553/4416179690";
-    private static final String INTERSTITIAL_AD_UNIT_ID  = "ca-app-pub-2864387622629553/2665325775";
-    private static final String REWARDED_AD_UNIT_ID      = "ca-app-pub-2864387622629553/5099917426";
+    private static final String BANNER_AD_UNIT_ID            = "ca-app-pub-2864387622629553/4416179690";
+    private static final String INTERSTITIAL_AD_UNIT_ID     = "ca-app-pub-2864387622629553/2665325775";
+    private static final String REWARDED_AD_UNIT_ID         = "ca-app-pub-2864387622629553/5099917426";
+    private static final String REWARDED_INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-2864387622629553/1024941040";
 
     private static boolean initialized = false;
     private static InterstitialAd interstitialAd;
     private static RewardedAd rewardedAd;
+    private static InterstitialAd rewardedInterstitialAd;
 
     // Minimum interval between interstitial shows (AdMob policy: no back-to-back ads)
     private static long lastInterstitialShowTime = 0;
@@ -138,7 +140,7 @@ public final class AdManager {
     // ────────────────────────────────────────────────────────────────────────────────────
 
     /**
-     * Pre-load an interstitial. Call early (e.g. onResume or after init) so it's ready
+     * Pre-load a standard interstitial. Call early (e.g. onResume or after init) so it's ready
      * when the user performs a qualifying action.
      */
     public static void loadInterstitial(@NonNull Context context) {
@@ -146,7 +148,7 @@ public final class AdManager {
     }
 
     /**
-     * Pre-load an interstitial with a custom ad-unit ID.
+     * Pre-load a standard interstitial with a custom ad-unit ID.
      */
     public static void loadInterstitial(@NonNull Context context, @Nullable String adUnitId) {
         String id = adUnitId != null ? adUnitId : INTERSTITIAL_AD_UNIT_ID;
@@ -182,7 +184,50 @@ public final class AdManager {
     }
 
     /**
-     * Show the interstitial if it's loaded and ready.
+     * Pre-load a rewarded interstitial. Call early so it's ready when the user taps "Watch Ad".
+     */
+    public static void loadRewardedInterstitial(@NonNull Context context) {
+        loadRewardedInterstitial(context, null);
+    }
+
+    /**
+     * Pre-load a rewarded interstitial with a custom ad-unit ID.
+     */
+    public static void loadRewardedInterstitial(@NonNull Context context, @Nullable String adUnitId) {
+        String id = adUnitId != null ? adUnitId : REWARDED_INTERSTITIAL_AD_UNIT_ID;
+        AdRequest request = new AdRequest.Builder().build();
+
+        InterstitialAd.load(context, id, request, new InterstitialAdLoadCallback() {
+            @Override
+            public void onAdLoaded(@NonNull InterstitialAd ad) {
+                rewardedInterstitialAd = ad;
+                Log.d(TAG, "Rewarded interstitial ad loaded");
+
+                ad.setFullScreenContentCallback(new FullScreenContentCallback() {
+                    @Override
+                    public void onAdDismissedFullScreenContent() {
+                        rewardedInterstitialAd = null;
+                        loadRewardedInterstitial(context, adUnitId);
+                    }
+
+                    @Override
+                    public void onAdFailedToShowFullScreenContent(@NonNull AdError error) {
+                        rewardedInterstitialAd = null;
+                        Log.w(TAG, "Rewarded interstitial show failed: " + error.getMessage());
+                    }
+                });
+            }
+
+            @Override
+            public void onAdFailedToLoad(@NonNull LoadAdError error) {
+                rewardedInterstitialAd = null;
+                Log.w(TAG, "Rewarded interstitial load failed: " + error.getMessage());
+            }
+        });
+    }
+
+    /**
+     * Show the standard interstitial if it's loaded and ready.
      *
      * @return {@code true} if the ad was shown, {@code false} otherwise
      */
@@ -204,6 +249,26 @@ public final class AdManager {
         }
         lastInterstitialShowTime = now;
         interstitialAd.show(activity);
+        return true;
+    }
+
+    /**
+     * Show the rewarded interstitial if it's loaded and ready.
+     * Does NOT enforce the interstitial cooldown (rewarded interstitials are a
+     * separate ad slot with their own fill).
+     *
+     * @return {@code true} if the ad was shown, {@code false} otherwise
+     */
+    public static boolean showRewardedInterstitialIfReady(@NonNull Activity activity) {
+        if (!ConsentHelper.canShowAds()) {
+            Log.d(TAG, "Rewarded interstitial skipped — consent not yet obtained");
+            return false;
+        }
+        if (rewardedInterstitialAd == null) {
+            Log.d(TAG, "Rewarded interstitial not ready yet");
+            return false;
+        }
+        rewardedInterstitialAd.show(activity);
         return true;
     }
 
