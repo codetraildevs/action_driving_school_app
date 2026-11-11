@@ -2,6 +2,7 @@
 import {  NextResponse } from 'next/server';
 import { withPermission } from '@/lib/middleware/withPermission';
 import { PERMISSIONS } from '@/lib/auth/permissions';
+import { deleteAccount } from '@/lib/auth/delete-account';
 import { z } from 'zod';
  
 import { prisma } from "@/lib/prismaDB";
@@ -149,7 +150,7 @@ const deleteUserHandler = withPermission(PERMISSIONS.USER_DELETE)(
       }
 
       await prisma.$transaction(async (tx) => {
-        await tx.user.delete({ where: { id: userId }, select: { id: true } });
+        await deleteAccount(tx, userId);
         await tx.userActivity.create({
           data: {
             activityType: 'USER_DELETE',

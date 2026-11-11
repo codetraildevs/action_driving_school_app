@@ -37,45 +37,5 @@ const getUserHandler = withPermission(PERMISSIONS.USER_READ)(
 
 export const GET = getUserHandler;
 
-const deleteUserHandler = withPermission(PERMISSIONS.USER_DELETE)(
-  async (
-    request: NextRequest,
-    { params }: { params: { id: string } }
-  ) => {
-    try {
-      const userId = parseInt(params.id);
- 
-
-      // Soft delete by deactivating
-      await prisma.user.delete({
-        where: { id: userId },
-        
-      });
-
-      // Log activity
-      await prisma.userActivity.create({
-        data: {
-          activityType: 'USER_DELETE',
-          description: `User ${userId} deleted by owner ${userId}`,
-          userId: userId,
-        }
-      });
-
-      return NextResponse.json({
-        success: true,
-        message: 'User deleted successfully'
-      });
-    } catch (error) {
-      console.error('Delete user error:', error);
-      return NextResponse.json(
-        { error: 'Internal server error' },
-        { status: 500 }
-      );
-    }
-  }
-);
-
-export const DELETE = deleteUserHandler;
-
-
- 
+// Both admin endpoints share the same permission checks, cleanup and audit entry.
+export { DELETE } from '@/app/api/admin/users/[id]/route';

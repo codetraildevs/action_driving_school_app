@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prismaDB";
 import { verifyToken } from "@/lib/auth/jwt";
+import { deleteAccount } from "@/lib/auth/delete-account";
 
-// DELETE user (soft delete)
 export async function DELETE(request: NextRequest) {
   try {
     const authHeader = request.headers.get("authorization");
@@ -24,11 +24,7 @@ export async function DELETE(request: NextRequest) {
 
     const userId = payload.userId;
 
-    // Log activity
-    await prisma.$transaction(async (tx) => {
-      await tx.user.delete({ where: { id: userId } });
- 
-    });
+    await prisma.$transaction((tx) => deleteAccount(tx, userId));
 
     return NextResponse.json({
       success: true,
