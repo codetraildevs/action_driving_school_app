@@ -317,22 +317,18 @@ export default function UsersPage() {
   const handleDeleteUser = async (userId: number) => {
     const user = users.find((user) => user.id === userId);
     if (!user) return;
-    try {
-      startTransition(async () => {
-        addOptimisticUser({ ...user, pending: true });
+    startTransition(async () => {
+      addOptimisticUser({ ...user, pending: true });
+      try {
         await apiClient.delete(`/api/admin/users/${userId}`);
         toast.success("User deleted successfully");
         startTransition(() => {
           setUsers((prev) => prev.filter((user) => user.id !== userId));
         });
-      });
-    } catch (error) {
-      // Revert on error
-      if (user) {
-        setUsers((prev) => [...prev, user].sort((a, b) => a.id - b.id));
+      } catch (error) {
+        toast.error("Failed to delete user: " + (error as Error).message);
       }
-      toast.error("Failed to delete user: " + (error as Error).message);
-    }
+    });
   };
 
   const handleToggleUserStatus = async (

@@ -131,11 +131,14 @@ const updateUserHandler = withPermission(PERMISSIONS.USER_UPDATE)(
   }
 );
 
-// DELETE user (soft delete)
+// Delete the account and record the administrator's action atomically.
 const deleteUserHandler = withPermission(PERMISSIONS.USER_DELETE)(
   async (req, { params, user }) => {
     try {
-      const userId = parseInt(params.id);
+      const userId = Number((await params).id);
+      if (!Number.isSafeInteger(userId) || userId <= 0) {
+        return NextResponse.json({ error: 'Invalid user ID' }, { status: 400 });
+      }
 
       // Prevent self-deletion
       if (userId === user.userId) {
@@ -145,26 +148,29 @@ const deleteUserHandler = withPermission(PERMISSIONS.USER_DELETE)(
         );
       }
 
-      // Soft delete by deactivating
-      await prisma.user.delete({
-        where: { id: userId },
-        
-      });
-
-      // Log activity
-      await prisma.userActivity.create({
-        data: {
-          activityType: 'USER_DELETE',
-          description: `User ${userId} deleted by admin ${user.userId}`,
-          userId: user.userId,
-        }
+      await prisma.$transaction(async (tx) => {
+        await tx.user.delete({ where: { id: userId }, select: { id: true } });
+        await tx.userActivity.create({
+          data: {
+            activityType: 'USER_DELETE',
+            description: `User ${userId} deleted by admin ${user.userId}`,
+            userId: user.userId,
+          },
+        });
       });
 
       return NextResponse.json({
         success: true,
-        message: 'User deactivated successfully'
+        message: 'User deleted successfully'
       });
     } catch (error) {
+      const code = (error as { code?: string })?.code;
+      if (code === 'P2025') {
+        return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      }
+      if (code === 'P2003') {
+        return NextResponse.json({ error: 'Linked records prevent deleting this account.' }, { status: 409 });
+      }
       console.error('Delete user error:', error);
       return NextResponse.json(
         { error: 'Internal server error' },

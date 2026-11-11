@@ -91,22 +91,21 @@ export async function POST(request: NextRequest) {
     }
 
     const userAddress = { ...body.address };
-    const userDevice = { ...body.device };
+    const deviceAddress = device?.physicalAddress.trim();
 
     const result = await prisma.$transaction(
       async (tx) => {
-        // Check for existing user — the stored format is already canonical,
-        // so an exact match is a true duplicate across all formats.
+        // Older accounts can still use either international spelling.
         const existingUser = await tx.user.findFirst({
           where: {
-            OR: [{ phoneNumber: normalizedPhone }],
+            phoneNumber: { in: [normalizedPhone, "+250" + normalizedPhone.slice(1), "250" + normalizedPhone.slice(1)] },
           },
+          select: { id: true },
         });
         // Guard: Prisma treats an undefined where-value as "no filter" —
         // a device-less registration would match the FIRST device row in
         // the table and falsely 409 (and send the FCM welcome to a random
         // device). Only run the device check when a device was provided.
-        const deviceAddress = typeof userDevice?.physicalAddress === "string" ? userDevice.physicalAddress.trim() : "";
         if (deviceAddress) {
           const existingDevice = await tx.device.findFirst({
             where: { physicalAddress: deviceAddress },
@@ -114,7 +113,7 @@ export async function POST(request: NextRequest) {
 
           if (existingDevice) {
             return {
-              error: true,
+              error: true as const,
               response: NextResponse.json(
                 {
                   success: false,
@@ -128,7 +127,7 @@ export async function POST(request: NextRequest) {
 
         if (existingUser) {
           return {
-            error: true,
+            error: true as const,
             response: NextResponse.json(
               {
                 success: false,
@@ -146,7 +145,7 @@ export async function POST(request: NextRequest) {
 
         if (!userRole) {
           return {
-            error: true,
+            error: true as const,
             response: NextResponse.json(
               {
                 success: false,
@@ -160,11 +159,11 @@ export async function POST(request: NextRequest) {
         // Validate language exists
         const userLanguage = await tx.language.findFirst({
           where: { languageCode: language },
-        });
+        }) ?? await tx.language.findFirst({ where: { languageCode: "en" } });
 
         if (!userLanguage) {
           return {
-            error: true,
+            error: true as const,
             response: NextResponse.json(
               {
                 success: false,
@@ -178,11 +177,11 @@ export async function POST(request: NextRequest) {
         // Validate timezone exists
         const userTimezone = await tx.timezone.findFirst({
           where: { timezoneName: timezone },
-        });
+        }) ?? await tx.timezone.findFirst({ where: { timezoneName: "Africa/Kigali" } });
 
         if (!userTimezone) {
           return {
-            error: true,
+            error: true as const,
             response: NextResponse.json(
               {
                 success: false,
@@ -249,53 +248,18 @@ export async function POST(request: NextRequest) {
             })
           : null;
 
-        if (firebaseDevice) {
-          let notificationMessage;
-          let notificationTitle;
-          let userLanguageCode = userLanguage.languageCode;
-          switch (userLanguageCode) {
-            case "fr":
-              notificationMessage =
-                "Bienvenue sur l'application Action Driving School ! Votre compte a été créé avec succès.";
-              notificationTitle = "Bienvenue!";
-              break;
-            case "es":
-              notificationMessage =
-                "¡Bienvenido a la aplicación Action Driving School! Su cuenta ha sido creada con éxito.";
-              notificationTitle = "¡Bienvenido!";
-              break;
-            case "rw":
-              notificationMessage =
-                "Murakaza neza kuri Action Driving School! Gufungura konti byagenze neza.";
-              notificationTitle = "Ikaze!";
-              break;
-            default:
-              notificationMessage =
-                "Welcome to Action Driving School App! Your account has been successfully created.";
-              notificationTitle = "Welcome!";
-          }
-
-          sendFCMNotification(
-            firebaseDevice.deviceToken,
-            notificationTitle,
-            notificationMessage,
-            {
-              channel_id: NOTIFICATION_CHANNELS.GENERAL,
-            },
-          );
-        }
-
         // Create device if provided
-        if (deviceAddress) {
+        if (device && deviceAddress) {
           await tx.device.create({
             data: {
               userId: user.id,
-              ...userDevice,
+              ...device,
+              physicalAddress: deviceAddress,
             },
           });
         }
         
-        return { error: false, user };
+        return { error: false as const, firebaseDevice, languageCode: userLanguage.languageCode };
       },
       { maxWait: 60000, timeout: 60000 },
     );
@@ -303,6 +267,41 @@ export async function POST(request: NextRequest) {
     // Check if transaction returned an error
     if (result.error) {
       return result.response;
+    }
+
+    if (result.firebaseDevice) {
+      let notificationMessage;
+      let notificationTitle;
+      switch (result.languageCode) {
+        case "fr":
+          notificationMessage =
+            "Bienvenue sur l'application Action Driving School ! Votre compte a été créé avec succès.";
+          notificationTitle = "Bienvenue!";
+          break;
+        case "es":
+          notificationMessage =
+            "¡Bienvenido a la aplicación Action Driving School! Su cuenta ha sido creada con éxito.";
+          notificationTitle = "¡Bienvenido!";
+          break;
+        case "rw":
+          notificationMessage =
+            "Murakaza neza kuri Action Driving School! Gufungura konti byagenze neza.";
+          notificationTitle = "Ikaze!";
+          break;
+        default:
+          notificationMessage =
+            "Welcome to Action Driving School App! Your account has been successfully created.";
+          notificationTitle = "Welcome!";
+      }
+
+      await sendFCMNotification(
+        result.firebaseDevice.deviceToken,
+        notificationTitle,
+        notificationMessage,
+        {
+          channel_id: NOTIFICATION_CHANNELS.GENERAL,
+        },
+      ).catch(() => console.warn("Welcome notification delivery failed"));
     }
 
     return NextResponse.json(
@@ -320,6 +319,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: "Invalid input",
+          message: "Invalid registration details: " + error.issues.map(issue => issue.path.join(".")).join(", "),
           details: error.issues,
         },
         { status: 400 },
