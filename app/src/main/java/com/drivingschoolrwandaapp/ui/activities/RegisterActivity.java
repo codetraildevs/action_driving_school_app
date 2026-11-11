@@ -22,7 +22,6 @@ import androidx.lifecycle.ViewModelProvider;
 import com.drivingschoolrwandaapp.App;
 import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.api.ApiService;
-import com.drivingschoolrwandaapp.data.local.preferences.AppPreferences;
 import com.drivingschoolrwandaapp.data.local.preferences.TokenManager;
 import com.drivingschoolrwandaapp.models.entities.Device;
 import com.drivingschoolrwandaapp.models.entities.User;
@@ -54,7 +53,6 @@ public class RegisterActivity extends AppCompatActivity {
     private ProgressBar loadingIndicator;
     private UserViewModel userViewModel;
     private TokenManager tokenManager;
-    private AppPreferences appPreferences;
     private static final String TAG = "RegisterActivity";
     private static final long LOADING_TIMEOUT_MS = 45_000; // 45 seconds
     private boolean isRegistering = false;
@@ -78,21 +76,11 @@ public class RegisterActivity extends AppCompatActivity {
         loadingTimeoutHandler = new Handler(Looper.getMainLooper());
 
         tokenManager = new TokenManager(this);
-        appPreferences = new AppPreferences(this);
 
-        // One account per device: if this device already has a registered account, redirect
-        if (appPreferences.isDeviceRegistered() || tokenManager.isLoggedIn()) {
-            Intent intent;
-            if (tokenManager.isLoggedIn()) {
-                // Already logged in - go to the right home for this user's role
-                intent = com.drivingschoolrwandaapp.utils.RoleUtils.isAdminRole(tokenManager.getRoleId())
-                        ? new Intent(RegisterActivity.this, AdminActivity.class)
-                        : new Intent(RegisterActivity.this, App.class);
-            } else {
-                // Device has an account but not logged in - go to login
-                Toast.makeText(this, getString(R.string.device_already_registered), Toast.LENGTH_LONG).show();
-                intent = new Intent(RegisterActivity.this, LoginActivity.class);
-            }
+        if (tokenManager.isLoggedIn()) {
+            Intent intent = com.drivingschoolrwandaapp.utils.RoleUtils.isAdminRole(tokenManager.getRoleId())
+                    ? new Intent(this, AdminActivity.class)
+                    : new Intent(this, App.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();
@@ -306,10 +294,6 @@ public class RegisterActivity extends AppCompatActivity {
 
                 // Always show feedback — Toast is harmless even if finishing
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    // Mark this device as having a registered account (one account per device)
-                    if (appPreferences != null) {
-                        appPreferences.setDeviceRegistered(true);
-                    }
                     // Show the server's success message
                     String successMsg = response.body().getMessage();
                     if (successMsg == null || successMsg.isEmpty()) {
@@ -344,7 +328,9 @@ public class RegisterActivity extends AppCompatActivity {
                         errorMessage = response.body().getMessage();
                     }
 
-                    if (isMessageAlreadyRegistered(errorMessage)) {
+                    if (errorMessage != null && errorMessage.toLowerCase(Locale.ROOT).contains("device already")) {
+                        Toast.makeText(RegisterActivity.this, getString(R.string.device_already_registered), Toast.LENGTH_LONG).show();
+                    } else if (isMessageAlreadyRegistered(errorMessage)) {
                         // Guide user to login instead
                         Toast.makeText(RegisterActivity.this, getString(R.string.account_already_exists_with_help), Toast.LENGTH_LONG).show();
                         // Navigate to login after short delay, pre-filling the phone

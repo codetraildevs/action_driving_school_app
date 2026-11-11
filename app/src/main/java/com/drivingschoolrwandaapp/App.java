@@ -36,7 +36,6 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.bumptech.glide.Glide;
 import com.drivingschoolrwandaapp.api.ApiClient;
-import com.drivingschoolrwandaapp.data.local.preferences.AppPreferences;
 import com.drivingschoolrwandaapp.database.entities.User;
 import com.drivingschoolrwandaapp.ui.activities.WhatsAppGroupsActivity;
 import com.drivingschoolrwandaapp.utils.AboutUtils;
@@ -370,8 +369,6 @@ public class App extends AppCompatActivity {
         btnCancel.setOnClickListener(v -> dialog.dismiss());
 
         btnConfirm.setOnClickListener(v -> {
-            // Allow this device to register again if account is deleted
-            new AppPreferences(App.this).setDeviceRegistered(false);
             userViewModel.deleteAccount();
             dialog.dismiss();
         });

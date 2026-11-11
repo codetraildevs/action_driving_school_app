@@ -9,7 +9,6 @@ public class AppPreferences {
     private static final String DEFAULT_LANGUAGE = "rw"; // Changed default to Kinyarwanda
     private static final String KEY_IS_GRID_LAYOUT = "is_grid_layout";
     private static final String KEY_DISCLAIMER_SHOWN = "disclaimer_shown";
-    private static final String KEY_DEVICE_REGISTERED = "device_registered";
     private static final String KEY_REMEMBER_ME = "remember_me";
     // Price (digits only) of the exam-access plan the user last requested, so
     // the payment instructions shown while a request is pending use the amount
@@ -49,22 +48,6 @@ public class AppPreferences {
 
     public void setDisclaimerShown(boolean shown) {
         preferences.edit().putBoolean(KEY_DISCLAIMER_SHOWN, shown).apply();
-    }
-
-    /**
-     * Returns whether this device has already registered an account.
-     * Once set to true, this flag persists across logouts to enforce one account per device.
-     */
-    public boolean isDeviceRegistered() {
-        return preferences.getBoolean(KEY_DEVICE_REGISTERED, false);
-    }
-
-    /**
-     * Marks this device as having a registered account.
-     * Should be called after a successful registration.
-     */
-    public void setDeviceRegistered(boolean registered) {
-        preferences.edit().putBoolean(KEY_DEVICE_REGISTERED, registered).apply();
     }
 
     /**
