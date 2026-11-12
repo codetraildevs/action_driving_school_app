@@ -154,8 +154,6 @@ public class TestsFragment extends Fragment {
         FrameLayout adContainer = view.findViewById(R.id.ad_container);
         if (adContainer != null && getActivity() != null) {
             AdManager.showBanner(getActivity(), adContainer, null);
-            // Pre-load rewarded ad for free exam access
-            AdManager.loadRewardedAd(getActivity());
         }
     }
 
@@ -494,12 +492,6 @@ public class TestsFragment extends Fragment {
                 }
                 AnalyticsUtils.logSubscriptionRequested(
                         getContext(), test.getTestNumber(), selectedDays, priceDigits);
-
-                // Show interstitial ad before proceeding with the request
-                if (getActivity() != null) {
-                    AdManager.loadInterstitial(requireContext());
-                    AdManager.showInterstitialIfReady(getActivity());
-                }
 
                 dialogProgressBar.setVisibility(View.VISIBLE);
                 btnConfirm.setEnabled(false);

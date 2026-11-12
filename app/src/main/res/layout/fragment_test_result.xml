@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:fillViewport="true"
-        app:layout_constraintBottom_toTopOf="@id/finish_button"
+        app:layout_constraintBottom_toTopOf="@id/ad_container"
         app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
@@ -364,6 +364,14 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/watch_ad_retake"
+                style="@style/Widget.App.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/watch_ad_retake"
+                android:visibility="gone" />
         </LinearLayout>
     </ScrollView>
 

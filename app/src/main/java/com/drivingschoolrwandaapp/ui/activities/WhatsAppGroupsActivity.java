@@ -185,9 +185,6 @@ public class WhatsAppGroupsActivity extends AppCompatActivity implements WhatsAp
 
     @Override
     public void onOpenGroup(WhatsAppGroup group) {
-        // Show interstitial before opening external link
-        AdManager.loadInterstitial(this);
-        AdManager.showInterstitialIfReady(this);
 
         if (group.getWhatsappLink() != null && !group.getWhatsappLink().isEmpty()) {
             try {

@@ -60,8 +60,6 @@ public class ApplicationDetailsActivity extends AppCompatActivity {
             AdManager.showBanner(this, adContainer, null);
         }
 
-        // Pre-load rewarded ad for user engagement
-        AdManager.loadRewardedAd(this);
 
         iremboViewModel = new ViewModelProvider(this).get(IremboViewModel.class);
         setupObservers();

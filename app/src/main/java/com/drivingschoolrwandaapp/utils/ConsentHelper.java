@@ -36,7 +36,6 @@ public final class ConsentHelper {
     private static boolean debugMode = false;
     private static String debugGeographyHash = null; // test device hash for debug
     private static ConsentInformation consentInformation;
-    private static boolean consentRequested = false;
 
     private ConsentHelper() { /* static utility */ }
 
@@ -106,14 +105,11 @@ public final class ConsentHelper {
                     );
                 },
                 requestConsentError -> {
-                    // Failed to update consent info — assume consent granted
-                    // (fail open so the app still works outside EEA)
                     Log.w(TAG, "Consent info update failed: " + requestConsentError.getMessage());
-                    callback.onConsentResult(true);
+                    callback.onConsentResult(canShowAds());
                 }
         );
 
-        consentRequested = true;
     }
 
     /**

@@ -25,7 +25,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.models.IremboApplication;
 import com.drivingschoolrwandaapp.utils.AdManager;
-import com.google.android.gms.ads.rewarded.RewardItem;
 import com.drivingschoolrwandaapp.models.IremboService;
 import com.drivingschoolrwandaapp.repository.Resource;
 import com.drivingschoolrwandaapp.ui.adapters.IremboServiceAdapter;
@@ -87,25 +86,7 @@ public class IremboActivity extends AppCompatActivity implements IremboServiceAd
                 hideTrackResult();
                 return;
             }
-            // Show rewarded ad before tracking application
-            if (AdManager.isRewardedAdReady()) {
-                AdManager.showRewardedAdIfReady(this, new AdManager.RewardedAdCallback() {
-                    @Override
-                    public void onRewardEarned(@NonNull com.google.android.gms.ads.rewarded.RewardItem reward) {
-                        runOnUiThread(() -> {
-                            Toast.makeText(IremboActivity.this, getString(R.string.dsrw_ad_reward_msg), Toast.LENGTH_LONG).show();
-                            iremboViewModel.fetchApplicationDetails(appNumber);
-                        });
-                    }
-
-                    @Override
-                    public void onAdFailedToShow() {
-                        iremboViewModel.fetchApplicationDetails(appNumber);
-                    }
-                });
-            } else {
-                iremboViewModel.fetchApplicationDetails(appNumber);
-            }
+            iremboViewModel.fetchApplicationDetails(appNumber);
         });
     }
 
@@ -180,31 +161,6 @@ public class IremboActivity extends AppCompatActivity implements IremboServiceAd
 
     @Override
     public void onItemClick(IremboService service) {
-        // Show rewarded ad before navigating to service form
-        if (AdManager.isRewardedAdReady()) {
-            AdManager.showRewardedAdIfReady(this, new AdManager.RewardedAdCallback() {
-                @Override
-                public void onRewardEarned(@NonNull RewardItem reward) {
-                    runOnUiThread(() -> {
-                        Toast.makeText(IremboActivity.this, getString(R.string.dsrw_ad_reward_msg), Toast.LENGTH_LONG).show();
-                        navigateToService(service);
-                    });
-                }
-
-                @Override
-                public void onAdFailedToShow() {
-                    navigateToService(service);
-                }
-            });
-        } else {
-            // Fallback to interstitial if no rewarded ad
-            AdManager.loadInterstitial(IremboActivity.this);
-            AdManager.showInterstitialIfReady(IremboActivity.this);
-            navigateToService(service);
-        }
-    }
-
-    private void navigateToService(IremboService service) {
         if (service.getName().equals(getString(R.string.provisional_license))) {
             startActivity(new Intent(this, LicenseRequestActivity.class));
         } else if (service.getName().equals(getString(R.string.special_irembo_service))) {

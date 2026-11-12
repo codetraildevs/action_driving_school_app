@@ -248,6 +248,7 @@
     <string name="dsrw_ad_error">Ad failed to load. Please try again.</string>
     <string name="retake_exam_title">Thank You!</string>
     <string name="retake_exam_message">You earned a free retake of this exam — tap below to restart.</string>
+    <string name="watch_ad_retake">Watch an ad to retake this exam for free</string>
     <string name="watch_ad_for_material">Watch Ad to access this material</string>
     <string name="watch_ad_material_reward_msg">You earned temporary access to this material!</string>
     <string name="privacy_options">Privacy Options</string>

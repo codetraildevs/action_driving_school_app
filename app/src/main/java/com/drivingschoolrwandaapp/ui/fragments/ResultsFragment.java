@@ -56,11 +56,6 @@ public class ResultsFragment extends Fragment {
         super.onResume();
         AnalyticsUtils.logScreenView(getContext(), "results");
 
-        // Show interstitial when user views results (natural transition point)
-        if (getActivity() != null) {
-            AdManager.loadInterstitial(requireContext());
-            AdManager.showInterstitialIfReady(getActivity());
-        }
     }
 
     @Override
@@ -276,46 +271,7 @@ public class ResultsFragment extends Fragment {
                 if (testId > 0 && btnRetake != null) {
                     btnRetake.setVisibility(View.VISIBLE);
                     btnRetake.setOnClickListener(v -> {
-                        // Show rewarded ad before retaking test for free access
-                        if (getActivity() != null && AdManager.isRewardedAdReady()) {
-                            AdManager.showRewardedAdIfReady(getActivity(), new AdManager.RewardedAdCallback() {
-                                @Override
-                                public void onRewardEarned(@NonNull com.google.android.gms.ads.rewarded.RewardItem reward) {
-                                    if (isAdded()) {
-                                        requireActivity().runOnUiThread(() -> {
-                                            Bundle args = new Bundle();
-                                            args.putInt("testId", testId);
-                                            args.putString("title", title);
-                                            args.putBoolean("isReviewMode", false);
-                                            args.putBoolean("isRealTimeFeedback", true);
-                                            try {
-                                                NavHostFragment.findNavController(ResultsFragment.this)
-                                                        .navigate(R.id.action_global_testQuestionsFragment, args);
-                                            } catch (Exception e) {
-                                                android.util.Log.e("ResultsFragment", "Navigation failed", e);
-                                            }
-                                        });
-                                    }
-                                }
-
-                                @Override
-                                public void onAdFailedToShow() {
-                                    if (isAdded()) {
-                                        Bundle args = new Bundle();
-                                        args.putInt("testId", testId);
-                                        args.putString("title", title);
-                                        args.putBoolean("isReviewMode", false);
-                                        args.putBoolean("isRealTimeFeedback", true);
-                                        try {
-                                            NavHostFragment.findNavController(ResultsFragment.this)
-                                                    .navigate(R.id.action_global_testQuestionsFragment, args);
-                                        } catch (Exception e) {
-                                            android.util.Log.e("ResultsFragment", "Navigation failed", e);
-                                        }
-                                    }
-                                }
-                            });
-                        } else if (isAdded() && getContext() != null) {
+                        if (isAdded()) {
                             try {
                                 Bundle args = new Bundle();
                                 args.putInt("testId", testId);

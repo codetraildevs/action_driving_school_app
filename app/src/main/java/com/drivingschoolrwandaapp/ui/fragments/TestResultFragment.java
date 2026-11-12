@@ -12,7 +12,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -20,6 +19,7 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.utils.AdManager;
+import com.drivingschoolrwandaapp.utils.ConsentHelper;
 import com.drivingschoolrwandaapp.utils.AnalyticsUtils;
 import com.drivingschoolrwandaapp.utils.TimeFormatUtils;
 import com.drivingschoolrwandaapp.viewmodel.TestViewModel;
@@ -84,88 +84,33 @@ public class TestResultFragment extends Fragment {
             AdManager.showBanner(getActivity(), adContainer, null);
         }
 
-        // Show interstitial after exam completion (natural transition point)
-        if (getActivity() != null) {
-            AdManager.loadInterstitial(requireContext());
-            AdManager.loadRewardedInterstitial(requireContext());
-            AdManager.showInterstitialIfReady(getActivity());
+        finishButton.setOnClickListener(v ->
+                NavHostFragment.findNavController(this).popBackStack(R.id.testsFragment, false));
+
+        Button retake = view.findViewById(R.id.watch_ad_retake);
+        Integer testId = testViewModel.getTestId();
+        if (testId != null && testId > 0 && ConsentHelper.canShowAds()) {
+            retake.setVisibility(View.VISIBLE);
+            AdManager.loadRewardedAd(requireContext());
+            retake.setOnClickListener(v -> AdManager.showRewardedAdIfReady(requireActivity(), new AdManager.RewardedAdCallback() {
+                @Override
+                public void onRewardEarned(@NonNull com.google.android.gms.ads.rewarded.RewardItem reward) {
+                    if (!isAdded() || getView() != view) return;
+                    Bundle args = new Bundle();
+                    args.putInt("testId", testId);
+                    args.putString("title", testViewModel.getCurrentTestName());
+                    args.putBoolean("isFree", true);
+                    args.putBoolean("isRealTimeFeedback", true);
+                    NavHostFragment.findNavController(TestResultFragment.this)
+                            .navigate(R.id.action_global_testQuestionsFragment, args);
+                }
+
+                @Override
+                public void onAdFailedToShow() {
+                    if (isAdded()) Toast.makeText(requireContext(), R.string.dsrw_ad_error, Toast.LENGTH_SHORT).show();
+                }
+            }));
         }
-
-        // Show rewarded interstitial shortly after the result renders.
-        // Watching to completion earns the user a free retake of this exam.
-        if (getActivity() != null) {
-            requireActivity().runOnUiThread(() -> {
-                try {
-                    Thread.sleep(1500); // let the result UI settle first
-                } catch (InterruptedException ignored) {
-                    return;
-                }
-                if (!isAdded()) return;
-                if (AdManager.showRewardedInterstitialIfReady(requireActivity())) {
-                    // Reward earned: offer a free retake.
-                    showFreeRetakeDialog();
-                }
-            });
-        }
-
-        finishButton.setOnClickListener(v -> {
-            // Show rewarded ad before returning to tests (free retake opportunity)
-            if (getActivity() != null && AdManager.isRewardedAdReady()) {
-                AdManager.showRewardedAdIfReady(getActivity(), new AdManager.RewardedAdCallback() {
-                    @Override
-                    public void onRewardEarned(@NonNull com.google.android.gms.ads.rewarded.RewardItem reward) {
-                        if (isAdded()) {
-                            requireActivity().runOnUiThread(() -> {
-                                // Free retake granted via rewarded ad on the finish button.
-                                showFreeRetakeDialog();
-                            });
-                        }
-                    }
-
-                    @Override
-                    public void onAdFailedToShow() {
-                        if (isAdded()) {
-                            try {
-                                NavHostFragment.findNavController(TestResultFragment.this)
-                                        .popBackStack(R.id.testsFragment, false);
-                            } catch (Exception e) {
-                                android.util.Log.e("TestResultFragment", "Navigation failed", e);
-                            }
-                        }
-                    }
-                });
-            } else {
-                try {
-                    NavHostFragment.findNavController(this).popBackStack(R.id.testsFragment, false);
-                } catch (Exception e) {
-                    android.util.Log.e("TestResultFragment", "Navigation failed", e);
-                }
-            }
-        });
-    }
-
-    /**
-     * Shows a dialog offering the user a free retake of the current exam,
-     * granted after watching a rewarded ad / rewarded interstitial to completion.
-     * Tapping "Retake" navigates back to the test fragment to restart the exam.
-     */
-    private void showFreeRetakeDialog() {
-        if (!isAdded() || getContext() == null) return;
-        new AlertDialog.Builder(requireContext())
-                .setTitle(R.string.retake_exam_title)
-                .setMessage(R.string.retake_exam_message)
-                .setPositiveButton(R.string.retake, (dialog, which) -> {
-                    if (!isAdded()) return;
-                    try {
-                        NavHostFragment.findNavController(TestResultFragment.this)
-                                .popBackStack(R.id.testsFragment, false);
-                    } catch (Exception e) {
-                        android.util.Log.e("TestResultFragment", "Navigation failed", e);
-                        com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
-                    }
-                })
-                .setNegativeButton(R.string.close, null)
-                .show();
     }
 
     private void observeViewModel() {

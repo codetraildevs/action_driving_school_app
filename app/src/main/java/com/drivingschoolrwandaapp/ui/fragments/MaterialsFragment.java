@@ -42,6 +42,7 @@ import com.drivingschoolrwandaapp.data.local.preferences.TokenManager;
 import com.drivingschoolrwandaapp.ui.activities.PdfViewerActivity;
 import com.drivingschoolrwandaapp.ui.adapters.LearningMaterialAdapter;
 import com.drivingschoolrwandaapp.utils.AdManager;
+import com.drivingschoolrwandaapp.utils.ConsentHelper;
 import com.drivingschoolrwandaapp.utils.AnalyticsUtils;
 import com.drivingschoolrwandaapp.utils.FileUtils;
 
@@ -80,10 +81,6 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
     // Cache the user from LiveData observation to avoid synchronous DB reads
     // on the main thread. Populated by observeUser().
     private com.drivingschoolrwandaapp.database.entities.User cachedUser;
-
-    // The material the user tried to access — used by the Watch Ad reward flow.
-    private LearningMaterial pendingMaterial;
-    private String pendingAction;
 
     private List<LearningMaterial> allMaterials = new ArrayList<>();
 
@@ -321,10 +318,10 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
         return null;
     }
 
-    private boolean canAccessPaidContent(String action) {
+    private boolean canAccessPaidContent(LearningMaterial material, String action) {
         com.drivingschoolrwandaapp.database.entities.User user = cachedUser;
         if (user == null || !"ACTIVE".equalsIgnoreCase(user.getTestAccessStatus())) {
-            showWatchAdDialog(action);
+            showWatchAdDialog(material, action);
             return false;
         }
 
@@ -354,47 +351,36 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
         }
 
         if (isExpired) {
-            showWatchAdDialog(action);
+            showWatchAdDialog(material, action);
             return false;
         }
 
         return true;
     }
 
-    /**
-     * Shows a dialog offering the user to watch a rewarded ad (rewarded or
-     * rewarded interstitial) for temporary access to the material. If the ad
-     * plays to completion, the material is opened directly.
-     *
-     * Tries the rewarded interstitial first (better view-through experience),
-     * falling back to the standard rewarded ad if it is not ready.
-     */
-    private void showWatchAdDialog(String action) {
+    private void showWatchAdDialog(LearningMaterial material, String action) {
         if (!isAdded() || getActivity() == null || getContext() == null) return;
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle(getString(R.string.need_active_subscription, action));
-        builder.setMessage(getString(R.string.dsrw_ad_subtitle));
+        if (!ConsentHelper.canShowAds()) {
+            builder.setPositiveButton(android.R.string.ok, null).show();
+            return;
+        }
+        AdManager.loadRewardedAd(requireContext());
+        builder.setMessage(R.string.watch_ad_for_material);
 
         builder.setPositiveButton(getString(R.string.dsrw_ad_btn), (dialog, which) -> {
             if (getActivity() == null) return;
-            // Pre-load both rewarded ad formats so one is likely ready.
-            AdManager.loadRewardedAd(requireContext());
-            AdManager.loadRewardedInterstitial(requireContext());
-
-            // Try rewarded interstitial first.
-            if (AdManager.showRewardedInterstitialIfReady(getActivity())) {
-                // Reward earned: grant access.
-                grantMaterialAccess();
-                return;
-            }
-
-            // Fall back to the standard rewarded ad.
             AdManager.showRewardedAdIfReady(getActivity(), new AdManager.RewardedAdCallback() {
                 @Override
                 public void onRewardEarned(@NonNull com.google.android.gms.ads.rewarded.RewardItem reward) {
                     if (!isAdded()) return;
-                    grantMaterialAccess();
+                    if ("download".equals(action)) {
+                        viewModel.downloadLearningMaterial(material);
+                    } else {
+                        openFile(material);
+                    }
                 }
 
                 @Override
@@ -410,30 +396,10 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
         builder.show();
     }
 
-    /**
-     * Grants temporary access to the pending material and performs the pending
-     * action (view or download). Shows a confirmation toast.
-     */
-    private void grantMaterialAccess() {
-        if (!isAdded() || getContext() == null) return;
-        Toast.makeText(requireContext(), getString(R.string.watch_ad_material_reward_msg), Toast.LENGTH_LONG).show();
-        if (pendingMaterial != null) {
-            if ("download".equals(pendingAction)) {
-                viewModel.downloadLearningMaterial(pendingMaterial);
-            } else if ("view".equals(pendingAction)) {
-                openFile(pendingMaterial);
-            }
-        }
-    }
-
     @Override
     public void onDownloadButtonClick(LearningMaterial material) {
-        if (!material.isPublic()) {
-            pendingMaterial = material;
-            pendingAction = "download";
-            if (!canAccessPaidContent("download")) {
-                return;
-            }
+        if (!material.isPublic() && !canAccessPaidContent(material, "download")) {
+            return;
         }
 
         // Permission is not required for writing to app's internal storage
@@ -442,12 +408,8 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
 
     @Override
     public void onItemClick(LearningMaterial material) {
-        if (!material.isPublic()) {
-            pendingMaterial = material;
-            pendingAction = "view";
-            if (!canAccessPaidContent("view")) {
-                return;
-            }
+        if (material.isDownloaded() && !material.isPublic() && !canAccessPaidContent(material, "view")) {
+            return;
         }
 
         if (material.isDownloaded()) {
@@ -470,26 +432,12 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
             Uri fileUri = FileProvider.getUriForFile(getContext(), authority, file);
             
             if ("application/pdf".equals(material.getFileType())) {
-                // Show interstitial ad before opening PDF viewer
-                if (getActivity() != null && AdManager.showInterstitialIfReady(getActivity())) {
-                    new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
-                        if (isAdded() && getActivity() != null) {
-                            Intent intent = new Intent(getContext(), PdfViewerActivity.class);
-                            intent.setData(fileUri);
-                            intent.putExtra("pdf_title", material.getTitle());
-                            intent.putExtra("pdf_id", String.valueOf(material.getId()));
-                            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                            startActivity(intent);
-                        }
-                    }, 500);
-                } else {
-                    Intent intent = new Intent(getContext(), PdfViewerActivity.class);
-                    intent.setData(fileUri);
-                    intent.putExtra("pdf_title", material.getTitle());
-                    intent.putExtra("pdf_id", String.valueOf(material.getId()));
-                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    startActivity(intent);
-                }
+                Intent intent = new Intent(getContext(), PdfViewerActivity.class);
+                intent.setData(fileUri);
+                intent.putExtra("pdf_title", material.getTitle());
+                intent.putExtra("pdf_id", String.valueOf(material.getId()));
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                startActivity(intent);
             } else if (material.getFileType().startsWith("image/")) {
                 showImageDialog(material, fileUri);
             } else {

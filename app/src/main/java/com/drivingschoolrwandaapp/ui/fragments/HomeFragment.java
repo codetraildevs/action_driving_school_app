@@ -77,13 +77,4 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        // Show interstitial when user returns to Home tab (natural transition point)
-        if (getActivity() != null) {
-            AdManager.loadInterstitial(requireContext());
-            AdManager.showInterstitialIfReady(getActivity());
-        }
-    }
 }

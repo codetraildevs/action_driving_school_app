@@ -75,31 +75,7 @@ public class DashboardFragment extends Fragment {
         // Setup Quick Access Cards
         MaterialCardView startExamCard = view.findViewById(R.id.start_exam_card);
         if (startExamCard != null) {
-            startExamCard.setOnClickListener(v -> {
-                // Show rewarded ad before starting exam for bonus access
-                if (getActivity() != null && AdManager.isRewardedAdReady()) {
-                    AdManager.showRewardedAdIfReady(getActivity(), new AdManager.RewardedAdCallback() {
-                        @Override
-                        public void onRewardEarned(@NonNull com.google.android.gms.ads.rewarded.RewardItem reward) {
-                            if (isAdded()) {
-                                requireActivity().runOnUiThread(() -> {
-                                    Toast.makeText(requireContext(), getString(R.string.dsrw_ad_reward_msg), Toast.LENGTH_LONG).show();
-                                    safeNavigate(R.id.action_dashboardFragment_to_testsFragment);
-                                });
-                            }
-                        }
-
-                        @Override
-                        public void onAdFailedToShow() {
-                            if (isAdded()) {
-                                safeNavigate(R.id.action_dashboardFragment_to_testsFragment);
-                            }
-                        }
-                    });
-                } else {
-                    safeNavigate(R.id.action_dashboardFragment_to_testsFragment);
-                }
-            });
+            startExamCard.setOnClickListener(v -> safeNavigate(R.id.action_dashboardFragment_to_testsFragment));
         }
 
         // The "Tests effectués" subtitle inside the Exams card opens the test history.
@@ -115,44 +91,12 @@ public class DashboardFragment extends Fragment {
 
         MaterialCardView iremboServiceCard = view.findViewById(R.id.irembo_service_card);
         if (iremboServiceCard != null) {
-            iremboServiceCard.setOnClickListener(v -> {
-                if (!isAdded() || getActivity() == null) return;
-                // Show interstitial before Irembo if ready
-                try {
-                    if (AdManager.showInterstitialIfReady(getActivity())) {
-                        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
-                            if (isAdded() && getActivity() != null) {
-                                startActivity(new Intent(getActivity(), IremboActivity.class));
-                            }
-                        }, 500);
-                    } else {
-                        startActivity(new Intent(getActivity(), IremboActivity.class));
-                    }
-                } catch (Exception e) {
-                    android.util.Log.e("DashboardFragment", "Failed to open IremboActivity", e);
-                }
-            });
+            iremboServiceCard.setOnClickListener(v -> startActivity(new Intent(requireContext(), IremboActivity.class)));
         }
 
         MaterialCardView whatsappGroupCard = view.findViewById(R.id.whatsapp_group_card);
         if (whatsappGroupCard != null) {
-            whatsappGroupCard.setOnClickListener(v -> {
-                if (!isAdded() || getContext() == null) return;
-                // Show interstitial before WhatsApp groups if ready
-                try {
-                    if (AdManager.showInterstitialIfReady(getActivity())) {
-                        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
-                            if (isAdded() && getContext() != null) {
-                                startActivity(new Intent(getContext(), WhatsAppGroupsActivity.class));
-                            }
-                        }, 500);
-                    } else {
-                        startActivity(new Intent(requireContext(), WhatsAppGroupsActivity.class));
-                    }
-                } catch (Exception e) {
-                    android.util.Log.e("DashboardFragment", "Failed to open WhatsAppGroupsActivity", e);
-                }
-            });
+            whatsappGroupCard.setOnClickListener(v -> startActivity(new Intent(requireContext(), WhatsAppGroupsActivity.class)));
         }
 
         MaterialCardView instructionsCard = view.findViewById(R.id.instructions_card);
@@ -175,10 +119,6 @@ public class DashboardFragment extends Fragment {
         FrameLayout adContainer = view.findViewById(R.id.ad_container);
         if (adContainer != null && getActivity() != null) {
             AdManager.showBanner(getActivity(), adContainer, null);
-            // Pre-load interstitial for exam submission
-            AdManager.loadInterstitial(getActivity());
-            // Pre-load rewarded ad for free exam access
-            AdManager.loadRewardedAd(getActivity());
         }
     }
 
