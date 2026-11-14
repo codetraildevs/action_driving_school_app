@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--
-        AdMob App ID — externalized from AndroidManifest.xml so it can be overridden
-        per build variant (e.g. test ID for debug, production ID for release) without
-        touching the manifest. The manifest meta-data references @string/admob_app_id.
+        AdMob App ID.
+        This project intentionally uses the same AdMob App ID for debug and release builds.
+        Ad unit IDs are selected per build in AdManager based on BuildConfig.DEBUG.
     -->
-    <string name="admob_app_id" translatable="false">ca-app-pub-2864387622629553~5289530498</string>
+    <string name="admob_app_id" translatable="false">ca-app-pub-2864387622629553~9478146136</string>
 </resources>

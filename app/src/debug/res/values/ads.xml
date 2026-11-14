@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        AdMob App ID.
+        This project intentionally uses the same AdMob App ID for debug and release builds.
+        Ad unit IDs are selected per build in AdManager based on BuildConfig.DEBUG.
+        If a separate debug App ID is needed later, override this string here.
+    -->
+    <string name="admob_app_id" translatable="false">ca-app-pub-2864387622629553~9478146136</string>
+</resources>
