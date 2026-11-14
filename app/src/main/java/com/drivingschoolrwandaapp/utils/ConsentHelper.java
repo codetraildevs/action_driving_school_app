@@ -33,6 +33,8 @@ public final class ConsentHelper {
 
     private static final String TAG = "ConsentHelper";
 
+    public static final androidx.lifecycle.MutableLiveData<Boolean> eligibility = new androidx.lifecycle.MutableLiveData<>();
+
     private static boolean debugMode = false;
     private static String debugGeographyHash = null; // test device hash for debug
     private static ConsentInformation consentInformation;
@@ -100,12 +102,14 @@ public final class ConsentHelper {
                                 // Consent status is now determined
                                 boolean canShow = consentInformation.canRequestAds();
                                 Log.d(TAG, "Consent result: canShowAds=" + canShow);
+                                eligibility.setValue(canShow);
                                 callback.onConsentResult(canShow);
                             }
                     );
                 },
                 requestConsentError -> {
                     Log.w(TAG, "Consent info update failed: " + requestConsentError.getMessage());
+                    eligibility.setValue(canShowAds());
                     callback.onConsentResult(canShowAds());
                 }
         );

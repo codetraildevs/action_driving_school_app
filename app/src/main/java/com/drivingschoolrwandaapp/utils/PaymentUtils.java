@@ -1,6 +1,5 @@
 package com.drivingschoolrwandaapp.utils;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
@@ -13,8 +12,6 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.drivingschoolrwandaapp.R;
@@ -24,18 +21,7 @@ import android.widget.TextView;
 
 public class PaymentUtils {
 
-    private static final int CALL_PHONE_PERMISSION_REQUEST_CODE = 456;
-    private static String ussdToCall;
-
-    /**
-     * Caps the dialog window height to a fraction of the screen so long payment
-     * content (instructions + methods) stays reachable on small devices.
-     * The dialog layout uses a weighted ScrollView, so when the window is
-     * clamped the body scrolls instead of being cut off.
-     *
-     * @param dialog           the dialog whose window should be capped (call after {@code show()})
-     * @param maxScreenFraction maximum window height as a fraction of the screen height (e.g. 0.8)
-     */
+    /** Caps the dialog window height so long payment instructions stay reachable. */
     public static void capDialogHeight(Dialog dialog, float maxScreenFraction) {
         if (dialog == null || dialog.getWindow() == null) return;
         Window window = dialog.getWindow();
@@ -50,6 +36,10 @@ public class PaymentUtils {
             }
         });
     }
+
+    // Kept for backward compatibility with callbacks; no longer requests CALL_PHONE.
+    @SuppressWarnings("UnusedAssignment")
+    private static final int CALL_PHONE_PERMISSION_REQUEST_CODE = 456;
 
     /** Default payment numbers (used by Irembo services). */
     private static final String DEFAULT_MOMO_PAY_CODE = "644209";
@@ -121,44 +111,32 @@ public class PaymentUtils {
     }
 
     private static void dialUssd(Fragment fragment, String ussd) {
-        ussdToCall = ussd;
-        if (ContextCompat.checkSelfPermission(fragment.requireContext(), Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-            fragment.requestPermissions(new String[]{Manifest.permission.CALL_PHONE}, CALL_PHONE_PERMISSION_REQUEST_CODE);
-        } else {
-            fragment.startActivity(new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + Uri.encode(ussd))));
-        }
+        Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + Uri.encode(ussd)));
+        fragment.startActivity(intent);
     }
 
     private static void dialUssd(Activity activity, String ussd) {
-        ussdToCall = ussd;
-        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CALL_PHONE}, CALL_PHONE_PERMISSION_REQUEST_CODE);
-        } else {
-            activity.startActivity(new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + Uri.encode(ussd))));
-        }
+        Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + Uri.encode(ussd)));
+        activity.startActivity(intent);
     }
 
     public static void onRequestPermissionsResult(Fragment fragment, int requestCode, @NonNull int[] grantResults) {
-        if (requestCode == CALL_PHONE_PERMISSION_REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                if (ussdToCall != null && !ussdToCall.isEmpty()) {
-                    dialUssd(fragment, ussdToCall);
-                }
-            } else {
-                Toast.makeText(fragment.getContext(), fragment.getString(R.string.permission_denied_call), Toast.LENGTH_SHORT).show();
-            }
-        }
+        onRequestPermissionsResultForUssd(fragment, requestCode, grantResults);
     }
 
     public static void onRequestPermissionsResult(Activity activity, int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == CALL_PHONE_PERMISSION_REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                if (ussdToCall != null && !ussdToCall.isEmpty()) {
-                    dialUssd(activity, ussdToCall);
-                }
-            } else {
-                Toast.makeText(activity, activity.getString(R.string.permission_denied_call), Toast.LENGTH_SHORT).show();
-            }
-        }
+        onRequestPermissionsResultForUssd(activity, requestCode, grantResults);
+    }
+
+    // CALL_PHONE permission is no longer needed by this app.
+    // If a caller still delivers legacy request results here, ignore them gracefully.
+
+    private static String ussdToCall;
+
+
+    private static void onRequestPermissionsResultForUssd(Activity activity, int requestCode, @NonNull int[] grantResults) {
+    }
+
+    private static void onRequestPermissionsResultForUssd(Fragment fragment, int requestCode, @NonNull int[] grantResults) {
     }
 }

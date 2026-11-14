@@ -41,6 +41,13 @@
         android:textColor="@color/colorOnSurfaceVariant"
         android:textSize="13sp" />
 
+    <Button
+        android:id="@+id/watch_exam_ad"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/watch_exam_ad"
+        android:visibility="gone" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_subscription_options"
         android:layout_width="match_parent"

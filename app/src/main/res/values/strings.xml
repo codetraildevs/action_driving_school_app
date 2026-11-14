@@ -186,7 +186,7 @@
     <string name="dsrw_ad_error">Kubonesha ad byanze. Ongera ugerageze.</string>
     <string name="retake_exam_title">Urakoze!</string>
     <string name="retake_exam_message">Wabonye uruhushya rwo gusanga ikizamini gishya — usanga ukandarurira ubusobozi bwo gusa.</string>
-    <string name="watch_ad_retake">Reba iyamamaza kugira ngo wongere gukora iki kizamini ku buntu</string>
+    <string name="retake_ad_notice">Iyo ukanze «Ongera Ukore», iyamamaza riratangira. Rirebe kugeza rirangiye kugira ngo wongere gukora iki kizamini.</string>
     <string name="watch_ad_for_material">Reba Ad kubona iki gikoresho</string>
     <string name="watch_ad_material_reward_msg">Wabonye urwego rwo kubona iki gikoresho!</string>
     <string name="privacy_options">Amahamatora ry\'ibanga</string>
@@ -483,4 +483,7 @@
     <string name="admin_no_matching_users">No users match your search</string>
     <string name="admin_no_matching_requests">No requests match your search</string>
     <string name="admin_last_updated">Last updated: %1$s</string>
+    <string name="watch_exam_ad">Reba iyamamaza ukore iki kizamini inshuro imwe</string>
+    <string name="rewarded_retake_intro">Iyamamaza riratangira mu masegonda 5. Rirebe kugeza rirangiye kugira ngo wongere gukora iki kizamini inshuro imwe ku buntu. Ushobora kurireka ukaguma ku bisubizo.</string>
+    <string name="skip_ad">Reka iyamamaza</string>
 </resources>

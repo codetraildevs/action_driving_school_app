@@ -65,6 +65,7 @@ public class PdfViewerActivity extends AppCompatActivity {
         EdgeToEdgeUtils.enable(getWindow());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pdf_viewer);
+        com.drivingschoolrwandaapp.utils.AdManager.showBanner(this, findViewById(R.id.ad_container), null);
 
         InsetsUtils.applySystemBarsPadding(findViewById(R.id.main), true, true);
 

@@ -14,6 +14,13 @@ plugins {
     id("jacoco")
 }
 
+// Local-only release path: the remote Crashlytics mapping upload fails here with a 400,
+// leaving the APK already-built but the task failing afterward. For a local hand-off build
+// we disable that upload so assembleRelease can complete; rerun it separately on a networked
+// machine when symbolication is needed. DO NOT commit a variant that disables release signing
+// or minification — only this upload step is gated.
+apply(from = "build_local_release_crashlytics_guard.gradle")
+
 android {
     namespace = "com.drivingschoolrwandaapp"
     compileSdk = 37
@@ -22,7 +29,7 @@ android {
         applicationId = "com.drivingschoolrwandaapp"
         minSdk = 27
         targetSdk = 37
-        versionCode = 111
+        versionCode = 112
         versionName = "1.5.14"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

@@ -134,6 +134,9 @@ public class TestsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        com.drivingschoolrwandaapp.utils.ConsentHelper.eligibility.observe(getViewLifecycleOwner(), eligible -> {
+            if (Boolean.TRUE.equals(eligible)) AdManager.loadRewardedAd(requireContext());
+        });
 
         testsRecyclerView = view.findViewById(R.id.tests_recycler_view);
         progressBar = view.findViewById(R.id.progress_bar);
@@ -153,6 +156,7 @@ public class TestsFragment extends Fragment {
         // Load AdMob banner
         FrameLayout adContainer = view.findViewById(R.id.ad_container);
         if (adContainer != null && getActivity() != null) {
+            AdManager.loadRewardedAd(requireContext());
             AdManager.showBanner(getActivity(), adContainer, null);
         }
     }
@@ -241,21 +245,21 @@ public class TestsFragment extends Fragment {
 
         testAdapter.setOnTestClickListener((test, isLocked, title) -> {
             if (isLocked) {
-                showRequestAccessDialog(test);
+                showRequestAccessDialog(test, title);
             } else if (isAdded() && getContext() != null) {
-                navigateToExam(test, title);
+                navigateToExam(test, title, test.isFree());
             }
         });
     }
 
-    private void navigateToExam(TestEntity test, String title) {
+    private void navigateToExam(TestEntity test, String title, boolean freeAttempt) {
         if (!isAdded() || getActivity() == null) return;
         try {
             Bundle args = new Bundle();
             args.putInt("testId", test.getId());
             args.putString("title", title);
             args.putBoolean("isRealTimeFeedback", true);
-            args.putBoolean("isFree", test.isFree());
+            args.putBoolean("isFree", freeAttempt);
             NavHostFragment.findNavController(this)
                     .navigate(R.id.action_global_testQuestionsFragment, args);
         } catch (Exception e) {
@@ -453,10 +457,27 @@ public class TestsFragment extends Fragment {
         return lower.contains("already have access") || lower.contains("already has access");
     }
 
-    private void showRequestAccessDialog(TestEntity test) {
+    private void showRequestAccessDialog(TestEntity test, String title) {
         requestAccessDialog = new BottomSheetDialog(requireContext());
         requestAccessDialog.setContentView(R.layout.dialog_subscription);
         requestedTest = test;
+        BottomSheetDialog sheet = requestAccessDialog;
+        Button watch = sheet.findViewById(R.id.watch_exam_ad);
+        if (com.drivingschoolrwandaapp.utils.ConsentHelper.canShowAds()) {
+            AdManager.loadRewardedAd(requireContext());
+            watch.setVisibility(View.VISIBLE);
+            watch.setOnClickListener(v -> AdManager.showRewardedAdIfReady(requireActivity(), new AdManager.RewardedAdCallback() {
+                @Override public void onRewardEarned(@NonNull com.google.android.gms.ads.rewarded.RewardItem reward) {
+                    if (!isAdded() || !sheet.isShowing()) return;
+                    sheet.dismiss();
+                    navigateToExam(test, title, true);
+                }
+
+                @Override public void onAdFailedToShow() {
+                    if (isAdded()) android.widget.Toast.makeText(requireContext(), R.string.dsrw_ad_error, android.widget.Toast.LENGTH_SHORT).show();
+                }
+            }));
+        }
 
         Button btnConfirm = requestAccessDialog.findViewById(R.id.btn_confirm);
         dialogConfirmButton = btnConfirm;

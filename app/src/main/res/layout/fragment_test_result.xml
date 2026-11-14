@@ -364,13 +364,24 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <TextView
+                android:id="@+id/retake_ad_notice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:text="@string/retake_ad_notice"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:visibility="gone" />
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/watch_ad_retake"
                 style="@style/Widget.App.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="@string/watch_ad_retake"
+                android:layout_marginTop="4dp"
+                android:text="@string/retake"
+                android:contentDescription="@string/retake_ad_notice"
                 android:visibility="gone" />
         </LinearLayout>
     </ScrollView>

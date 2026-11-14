@@ -72,6 +72,11 @@ public class DashboardFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        com.drivingschoolrwandaapp.utils.ConsentHelper.eligibility.observe(getViewLifecycleOwner(), eligible -> {
+            if (Boolean.TRUE.equals(eligible)) AdManager.loadInterstitial(requireContext());
+        });
+        AdManager.loadInterstitial(requireContext());
+
         // Setup Quick Access Cards
         MaterialCardView startExamCard = view.findViewById(R.id.start_exam_card);
         if (startExamCard != null) {
@@ -81,22 +86,22 @@ public class DashboardFragment extends Fragment {
         // The "Tests effectués" subtitle inside the Exams card opens the test history.
         android.widget.TextView previousTestsSubtitle = view.findViewById(R.id.previous_tests_subtitle);
         if (previousTestsSubtitle != null) {
-            previousTestsSubtitle.setOnClickListener(v -> safeNavigate(R.id.action_dashboardFragment_to_resultsFragment));
+            previousTestsSubtitle.setOnClickListener(v -> showTransition(() -> safeNavigate(R.id.action_dashboardFragment_to_resultsFragment)));
         }
 
         MaterialCardView learningMaterialsCard = view.findViewById(R.id.learning_materials_card);
         if (learningMaterialsCard != null) {
-            learningMaterialsCard.setOnClickListener(v -> safeNavigate(R.id.action_dashboardFragment_to_materialsFragment));
+            learningMaterialsCard.setOnClickListener(v -> showTransition(() -> safeNavigate(R.id.action_dashboardFragment_to_materialsFragment)));
         }
 
         MaterialCardView iremboServiceCard = view.findViewById(R.id.irembo_service_card);
         if (iremboServiceCard != null) {
-            iremboServiceCard.setOnClickListener(v -> startActivity(new Intent(requireContext(), IremboActivity.class)));
+            iremboServiceCard.setOnClickListener(v -> showTransition(() -> startActivity(new Intent(requireContext(), IremboActivity.class))));
         }
 
         MaterialCardView whatsappGroupCard = view.findViewById(R.id.whatsapp_group_card);
         if (whatsappGroupCard != null) {
-            whatsappGroupCard.setOnClickListener(v -> startActivity(new Intent(requireContext(), WhatsAppGroupsActivity.class)));
+            whatsappGroupCard.setOnClickListener(v -> showTransition(() -> startActivity(new Intent(requireContext(), WhatsAppGroupsActivity.class))));
         }
 
         MaterialCardView instructionsCard = view.findViewById(R.id.instructions_card);
@@ -120,6 +125,13 @@ public class DashboardFragment extends Fragment {
         if (adContainer != null && getActivity() != null) {
             AdManager.showBanner(getActivity(), adContainer, null);
         }
+    }
+
+    private void showTransition(Runnable action) {
+        View source = getView();
+        AdManager.showTransitionAd(requireActivity(), () -> {
+            if (isAdded() && getView() == source) action.run();
+        });
     }
 
     private void observeViewModels() {

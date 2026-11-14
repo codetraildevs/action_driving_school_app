@@ -72,6 +72,11 @@ public class ResultsFragment extends Fragment {
         passRateValue = view.findViewById(R.id.pass_rate_value);
         historyHeader = view.findViewById(R.id.history_header);
 
+        AdManager.loadRetakeAd(requireActivity());
+        com.drivingschoolrwandaapp.utils.ConsentHelper.eligibility.observe(getViewLifecycleOwner(), eligible -> {
+            if (Boolean.TRUE.equals(eligible)) AdManager.loadRetakeAd(requireActivity());
+        });
+
         // Setup RecyclerView
         resultsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new TestResultAdapter();
@@ -270,21 +275,22 @@ public class ResultsFragment extends Fragment {
 
                 if (testId > 0 && btnRetake != null) {
                     btnRetake.setVisibility(View.VISIBLE);
-                    btnRetake.setOnClickListener(v -> {
-                        if (isAdded()) {
-                            try {
-                                Bundle args = new Bundle();
-                                args.putInt("testId", testId);
-                                args.putString("title", title);
-                                args.putBoolean("isReviewMode", false);
-                                args.putBoolean("isRealTimeFeedback", true);
-                                NavHostFragment.findNavController(ResultsFragment.this)
-                                        .navigate(R.id.action_global_testQuestionsFragment, args);
-                            } catch (Exception e) {
-                                android.util.Log.e("ResultsFragment", "Navigation failed", e);
-                            }
+                    btnRetake.setOnClickListener(v -> AdManager.showRetakeAd(requireActivity(), new AdManager.RewardedAdCallback() {
+                        @Override public void onRewardEarned(@NonNull com.google.android.gms.ads.rewarded.RewardItem reward) {
+                            if (!isAdded() || getView() == null) return;
+                            Bundle args = new Bundle();
+                            args.putInt("testId", testId);
+                            args.putString("title", title);
+                            args.putBoolean("isFree", true);
+                            args.putBoolean("isRealTimeFeedback", true);
+                            NavHostFragment.findNavController(ResultsFragment.this)
+                                    .navigate(R.id.action_global_testQuestionsFragment, args);
                         }
-                    });
+
+                        @Override public void onAdFailedToShow() {
+                            if (isAdded()) android.widget.Toast.makeText(requireContext(), R.string.dsrw_ad_error, android.widget.Toast.LENGTH_SHORT).show();
+                        }
+                    }));
                 } else if (btnRetake != null) {
                     btnRetake.setVisibility(View.GONE);
                 }

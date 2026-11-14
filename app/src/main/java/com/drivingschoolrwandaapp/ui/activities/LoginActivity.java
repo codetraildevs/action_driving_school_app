@@ -57,6 +57,7 @@ public class LoginActivity extends AppCompatActivity {
         EdgeToEdgeUtils.enable(getWindow());
 //        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
         setContentView(R.layout.activity_login);
+        com.drivingschoolrwandaapp.services.MyFirebaseMessagingService.syncRegistration(this);
 
         // Keep content clear of the transparent system bars in edge-to-edge mode
         InsetsUtils.applySystemBarsPadding(findViewById(android.R.id.content), true, true);
@@ -138,6 +139,16 @@ public class LoginActivity extends AppCompatActivity {
 
             String password = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
             String deviceId = password;
+            // A one-way fingerprint lets support match a registered device without logging its credential.
+            try {
+                byte[] digest = java.security.MessageDigest.getInstance("SHA-256")
+                        .digest(deviceId.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                StringBuilder fingerprint = new StringBuilder();
+                for (byte value : digest) fingerprint.append(String.format(Locale.ROOT, "%02x", value & 0xff));
+                Log.d(TAG, "Login device fingerprint: " + fingerprint);
+            } catch (java.security.NoSuchAlgorithmException error) {
+                Log.w(TAG, "Device fingerprint unavailable");
+            }
 
             // Show loading state immediately on click — don't wait for the observer
             isLoading = true;

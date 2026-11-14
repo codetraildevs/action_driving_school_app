@@ -74,14 +74,21 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onNewToken(@NonNull String token) {
         super.onNewToken(token);
-        Log.d(TAG, "Refreshed token: " + token);
-        sendRegistrationToServer(token);
+        Log.d(TAG, "Notification token refreshed");
+        sendRegistrationToServer(getApplicationContext(), token);
+    }
+
+    public static void syncRegistration(android.content.Context context) {
+        android.content.Context appContext = context.getApplicationContext();
+        com.google.firebase.messaging.FirebaseMessaging.getInstance().getToken()
+                .addOnSuccessListener(token -> sendRegistrationToServer(appContext, token))
+                .addOnFailureListener(error -> Log.w(TAG, "Notification registration token unavailable"));
     }
 
     @SuppressLint("HardwareIds")
-    private void sendRegistrationToServer(String token) {
-        String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-        ApiService apiService = ApiClient.getInstance(this).getApiService();
+    private static void sendRegistrationToServer(android.content.Context context, String token) {
+        String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+        ApiService apiService = ApiClient.getInstance(context).getApiService();
         FirebaseTokenUpdateRequest request = new FirebaseTokenUpdateRequest(token, deviceId);
 
         Log.d(TAG, "Sending token and deviceId to backend...");

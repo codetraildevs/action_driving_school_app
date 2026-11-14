@@ -89,10 +89,16 @@ public class TestResultFragment extends Fragment {
 
         Button retake = view.findViewById(R.id.watch_ad_retake);
         Integer testId = testViewModel.getTestId();
-        if (testId != null && testId > 0 && ConsentHelper.canShowAds()) {
-            retake.setVisibility(View.VISIBLE);
-            AdManager.loadRewardedAd(requireContext());
-            retake.setOnClickListener(v -> AdManager.showRewardedAdIfReady(requireActivity(), new AdManager.RewardedAdCallback() {
+        if (testId != null && testId > 0) {
+            androidx.lifecycle.Observer<Boolean> updateOffer = eligible -> {
+                if (!Boolean.TRUE.equals(eligible)) return;
+                view.findViewById(R.id.retake_ad_notice).setVisibility(View.VISIBLE);
+                retake.setVisibility(View.VISIBLE);
+                AdManager.loadRetakeAd(requireActivity());
+            };
+            ConsentHelper.eligibility.observe(getViewLifecycleOwner(), updateOffer);
+            updateOffer.onChanged(ConsentHelper.canShowAds());
+            retake.setOnClickListener(v -> AdManager.showRetakeAd(requireActivity(), new AdManager.RewardedAdCallback() {
                 @Override
                 public void onRewardEarned(@NonNull com.google.android.gms.ads.rewarded.RewardItem reward) {
                     if (!isAdded() || getView() != view) return;

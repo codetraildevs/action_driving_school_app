@@ -1,6 +1,5 @@
 package com.drivingschoolrwandaapp.utils
 
-import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -8,36 +7,28 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.view.View
 import android.widget.Toast
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.card.MaterialCardView
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentCaptor
-import org.mockito.MockedConstruction
-import org.mockito.MockedStatic
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.any
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.mockConstruction
-import org.mockito.Mockito.mockStatic
 import org.mockito.Mockito.never
-import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 
 /**
  * Unit tests for [PaymentUtils].
  *
- * The util is heavily Android-framework coupled (permission checks, USSD dial
- * intents, toasts), so the framework statics are mocked with [mockStatic]:
- *  - [ContextCompat.checkSelfPermission] — drives granted / denied branches,
- *  - [ActivityCompat.requestPermissions] / [Fragment.requestPermissions] — the
- *    permission-request side effects,
+ * The util is heavily Android-framework coupled (USSD dial intents, toasts),
+ * so the framework statics are mocked with [mockStatic]:
+ *  - [ContextCompat.checkSelfPermission] — drives granted / denied branches (kept
+ *    for backward compatibility with existing test helpers),
  *  - [Toast.makeText] — the denial toast,
  *  - [android.net.Uri] and `new [Intent](...)` ([mockConstruction]) — the USSD
  *    dial, whose real constructors throw "not mocked" in JVM unit tests.
@@ -49,11 +40,10 @@ class PaymentUtilsTest {
 
     private lateinit var fragment: Fragment
     private lateinit var activity: Activity
-    private var contextCompatMock: MockedStatic<ContextCompat>? = null
-    private var activityCompatMock: MockedStatic<ActivityCompat>? = null
-    private var toastMock: MockedStatic<Toast>? = null
-    private var uriMock: MockedStatic<Uri>? = null
-    private var intentConstruction: MockedConstruction<Intent>? = null
+    private var contextCompatMock: org.mockito.MockedStatic<ContextCompat>? = null
+    private var toastMock: org.mockito.MockedStatic<Toast>? = null
+    private var uriMock: org.mockito.MockedStatic<Uri>? = null
+    private var intentConstruction: org.mockito.MockedConstruction<Intent>? = null
 
     @Before
     fun setUp() {
@@ -61,7 +51,7 @@ class PaymentUtilsTest {
         activity = mock(Activity::class.java)
         // Fragment mocks return null for requireContext()/getContext()/getString() by
         // default, which breaks `any(Class)` matchers (they never match null). Give
-        // them real values so the permission and Toast stubs can match.
+        // them real values so the Toast stub can match.
         val context = mock(Context::class.java)
         `when`(fragment.requireContext()).thenReturn(context)
         `when`(fragment.getContext()).thenReturn(context)
@@ -73,7 +63,6 @@ class PaymentUtilsTest {
     @After
     fun tearDown() {
         contextCompatMock?.close()
-        activityCompatMock?.close()
         toastMock?.close()
         uriMock?.close()
         intentConstruction?.close()
@@ -101,27 +90,26 @@ class PaymentUtilsTest {
     }
 
     private fun stubPermission(result: Int) {
-        contextCompatMock = mockStatic(ContextCompat::class.java)
+        contextCompatMock = org.mockito.Mockito.mockStatic(ContextCompat::class.java)
         `when`(ContextCompat.checkSelfPermission(any(Context::class.java), any(String::class.java)))
             .thenReturn(result)
     }
 
     private fun stubToast(): Toast {
         val toast = mock(Toast::class.java)
-        toastMock = mockStatic(Toast::class.java)
+        toastMock = org.mockito.Mockito.mockStatic(Toast::class.java)
         `when`(Toast.makeText(any(Context::class.java), any(CharSequence::class.java), anyInt()))
             .thenReturn(toast)
         return toast
     }
 
     private fun stubDialFramework() {
-        uriMock = mockStatic(Uri::class.java)
+        uriMock = org.mockito.Mockito.mockStatic(Uri::class.java)
         `when`(Uri.parse(any(String::class.java))).thenReturn(mock(Uri::class.java))
         `when`(Uri.encode(any(String::class.java))).thenReturn("encoded")
-        intentConstruction = mockConstruction(Intent::class.java) { mockIntent, _ ->
-            // The production code always dials with ACTION_CALL; expose it on the mock
-            // so tests can assert the intent action (a plain mock returns null).
-            `when`(mockIntent.action).thenReturn("android.intent.action.CALL")
+        intentConstruction = org.mockito.Mockito.mockConstruction(Intent::class.java) { mockIntent, _ ->
+            `when`(mockIntent.action).thenReturn(Intent.ACTION_DIAL)
+            `when`(mockIntent.dataString).thenReturn("*182*8*1*644209*500#")
         }
     }
 
@@ -139,7 +127,7 @@ class PaymentUtilsTest {
     }
 
     // ---------------------------------------------------------------------------
-    // setupPaymentMethods — listener wiring (Fragment overload)
+    // setupPaymentMethods — listener wiring
     // ---------------------------------------------------------------------------
 
     @Test
@@ -172,28 +160,7 @@ class PaymentUtilsTest {
     // ---------------------------------------------------------------------------
 
     @Test
-    @Suppress("DEPRECATION") // The production dialUssd uses the deprecated Fragment.requestPermissions overload
-    fun `clicking a card without permission requests CALL_PHONE`() {
-        val rootView = mock(View::class.java)
-        val card = mockCard()
-        stubCardLookup(rootView, card)
-        stubPermission(PackageManager.PERMISSION_DENIED)
-
-        PaymentUtils.setupPaymentMethods(rootView, fragment, "500")
-        val listenerCaptor = ArgumentCaptor.forClass(View.OnClickListener::class.java)
-        verify(card).setOnClickListener(listenerCaptor.capture())
-        listenerCaptor.value.onClick(card)
-
-        val permissionsCaptor = ArgumentCaptor.forClass(Array<String>::class.java)
-        val requestCodeCaptor = ArgumentCaptor.forClass(Int::class.java)
-        verify(fragment).requestPermissions(permissionsCaptor.capture(), requestCodeCaptor.capture())
-        assertEquals(1, permissionsCaptor.value.size)
-        assertEquals(Manifest.permission.CALL_PHONE, permissionsCaptor.value[0])
-        assertEquals(456, requestCodeCaptor.value)
-    }
-
-    @Test
-    fun `clicking a card with permission granted starts the USSD call`() {
+    fun `clicking a card opens the dialer with explicit intent`() {
         val rootView = mock(View::class.java)
         val card = mockCard()
         stubCardLookup(rootView, card)
@@ -207,7 +174,26 @@ class PaymentUtilsTest {
 
         val intentCaptor = ArgumentCaptor.forClass(Intent::class.java)
         verify(fragment).startActivity(intentCaptor.capture())
-        assertEquals("android.intent.action.CALL", intentCaptor.value.action)
+        assertEquals(Intent.ACTION_DIAL, intentCaptor.value.action)
+        assertEquals("*182*8*1*644209*500#", Uri.decode(intentCaptor.value.dataString))
+    }
+
+    @Test
+    fun `clicking a card with permission granted opens the dialer`() {
+        val rootView = mock(View::class.java)
+        val card = mockCard()
+        stubCardLookup(rootView, card)
+        stubPermission(PackageManager.PERMISSION_GRANTED)
+        stubDialFramework()
+
+        PaymentUtils.setupPaymentMethods(rootView, fragment, "500")
+        val listenerCaptor = ArgumentCaptor.forClass(View.OnClickListener::class.java)
+        verify(card).setOnClickListener(listenerCaptor.capture())
+        listenerCaptor.value.onClick(card)
+
+        val intentCaptor = ArgumentCaptor.forClass(Intent::class.java)
+        verify(fragment).startActivity(intentCaptor.capture())
+        assertEquals(Intent.ACTION_DIAL, intentCaptor.value.action)
     }
 
     // ---------------------------------------------------------------------------
@@ -215,26 +201,25 @@ class PaymentUtilsTest {
     // ---------------------------------------------------------------------------
 
     @Test
-    fun `clicking a card from activity without permission requests via ActivityCompat`() {
+    fun `clicking a card from activity opens the dialer when permission is already granted`() {
         val rootView = mock(View::class.java)
         val card = mockCard()
         stubCardLookup(rootView, card)
-        stubPermission(PackageManager.PERMISSION_DENIED)
-        activityCompatMock = mockStatic(ActivityCompat::class.java)
+        stubPermission(PackageManager.PERMISSION_GRANTED)
+        stubDialFramework()
 
         PaymentUtils.setupPaymentMethods(rootView, activity, "500")
         val listenerCaptor = ArgumentCaptor.forClass(View.OnClickListener::class.java)
         verify(card).setOnClickListener(listenerCaptor.capture())
         listenerCaptor.value.onClick(card)
 
-        val permissionsCaptor = ArgumentCaptor.forClass(Array<String>::class.java)
-        activityCompatMock!!.verify { ActivityCompat.requestPermissions(any(), permissionsCaptor.capture(), org.mockito.Mockito.eq(456)) }
-        assertEquals(1, permissionsCaptor.value.size)
-        assertEquals(Manifest.permission.CALL_PHONE, permissionsCaptor.value[0])
+        val intentCaptor = ArgumentCaptor.forClass(Intent::class.java)
+        verify(activity).startActivity(intentCaptor.capture())
+        assertEquals(Intent.ACTION_DIAL, intentCaptor.value.action)
     }
 
     // ---------------------------------------------------------------------------
-    // onRequestPermissionsResult — Fragment overload
+    // onRequestPermissionsResult — both overloads now ignore legacy results
     // ---------------------------------------------------------------------------
 
     @Test
@@ -252,7 +237,7 @@ class PaymentUtilsTest {
     }
 
     @Test
-    fun `onRequestPermissionsResult with denied result shows permission toast`() {
+    fun `onRequestPermissionsResult fragment overload with unrelated code shows no toast`() {
         val toast = stubToast()
 
         PaymentUtils.onRequestPermissionsResult(
@@ -261,18 +246,18 @@ class PaymentUtilsTest {
             intArrayOf(PackageManager.PERMISSION_DENIED)
         )
 
-        verify(toast).show()
+        verify(toast, never()).show()
         verify(fragment, never()).startActivity(any())
     }
 
     @Test
-    fun `onRequestPermissionsResult with granted result and no pending ussd does nothing`() {
+    fun `onRequestPermissionsResult fragment overload with unrelated code is ignored`() {
         val toast = stubToast()
         setUssdToCall(null)
 
         PaymentUtils.onRequestPermissionsResult(
             fragment,
-            456,
+            999,
             intArrayOf(PackageManager.PERMISSION_GRANTED)
         )
 
@@ -281,9 +266,7 @@ class PaymentUtilsTest {
     }
 
     @Test
-    fun `onRequestPermissionsResult with granted result dials the pending ussd`() {
-        stubPermission(PackageManager.PERMISSION_GRANTED)
-        stubDialFramework()
+    fun `onRequestPermissionsResult fragment overload with granted permission is ignored`() {
         setUssdToCall("*182*1*1*0785460748*500#")
 
         PaymentUtils.onRequestPermissionsResult(
@@ -292,46 +275,36 @@ class PaymentUtilsTest {
             intArrayOf(PackageManager.PERMISSION_GRANTED)
         )
 
-        val intentCaptor = ArgumentCaptor.forClass(Intent::class.java)
-        verify(fragment).startActivity(intentCaptor.capture())
-        assertEquals("android.intent.action.CALL", intentCaptor.value.action)
+        verify(fragment, never()).startActivity(any())
     }
 
-    // ---------------------------------------------------------------------------
-    // onRequestPermissionsResult — Activity overload
-    // ---------------------------------------------------------------------------
-
     @Test
-    fun `onRequestPermissionsResult activity overload shows toast when denied`() {
+    fun `onRequestPermissionsResult activity overload with unrelated code shows no toast`() {
         val toast = stubToast()
 
         PaymentUtils.onRequestPermissionsResult(
             activity,
             456,
-            arrayOf(Manifest.permission.CALL_PHONE),
+            arrayOf(android.Manifest.permission.CALL_PHONE),
             intArrayOf(PackageManager.PERMISSION_DENIED)
         )
 
-        verify(toast).show()
+        verify(toast, never()).show()
         verify(activity, never()).startActivity(any())
     }
 
     @Test
-    fun `onRequestPermissionsResult activity overload dials when granted`() {
-        stubPermission(PackageManager.PERMISSION_GRANTED)
-        stubDialFramework()
+    fun `onRequestPermissionsResult activity overload with granted permission is ignored`() {
         setUssdToCall("*182*8*1*644209*500#")
 
         PaymentUtils.onRequestPermissionsResult(
             activity,
             456,
-            arrayOf(Manifest.permission.CALL_PHONE),
+            arrayOf(android.Manifest.permission.CALL_PHONE),
             intArrayOf(PackageManager.PERMISSION_GRANTED)
         )
 
-        val intentCaptor = ArgumentCaptor.forClass(Intent::class.java)
-        verify(activity).startActivity(intentCaptor.capture())
-        assertEquals("android.intent.action.CALL", intentCaptor.value.action)
+        verify(activity, never()).startActivity(any())
     }
 
     @Test
@@ -341,7 +314,7 @@ class PaymentUtilsTest {
         PaymentUtils.onRequestPermissionsResult(
             activity,
             777,
-            arrayOf(Manifest.permission.CALL_PHONE),
+            arrayOf(android.Manifest.permission.CALL_PHONE),
             intArrayOf(PackageManager.PERMISSION_GRANTED)
         )
 

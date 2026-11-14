@@ -45,5 +45,10 @@
             android:textColor="?android:attr/textColorSecondary"
             tools:text="This is a detailed description of the image, providing context and academic information." />
 
+    <FrameLayout
+        android:id="@+id/ad_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

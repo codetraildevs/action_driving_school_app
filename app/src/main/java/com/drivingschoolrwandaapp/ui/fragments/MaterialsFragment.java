@@ -112,6 +112,12 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        com.drivingschoolrwandaapp.utils.ConsentHelper.eligibility.observe(getViewLifecycleOwner(), eligible -> {
+            if (Boolean.TRUE.equals(eligible)) {
+                AdManager.loadRewardedAd(requireContext());
+                AdManager.loadInterstitial(requireContext());
+            }
+        });
 
         viewModel = new ViewModelProvider(this).get(LearningMaterialViewModel.class);
 
@@ -132,6 +138,8 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
         // Load AdMob banner
         FrameLayout adContainer = view.findViewById(R.id.ad_container);
         if (adContainer != null && getActivity() != null) {
+            AdManager.loadRewardedAd(requireContext());
+            AdManager.loadInterstitial(requireContext());
             AdManager.showBanner(getActivity(), adContainer, null);
         }
     }
@@ -415,13 +423,19 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
         if (material.isDownloaded()) {
             openFile(material);
         } else {
-            if (isAdded() && getContext() != null) {
-                Toast.makeText(getContext(), getString(R.string.download_first), Toast.LENGTH_SHORT).show();
-            }
+            onDownloadButtonClick(material);
         }
     }
 
     private void openFile(LearningMaterial material) {
+        if (!isAdded() || getActivity() == null) return;
+        View source = getView();
+        AdManager.showTransitionAd(requireActivity(), () -> {
+            if (isAdded() && getView() == source) openFileAfterAd(material);
+        });
+    }
+
+    private void openFileAfterAd(LearningMaterial material) {
         if (!isAdded() || getContext() == null) return;
         File internalStroageDir = getContext().getFilesDir();
         String fileName = FileUtils.getSafeFileName(material);
@@ -493,6 +507,9 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
 
         AlertDialog dialog = builder.create();
         dialog.show();
+        android.widget.FrameLayout banner = dialogView.findViewById(R.id.ad_container);
+        AdManager.showBanner(requireActivity(), banner, null);
+        dialog.setOnDismissListener(ignored -> AdManager.hideBanner(banner));
     }
 
 
