@@ -1,8 +1,6 @@
 package com.drivingschoolrwandaapp.utils;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 
@@ -67,16 +65,8 @@ public class LanguageUtils {
                     dialog.dismiss();
                     if (!selectedCode.equals(currentCode)) {
                         appPreferences.setLanguage(selectedCode);
-                        // Avoid an OEM activity transition exposing a black frame
-                        // while the localized activity is recreated.
-                        Activity host = findActivity(context);
-                        if (host != null) {
-                            host.getWindow().setWindowAnimations(0);
-                            host.overridePendingTransition(0, 0);
-                        }
-                        // Configuration recreation preserves the NavHost back stack and
-                        // saved view state. Relaunching SplashActivity loses both and
-                        // causes an unrelated page transition through startup.
+                        // Hosts with a language picker handle locale changes in-place,
+                        // keeping their window and navigation stack alive.
                         AppCompatDelegate.setApplicationLocales(
                                 LocaleListCompat.forLanguageTags(selectedCode));
                     }
@@ -85,13 +75,4 @@ public class LanguageUtils {
                 .show();
     }
 
-    private static Activity findActivity(Context context) {
-        while (context instanceof ContextWrapper) {
-            if (context instanceof Activity) return (Activity) context;
-            Context base = ((ContextWrapper) context).getBaseContext();
-            if (base == context) break;
-            context = base;
-        }
-        return null;
-    }
 }

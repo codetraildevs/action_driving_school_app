@@ -69,6 +69,30 @@ import java.util.concurrent.Executors;
 @AndroidEntryPoint
 public class App extends AppCompatActivity {
 
+    @Override
+    public void onConfigurationChanged(@androidx.annotation.NonNull android.content.res.Configuration configuration) {
+        super.onConfigurationChanged(configuration);
+        getWindow().getDecorView().post(() -> {
+            if (isFinishing() || isDestroyed() || navController == null) return;
+            com.drivingschoolrwandaapp.utils.LocaleUi.refreshLabels(navController.getGraph(),
+                    navController.getNavInflater().inflate(R.navigation.main_nav_graph));
+            MaterialToolbar toolbar = findViewById(R.id.toolbar);
+            BottomNavigationView bottom = findViewById(R.id.bottom_nav_view);
+            NavigationView drawer = findViewById(R.id.navigation_view);
+            com.drivingschoolrwandaapp.utils.LocaleUi.refreshMenu(this, bottom, bottom.getMenu(), R.menu.menu_bottom_navigation);
+            com.drivingschoolrwandaapp.utils.LocaleUi.refreshMenu(this, drawer, drawer.getMenu(), R.menu.drawer_menu);
+            NavHostFragment host = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
+            if (host != null) {
+                com.drivingschoolrwandaapp.utils.LocaleUi.refreshFragmentView(
+                        host.getChildFragmentManager().getPrimaryNavigationFragment());
+            }
+            if (navController.getCurrentDestination() != null) {
+                toolbar.setTitle(navController.getCurrentDestination().getLabel());
+            }
+            invalidateOptionsMenu();
+        });
+    }
+
     private AppBarConfiguration appBarConfiguration;
     private NavController navController;
     private UserViewModel userViewModel;

@@ -32,6 +32,22 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class AdminActivity extends AppCompatActivity {
 
+    @Override
+    public void onConfigurationChanged(@androidx.annotation.NonNull android.content.res.Configuration configuration) {
+        super.onConfigurationChanged(configuration);
+        getWindow().getDecorView().post(() -> {
+            if (isFinishing() || isDestroyed()) return;
+            BottomNavigationView bottom = findViewById(R.id.bottom_nav);
+            if (bottom == null) return;
+            com.drivingschoolrwandaapp.utils.LocaleUi.refreshMenu(this, bottom, bottom.getMenu(), R.menu.menu_admin_bottom_nav);
+            com.drivingschoolrwandaapp.utils.LocaleUi.refreshFragmentView(
+                    getSupportFragmentManager().findFragmentById(R.id.fragment_container));
+            android.view.MenuItem selected = bottom.getMenu().findItem(bottom.getSelectedItemId());
+            if (selected != null && getSupportActionBar() != null) getSupportActionBar().setTitle(selected.getTitle());
+            invalidateOptionsMenu();
+        });
+    }
+
     private static final int TAB_DASHBOARD = 0;
     private static final int TAB_USERS = 1;
     private static final int TAB_REQUESTS = 2;

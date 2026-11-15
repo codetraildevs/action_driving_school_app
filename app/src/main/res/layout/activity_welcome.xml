@@ -2,6 +2,8 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/welcome_scroll"
+    android:background="?android:attr/colorBackground"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
@@ -29,7 +31,7 @@
                 android:layout_weight="1"
                 android:text="@string/app_version_placeholder"
                 android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
-                android:textColor="@color/colorOutline" />
+                android:textColor="?attr/colorOnSurfaceVariant" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/instructions_button"
@@ -39,13 +41,13 @@
                 android:text="@string/instructions"
                 android:padding="5dp"
                 android:lines="1"
-                android:textColor="@color/my_primary"
-                app:strokeColor="@color/colorPrimary"
+                android:textColor="?attr/colorPrimary"
+                app:strokeColor="?attr/colorOutline"
                 android:ellipsize="end"
                 android:minHeight="0dp"
                 android:minWidth="0dp"
                 app:iconSize="14dp"
-                app:iconTint="@color/my_primary" />
+                app:iconTint="?attr/colorPrimary" />
         </LinearLayout>
 
         <!-- App Title -->
@@ -133,8 +135,8 @@
             android:layout_marginTop="8dp"
             android:text="@string/login_to_your_account"
             app:cornerRadius="12dp"
-            app:strokeColor="@color/colorPrimary"
-            android:textColor="@color/my_primary"
+            app:strokeColor="?attr/colorOutline"
+            android:textColor="?attr/colorPrimary"
             android:lines="1"
             android:ellipsize="end"
             app:layout_constraintEnd_toEndOf="parent"
@@ -161,7 +163,7 @@
             android:gravity="center"
             android:text="@string/by_continuing_you_agree_to_our_terms_of_service_and_privacy_policy"
             android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
-            android:textColor="@color/colorOutline"
+            android:textColor="?attr/colorOnSurfaceVariant"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

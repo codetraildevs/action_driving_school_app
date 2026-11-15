@@ -8,7 +8,10 @@ Verify that its Android package matches `com.drivingschoolrwandaapp` and that th
 app sends events to the same Firebase project opened in DebugView.
 
 Language changes use AppCompat's locale configuration update instead of launching the splash
-screen. The activity restores its navigation state; an opaque branded window backs the redraw.
+screen. Hosts with a language picker handle the configuration change without recreating the
+activity window. Visible fragment views are rebound in the same navigation stack, while the
+welcome screen restores its carousel page and scroll position. Auth screens use coordinated
+light/dark surfaces and foreground colors rather than a branded background on every window.
 The welcome carousel pauses while the language picker is open, and the saved language is
 applied before splash UI creation on the next launch.
 

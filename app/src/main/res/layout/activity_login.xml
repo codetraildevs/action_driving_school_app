@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
+    android:background="?android:attr/colorBackground"
 
     tools:context=".ui.activities.RegisterActivity">
 
@@ -25,7 +26,7 @@
             android:layout_height="100dp"
             android:layout_marginTop="50dp"
             android:src="@drawable/user_check_alt_1_svgrepo_com"
-            app:tint="@color/my_primary"
+            app:tint="?attr/colorPrimary"
             android:contentDescription="@null"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -48,7 +49,7 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/email_layout"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="32dp"
@@ -113,7 +114,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
-                style="@style/Widget.App.Button.OutlinedButton"
+                style="@style/Widget.App.Auth.OutlinedButton"
                 app:iconGravity="end"
                 app:icon="@drawable/ic_arrow_forward"
                 android:text="@string/sign_up"

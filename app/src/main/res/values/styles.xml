@@ -46,8 +46,8 @@
          compat library was removed because it calls the Android 15-deprecated
          edge-to-edge APIs (Window.setStatusBarColor, Window.setNavigationBarColor,
          LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES), which Play Console flags. -->
-    <style name="Theme.App.Starting" parent="Base.Theme.drivingSchoolRwandaApp">
-        <item name="android:windowBackground">@color/colorPrimary</item>
+    <style name="Theme.App.Starting" parent="Theme.App.Auth">
+        <item name="android:windowBackground">@color/auth_background</item>
     </style>
 
 </resources>

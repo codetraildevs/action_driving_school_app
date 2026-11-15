@@ -42,14 +42,26 @@ public class WelcomeActivity extends AppCompatActivity {
     private Runnable runnable;
     TextView versionTv;
     private int carouselSize = 0;
+    private TabLayoutMediator carouselMediator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdgeUtils.enable(getWindow());
 
-        setContentView(R.layout.activity_welcome);
         appPreferences = new AppPreferences(this);
+        bindContent();
+
+        // Show disclaimer only on first launch, not on a language update.
+        if (!appPreferences.isDisclaimerShown()) {
+            appPreferences.setDisclaimerShown(true);
+            showSupportDialog();
+        }
+    }
+
+    private void bindContent() {
+        if (carouselMediator != null) carouselMediator.detach();
+        setContentView(R.layout.activity_welcome);
 
         // Apply system bar insets to the root view to prevent content from being clipped
         // behind the transparent status bar in edge-to-edge mode.
@@ -64,10 +76,21 @@ public class WelcomeActivity extends AppCompatActivity {
                 BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE));
         makeTermsAndPolicyClickable(termsPolicyText);
 
-        // Show disclaimer only on first launch
-        if (!appPreferences.isDisclaimerShown()) {
-            appPreferences.setDisclaimerShown(true);
-            showSupportDialog();
+    }
+
+    @Override
+    public void onConfigurationChanged(@NonNull android.content.res.Configuration configuration) {
+        super.onConfigurationChanged(configuration);
+        int page = viewPager2 == null ? 0 : viewPager2.getCurrentItem();
+        android.widget.ScrollView scroll = findViewById(R.id.welcome_scroll);
+        int scrollY = scroll == null ? 0 : scroll.getScrollY();
+        handler.removeCallbacks(runnable);
+        bindContent();
+        viewPager2.setCurrentItem(page, false);
+        View updatedScroll = findViewById(R.id.welcome_scroll);
+        updatedScroll.post(() -> updatedScroll.scrollTo(0, scrollY));
+        if (getLifecycle().getCurrentState().isAtLeast(androidx.lifecycle.Lifecycle.State.RESUMED)) {
+            handler.postDelayed(runnable, 3000);
         }
     }
 
@@ -115,7 +138,8 @@ public class WelcomeActivity extends AppCompatActivity {
         WelcomeCarouselAdapter adapter = new WelcomeCarouselAdapter(items);
         viewPager2.setAdapter(adapter);
 
-        new TabLayoutMediator(tabLayout, viewPager2, (tab, position) -> {}).attach();
+        carouselMediator = new TabLayoutMediator(tabLayout, viewPager2, (tab, position) -> {});
+        carouselMediator.attach();
 
         // Auto-scroll logic
         runnable = new Runnable() {
@@ -192,7 +216,7 @@ public class WelcomeActivity extends AppCompatActivity {
             @Override
             public void updateDrawState(@NonNull TextPaint ds) {
                 super.updateDrawState(ds);
-                ds.setColor(ContextCompat.getColor(WelcomeActivity.this, R.color.my_primary));
+                ds.setColor(ContextCompat.getColor(WelcomeActivity.this, R.color.auth_primary));
                 ds.setUnderlineText(false);
             }
         };
@@ -206,7 +230,7 @@ public class WelcomeActivity extends AppCompatActivity {
             @Override
             public void updateDrawState(@NonNull TextPaint ds) {
                 super.updateDrawState(ds);
-                ds.setColor(ContextCompat.getColor(WelcomeActivity.this, R.color.my_primary));
+                ds.setColor(ContextCompat.getColor(WelcomeActivity.this, R.color.auth_primary));
                 ds.setUnderlineText(false);
             }
         };

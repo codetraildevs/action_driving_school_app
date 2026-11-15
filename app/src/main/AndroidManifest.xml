@@ -78,18 +78,23 @@
 
         <activity
             android:name=".ui.activities.WelcomeActivity"
+            android:configChanges="locale|layoutDirection"
+            android:theme="@style/Theme.App.Auth"
             android:exported="false" />
 
         <activity
             android:name=".App"
+            android:configChanges="locale|layoutDirection"
             android:exported="false"
             android:theme="@style/Base.Theme.drivingSchoolRwandaApp" />
 
         <activity
             android:name=".ui.activities.RegisterActivity"
+            android:theme="@style/Theme.App.Auth"
             android:exported="false" />
         <activity
             android:name=".ui.activities.LoginActivity"
+            android:theme="@style/Theme.App.Auth"
             android:exported="false" />
 
         <activity
@@ -132,6 +137,7 @@
 
         <activity
             android:name=".ui.activities.AdminActivity"
+            android:configChanges="locale|layoutDirection"
             android:exported="false" />
 
         <provider

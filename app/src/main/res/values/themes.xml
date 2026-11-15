@@ -3,8 +3,7 @@
     <style name="Base.Theme.drivingSchoolRwandaApp" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
-        <!-- Opaque branded backing while a localized activity redraws. -->
-        <item name="android:windowBackground">@color/colorPrimary</item>
+        <item name="android:windowBackground">?attr/colorSurface</item>
 
         <!-- windowLayoutInDisplayCutoutMode=always is only safe on API 30+. -->
         <!-- On API 28-29 TECNO/Infinix devices it throws UnsupportedOperationException. -->

@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
+    android:background="?android:attr/colorBackground"
     tools:context=".ui.activities.RegisterActivity">
 
 <ScrollView
@@ -25,7 +26,7 @@
             android:layout_height="100dp"
             android:layout_marginTop="40dp"
             android:src="@drawable/user_plus_svgrepo_com"
-            app:tint="@color/my_primary"
+            app:tint="?attr/colorPrimary"
             android:contentDescription="@null"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -112,7 +113,6 @@
             android:layout_marginTop="24dp"
             android:padding="12dp"
             android:text="@string/confirm"
-            app:backgroundTint="@color/colorPrimary"
             app:layout_constraintTop_toBottomOf="@+id/fields_card"
             tools:layout_editor_absoluteX="47dp" />
 
@@ -139,7 +139,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
                 android:paddingHorizontal="1dp"
-                style="@style/Widget.App.Button.OutlinedButton"
+                style="@style/Widget.App.Auth.OutlinedButton"
                 android:text="@string/injira1"
                 app:icon="@drawable/ic_arrow_forward"
                 app:iconGravity="end"

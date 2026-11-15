@@ -22,11 +22,11 @@
         android:layout_marginBottom="4dp"
         android:gravity="center_vertical"
         app:drawableStartCompat="@android:drawable/ic_menu_call"
-        app:drawableTint="#33A1C9"
+        app:drawableTint="@color/auth_primary"
         android:drawablePadding="8dp"
         android:autoLink="phone"
         android:text="@string/contact_phone_1"
-        android:textColorLink="#33A1C9"
+        android:textColorLink="@color/auth_primary"
         android:textSize="16sp" />
 
     <TextView
@@ -34,10 +34,10 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         app:drawableStartCompat="@android:drawable/ic_menu_call"
-        app:drawableTint="#33A1C9"
+        app:drawableTint="@color/auth_primary"
         android:drawablePadding="8dp"
         android:autoLink="phone"
         android:text="@string/contact_phone_2"
-        android:textColorLink="#33A1C9"
+        android:textColorLink="@color/auth_primary"
         android:textSize="16sp" />
 </LinearLayout>
