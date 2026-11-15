@@ -102,13 +102,7 @@ public class TestResultFragment extends Fragment {
                 @Override
                 public void onRewardEarned(@NonNull com.google.android.gms.ads.rewarded.RewardItem reward) {
                     if (!isAdded() || getView() != view) return;
-                    Bundle args = new Bundle();
-                    args.putInt("testId", testId);
-                    args.putString("title", testViewModel.getCurrentTestName());
-                    args.putBoolean("isFree", true);
-                    args.putBoolean("isRealTimeFeedback", true);
-                    NavHostFragment.findNavController(TestResultFragment.this)
-                            .navigate(R.id.action_global_testQuestionsFragment, args);
+                    com.drivingschoolrwandaapp.utils.RetakeNavigation.open(TestResultFragment.this, testId, testViewModel.getCurrentTestName());
                 }
 
                 @Override

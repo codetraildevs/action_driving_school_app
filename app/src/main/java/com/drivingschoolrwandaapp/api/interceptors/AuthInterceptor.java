@@ -2,13 +2,24 @@ package com.drivingschoolrwandaapp.api.interceptors;
 
 import android.content.Context;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import com.drivingschoolrwandaapp.data.local.preferences.TokenManager;
 import java.io.IOException;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
 
+/**
+ * Attaches the current Bearer token to outbound API requests.
+ * <p>
+ * This interceptor must never crash the OkHttp dispatcher thread. If the token store is
+ * unavailable or corrupted, the request is sent without an auth header so the server can
+ * respond with {@code 401} and the app can log the user out cleanly.
+ */
 public class AuthInterceptor implements Interceptor {
+
+    private static final String TAG = "AuthInterceptor";
+    private static final String REFRESH_PATH_SUFFIX = "/refresh";
 
     private final TokenManager tokenManager;
 
@@ -20,27 +31,48 @@ public class AuthInterceptor implements Interceptor {
     @Override
     public Response intercept(@NonNull Chain chain) throws IOException {
         Request originalRequest = chain.request();
-        Request.Builder requestBuilder = originalRequest.newBuilder();
 
-        // Do not add the Authorization header to the refresh token request
-        if (originalRequest.url().encodedPath().endsWith("/refresh")) {
-            return chain.proceed(originalRequest);
+        // Avoid attaching a bearer token to the refresh endpoint itself.
+        if (AuthEndpoints.isPublicAuth(originalRequest.url().encodedPath())) {
+            return chain.proceed(originalRequest.newBuilder().removeHeader("Authorization").build());
         }
 
-        String accessToken;
-        try {
-            accessToken = tokenManager.getAccessToken();
-        } catch (StackOverflowError e) {
-            // EncryptedSharedPreferences keystore corruption — skip auth header
-            // so the request fails with 401 and triggers logout.
-            android.util.Log.e("AuthInterceptor", "StackOverflow reading token", e);
-            return chain.proceed(originalRequest);
-        }
+        @Nullable String accessToken = readAccessTokenSafely();
         if (accessToken != null && !accessToken.isEmpty()) {
-            requestBuilder.addHeader("Authorization", "Bearer " + accessToken);
+            Request request = originalRequest.newBuilder()
+                    .header("Authorization", "Bearer " + accessToken)
+                    .build();
+            return chain.proceed(request);
         }
 
-        Request request = requestBuilder.build();
-        return chain.proceed(request);
+        return chain.proceed(originalRequest);
+    }
+
+    private boolean endsWithRefreshPath(Request request) {
+        if (request == null) {
+            return false;
+        }
+        String path = request.url().encodedPath();
+        if (path == null) {
+            return false;
+        }
+        int len = path.length();
+        int suffixLen = REFRESH_PATH_SUFFIX.length();
+        return len >= suffixLen && path.regionMatches(true, len - suffixLen, REFRESH_PATH_SUFFIX, 0, suffixLen);
+    }
+
+    @Nullable
+    private String readAccessTokenSafely() {
+        try {
+            return tokenManager.getAccessToken();
+        } catch (StackOverflowError e) {
+            // Known EncryptedSharedPreferences keystore read-corruption behavior.
+            // TokenManager should already have switched to its fallback store.
+            android.util.Log.e(TAG, "StackOverflow reading token", e);
+            return null;
+        } catch (RuntimeException e) {
+            android.util.Log.e(TAG, "Error reading token", e);
+            return null;
+        }
     }
 }

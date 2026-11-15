@@ -117,7 +117,9 @@ class UserRepositoryTest {
         ArgumentCaptor.forClass(Callback::class.java) as ArgumentCaptor<Callback<T>>
 
     @Suppress("UNCHECKED_CAST")
-    private fun <T> mockCall(): Call<T> = mock(Call::class.java) as Call<T>
+    private fun <T> mockCall(): Call<T> = (mock(Call::class.java) as Call<T>).also {
+        `when`(it.timeout()).thenReturn(okio.Timeout())
+    }
 
     @Suppress("UNCHECKED_CAST")
     private fun <T> mockResponse(): Response<T> = mock(Response::class.java) as Response<T>

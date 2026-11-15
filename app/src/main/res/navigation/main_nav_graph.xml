@@ -78,7 +78,8 @@
             app:argType="integer" />
         <action
             android:id="@+id/action_testQuestionsFragment_to_testResultFragment"
-            app:popUpToInclusive="false"
+            app:popUpTo="@id/testQuestionsFragment"
+            app:popUpToInclusive="true"
             app:destination="@id/testResultFragment" />
     </fragment>
 

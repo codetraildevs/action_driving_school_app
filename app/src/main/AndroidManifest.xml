@@ -48,7 +48,11 @@
         <activity
             android:name=".ui.activities.SplashActivity"
             android:exported="true"
-            android:theme="@style/Theme.App.Starting">
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.App.Starting"
+            android:screenOrientation="unspecified"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter android:autoVerify="true">
 
                 <action android:name="android.intent.action.VIEW"/>

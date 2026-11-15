@@ -486,4 +486,5 @@
     <string name="watch_exam_ad">Reba iyamamaza ukore iki kizamini inshuro imwe</string>
     <string name="rewarded_retake_intro">Iyamamaza riratangira mu masegonda 5. Rirebe kugeza rirangiye kugira ngo wongere gukora iki kizamini inshuro imwe ku buntu. Ushobora kurireka ukaguma ku bisubizo.</string>
     <string name="skip_ad">Reka iyamamaza</string>
+    <string name="test_submission_not_ready">Ikizamini ntikarangiye kwiga.</string>
 </resources>

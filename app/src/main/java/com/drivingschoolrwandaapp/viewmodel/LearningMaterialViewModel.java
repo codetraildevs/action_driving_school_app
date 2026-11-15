@@ -45,6 +45,8 @@ import retrofit2.Response;
 @HiltViewModel
 public class LearningMaterialViewModel extends AndroidViewModel {
 
+    private static final String TAG = "LearningMaterialVM";
+
     private final LearningMaterialRepository repository;
     private final MutableLiveData<List<LearningMaterial>> materials = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
@@ -127,25 +129,66 @@ public class LearningMaterialViewModel extends AndroidViewModel {
 
     private void loadFromCacheAsync(String message) {
         executeSafely(() -> {
-            if (cacheFile.exists()) {
-                try (FileReader reader = new FileReader(cacheFile)) {
-                    Type listType = new TypeToken<List<LearningMaterial>>() {}.getType();
-                    List<LearningMaterial> cachedMaterials = gson.fromJson(reader, listType);
-                    if (cachedMaterials != null && !cachedMaterials.isEmpty()) {
-                        checkDownloadedStatus(cachedMaterials);
-                        materials.postValue(cachedMaterials);
-                        toastMessage.postValue(message);
-                    } else {
-                        error.postValue(getApplication().getString(R.string.no_offline_content));
-                    }
-                } catch (IOException e) {
-                    Log.e("LearningMaterialVM", "Could not load offline content from cache", e);
-                    error.postValue(getApplication().getString(R.string.could_not_load_offline_content));
-                }
-            } else {
+            if (cacheFile == null) {
                 error.postValue(getApplication().getString(R.string.no_internet_no_offline));
+                return;
+            }
+
+            if (!cacheFile.exists()) {
+                error.postValue(getApplication().getString(R.string.no_internet_no_offline));
+                return;
+            }
+
+            FileReader reader = null;
+            try {
+                reader = new FileReader(cacheFile);
+                Type listType = new TypeToken<List<LearningMaterial>>() {}.getType();
+                Object parsed = gson.fromJson(reader, listType);
+                @SuppressWarnings("unchecked")
+                List<LearningMaterial> cachedMaterials = (parsed instanceof List) ? (List<LearningMaterial>) parsed : null;
+
+                if (cachedMaterials != null && !cachedMaterials.isEmpty()) {
+                    checkDownloadedStatus(cachedMaterials);
+                    materials.postValue(cachedMaterials);
+                    if (message != null) {
+                        toastMessage.postValue(message);
+                    }
+                } else {
+                    error.postValue(getApplication().getString(R.string.no_offline_content));
+                }
+            } catch (StackOverflowError e) {
+                Log.e(TAG, "StackOverflow parsing cached materials; clearing bad cache", e);
+                deleteCacheSilently();
+                error.postValue(getApplication().getString(R.string.could_not_load_offline_content));
+            } catch (IOException e) {
+                Log.e(TAG, "Could not load offline content from cache", e);
+                error.postValue(getApplication().getString(R.string.could_not_load_offline_content));
+            } catch (Exception e) {
+                Log.e(TAG, "Unexpected error reading cached materials", e);
+                error.postValue(getApplication().getString(R.string.could_not_load_offline_content));
+            } finally {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (IOException ignored) {
+                        // Best-effort close.
+                    }
+                }
             }
         });
+    }
+
+    /**
+     * Safely invalidates the materials cache file when its contents cannot be parsed.
+     */
+    private void deleteCacheSilently() {
+        if (cacheFile != null && cacheFile.exists()) {
+            try {
+                cacheFile.delete();
+            } catch (SecurityException e) {
+                Log.w(TAG, "Could not delete corrupted cache file", e);
+            }
+        }
     }
 
     private void cacheMaterialsAsync(List<LearningMaterial> materialsToCache) {
@@ -239,45 +282,68 @@ public class LearningMaterialViewModel extends AndroidViewModel {
 
     private void checkDownloadedStatus(List<LearningMaterial> materialsList) {
         if (materialsList == null) return;
+
         // File I/O (exists, length, delete) and SharedPreferences reads are fast operations
         // safe to run on the main thread, as they were originally. The callers handle
         // background threading when needed (e.g., loadFromCacheAsync) and post the result.
         long currentTime = System.currentTimeMillis();
 
         for (LearningMaterial material : materialsList) {
-            File file = getDestinationFile(material);
-            long downloadTime = sharedPreferences.getLong("download_" + material.getId(), -1);
+            try {
+                checkDownloadedStatusForMaterial(material, currentTime);
+            } catch (StackOverflowError e) {
+                Log.e(TAG, "StackOverflow updating download status for material " + material.getId(), e);
+            } catch (RuntimeException e) {
+                Log.w(TAG, "Error updating download status for material " + material.getId(), e);
+            }
+        }
+    }
 
-            if (downloadTime != -1) {
-                long elapsedTime = currentTime - downloadTime;
-                if (elapsedTime > EXPIRATION_DURATION_MS) {
-                    if (file.exists()) {
-                        file.delete();
-                    }
+    /**
+     * Updates download state for a single material.
+     * Isolated in its own method so a problem with one item cannot corrupt the loop state.
+     */
+    private void checkDownloadedStatusForMaterial(LearningMaterial material, long currentTime) {
+        if (material == null) return;
+
+        File file = getDestinationFile(material);
+        long downloadTime = sharedPreferences.getLong("download_" + material.getId(), -1);
+
+        if (downloadTime != -1) {
+            long elapsedTime = currentTime - downloadTime;
+            if (elapsedTime > EXPIRATION_DURATION_MS) {
+                deleteFileSilently(file);
+                sharedPreferences.edit().remove("download_" + material.getId()).apply();
+                material.setDownloaded(false);
+                material.setHoursUntilExpiration(-1);
+                material.setFileSize(-1);
+            } else {
+                if (file.exists()) {
+                    material.setDownloaded(true);
+                    material.setFileSize(file.length());
+                    long remainingTimeMs = EXPIRATION_DURATION_MS - elapsedTime;
+                    material.setHoursUntilExpiration(TimeUnit.MILLISECONDS.toHours(remainingTimeMs));
+                } else {
                     sharedPreferences.edit().remove("download_" + material.getId()).apply();
                     material.setDownloaded(false);
                     material.setHoursUntilExpiration(-1);
                     material.setFileSize(-1);
-                } else {
-                    if (file.exists()) {
-                        material.setDownloaded(true);
-                        material.setFileSize(file.length());
-                        long remainingTimeMs = EXPIRATION_DURATION_MS - elapsedTime;
-                        material.setHoursUntilExpiration(TimeUnit.MILLISECONDS.toHours(remainingTimeMs));
-                    } else {
-                        sharedPreferences.edit().remove("download_" + material.getId()).apply();
-                        material.setDownloaded(false);
-                        material.setHoursUntilExpiration(-1);
-                        material.setFileSize(-1);
-                    }
                 }
-            } else {
-                if (file.exists()) {
-                    file.delete();
-                }
-                material.setDownloaded(false);
-                material.setHoursUntilExpiration(-1);
-                material.setFileSize(-1);
+            }
+        } else {
+            deleteFileSilently(file);
+            material.setDownloaded(false);
+            material.setHoursUntilExpiration(-1);
+            material.setFileSize(-1);
+        }
+    }
+
+    private void deleteFileSilently(File file) {
+        if (file != null && file.exists()) {
+            try {
+                file.delete();
+            } catch (SecurityException e) {
+                Log.w(TAG, "Could not delete expired material file", e);
             }
         }
     }

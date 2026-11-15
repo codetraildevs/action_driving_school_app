@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <data-extraction-rules>
     <cloud-backup>
+        <exclude domain="sharedpref" path="journey_analytics.xml"/>
         <!-- Exclude encrypted auth tokens from cloud backup.
              The TokenManager stores access/refresh tokens in
              encrypted_tokens prefs (AndroidX Security Crypto).
@@ -12,6 +13,7 @@
         <exclude domain="sharedpref" path="encrypted_tokens_fallback"/>
     </cloud-backup>
     <device-transfer>
+        <exclude domain="sharedpref" path="journey_analytics.xml"/>
         <!-- Allow device transfer of user data (exam history, bookmarks,
              subscription state) but not auth tokens. -->
         <exclude domain="sharedpref" path="encrypted_tokens"/>

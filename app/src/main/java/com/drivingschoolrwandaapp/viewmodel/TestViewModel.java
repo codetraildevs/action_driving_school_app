@@ -124,13 +124,15 @@ public class TestViewModel extends AndroidViewModel {
 
     public void loadQuestionsForTest(int testId) {
         this.currentTestId = testId;
-        this.testId.setValue(testId);
         // Reset answers for new test
         selectedAnswers.setValue(new HashMap<>());
         feedbackHiddenQuestions.clear();
         testResult.setValue(null);
         // Clock is armed (not started) until markTestStarted() fires with the countdown timer
         this.testStartTime = 0L;
+        loadedTestData = null;
+        // Publish only after resetting: cached repository data may arrive synchronously.
+        this.testId.setValue(testId);
     }
 
     /**

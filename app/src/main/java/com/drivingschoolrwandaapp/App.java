@@ -168,12 +168,6 @@ public class App extends AppCompatActivity {
         userViewModel.getUserLiveData().observe(this, resource -> {
             if (resource != null && resource.data != null) {
                 updateNavHeader(resource.data);
-                // Set Crashlytics user identifier for crash tracking
-                if (resource.data.getPhoneNumber() != null) {
-                    FirebaseCrashlytics.getInstance().setUserId(resource.data.getPhoneNumber());
-                    AnalyticsUtils.setUser(App.this, resource.data.getPhoneNumber(), null);
-                }
-                FirebaseCrashlytics.getInstance().setCustomKey("user_name", resource.data.getFirstName() + " " + resource.data.getLastName());
                 FirebaseCrashlytics.getInstance().setCustomKey("language_id", resource.data.getLanguageId());
             }
         });

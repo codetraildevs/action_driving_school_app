@@ -29,6 +29,7 @@ import com.drivingschoolrwandaapp.models.response.RegisterResponse;
 import com.drivingschoolrwandaapp.utils.InsetsUtils;
 import com.drivingschoolrwandaapp.utils.IntegrityHelper;
 import com.drivingschoolrwandaapp.utils.PhoneUtils;
+import com.drivingschoolrwandaapp.utils.JourneyAnalytics;
 import com.drivingschoolrwandaapp.viewmodel.UserViewModel;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -147,6 +148,11 @@ public class RegisterActivity extends AppCompatActivity {
                         // but it can never route here to the admin console.
                         int roleId = resource.data.getUser() != null ? resource.data.getUser().getRole() : 0;
                         tokenManager.saveRole(roleId);
+                        if (resource.data.getUser() != null) {
+                            tokenManager.saveUserId(resource.data.getUser().getId());
+                            userViewModel.clearCachedUser();
+                            userViewModel.saveLoginUser(resource.data.getUser());
+                        }
                         Log.d(TAG, "Login after registration successful (role=" + roleId + ").");
                         Toast.makeText(RegisterActivity.this, getString(R.string.login_successful_redirect), Toast.LENGTH_SHORT).show();
 
@@ -201,6 +207,7 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void validateAndRegister() {
+        if (isRegistering) return;
         // Canonicalize the phone field FIRST so validation, the on-screen value
         // and the submitted account all use the backend's stored format
         // (07XXXXXXXX). The user sees their number flip to canonical form the
@@ -214,6 +221,7 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         if (!validateFullName() | !validatePhone()) {
+            JourneyAnalytics.validationFailure(this, JourneyAnalytics.Flow.REGISTRATION);
             return; // Validation failed
         }
 
@@ -253,9 +261,15 @@ public class RegisterActivity extends AppCompatActivity {
         // normalization; toCanonicalLocal is idempotent so this is a no-op
         // safeguard. Submitting the exact stored format, not a re-rendering.
         String phone = PhoneUtils.toCanonicalLocal(rawPhone);
-        Log.d(TAG, "Canonical phone for registration: " + rawPhone + " → " + phone);
         @SuppressLint("HardwareIds")
         String password = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+        if (password == null || password.trim().isEmpty()) {
+            isRegistering = false;
+            loadingTimeoutHandler.removeCallbacksAndMessages(null);
+            setLoadingState(false);
+            Toast.makeText(this, R.string.device_not_allowed_short, Toast.LENGTH_LONG).show();
+            return;
+        }
 
         String deviceId = password;
         String manufacturer = Build.MANUFACTURER;
@@ -282,10 +296,14 @@ public class RegisterActivity extends AppCompatActivity {
         user.setDevice(device);
 
         registrationCall = apiService.register(user);
+        registrationCall.timeout().timeout(45, java.util.concurrent.TimeUnit.SECONDS);
+        JourneyAnalytics.auth(this, JourneyAnalytics.Flow.REGISTRATION, JourneyAnalytics.Source.REGISTRATION_FORM,
+                JourneyAnalytics.Outcome.ATTEMPT, JourneyAnalytics.Failure.NONE);
 
         registrationCall.enqueue(new Callback<RegisterResponse>() {
             @Override
             public void onResponse(@NonNull Call<RegisterResponse> call, @NonNull Response<RegisterResponse> response) {
+                if (isFinishing() || isDestroyed() || call.isCanceled()) return;
                 isRegistering = false;
                 if (loadingTimeoutHandler != null) {
                     loadingTimeoutHandler.removeCallbacksAndMessages(null);
@@ -294,6 +312,8 @@ public class RegisterActivity extends AppCompatActivity {
 
                 // Always show feedback — Toast is harmless even if finishing
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    JourneyAnalytics.auth(RegisterActivity.this, JourneyAnalytics.Flow.REGISTRATION,
+                            JourneyAnalytics.Source.REGISTRATION_FORM, JourneyAnalytics.Outcome.SUCCESS, JourneyAnalytics.Failure.NONE);
                     // Show the server's success message
                     String successMsg = response.body().getMessage();
                     if (successMsg == null || successMsg.isEmpty()) {
@@ -303,11 +323,13 @@ public class RegisterActivity extends AppCompatActivity {
                     
                     // Save phone for auto-login fallback
                     registeredPhone = phone;
+                    isRegistering = true;
+                    setLoadingState(true);
                     // Auto-login: make a direct API call so user goes straight to home/dashboard
                     @SuppressLint("HardwareIds")
                     String loginPassword = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
                     String loginDeviceId = loginPassword;
-                    userViewModel.login(phone, loginPassword, loginDeviceId);
+                    userViewModel.login(phone, loginPassword, loginDeviceId, JourneyAnalytics.Source.REGISTRATION_AUTO_LOGIN);
                 } else {
                     String errorMessage = getString(R.string.registration_failed);
 
@@ -321,13 +343,15 @@ public class RegisterActivity extends AppCompatActivity {
                                 }
                             }
                         } catch (Exception e) {
-                            Log.e("RegisterActivity", "Could not parse error response body", e);
-                            com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
+                            Log.e("RegisterActivity", "Could not parse error response body");
                         }
                     } else if (response.body() != null && response.body().getMessage() != null) {
                         errorMessage = response.body().getMessage();
                     }
 
+                    JourneyAnalytics.auth(RegisterActivity.this, JourneyAnalytics.Flow.REGISTRATION,
+                            JourneyAnalytics.Source.REGISTRATION_FORM, JourneyAnalytics.Outcome.FAILURE,
+                            JourneyAnalytics.failure(response.code(), errorMessage));
                     if (errorMessage != null && errorMessage.toLowerCase(Locale.ROOT).contains("device already")) {
                         Toast.makeText(RegisterActivity.this, getString(R.string.device_already_registered), Toast.LENGTH_LONG).show();
                     } else if (isMessageAlreadyRegistered(errorMessage)) {
@@ -353,6 +377,10 @@ public class RegisterActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(@NonNull Call<RegisterResponse> call, @NonNull Throwable t) {
+                JourneyAnalytics.auth(RegisterActivity.this, JourneyAnalytics.Flow.REGISTRATION,
+                        JourneyAnalytics.Source.REGISTRATION_FORM, JourneyAnalytics.Outcome.FAILURE,
+                        JourneyAnalytics.failure(t, call.isCanceled()));
+                if (isFinishing() || isDestroyed() || call.isCanceled()) return;
                 isRegistering = false;
                 if (loadingTimeoutHandler != null) {
                     loadingTimeoutHandler.removeCallbacksAndMessages(null);
@@ -370,9 +398,7 @@ public class RegisterActivity extends AppCompatActivity {
      * Checks if the error message from the registration API indicates the user already has an account.
      */
     private boolean isMessageAlreadyRegistered(String message) {
-        if (message == null) return false;
-        String lowerMsg = message.toLowerCase(Locale.ROOT);
-        return lowerMsg.contains("already") || lowerMsg.contains("exists") || lowerMsg.contains("registered");
+        return com.drivingschoolrwandaapp.utils.RegistrationErrors.isExistingAccount(message);
     }
 
     /**

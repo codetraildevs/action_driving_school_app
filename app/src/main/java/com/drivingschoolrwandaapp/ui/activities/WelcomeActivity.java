@@ -88,7 +88,17 @@ public class WelcomeActivity extends AppCompatActivity {
         });
 
         instructionsButton.setOnClickListener(v -> showInstructionsDialog());
-        changeLanguageButton.setOnClickListener(v -> LanguageUtils.showLanguageDialog(WelcomeActivity.this));
+        changeLanguageButton.setOnClickListener(v -> {
+            // Keep the welcome carousel still while the user chooses a language.
+            handler.removeCallbacks(runnable);
+            LanguageUtils.showLanguageDialog(WelcomeActivity.this).setOnDismissListener(dialog -> {
+                if (!isFinishing() && !isDestroyed()
+                        && getLifecycle().getCurrentState().isAtLeast(androidx.lifecycle.Lifecycle.State.RESUMED)) {
+                    handler.removeCallbacks(runnable);
+                    handler.postDelayed(runnable, 3000);
+                }
+            });
+        });
     }
 
     private void setupCarousel() {
@@ -123,6 +133,7 @@ public class WelcomeActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (runnable != null) {
+            handler.removeCallbacks(runnable);
             handler.postDelayed(runnable, 3000);
         }
     }

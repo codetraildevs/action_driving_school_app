@@ -6,11 +6,12 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
-import com.drivingschoolrwandaapp.utils.EdgeToEdgeUtils;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.drivingschoolrwandaapp.App;
 import com.drivingschoolrwandaapp.data.local.preferences.TokenManager;
+import com.drivingschoolrwandaapp.utils.EdgeToEdgeUtils;
 import com.drivingschoolrwandaapp.utils.ConsentHelper;
 import com.drivingschoolrwandaapp.utils.LanguageUtils;
 
@@ -30,23 +31,33 @@ public class SplashActivity extends AppCompatActivity {
     private boolean navigated = false;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        EdgeToEdgeUtils.enable(getWindow());
-
-        // Load the current locale from preferences. This is essential when the user
-        // changes language from the Profile or Welcome page — the language preference
-        // is saved but MainApplication.onCreate() only runs once per process, so we
-        // must reload it here to apply the change before navigating to the next screen.
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        // Apply the saved locale before creating the splash UI, avoiding a
+        // second configuration recreation during startup.
         LanguageUtils.loadAppLanguage(this);
+        super.onCreate(savedInstanceState);
+
+        // Keep the splash window stable on older / OEM-specific devices.
+        // EdgeToEdgeUtils.enable() already logs and swallows UnsupportedOperationException
+        // on firmware that rejects the cutout / decor APIs used there.
+        try {
+            EdgeToEdgeUtils.enable(getWindow());
+        } catch (UnsupportedOperationException e) {
+            Log.w(TAG, "Edge-to-edge setup skipped", e);
+        }
 
         // Request GDPR consent (UMP) before showing any ads.
         // Ads are gated by ConsentHelper.canShowAds() in AdManager — they won't
         // load until consent is obtained (or the user is outside the EEA).
-        ConsentHelper.requestConsent(this, canShowAds -> {
-            Log.d(TAG, "Consent result: canShowAds=" + canShowAds);
+        try {
+            ConsentHelper.requestConsent(this, canShowAds -> {
+                Log.d(TAG, "Consent result: canShowAds=" + canShowAds);
+                navigateToNextScreen();
+            });
+        } catch (Exception e) {
+            Log.w(TAG, "Consent prompt unavailable; navigating immediately", e);
             navigateToNextScreen();
-        });
+        }
 
         // Safety timeout: if the consent form takes too long (or the device is
         // offline), navigate anyway so the user isn't stuck on a blank screen.
@@ -63,25 +74,45 @@ public class SplashActivity extends AppCompatActivity {
         navigated = true;
 
         Intent intent;
+        boolean isLoggedIn;
+        int roleId;
+
         try {
-            if (tokenManager.isLoggedIn()) {
-                // Route admins to the admin console, everyone else to the user app.
-                if (com.drivingschoolrwandaapp.utils.RoleUtils.isAdminRole(tokenManager.getRoleId())) {
-                    intent = new Intent(SplashActivity.this, AdminActivity.class);
-                } else {
-                    intent = new Intent(SplashActivity.this, App.class);
-                }
-            } else {
-                intent = new Intent(SplashActivity.this, WelcomeActivity.class);
-            }
+            isLoggedIn = tokenManager.isLoggedIn();
+            roleId = tokenManager.getRoleId();
+        } catch (UnsupportedOperationException e) {
+            // Preferences / keystore / crypto path is not usable on this device or in this
+            // process state. Treat the user as logged out so they can re-authenticate.
+            Log.e(TAG, "Token/preferences setup not supported on this device", e);
+            isLoggedIn = false;
+            roleId = 0;
         } catch (StackOverflowError e) {
-            // EncryptedSharedPreferences keystore corruption — tokenManager failed to
-            // read. Treat as logged out so the user can re-authenticate.
-            Log.e(TAG, "Token read failed (keystore corrupted)", e);
+            // Known EncryptedSharedPreferences keystore read-corruption behavior.
+            // TokenManager swallows these internally and switches to its fallback store,
+            // but we also guard here so splash never crashes even if that fallback misbehaves.
+            Log.e(TAG, "Token read failed (keystore issue)", e);
+            isLoggedIn = false;
+            roleId = 0;
+        }
+
+        if (isLoggedIn && com.drivingschoolrwandaapp.utils.RoleUtils.isAdminRole(roleId)) {
+            intent = new Intent(SplashActivity.this, AdminActivity.class);
+        } else if (isLoggedIn) {
+            intent = new Intent(SplashActivity.this, App.class);
+        } else {
             intent = new Intent(SplashActivity.this, WelcomeActivity.class);
         }
 
-        startActivity(intent);
+        try {
+            startActivity(intent);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to start destination activity", e);
+            // As a last resort, clear state and try the welcome screen again.
+            intent = new Intent(SplashActivity.this, WelcomeActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        }
+
         finish();
     }
 }

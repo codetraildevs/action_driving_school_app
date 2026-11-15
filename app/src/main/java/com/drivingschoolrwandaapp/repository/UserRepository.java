@@ -19,6 +19,7 @@ import com.drivingschoolrwandaapp.data.local.preferences.TokenManager;
 import com.drivingschoolrwandaapp.models.request.ForgotPasswordRequest;
 import com.drivingschoolrwandaapp.models.request.LoginRequest;
 import com.drivingschoolrwandaapp.utils.PhoneUtils;
+import com.drivingschoolrwandaapp.utils.JourneyAnalytics;
 import com.drivingschoolrwandaapp.models.request.PasswordChangeRequest;
 import com.drivingschoolrwandaapp.models.request.ResetPasswordRequest;
 import com.drivingschoolrwandaapp.models.request.VerifyOtpRequest;
@@ -73,13 +74,12 @@ public class UserRepository {
                     }
                 }
             } catch (Exception e) {
-                Log.e("UserRepository", "Failed to parse error response", e);
-                com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
+                Log.e("UserRepository", "Failed to parse error response");
             }
         }
         // If the error message is about a device, show the full support message with phone numbers
         if (errorMessage != null && errorMessage.toLowerCase(Locale.ROOT).contains("device")) {
-            Log.w("UserRepository", "Device-related error detected: " + errorMessage);
+            Log.w("UserRepository", "Device-related authentication error");
             errorMessage = context.getString(R.string.device_not_allowed);
         }
         return errorMessage;
@@ -101,24 +101,44 @@ public class UserRepository {
     }
 
     public LiveData<Resource<LoginResponse>> login(String email, String password, String deviceId) {
+        return login(email, password, deviceId, JourneyAnalytics.Source.LOGIN_FORM);
+    }
+
+    public LiveData<Resource<LoginResponse>> login(String email, String password, String deviceId,
+                                                  JourneyAnalytics.Source source) {
         // Normalise the phone number to ensure consistent format with registration
         String normalizedPhone = PhoneUtils.normalize(email);
-        Log.d("UserRepository", "login: normalised phone " + email + " → " + normalizedPhone);
         MutableLiveData<Resource<LoginResponse>> result = new MutableLiveData<>();
         result.setValue(Resource.loading(null));
         LoginRequest request = new LoginRequest(normalizedPhone, password, deviceId, LoginRequest.CLIENT_TYPE_ANDROID_APP);
-        apiService.login(request).enqueue(new Callback<LoginResponse>() {
+        Call<LoginResponse> loginCall = apiService.login(request);
+        loginCall.timeout().timeout(45, java.util.concurrent.TimeUnit.SECONDS);
+        JourneyAnalytics.auth(context, JourneyAnalytics.Flow.LOGIN, source,
+                JourneyAnalytics.Outcome.ATTEMPT, JourneyAnalytics.Failure.NONE);
+        loginCall.enqueue(new Callback<LoginResponse>() {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
+                    boolean success = response.body().isSuccess();
+                    JourneyAnalytics.auth(context, JourneyAnalytics.Flow.LOGIN, source,
+                            success ? JourneyAnalytics.Outcome.SUCCESS : JourneyAnalytics.Outcome.FAILURE,
+                            success ? JourneyAnalytics.Failure.NONE : JourneyAnalytics.failure(response.code(), response.body().getMessage()));
                     result.postValue(Resource.success(response.body()));
                 } else {
-                    result.postValue(Resource.error(parseErrorMessage(response), null));
+                    String message = parseErrorMessage(response);
+                    JourneyAnalytics.auth(context, JourneyAnalytics.Flow.LOGIN, source,
+                            JourneyAnalytics.Outcome.FAILURE,
+                            message != null && message.equals(context.getString(R.string.device_not_allowed))
+                                    ? JourneyAnalytics.Failure.DEVICE_RESTRICTED
+                                    : JourneyAnalytics.failure(response.code(), message));
+                    result.postValue(Resource.error(message, null));
                 }
             }
 
             @Override
             public void onFailure(Call<LoginResponse> call, Throwable t) {
+                JourneyAnalytics.auth(context, JourneyAnalytics.Flow.LOGIN, source,
+                        JourneyAnalytics.Outcome.FAILURE, JourneyAnalytics.failure(t, call.isCanceled()));
                 result.postValue(Resource.error(getNetworkErrorMessage(t), null));
             }
         });

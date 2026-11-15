@@ -42,7 +42,19 @@ public class TokenAuthenticator implements Authenticator {
     @Nullable
     @Override
     public Request authenticate(@Nullable Route route, @NonNull Response response) {
+        // Login errors must reach the form, and refresh must never refresh itself.
+        if (AuthEndpoints.isPublicAuth(response.request().url().encodedPath())) return null;
+        if (response.priorResponse() != null) return null;
         synchronized (this) {
+            String currentAccess = tokenManager.getAccessToken();
+            String failedAuthorization = response.request().header("Authorization");
+            // Another request may already have refreshed the token while we waited.
+            if (currentAccess != null && !currentAccess.isEmpty()
+                    && failedAuthorization != null
+                    && !failedAuthorization.equals("Bearer " + currentAccess)) {
+                return response.request().newBuilder()
+                        .header("Authorization", "Bearer " + currentAccess).build();
+            }
             String refreshToken;
             try {
                 refreshToken = tokenManager.getRefreshToken();
@@ -77,7 +89,8 @@ public class TokenAuthenticator implements Authenticator {
                         return null;
                     }
                 } else {
-                    logoutUser();
+                    // A server outage or rate limit does not invalidate the user's session.
+                    if (refreshResponse.code() == 401 || refreshResponse.code() == 403) logoutUser();
                     return null;
                 }
             } catch (IOException e) {

@@ -23,10 +23,14 @@ public class MainApplication extends Application implements Configuration.Provid
     @Override
     public void onCreate() {
         super.onCreate();
+        com.drivingschoolrwandaapp.utils.AnalyticsUtils.clearPersonalIdentity(this);
+        registerActivityLifecycleCallbacks(new com.drivingschoolrwandaapp.utils.JourneyLifecycle());
         LanguageUtils.loadAppLanguage(this);
 
         // Initialize Firebase Crashlytics (fatal crashes are captured automatically)
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true);
+        FirebaseCrashlytics.getInstance().setUserId("");
+        FirebaseCrashlytics.getInstance().setCustomKey("user_name", "");
         Log.d("MainApplication", "Firebase Crashlytics initialized");
 
     }

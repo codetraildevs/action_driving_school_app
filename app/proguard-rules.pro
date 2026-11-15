@@ -1,6 +1,9 @@
 # Add project specific ProGuard rules here.
 # You can control the set of applied configuration files using the
 # proguardFiles setting in build.gradle.
+# Journey screen identifiers are fixed class names, never user-visible titles.
+-keepnames class com.drivingschoolrwandaapp.** extends android.app.Activity
+-keepnames class com.drivingschoolrwandaapp.** extends androidx.fragment.app.Fragment
 #
 # For more details, see
 #   http://developer.android.com/guide/developing/tools/proguard.html

@@ -24,14 +24,14 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.FullScreenContentCallback;
-import com.google.android.gms.ads.InterstitialAd;
-import com.google.android.gms.ads.InterstitialAdLoadCallback;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.OnUserEarnedRewardListener;
-import com.google.android.gms.ads.RewardItem;
-import com.google.android.gms.ads.RewardedAd;
-import com.google.android.gms.ads.RewardedAdLoadCallback;
+import com.google.android.gms.ads.rewarded.RewardItem;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
+import com.google.android.gms.ads.rewarded.RewardedAd;
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd;
 import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAdLoadCallback;
 
@@ -80,15 +80,15 @@ public final class AdManager {
             : "ca-app-pub-2864387622629553/4416179690";
 
     private static final String INTERSTITIAL_AD_UNIT_ID = BuildConfig.DEBUG
-            ? "ca-app-pub-3940256099942544/9214589741"
+            ? "ca-app-pub-3940256099942544/1033173712"
             : "ca-app-pub-2864387622629553/2665325775";
 
     private static final String REWARDED_AD_UNIT_ID = BuildConfig.DEBUG
-            ? "ca-app-pub-3940256099942544/9214589741"
+            ? "ca-app-pub-3940256099942544/5224354917"
             : "ca-app-pub-2864387622629553/5099917426";
 
     private static final String RETAKE_AD_UNIT_ID = BuildConfig.DEBUG
-            ? "ca-app-pub-3940256099942544/9214589741"
+            ? "ca-app-pub-3940256099942544/5354046379"
             : "ca-app-pub-2864387622629553/1024941040";
 
     // ------------------------------------------------------------------
@@ -308,23 +308,26 @@ public final class AdManager {
         if (showingFullScreen) {
             return;
         }
+        JourneyAnalytics.reward(activity, JourneyAnalytics.RewardFormat.VIDEO, JourneyAnalytics.RewardStage.SELECTED, false);
         if (SystemClock.elapsedRealtime() - rewardedLoadedAt >= AD_MAX_AGE_MS) {
             rewardedAd = null;
         }
         if (!ConsentHelper.canShowAds()) {
             rewardedAd = null;
+            JourneyAnalytics.reward(activity, JourneyAnalytics.RewardFormat.VIDEO, JourneyAnalytics.RewardStage.UNAVAILABLE, false);
             callback.onAdFailedToShow();
             return;
         }
         RewardedAd ad = rewardedAd;
         if (ad == null) {
             loadRewardedAd(activity);
+            JourneyAnalytics.reward(activity, JourneyAnalytics.RewardFormat.VIDEO, JourneyAnalytics.RewardStage.UNAVAILABLE, false);
             callback.onAdFailedToShow();
             return;
         }
         rewardedAd = null;
         showingFullScreen = true;
-        RewardEvents events = new RewardEvents(callback);
+        RewardEvents events = new RewardEvents(callback, activity.getApplicationContext(), JourneyAnalytics.RewardFormat.VIDEO);
         ad.setFullScreenContentCallback(events);
         ad.show(activity, events);
     }
@@ -332,15 +335,15 @@ public final class AdManager {
     // ------------------------------------------------------------------
     // Retake rewarded interstitial
     // ------------------------------------------------------------------
-    public static void loadRetakeAd(Activity activity) {
+    public static void loadRetakeAd(@NonNull Context context) {
         if (SystemClock.elapsedRealtime() - retakeLoadedAt >= AD_MAX_AGE_MS) {
             retakeAd = null;
         }
-        if (!canRequestAds(activity) || loadingRetake || retakeAd != null) {
+        if (!canRequestAds(context) || loadingRetake || retakeAd != null) {
             return;
         }
         loadingRetake = true;
-        RewardedInterstitialAd.load(activity.getApplicationContext(),
+        RewardedInterstitialAd.load(context.getApplicationContext(),
                 RETAKE_AD_UNIT_ID,
                 new AdRequest.Builder().build(),
                 new RewardedInterstitialAdLoadCallback() {
@@ -366,12 +369,14 @@ public final class AdManager {
         if (showingFullScreen) {
             return;
         }
+        JourneyAnalytics.reward(activity, JourneyAnalytics.RewardFormat.INTERSTITIAL, JourneyAnalytics.RewardStage.SELECTED, false);
         if (SystemClock.elapsedRealtime() - retakeLoadedAt >= AD_MAX_AGE_MS) {
             retakeAd = null;
         }
         RewardedInterstitialAd ad = retakeAd;
         if (ad == null || !canRequestAds(activity)) {
             loadRetakeAd(activity);
+            JourneyAnalytics.reward(activity, JourneyAnalytics.RewardFormat.INTERSTITIAL, JourneyAnalytics.RewardStage.UNAVAILABLE, false);
             callback.onAdFailedToShow();
             return;
         }
@@ -403,7 +408,7 @@ public final class AdManager {
                 }
                 retakeAd = null;
                 showingFullScreen = true;
-                RewardEvents events = new RewardEvents(callback);
+                RewardEvents events = new RewardEvents(callback, activity.getApplicationContext(), JourneyAnalytics.RewardFormat.INTERSTITIAL);
                 ad.setFullScreenContentCallback(events);
                 ad.show(activity, events);
             }
@@ -517,29 +522,39 @@ public final class AdManager {
             implements OnUserEarnedRewardListener {
 
         private final RewardedAdCallback callback;
-        private RewardItem earned;
+        private final Context context;
+        private final JourneyAnalytics.RewardFormat format;
+        @SuppressWarnings("unused")
+        private RewardItem earnedReward;
         private boolean dismissed;
         private boolean delivered;
 
-        RewardEvents(RewardedAdCallback callback) {
+        RewardEvents(RewardedAdCallback callback, Context context, JourneyAnalytics.RewardFormat format) {
             this.callback = callback;
+            this.context = context;
+            this.format = format;
         }
 
         @Override
         public void onAdShowedFullScreenContent() {
             lastFullScreenAt = SystemClock.elapsedRealtime();
+            JourneyAnalytics.reward(context, format, JourneyAnalytics.RewardStage.SHOWN, false);
         }
 
         @Override
         public void onUserEarnedReward(@NonNull RewardItem reward) {
+            if (earnedReward == null && !delivered) {
+                JourneyAnalytics.reward(context, format, JourneyAnalytics.RewardStage.EARNED, true);
+            }
             Log.d(TAG, "Reward earned by SDK callback");
-            earned = reward;
+            earnedReward = reward;
             deliverIfReady();
         }
 
         @Override
         public void onAdDismissedFullScreenContent() {
-            Log.d(TAG, "Rewarded ad dismissed; reward earned=" + (earned != null));
+            if (!dismissed) JourneyAnalytics.reward(context, format, JourneyAnalytics.RewardStage.DISMISSED, earnedReward != null);
+            Log.d(TAG, "Rewarded ad dismissed; reward earned=" + (earnedReward != null));
             showingFullScreen = false;
             dismissed = true;
             deliverIfReady();
@@ -547,16 +562,17 @@ public final class AdManager {
 
         @Override
         public void onAdFailedToShowFullScreenContent(@NonNull AdError error) {
+            JourneyAnalytics.reward(context, format, JourneyAnalytics.RewardStage.SHOW_FAILED, false);
             showingFullScreen = false;
             callback.onAdFailedToShow();
         }
 
         private void deliverIfReady() {
-            if (dismissed && earned != null && !delivered) {
+            if (dismissed && earnedReward != null && !delivered) {
                 delivered = true;
                 Log.d(TAG, "Delivering earned reward to content unlock callback");
-                RewardItem reward = earned;
-                earned = null;
+                RewardItem reward = earnedReward;
+                earnedReward = null;
                 callback.onRewardEarned(reward);
             }
         }

@@ -54,11 +54,18 @@ public class UserViewModel extends AndroidViewModel {
     }
 
     public void login(String email, String password, String deviceId) {
+        login(email, password, deviceId, com.drivingschoolrwandaapp.utils.JourneyAnalytics.Source.LOGIN_FORM);
+    }
+
+    public void login(String email, String password, String deviceId,
+                      com.drivingschoolrwandaapp.utils.JourneyAnalytics.Source source) {
         // Clean up any previous login observer
         if (currentLoginLiveData != null && currentLoginObserver != null) {
             currentLoginLiveData.removeObserver(currentLoginObserver);
         }
-        currentLoginLiveData = userRepository.login(email, password, deviceId);
+        currentLoginLiveData = source == com.drivingschoolrwandaapp.utils.JourneyAnalytics.Source.LOGIN_FORM
+                ? userRepository.login(email, password, deviceId)
+                : userRepository.login(email, password, deviceId, source);
         currentLoginObserver = resource -> {
             loginResult.setValue(resource);
             // When the API completes (SUCCESS or ERROR), clean up

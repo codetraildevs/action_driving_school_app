@@ -23,9 +23,10 @@ public class AdRewardTest {
         callback = mock(AdManager.RewardedAdCallback.class);
         reward = mock(RewardItem.class);
         Class<?> type = Class.forName(AdManager.class.getName() + "$RewardEvents");
-        Constructor<?> constructor = type.getDeclaredConstructor(AdManager.RewardedAdCallback.class);
+        Constructor<?> constructor = type.getDeclaredConstructor(AdManager.RewardedAdCallback.class,
+                android.content.Context.class, JourneyAnalytics.RewardFormat.class);
         constructor.setAccessible(true);
-        Object handler = constructor.newInstance(callback);
+        Object handler = constructor.newInstance(callback, null, JourneyAnalytics.RewardFormat.INTERSTITIAL);
         events = (FullScreenContentCallback) handler;
         rewards = (OnUserEarnedRewardListener) handler;
     }

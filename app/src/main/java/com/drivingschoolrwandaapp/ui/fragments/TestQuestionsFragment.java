@@ -55,6 +55,8 @@ public class TestQuestionsFragment extends Fragment {
     private LinearLayout errorLayout;
     private Button retryButton;
     private TextView errorTextView;
+    private static final String TAG = "TestQuestionsFragment";
+
     private CountDownTimer timer;
     private int testId;
     private boolean isReviewMode;
@@ -158,8 +160,8 @@ public class TestQuestionsFragment extends Fragment {
         
         setupRetryButton();
 
-        observeViewModel();
         testViewModel.loadQuestionsForTest(testId);
+        observeViewModel();
     }
     
     private void setupRetryButton() {
@@ -252,6 +254,8 @@ public class TestQuestionsFragment extends Fragment {
                 if (test != null && test.getQuestions() != null) {
                     pagerAdapter.setQuestions(test.getQuestions());
                     totalQuestions = test.getQuestions().size();
+                    android.util.Log.d("TestQuestionsFragment", "Exam questions ready: testId="
+                            + testId + ", count=" + totalQuestions);
 
                     updateQuestionCounter(viewPager.getCurrentItem());
                     updateProgress(viewPager.getCurrentItem());
@@ -339,10 +343,20 @@ public class TestQuestionsFragment extends Fragment {
         // First call wins; the timer finishing at the same moment the user taps
         // Submit must not calculate/persist/navigate twice.
         if (isSubmitting) return;
-        isSubmitting = true;
-        if (timer != null) {
-            timer.cancel();
+
+        // Avoid submitting with incomplete test data.
+        // If the test was never loaded or the question set is empty, do not call
+        // calculateResult() — that path is the most likely source of an
+        // IllegalArgumentException-style failure seen in Play Console traces.
+        if (!canSubmit()) {
+            if (isAdded()) {
+                android.widget.Toast.makeText(getContext(), R.string.test_submission_not_ready, android.widget.Toast.LENGTH_SHORT).show();
+            }
+            return;
         }
+
+        isSubmitting = true;
+        if (timer != null) timer.cancel();
         testViewModel.calculateResult();
 
         // Show interstitial ad after exam submission, then navigate
@@ -350,9 +364,28 @@ public class TestQuestionsFragment extends Fragment {
             try {
                 NavHostFragment.findNavController(this).navigate(R.id.action_testQuestionsFragment_to_testResultFragment);
             } catch (Exception e) {
-                android.util.Log.e("TestQuestionsFragment", "Navigation failed", e);
+                android.util.Log.e(TAG, "Navigation failed", e);
             }
         }
+    }
+
+    /**
+     * Returns true only when the fragment has a valid test and question set ready for scoring.
+     */
+    private boolean canSubmit() {
+        if (getView() == null) {
+            return false;
+        }
+        if (testViewModel == null) {
+            return false;
+        }
+        if (totalQuestions <= 0) {
+            return false;
+        }
+        if (pagerAdapter == null || pagerAdapter.getQuestions() == null || pagerAdapter.getQuestions().isEmpty()) {
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -360,10 +393,13 @@ public class TestQuestionsFragment extends Fragment {
         super.onDestroyView();
         if (timer != null) {
             timer.cancel();
+            timer = null;
         }
+        // Avoid touching views after they have been detached.
         if (getActivity() instanceof AppCompatActivity) {
-            ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-            if (actionBar != null) {
+            android.app.Activity activity = getActivity();
+            androidx.appcompat.app.ActionBar actionBar = ((AppCompatActivity) activity).getSupportActionBar();
+            if (actionBar != null && activity != null && !activity.isFinishing()) {
                 actionBar.setTitle(R.string.title_tests);
             }
         }

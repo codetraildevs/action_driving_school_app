@@ -80,6 +80,7 @@ docs/*.sql
 
 # docs/app-flows.md is referenced from README.md, so keep it despite the *.md rule
 !docs/app-flows.md
+!docs/journey-analytics.md
 
 # On-device offline test report (deliberate deliverable)
 !docs/offline-test-report-2026-08-16.md

@@ -121,6 +121,8 @@ public class LoginActivity extends AppCompatActivity {
             // Validate the raw input before normalization so we can show field-level errors
             String errorKey = PhoneUtils.getValidationError(rawPhone);
             if (errorKey != null) {
+                com.drivingschoolrwandaapp.utils.JourneyAnalytics.validationFailure(this,
+                        com.drivingschoolrwandaapp.utils.JourneyAnalytics.Flow.LOGIN);
                 int resId;
                 switch (errorKey) {
                     case "phone_required":
@@ -135,21 +137,13 @@ public class LoginActivity extends AppCompatActivity {
             }
 
             String phone = PhoneUtils.normalize(rawPhone);
-            Log.d(TAG, "Normalised phone for login: " + rawPhone + " → " + phone);
 
             String password = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-            String deviceId = password;
-            // A one-way fingerprint lets support match a registered device without logging its credential.
-            try {
-                byte[] digest = java.security.MessageDigest.getInstance("SHA-256")
-                        .digest(deviceId.getBytes(java.nio.charset.StandardCharsets.UTF_8));
-                StringBuilder fingerprint = new StringBuilder();
-                for (byte value : digest) fingerprint.append(String.format(Locale.ROOT, "%02x", value & 0xff));
-                Log.d(TAG, "Login device fingerprint: " + fingerprint);
-            } catch (java.security.NoSuchAlgorithmException error) {
-                Log.w(TAG, "Device fingerprint unavailable");
+            if (password == null || password.trim().isEmpty()) {
+                Toast.makeText(this, R.string.device_not_allowed_short, Toast.LENGTH_LONG).show();
+                return;
             }
-
+            String deviceId = password;
             // Show loading state immediately on click — don't wait for the observer
             isLoading = true;
             loadingIndicator.setVisibility(View.VISIBLE);
@@ -163,6 +157,7 @@ public class LoginActivity extends AppCompatActivity {
             if (resource == null) return;
             switch (resource.status) {
                 case LOADING:
+                    isLoading = true;
                     // Only show loading if we're still expecting a response
                     if (loadingIndicator != null) {
                         loadingIndicator.setVisibility(View.VISIBLE);
@@ -238,7 +233,7 @@ public class LoginActivity extends AppCompatActivity {
                         if (message == null || message.isEmpty()) {
                             message = getString(R.string.login_failed);
                         }
-                        Log.w(TAG, "Login failed (server returned success:false): " + message);
+                        Log.w(TAG, "Login rejected by server");
                         // Show the actual backend message, but map device-related errors
                         String lowerMsg = message.toLowerCase(Locale.ROOT);
                         if (lowerMsg.contains("device")) {
@@ -261,7 +256,7 @@ public class LoginActivity extends AppCompatActivity {
                     if (errorMsg == null || errorMsg.isEmpty()) {
                         errorMsg = getString(R.string.login_failed);
                     } else {
-                        Log.w(TAG, "Login error from server: " + errorMsg);
+                        Log.w(TAG, "Login request failed");
                         String lowerMsg = errorMsg.toLowerCase(Locale.ROOT);
                         // Only map device errors to a user-friendly message; show everything else as-is
                         if (lowerMsg.contains("device")) {
@@ -269,7 +264,7 @@ public class LoginActivity extends AppCompatActivity {
                         }
                     }
                     Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show();
-                    Log.d(TAG, "Login error displayed: " + errorMsg);
+                    Log.d(TAG, "Login error displayed");
                     break;
             }
         });

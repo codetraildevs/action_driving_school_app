@@ -278,13 +278,7 @@ public class ResultsFragment extends Fragment {
                     btnRetake.setOnClickListener(v -> AdManager.showRetakeAd(requireActivity(), new AdManager.RewardedAdCallback() {
                         @Override public void onRewardEarned(@NonNull com.google.android.gms.ads.rewarded.RewardItem reward) {
                             if (!isAdded() || getView() == null) return;
-                            Bundle args = new Bundle();
-                            args.putInt("testId", testId);
-                            args.putString("title", title);
-                            args.putBoolean("isFree", true);
-                            args.putBoolean("isRealTimeFeedback", true);
-                            NavHostFragment.findNavController(ResultsFragment.this)
-                                    .navigate(R.id.action_global_testQuestionsFragment, args);
+                            com.drivingschoolrwandaapp.utils.RetakeNavigation.open(ResultsFragment.this, testId, title);
                         }
 
                         @Override public void onAdFailedToShow() {

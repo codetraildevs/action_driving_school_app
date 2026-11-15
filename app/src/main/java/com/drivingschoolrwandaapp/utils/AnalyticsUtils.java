@@ -10,14 +10,11 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 /**
  * Null-safe wrapper around {@link FirebaseAnalytics} (GA4).
  *
- * <p>This is the single entry point for all app analytics. Every method is
+ * <p>Feature events complement the privacy-safe JourneyAnalytics funnel. Every method is
  * defensive: if the SDK is unavailable, the context is null, or anything
  * throws, the call is silently dropped so analytics can never crash the app.
  *
- * <p>Why it exists: Google AdMob requires a linked Google Analytics for
- * Firebase (GA4) property, and these events power AdMob's revenue and
- * audience features once ads are enabled. They are also useful on their own
- * for engagement/retention analysis in Firebase.
+ * <p>These events support engagement and retention analysis in Firebase.
  */
 public final class AnalyticsUtils {
 
@@ -48,26 +45,15 @@ public final class AnalyticsUtils {
     private static final String PARAM_PRICE = "price";
     private static final String PARAM_REQUEST_TYPE = "request_type";
 
-    /**
-     * Identify the user in analytics (and set their role) once the profile is
-     * known. The phone number is the app's own account identifier, consistent
-     * with what is already sent to Crashlytics.
-     */
-    public static void setUser(@Nullable Context context, @Nullable String userId, @Nullable String role) {
+    /** Clear identifiers saved by older versions; use Firebase's app-instance identity. */
+    public static void clearPersonalIdentity(@Nullable Context context) {
         FirebaseAnalytics fa = get(context);
         if (fa == null) return;
         try {
-            if (userId != null && !userId.isEmpty()) {
-                fa.setUserId(userId);
-            }
-            if (role != null && !role.isEmpty()) {
-                fa.setUserProperty("user_role", role);
-            }
-        } catch (Throwable ignored) {
-            // never crash the app because of analytics
-        }
+            fa.setUserId(null);
+            fa.setUserProperty("user_role", null);
+        } catch (RuntimeException ignored) { }
     }
-
     /** Manual screen view for fragments (activities are tracked automatically). */
     public static void logScreenView(@Nullable Context context, @Nullable String screenName) {
         Bundle b = new Bundle();
@@ -77,6 +63,7 @@ public final class AnalyticsUtils {
     }
 
     public static void logExamStarted(@Nullable Context context, int testId, int testNumber, @Nullable String testName) {
+        JourneyAnalytics.firstExam(context);
         Bundle b = new Bundle();
         b.putInt(PARAM_TEST_ID, testId);
         b.putInt(PARAM_TEST_NUMBER, testNumber);
