@@ -60,13 +60,12 @@
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
 
+                <!-- Canonical verified host. Do not add the www alias here: its
+                     assetlinks URL redirects, and Android requires a direct 200. -->
+                <data android:scheme="http" />
+                <data android:scheme="https" />
                 <data
-                    android:scheme="https"
                     android:host="amategekoyumuhanda.rw"
-                    android:pathPrefix="/" />
-                <data
-                    android:scheme="https"
-                    android:host="www.amategekoyumuhanda.rw"
                     android:pathPrefix="/" />
 
             </intent-filter>
