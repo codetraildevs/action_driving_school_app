@@ -25,28 +25,32 @@ echo "════════════════════════�
 cd "$APP_DIR"
 
 # ── 0. Ensure uploads directory exists (protected from git) ──
-echo "[0/6] Ensuring uploads directory..."
+echo "[0/7] Ensuring uploads directory..."
 mkdir -p "$APP_DIR/public/uploads/files"
 mkdir -p "$APP_DIR/public/uploads/learning-materials/thumbnails"
 
 # ── 1. Pull latest code ──
-echo "[1/6] Pulling latest code..."
+echo "[1/7] Pulling latest code..."
 git pull origin backend-deploy
 
 # ── 2. Install dependencies ──
-echo "[2/6] Installing dependencies..."
+echo "[2/7] Installing dependencies..."
 npm install --omit=dev --legacy-peer-deps
 
 # ── 3. Prisma generate ──
-echo "[3/6] Running Prisma generate..."
+echo "[3/7] Running Prisma generate..."
 npx prisma generate
 
-# ── 4. Build Next.js (with memory optimization to avoid SIGBUS) ──
-echo "[4/6] Building Next.js..."
+# ── 4. Publish the current privacy policy in all supported languages ──
+echo "[4/7] Publishing privacy policy..."
+npm run privacy-policy:update
+
+# ── 5. Build Next.js (with memory optimization to avoid SIGBUS) ──
+echo "[5/7] Building Next.js..."
 NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS="--max-old-space-size=1536" npm run build
 
-# ── 5. Restart PM2 (zero-downtime reload) ──
-echo "[5/6] Restarting PM2..."
+# ── 6. Restart PM2 (zero-downtime reload) ──
+echo "[6/7] Restarting PM2..."
 pm2 reload ecosystem.config.js --env production
 
 # ── Done ──

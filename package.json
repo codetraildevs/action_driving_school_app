@@ -8,7 +8,8 @@
     "build": "next build --experimental-build-mode compile",
     "start": "next start",
     "lint": "eslint",
-    "export": "next export"
+    "export": "next export",
+    "privacy-policy:update": "node prisma/update-privacy-policy.js"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",

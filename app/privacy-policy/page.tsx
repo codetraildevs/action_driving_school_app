@@ -24,49 +24,35 @@ interface PrivacyPolicy {
 
 export default function PrivacyPolicyPage() {
   const [policy, setPolicy] = useState<PrivacyPolicy | null>(null);
-  const [availableVersions, setAvailableVersions] = useState<PrivacyPolicy[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const searchParams = useSearchParams();
   const queryLanguage = searchParams.get("language") || "en";
   const [selectedLanguage, setSelectedLanguage] = useState<string>(queryLanguage);
 
   useEffect(() => {
+    const fetchPolicy = async () => {
+      try {
+        setIsLoading(true);
+        const url = `/api/privacy-policy?language=${selectedLanguage}`;
+
+        const data = await fetch(url).then(res => res.json());
+
+        if (data.error) {
+          toast.error(data.error);
+          setPolicy(null);
+        } else {
+          setPolicy(data.data);
+        }
+      } catch (error) {
+        toast.error("Failed to load privacy policy");
+        console.error("Error fetching privacy policy:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     fetchPolicy();
-    fetchAvailableVersions();
   }, [selectedLanguage]);
-
-  const fetchPolicy = async () => {
-    try {
-      setIsLoading(true);
-      const url = `/api/privacy-policy?language=${selectedLanguage}`;
-      
-      const data = await fetch(url).then(res => res.json());
-      
-      if (data.error) {
-        toast.error(data.error);
-        setPolicy(null);
-      } else {
-        setPolicy(data.data);
-      }
-    } catch (error) {
-      toast.error("Failed to load privacy policy");
-      console.error("Error fetching privacy policy:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchAvailableVersions = async () => {
-    try {
-      // This would be a new endpoint to get all available versions
-      const data = await fetch(`/api/privacy-policy/versions?language=${selectedLanguage}`).then(res => res.json());
-      if (data.data) {
-        setAvailableVersions(data.data);
-      }
-    } catch (error) {
-      console.error("Error fetching available versions:", error);
-    }
-  };
 
   const downloadAsPDF = () => {
     if (!policy) return;
@@ -190,8 +176,8 @@ export default function PrivacyPolicyPage() {
             <div className="mt-8 text-center text-sm text-muted-foreground">
               <p>
                 If you have any questions about our privacy policy, please contact us at{" "}
-                <a href="mailto:privacy@yourapp.com" className="text-primary hover:underline">
-                  privacy@yourapp.com
+                <a href="mailto:info@amategekoyumuhanda.rw" className="text-primary hover:underline">
+                  info@amategekoyumuhanda.rw
                 </a>
               </p>
               <p className="mt-2">
