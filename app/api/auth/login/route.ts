@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
+import { verifyLoginPassword } from "@/lib/auth/verify-password";
 import { z } from "zod";
 import { prisma} from "@/lib/prismaDB";
 import { generateAccessToken, generateRefreshToken } from "@/lib/auth/jwt";
@@ -117,16 +117,8 @@ export async function POST(request: NextRequest) {
             continue;
           }
         }
-        // Verify password. Admins logging in from the native Android app use
-        // phone-only (shared login from any device), so their password check
-        // is skipped when the request explicitly originates from the app. The
-        // web console does not send clientType, so console logins ALWAYS
-        // require the real password. Regular users are unchanged (their
-        // password is their device id).
-        const isPasswordValid =
-          isAdminRoleName(candidate.role.roleName) && clientType === "android_app"
-            ? true
-            : await bcrypt.compare(password, candidate.password);
+        // clientType is caller-controlled and cannot authenticate an administrator.
+        const isPasswordValid = await verifyLoginPassword(password, candidate.password);
         if (!isPasswordValid) {
           sawBadPassword = true;
           continue;
