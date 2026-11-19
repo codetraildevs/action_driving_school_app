@@ -5,6 +5,7 @@ import { prisma} from "@/lib/prismaDB";
 import { generateAccessToken, generateRefreshToken } from "@/lib/auth/jwt";
 import { isAdminRoleName } from "@/lib/auth/roles";
 import { resolveTimezoneName } from "@/lib/auth/timezone";
+import { orderPhoneCandidates } from "@/lib/auth/phone-candidates";
 import { sendFCMNotification } from "@/lib/notification";
 import { NOTIFICATION_CHANNELS } from "@/lib/types";
 
@@ -63,9 +64,9 @@ export async function POST(request: NextRequest) {
       // bug. Identity is only known after the credential checks, so every
       // candidate is evaluated and the first one that passes device +
       // password checks wins.
-      const fetchCandidateRows = (phone: string) =>
+      const fetchCandidateRows = () =>
         tx.user.findMany({
-          where: { phoneNumber: phone },
+          where: { phoneNumber: { in: variants } },
           include: {
             role: true,
             language: true,
@@ -75,16 +76,8 @@ export async function POST(request: NextRequest) {
           orderBy: { id: "asc" },
         });
 
-      const candidates: Awaited<ReturnType<typeof fetchCandidateRows>> = [];
-      const seenIds = new Set<number>();
-      for (const variant of variants) {
-        for (const row of await fetchCandidateRows(variant)) {
-          if (!seenIds.has(row.id)) {
-            seenIds.add(row.id);
-            candidates.push(row);
-          }
-        }
-      }
+      const matchingRows = await fetchCandidateRows();
+      const candidates = orderPhoneCandidates(matchingRows, variants);
 
       if (candidates.length === 0) {
         // Console-facing message: the admin console only sends phone+password,
