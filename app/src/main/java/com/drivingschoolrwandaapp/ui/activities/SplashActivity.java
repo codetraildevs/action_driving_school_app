@@ -42,7 +42,7 @@ public class SplashActivity extends AppCompatActivity {
         // on firmware that rejects the cutout / decor APIs used there.
         try {
             EdgeToEdgeUtils.enable(getWindow());
-        } catch (UnsupportedOperationException e) {
+        } catch (Exception e) {
             Log.w(TAG, "Edge-to-edge setup skipped", e);
         }
 

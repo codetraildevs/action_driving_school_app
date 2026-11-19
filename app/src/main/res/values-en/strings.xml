@@ -51,7 +51,7 @@
 
     <string name="welcome_to_driving_school">Welcome to Action Driving School</string>
     <string name="create_an_account">Create an account</string>
-    <string name="login_to_your_account">Already have an account? Login to your account</string>
+    <string name="login_to_your_account">Log in to your account</string>
     <string name="by_continuing_you_agree_to_our_terms_of_service_and_privacy_policy">
         By continuing, you agree to our Terms of Service and Privacy Policy.
     </string>

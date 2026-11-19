@@ -593,7 +593,9 @@ public class TestsFragment extends Fragment {
 
         AlertDialog dialog = builder.create();
         paymentInstructionsDialog = dialog;
-        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
 
         // Use the selected plan's price; when reopening while a request is
         // pending there is no plan selected in this session, so fall back to

@@ -52,7 +52,7 @@
 
     <string name="welcome_to_driving_school">Bienvenue à Action Driving School</string>
     <string name="create_an_account">Nouvel utilisateur? Créer un compte</string>
-    <string name="login_to_your_account">Déjà inscrit ? Connectez-vous à votre compte</string>
+    <string name="login_to_your_account">Se connecter à votre compte</string>
     <string name="by_continuing_you_agree_to_our_terms_of_service_and_privacy_policy">
         En continuant, vous acceptez nos Conditions d\'utilisation et notre Politique de confidentialité.
     </string>

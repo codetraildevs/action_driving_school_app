@@ -41,13 +41,13 @@
                 android:text="@string/instructions"
                 android:padding="5dp"
                 android:lines="1"
-                android:textColor="?attr/colorPrimary"
-                app:strokeColor="?attr/colorOutline"
+                android:textColor="@color/auth_action"
+                app:strokeColor="@color/auth_action"
                 android:ellipsize="end"
                 android:minHeight="0dp"
                 android:minWidth="0dp"
                 app:iconSize="14dp"
-                app:iconTint="?attr/colorPrimary" />
+                app:iconTint="@color/auth_action" />
         </LinearLayout>
 
         <!-- App Title -->
@@ -135,8 +135,8 @@
             android:layout_marginTop="8dp"
             android:text="@string/login_to_your_account"
             app:cornerRadius="12dp"
-            app:strokeColor="?attr/colorOutline"
-            android:textColor="?attr/colorPrimary"
+            app:strokeColor="@color/auth_action"
+            android:textColor="@color/auth_action"
             android:lines="1"
             android:ellipsize="end"
             app:layout_constraintEnd_toEndOf="parent"

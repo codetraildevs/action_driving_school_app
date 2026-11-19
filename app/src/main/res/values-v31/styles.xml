@@ -4,9 +4,9 @@
          attributes — no compat library required. windowBackground stays brand-colored
          so the window shown between splash dismissal and first frame is seamless. -->
     <style name="Theme.App.Starting" parent="Theme.App.Auth">
-        <item name="android:windowSplashScreenBackground">@color/auth_background</item>
+        <item name="android:windowSplashScreenBackground">@color/colorPrimary</item>
         <item name="android:windowSplashScreenAnimatedIcon">@drawable/logo1</item>
         <item name="android:windowSplashScreenAnimationDuration">300</item>
-        <item name="android:windowBackground">@color/auth_background</item>
+        <item name="android:windowBackground">@color/colorPrimary</item>
     </style>
 </resources>

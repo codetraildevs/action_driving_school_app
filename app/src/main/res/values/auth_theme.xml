@@ -1,29 +1,15 @@
 <resources>
-    <color name="auth_background">#DDF2F6</color>
-    <color name="auth_surface">#F0FAFC</color>
-    <color name="auth_text">#172B35</color>
-    <color name="auth_muted">#4C626D</color>
-    <color name="auth_primary">#00677D</color>
-    <color name="auth_on_primary">#FFFFFF</color>
-    <color name="auth_outline">#617985</color>
-    <color name="auth_error">#B3261E</color>
+    <!-- High-contrast action color for controls placed on colorPrimary. -->
+    <color name="auth_action">#00677D</color>
 
+    <!-- Keep the auth window continuous with the light-blue system status bar.
+         A dedicated theme preserves in-place locale changes and prevents a
+         white/black flash between the Android splash and the first app frame. -->
     <style name="Theme.App.Auth" parent="Base.Theme.drivingSchoolRwandaApp">
-        <item name="android:windowBackground">@color/auth_background</item>
-        <item name="android:colorBackground">@color/auth_background</item>
-        <item name="colorSurface">@color/auth_surface</item>
-        <item name="colorOnSurface">@color/auth_text</item>
-        <item name="colorOnBackground">@color/auth_text</item>
-        <item name="colorOnSurfaceVariant">@color/auth_muted</item>
-        <item name="colorOutline">@color/auth_outline</item>
-        <item name="colorPrimary">@color/auth_primary</item>
-        <item name="colorOnPrimary">@color/auth_on_primary</item>
-        <item name="colorSecondary">@color/auth_primary</item>
-        <item name="colorError">@color/auth_error</item>
-        <item name="android:textColorPrimary">@color/auth_text</item>
-        <item name="android:textColorSecondary">@color/auth_muted</item>
-        <item name="android:textColorHint">@color/auth_muted</item>
-        <item name="android:textColorLink">@color/auth_primary</item>
+        <item name="android:windowBackground">@color/colorPrimary</item>
+        <item name="android:colorBackground">@color/colorPrimary</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
         <item name="materialButtonStyle">@style/Widget.App.Auth.Button</item>
         <item name="textInputStyle">@style/Widget.Material3.TextInputLayout.OutlinedBox</item>
     </style>
@@ -31,9 +17,15 @@
     <style name="Widget.App.Auth.Button" parent="Widget.Material3.Button">
         <item name="android:minHeight">48dp</item>
         <item name="cornerRadius">12dp</item>
+        <item name="backgroundTint">@color/auth_action</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="iconTint">@color/white</item>
     </style>
     <style name="Widget.App.Auth.OutlinedButton" parent="Widget.Material3.Button.OutlinedButton">
         <item name="android:minHeight">48dp</item>
         <item name="cornerRadius">12dp</item>
+        <item name="android:textColor">@color/auth_action</item>
+        <item name="strokeColor">@color/auth_action</item>
+        <item name="iconTint">@color/auth_action</item>
     </style>
 </resources>

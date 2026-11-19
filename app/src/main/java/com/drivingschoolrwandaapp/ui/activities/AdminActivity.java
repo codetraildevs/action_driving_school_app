@@ -2,6 +2,7 @@ package com.drivingschoolrwandaapp.ui.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 
 import com.drivingschoolrwandaapp.utils.EdgeToEdgeUtils;
 import androidx.appcompat.app.AppCompatActivity;
@@ -59,8 +60,8 @@ public class AdminActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        EdgeToEdgeUtils.enable(getWindow());
         super.onCreate(savedInstanceState);
+        EdgeToEdgeUtils.enable(getWindow());
 
         // Defense in depth: the console is only for admin roles. If the persisted
         // role is missing or no longer admin, send the user to the regular app.
@@ -77,7 +78,8 @@ public class AdminActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        InsetsUtils.applySystemBarsPadding(findViewById(R.id.root_layout), true, true);
+        View root = findViewById(R.id.root_layout);
+        if (root != null) InsetsUtils.applySystemBarsPadding(root, true, true);
 
         BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
         bottomNav.setOnItemSelectedListener(item -> {

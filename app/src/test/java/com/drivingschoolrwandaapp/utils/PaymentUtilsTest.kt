@@ -107,6 +107,7 @@ class PaymentUtilsTest {
         uriMock = org.mockito.Mockito.mockStatic(Uri::class.java)
         `when`(Uri.parse(any(String::class.java))).thenReturn(mock(Uri::class.java))
         `when`(Uri.encode(any(String::class.java))).thenReturn("encoded")
+        `when`(Uri.decode(any(String::class.java))).thenAnswer { it.arguments[0] }
         intentConstruction = org.mockito.Mockito.mockConstruction(Intent::class.java) { mockIntent, _ ->
             `when`(mockIntent.action).thenReturn(Intent.ACTION_DIAL)
             `when`(mockIntent.dataString).thenReturn("*182*8*1*644209*500#")

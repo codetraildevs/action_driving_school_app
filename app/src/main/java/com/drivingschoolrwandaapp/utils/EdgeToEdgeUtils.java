@@ -48,7 +48,7 @@ public final class EdgeToEdgeUtils {
             // The non-deprecated way to draw behind system bars. Background
             // colors behind the bars come from the Material 3 theme.
             window.setDecorFitsSystemWindows(false);
-        } catch (UnsupportedOperationException e) {
+        } catch (Exception e) {
             Log.w(TAG, "Edge-to-edge not supported on this device", e);
         }
     }

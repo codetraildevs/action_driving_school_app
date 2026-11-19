@@ -24,8 +24,12 @@ public final class LocaleUi {
         fragment.requireView().saveHierarchyState(state);
         // Separate transactions are intentional: a combined detach/attach is optimized away.
         // The same Fragment, ViewModels and navigation back stack are retained.
-        manager.beginTransaction().detach(fragment).commitNow();
-        manager.beginTransaction().attach(fragment).commitNow();
+        try {
+            manager.beginTransaction().detach(fragment).commitNow();
+            manager.beginTransaction().attach(fragment).commitNow();
+        } catch (Exception ignored) {
+            // Avoid crashing on fragment state restoration edge cases.
+        }
         if (fragment.getView() != null) fragment.requireView().restoreHierarchyState(state);
     }
 

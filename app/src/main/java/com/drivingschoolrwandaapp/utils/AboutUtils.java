@@ -27,15 +27,19 @@ public final class AboutUtils {
         View dialogView = inflater.inflate(R.layout.dialog_about_us, null);
 
         TextView versionTv = dialogView.findViewById(R.id.versionTv);
-        versionTv.setText(activity.getString(R.string.version_format,
-                BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE));
+        if (versionTv != null) {
+            versionTv.setText(activity.getString(R.string.version_format,
+                    BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE));
+        }
         builder.setView(dialogView);
 
         AlertDialog dialog = builder.create();
-        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
 
         Button btnClose = dialogView.findViewById(R.id.btn_close_about);
-        btnClose.setOnClickListener(v -> dialog.dismiss());
+        if (btnClose != null) btnClose.setOnClickListener(v -> dialog.dismiss());
 
         dialog.show();
     }

@@ -28,9 +28,13 @@ public final class InsetsUtils {
      * @param includeBottom apply the navigation-bar inset as bottom padding
      */
     public static void applySystemBarsPadding(View view, boolean includeTop, boolean includeBottom) {
+        if (view == null) return;
         view.setOnApplyWindowInsetsListener((v, insets) -> {
+            if (v == null || insets == null) return insets;
             WindowInsetsCompat compatInsets = WindowInsetsCompat.toWindowInsetsCompat(insets);
+            if (compatInsets == null) return insets;
             Insets systemBars = compatInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            if (systemBars == null) return insets;
             v.setPadding(
                 v.getPaddingLeft(),
                 includeTop ? systemBars.top : v.getPaddingTop(),

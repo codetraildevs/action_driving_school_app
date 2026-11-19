@@ -60,7 +60,8 @@ public class LoginActivity extends AppCompatActivity {
         com.drivingschoolrwandaapp.services.MyFirebaseMessagingService.syncRegistration(this);
 
         // Keep content clear of the transparent system bars in edge-to-edge mode
-        InsetsUtils.applySystemBarsPadding(findViewById(android.R.id.content), true, true);
+        View content = findViewById(android.R.id.content);
+        if (content != null) InsetsUtils.applySystemBarsPadding(content, true, true);
 
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
         tokenManager = new TokenManager(this);

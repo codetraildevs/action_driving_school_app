@@ -65,7 +65,8 @@ public class WelcomeActivity extends AppCompatActivity {
 
         // Apply system bar insets to the root view to prevent content from being clipped
         // behind the transparent status bar in edge-to-edge mode.
-        InsetsUtils.applySystemBarsPadding(findViewById(android.R.id.content), true, true);
+        View content = findViewById(android.R.id.content);
+        if (content != null) InsetsUtils.applySystemBarsPadding(content, true, true);
 
         setupButtons();
         setupCarousel();
@@ -86,9 +87,9 @@ public class WelcomeActivity extends AppCompatActivity {
         int scrollY = scroll == null ? 0 : scroll.getScrollY();
         handler.removeCallbacks(runnable);
         bindContent();
-        viewPager2.setCurrentItem(page, false);
+        if (viewPager2 != null) viewPager2.setCurrentItem(page, false);
         View updatedScroll = findViewById(R.id.welcome_scroll);
-        updatedScroll.post(() -> updatedScroll.scrollTo(0, scrollY));
+        if (updatedScroll != null) updatedScroll.post(() -> updatedScroll.scrollTo(0, scrollY));
         if (getLifecycle().getCurrentState().isAtLeast(androidx.lifecycle.Lifecycle.State.RESUMED)) {
             handler.postDelayed(runnable, 3000);
         }
@@ -216,7 +217,7 @@ public class WelcomeActivity extends AppCompatActivity {
             @Override
             public void updateDrawState(@NonNull TextPaint ds) {
                 super.updateDrawState(ds);
-                ds.setColor(ContextCompat.getColor(WelcomeActivity.this, R.color.auth_primary));
+                ds.setColor(ContextCompat.getColor(WelcomeActivity.this, R.color.auth_action));
                 ds.setUnderlineText(false);
             }
         };
@@ -230,7 +231,7 @@ public class WelcomeActivity extends AppCompatActivity {
             @Override
             public void updateDrawState(@NonNull TextPaint ds) {
                 super.updateDrawState(ds);
-                ds.setColor(ContextCompat.getColor(WelcomeActivity.this, R.color.auth_primary));
+                ds.setColor(ContextCompat.getColor(WelcomeActivity.this, R.color.auth_action));
                 ds.setUnderlineText(false);
             }
         };

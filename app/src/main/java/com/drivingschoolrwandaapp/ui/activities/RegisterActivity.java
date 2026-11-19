@@ -72,7 +72,8 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
 
         // Keep content clear of the transparent system bars in edge-to-edge mode
-        InsetsUtils.applySystemBarsPadding(findViewById(android.R.id.content), true, true);
+        View content = findViewById(android.R.id.content);
+        if (content != null) InsetsUtils.applySystemBarsPadding(content, true, true);
 
         loadingTimeoutHandler = new Handler(Looper.getMainLooper());
 

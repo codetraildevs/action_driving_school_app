@@ -187,7 +187,12 @@ public class DashboardFragment extends Fragment {
     private void safeNavigate(int actionId) {
         if (!isAdded() || getContext() == null) return;
         try {
-            NavHostFragment.findNavController(this).navigate(actionId);
+            androidx.navigation.NavController navController = NavHostFragment.findNavController(this);
+            if (navController.getCurrentDestination() == null
+                    || navController.getCurrentDestination().getId() != R.id.dashboardFragment) {
+                return;
+            }
+            navController.navigate(actionId);
         } catch (Exception e) {
             android.util.Log.e("DashboardFragment", "Navigation failed", e);
         }

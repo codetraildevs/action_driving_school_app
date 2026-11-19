@@ -74,19 +74,25 @@ public class App extends AppCompatActivity {
         super.onConfigurationChanged(configuration);
         getWindow().getDecorView().post(() -> {
             if (isFinishing() || isDestroyed() || navController == null) return;
-            com.drivingschoolrwandaapp.utils.LocaleUi.refreshLabels(navController.getGraph(),
-                    navController.getNavInflater().inflate(R.navigation.main_nav_graph));
+            try {
+                com.drivingschoolrwandaapp.utils.LocaleUi.refreshLabels(navController.getGraph(),
+                        navController.getNavInflater().inflate(R.navigation.main_nav_graph));
+            } catch (Exception ignored) { }
             MaterialToolbar toolbar = findViewById(R.id.toolbar);
             BottomNavigationView bottom = findViewById(R.id.bottom_nav_view);
             NavigationView drawer = findViewById(R.id.navigation_view);
-            com.drivingschoolrwandaapp.utils.LocaleUi.refreshMenu(this, bottom, bottom.getMenu(), R.menu.menu_bottom_navigation);
-            com.drivingschoolrwandaapp.utils.LocaleUi.refreshMenu(this, drawer, drawer.getMenu(), R.menu.drawer_menu);
+            if (bottom != null && bottom.getMenu() != null) {
+                com.drivingschoolrwandaapp.utils.LocaleUi.refreshMenu(this, bottom, bottom.getMenu(), R.menu.menu_bottom_navigation);
+            }
+            if (drawer != null && drawer.getMenu() != null) {
+                com.drivingschoolrwandaapp.utils.LocaleUi.refreshMenu(this, drawer, drawer.getMenu(), R.menu.drawer_menu);
+            }
             NavHostFragment host = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
             if (host != null) {
                 com.drivingschoolrwandaapp.utils.LocaleUi.refreshFragmentView(
                         host.getChildFragmentManager().getPrimaryNavigationFragment());
             }
-            if (navController.getCurrentDestination() != null) {
+            if (toolbar != null && navController.getCurrentDestination() != null) {
                 toolbar.setTitle(navController.getCurrentDestination().getLabel());
             }
             invalidateOptionsMenu();
@@ -379,7 +385,9 @@ public class App extends AppCompatActivity {
         builder.setView(dialogView);
 
         AlertDialog dialog = builder.create();
-        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
 
         Button btnCancel = dialogView.findViewById(R.id.btn_cancel_delete);
         Button btnConfirm = dialogView.findViewById(R.id.btn_confirm_delete);

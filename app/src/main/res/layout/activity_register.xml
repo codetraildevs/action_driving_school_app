@@ -26,7 +26,7 @@
             android:layout_height="100dp"
             android:layout_marginTop="40dp"
             android:src="@drawable/user_plus_svgrepo_com"
-            app:tint="?attr/colorPrimary"
+            app:tint="@color/auth_action"
             android:contentDescription="@null"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
