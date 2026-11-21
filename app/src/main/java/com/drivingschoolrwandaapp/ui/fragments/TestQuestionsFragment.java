@@ -224,9 +224,12 @@ public class TestQuestionsFragment extends Fragment {
 
         nextButton.setOnClickListener(v -> {
             int currentPosition = viewPager.getCurrentItem();
-            if (pagerAdapter.getQuestions() != null && !pagerAdapter.getQuestions().isEmpty()) {
+            if (pagerAdapter.getQuestions() != null && currentPosition >= 0
+                    && currentPosition < pagerAdapter.getQuestions().size()) {
                 TestQuestion currentQuestion = pagerAdapter.getQuestions().get(currentPosition);
-                testViewModel.markQuestionFeedbackHidden(currentQuestion.getId());
+                if (currentQuestion != null) {
+                    testViewModel.markQuestionFeedbackHidden(currentQuestion.getId());
+                }
             }
 
             if (currentPosition < pagerAdapter.getItemCount() - 1) {

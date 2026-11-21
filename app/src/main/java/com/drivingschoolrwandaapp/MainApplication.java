@@ -23,6 +23,7 @@ public class MainApplication extends Application implements Configuration.Provid
     @Override
     public void onCreate() {
         super.onCreate();
+        // Clear old identity before lifecycle events can be recorded.
         com.drivingschoolrwandaapp.utils.AnalyticsUtils.clearPersonalIdentity(this);
         registerActivityLifecycleCallbacks(new com.drivingschoolrwandaapp.utils.JourneyLifecycle());
         LanguageUtils.loadAppLanguage(this);

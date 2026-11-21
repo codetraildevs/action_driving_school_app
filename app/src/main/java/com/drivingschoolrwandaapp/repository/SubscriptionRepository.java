@@ -51,7 +51,7 @@ public class SubscriptionRepository {
             @Override
             protected void saveCallResult(SubscriptionPlansResponse item) {
                 if (item != null && item.getData() != null) {
-                    executeSafely(() -> subscriptionPlanDao.insertAll(SubscriptionMapper.INSTANCE.toEntity(item.getData())));
+                    subscriptionPlanDao.insertAll(SubscriptionMapper.INSTANCE.toEntity(item.getData()));
                 }
             }
 
@@ -74,14 +74,12 @@ public class SubscriptionRepository {
             @Override
             protected void saveCallResult(UserSubscriptionResponse item) {
                 if (item != null && item.getData() != null) {
-                    executeSafely(() -> {
                         // Save the subscription plan first
                         if (item.getData().getSubscriptionPlan() != null) {
                             subscriptionPlanDao.insert(SubscriptionMapper.INSTANCE.toEntity(item.getData().getSubscriptionPlan()));
                         }
                         // Then save the user subscription
                         userSubscriptionDao.insert(SubscriptionMapper.INSTANCE.toEntity(item.getData()));
-                    });
                 }
             }
 

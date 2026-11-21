@@ -2466,7 +2466,7 @@
       "quizId": "13",
       "examType": "Paid",
       "title": "Exam",
-      "examImgUrl": "assets/$1.jpg",
+      "examImgUrl": "assets/json_questions_images/exam13.jpg",
       "questions": [
         {
           "question": "1. Before overtaking a vehicle, it should be ensured that:",

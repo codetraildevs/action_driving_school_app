@@ -37,8 +37,8 @@ public class WebViewActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        EdgeToEdgeUtils.enable(getWindow());
         super.onCreate(savedInstanceState);
+        EdgeToEdgeUtils.enable(getWindow());
         setContentView(R.layout.activity_web_view);
 
         Toolbar toolbar = findViewById(R.id.toolbar);

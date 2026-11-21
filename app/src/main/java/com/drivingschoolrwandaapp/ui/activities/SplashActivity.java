@@ -2,8 +2,6 @@ package com.drivingschoolrwandaapp.ui.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -12,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.drivingschoolrwandaapp.App;
 import com.drivingschoolrwandaapp.data.local.preferences.TokenManager;
 import com.drivingschoolrwandaapp.utils.EdgeToEdgeUtils;
-import com.drivingschoolrwandaapp.utils.ConsentHelper;
 import com.drivingschoolrwandaapp.utils.LanguageUtils;
 
 import javax.inject.Inject;
@@ -23,7 +20,6 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class SplashActivity extends AppCompatActivity {
 
     private static final String TAG = "SplashActivity";
-    private static final long CONSENT_TIMEOUT_MS = 5_000; // 5 seconds max for consent
 
     @Inject
     TokenManager tokenManager;
@@ -46,23 +42,10 @@ public class SplashActivity extends AppCompatActivity {
             Log.w(TAG, "Edge-to-edge setup skipped", e);
         }
 
-        // Request GDPR consent (UMP) before showing any ads.
-        // Ads are gated by ConsentHelper.canShowAds() in AdManager — they won't
-        // load until consent is obtained (or the user is outside the EEA).
-        try {
-            ConsentHelper.requestConsent(this, canShowAds -> {
-                Log.d(TAG, "Consent result: canShowAds=" + canShowAds);
-                navigateToNextScreen();
-            });
-        } catch (Exception e) {
-            Log.w(TAG, "Consent prompt unavailable; navigating immediately", e);
-            navigateToNextScreen();
-        }
-
-        // Safety timeout: if the consent form takes too long (or the device is
-        // offline), navigate anyway so the user isn't stuck on a blank screen.
-        new Handler(Looper.getMainLooper()).postDelayed(this::navigateToNextScreen,
-                CONSENT_TIMEOUT_MS);
+        // App requests UMP consent on its lasting host activity before loading ads.
+        // Splash has no ads: avoid duplicate requests and a timeout that could
+        // finish the activity while its consent form is visible.
+        navigateToNextScreen();
     }
 
     /**

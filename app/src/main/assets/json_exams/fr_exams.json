@@ -2276,7 +2276,7 @@
             "quizId": "13",
             "examType": "Paid",
             "title": "Examen",
-            "examImgUrl": "assets/$1.jpg",
+            "examImgUrl": "assets/json_questions_images/exam13.jpg",
             "questions": [
                 {
                     "question": "1. Avant de dépasser un véhicule, il faut s'assurer que :",

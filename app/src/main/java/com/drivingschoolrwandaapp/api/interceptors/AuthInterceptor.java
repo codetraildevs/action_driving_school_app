@@ -31,23 +31,17 @@ public class AuthInterceptor implements Interceptor {
     @Override
     public Response intercept(@NonNull Chain chain) throws IOException {
         Request originalRequest = chain.request();
-
-        // Avoid attaching a bearer token to the refresh endpoint itself.
-        if (AuthEndpoints.isPublicAuth(originalRequest.url().encodedPath())) {
-            return chain.proceed(originalRequest.newBuilder().removeHeader("Authorization").build());
+        // Keep network execution outside token-store recovery: retrying here could
+        // submit a write twice after the server processed the first request.
+        Request.Builder request = originalRequest.newBuilder().removeHeader("Authorization");
+        if (!AuthEndpoints.isPublicAuth(originalRequest.url().encodedPath())) {
+            String accessToken = readAccessTokenSafely();
+            if (accessToken != null && !accessToken.isEmpty()) {
+                request.header("Authorization", "Bearer " + accessToken);
+            }
         }
-
-        @Nullable String accessToken = readAccessTokenSafely();
-        if (accessToken != null && !accessToken.isEmpty()) {
-            Request request = originalRequest.newBuilder()
-                    .header("Authorization", "Bearer " + accessToken)
-                    .build();
-            return chain.proceed(request);
-        }
-
-        return chain.proceed(originalRequest);
+        return chain.proceed(request.build());
     }
-
     private boolean endsWithRefreshPath(Request request) {
         if (request == null) {
             return false;

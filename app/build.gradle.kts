@@ -1,4 +1,7 @@
 import java.util.Properties
+import java.util.zip.ZipFile
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 import org.gradle.api.GradleException
 
 @file:Suppress("DEPRECATION")
@@ -29,8 +32,8 @@ android {
         applicationId = "com.drivingschoolrwandaapp"
         minSdk = 27
         targetSdk = 37
-        versionCode = 116
-        versionName = "1.5.15"
+        versionCode = 118
+        versionName = "1.5.17"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -231,6 +234,7 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.mockito.core)
     testImplementation(libs.core.testing)
+    testImplementation("org.xerial:sqlite-jdbc:3.41.2.2")
     androidTestImplementation(libs.junit.androidx)
     androidTestImplementation(libs.espresso.core)
 }
@@ -238,6 +242,9 @@ dependencies {
 
 kapt {
     correctErrorTypes = true
+    arguments {
+        arg("room.schemaLocation", file("schemas").absolutePath)
+    }
 }
 
 // ── Code coverage (JaCoCo) ──
@@ -541,7 +548,38 @@ val copyVersionedAab = tasks.register("copyVersionedAab") {
         val src = layout.buildDirectory.file("outputs/bundle/release/app-release.aab").get().asFile
         if (src.exists()) {
             val dst = File(src.parentFile, "app-$releaseVersionName.aab")
-            src.copyTo(dst, overwrite = true)
+            // JAR stream verification requires the manifest and signature entries
+            // before payload entries. Preserve all signed bytes and the upload key.
+            ZipFile(src).use { input ->
+                val entries = input.entries().asSequence().toList().sortedWith(
+                    compareBy<ZipEntry> {
+                        when {
+                            it.name == "META-INF/MANIFEST.MF" -> 0
+                            it.name.startsWith("META-INF/") &&
+                                it.name.substringAfterLast('.').uppercase() in setOf("SF", "RSA", "DSA", "EC") -> 1
+                            else -> 2
+                        }
+                    }.thenBy { it.name }
+                )
+                ZipOutputStream(dst.outputStream().buffered()).use { output ->
+                    for (entry in entries) {
+                        val normalized = ZipEntry(entry.name)
+                        normalized.time = entry.time
+                        output.putNextEntry(normalized)
+                        if (!entry.isDirectory) input.getInputStream(entry).use { it.copyTo(output) }
+                        output.closeEntry()
+                    }
+                }
+                // Validate that repackaging did not alter any entry's bytes.
+                ZipFile(dst).use { normalized ->
+                    check(normalized.size() == input.size()) { "Bundle entry count changed" }
+                    for (entry in entries) {
+                        val before = input.getInputStream(entry).use { it.readBytes() }
+                        val after = normalized.getInputStream(normalized.getEntry(entry.name)).use { it.readBytes() }
+                        check(before.contentEquals(after)) { "Bundle content changed: ${entry.name}" }
+                    }
+                }
+            }
             logger.lifecycle("Copied release bundle to ${dst.name}")
         }
     }

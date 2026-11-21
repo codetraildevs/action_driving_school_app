@@ -29,15 +29,12 @@ public class TestQuestionPagerAdapter extends FragmentStateAdapter {
     }
 
     public void setQuestions(List<TestQuestion> questions) {
-        int oldSize = getItemCount();
         this.questions = questions;
-        if (oldSize > 0) {
-            notifyItemRangeRemoved(0, oldSize);
-        }
-        int newSize = getItemCount();
-        if (newSize > 0) {
-            notifyItemRangeInserted(0, newSize);
-        }
+        // Use notifyDataSetChanged() instead of range notifications: FragmentStateAdapter
+        // tracks fragment instances by item id/position and range remove/insert pairs
+        // can leave stale fragment keys ("Fragment no longer exists for key f#...")
+        // when the whole question set is replaced.
+        notifyDataSetChanged();
     }
 
     @NonNull

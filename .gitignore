@@ -81,6 +81,9 @@ docs/*.sql
 # docs/app-flows.md is referenced from README.md, so keep it despite the *.md rule
 !docs/app-flows.md
 !docs/journey-analytics.md
+!docs/optimization-progress.md
+!docs/play-store-listing-update.md
+.backend-optimization/
 !docs/android-app-links.md
 
 # On-device offline test report (deliberate deliverable)

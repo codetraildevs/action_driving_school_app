@@ -43,8 +43,8 @@ public class MyApplicationsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        EdgeToEdgeUtils.enable(getWindow());
         super.onCreate(savedInstanceState);
+        EdgeToEdgeUtils.enable(getWindow());
         setContentView(R.layout.fragment_my_applications);
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar);

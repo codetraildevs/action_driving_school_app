@@ -110,6 +110,11 @@ public final class AdManager {
     private static long retakeLoadedAt;
 
     private static long lastFullScreenAt;
+    private static long rewardedRetryAt;
+    private static long retakeRetryAt;
+    private static long interstitialRetryAt;
+    private static final long LOAD_FAILURE_COOLDOWN_MS = 30_000;
+    private static final java.util.Map<String, Long> bannerRetryAt = new java.util.HashMap<>();
 
     private static final long AD_MAX_AGE_MS = 55 * 60 * 1000L;
     private static final long TRANSITION_INTERVAL_MS = 120_000;
@@ -145,13 +150,22 @@ public final class AdManager {
     public static void showBanner(@NonNull Activity activity,
                                   @NonNull FrameLayout container,
                                   @Nullable String adUnitId) {
+        if (activity.isFinishing() || activity.isDestroyed()) return;
+        // Keep the current banner/request rather than creating duplicates.
+        if (container.getChildCount() > 0) return;
         if (!canRequestAds(activity)) {
             deferBannerUntilConsent(activity, container, adUnitId);
             return;
         }
 
+        String unitId = adUnitId != null ? adUnitId : BANNER_AD_UNIT_ID;
+        Long retryAt = bannerRetryAt.get(unitId);
+        if (retryAt != null && SystemClock.elapsedRealtime() < retryAt) {
+            container.setVisibility(View.GONE);
+            return;
+        }
         AdView adView = new AdView(activity);
-        adView.setAdUnitId(adUnitId != null ? adUnitId : BANNER_AD_UNIT_ID);
+        adView.setAdUnitId(unitId);
 
         hideBanner(container);
         container.addView(adView,
@@ -161,18 +175,25 @@ public final class AdManager {
         adView.setAdListener(new AdListener() {
             @Override
             public void onAdLoaded() {
+                if (adView.getParent() != container) return;
                 if (!ConsentHelper.canShowAds()) {
                     hideBanner(container);
                     return;
                 }
+                bannerRetryAt.remove(unitId);
                 container.setVisibility(View.VISIBLE);
                 Log.d(TAG, "Banner ad loaded");
             }
 
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError error) {
-                container.setVisibility(View.GONE);
-                Log.w(TAG, "Banner ad failed: " + error.getMessage());
+                if (adView.getParent() != container) return;
+                bannerRetryAt.put(unitId, SystemClock.elapsedRealtime() + LOAD_FAILURE_COOLDOWN_MS);
+                // Collapse unused space and release the failed view. A later screen
+                // visit may request again after cooldown; do not loop on no-fill.
+                hideBanner(container);
+                Log.w(TAG, "Banner unavailable: code=" + error.getCode()
+                        + ", domain=" + error.getDomain() + "; retry on a later visit");
             }
         });
 
@@ -277,6 +298,7 @@ public final class AdManager {
     }
 
     public static void loadRewardedAd(@NonNull Context context) {
+        if (SystemClock.elapsedRealtime() < rewardedRetryAt) return;
         if (SystemClock.elapsedRealtime() - rewardedLoadedAt >= AD_MAX_AGE_MS) {
             rewardedAd = null;
         }
@@ -299,6 +321,7 @@ public final class AdManager {
                     public void onAdFailedToLoad(@NonNull LoadAdError error) {
                         loadingReward = false;
                         Log.w(TAG, "Rewarded ad load failed: " + error.getCode());
+                        rewardedRetryAt = SystemClock.elapsedRealtime() + LOAD_FAILURE_COOLDOWN_MS;
                     }
                 });
     }
@@ -336,6 +359,7 @@ public final class AdManager {
     // Retake rewarded interstitial
     // ------------------------------------------------------------------
     public static void loadRetakeAd(@NonNull Context context) {
+        if (SystemClock.elapsedRealtime() < retakeRetryAt) return;
         if (SystemClock.elapsedRealtime() - retakeLoadedAt >= AD_MAX_AGE_MS) {
             retakeAd = null;
         }
@@ -361,6 +385,7 @@ public final class AdManager {
                     public void onAdFailedToLoad(@NonNull LoadAdError error) {
                         loadingRetake = false;
                         Log.w(TAG, "Retake ad load failed: " + error.getCode());
+                        retakeRetryAt = SystemClock.elapsedRealtime() + LOAD_FAILURE_COOLDOWN_MS;
                     }
                 });
     }
@@ -435,6 +460,7 @@ public final class AdManager {
     // Transition interstitial
     // ------------------------------------------------------------------
     public static void loadInterstitial(Context context) {
+        if (SystemClock.elapsedRealtime() < interstitialRetryAt) return;
         if (SystemClock.elapsedRealtime() - interstitialLoadedAt >= AD_MAX_AGE_MS) {
             interstitialAd = null;
         }
@@ -458,6 +484,7 @@ public final class AdManager {
                     public void onAdFailedToLoad(@NonNull LoadAdError error) {
                         loadingInterstitial = false;
                         Log.w(TAG, "Transition ad load failed: " + error.getCode());
+                        interstitialRetryAt = SystemClock.elapsedRealtime() + LOAD_FAILURE_COOLDOWN_MS;
                     }
                 });
     }

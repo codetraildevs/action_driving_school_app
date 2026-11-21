@@ -42,6 +42,7 @@ public class TokenAuthenticator implements Authenticator {
     @Nullable
     @Override
     public Request authenticate(@Nullable Route route, @NonNull Response response) {
+        try {
         // Login errors must reach the form, and refresh must never refresh itself.
         if (AuthEndpoints.isPublicAuth(response.request().url().encodedPath())) return null;
         if (response.priorResponse() != null) return null;
@@ -98,6 +99,10 @@ public class TokenAuthenticator implements Authenticator {
                 return null; // Let the original request fail.
             }
         }
+    } catch (Throwable t) {
+        Log.e("TokenAuthenticator", "Authentication failed", t);
+        return null;
+    }
     }
 
     private void logoutUser() {

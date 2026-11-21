@@ -58,14 +58,19 @@ public class PdfViewerActivity extends AppCompatActivity {
     private SharedPreferences prefs;
     private LinearLayoutManager layoutManager;
     private boolean suppressPageIndicator;
+    private final java.util.concurrent.ExecutorService pdfIo = java.util.concurrent.Executors.newSingleThreadExecutor();
+    private volatile boolean destroyed;
     private final Runnable resetPageIndicatorSuppression = () -> suppressPageIndicator = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        EdgeToEdgeUtils.enable(getWindow());
         super.onCreate(savedInstanceState);
+        EdgeToEdgeUtils.enable(getWindow());
         setContentView(R.layout.activity_pdf_viewer);
-        com.drivingschoolrwandaapp.utils.AdManager.showBanner(this, findViewById(R.id.ad_container), null);
+        android.widget.FrameLayout pdfAdContainer = findViewById(R.id.ad_container);
+        if (pdfAdContainer != null) {
+            com.drivingschoolrwandaapp.utils.AdManager.showBanner(this, pdfAdContainer, null);
+        }
 
         InsetsUtils.applySystemBarsPadding(findViewById(R.id.main), true, true);
 
@@ -109,22 +114,43 @@ public class PdfViewerActivity extends AppCompatActivity {
         }
     }
 
-    private void setupPdfRenderer(Uri uri) throws Exception {
+    private void setupPdfRenderer(Uri uri) {
         progressBar.setVisibility(View.VISIBLE);
-        
-        tempFile = new File(getCacheDir(), "temp_pdf.pdf");
+        pdfIo.execute(() -> {
+            try {
+                loadPdf(uri);
+                runOnUiThread(() -> {
+                    if (!destroyed && !isFinishing()) attachPdf();
+                });
+            } catch (Exception e) {
+                Log.e("PdfViewer", "Unable to open PDF", e);
+                runOnUiThread(() -> {
+                    if (destroyed || isFinishing()) return;
+                    Toast.makeText(this, R.string.something_went_wrong, Toast.LENGTH_LONG).show();
+                    finish();
+                });
+            }
+        });
+    }
+
+    private void loadPdf(Uri uri) throws Exception {
+        tempFile = File.createTempFile("study-", ".pdf", getCacheDir());
         try (InputStream inputStream = getContentResolver().openInputStream(uri);
              FileOutputStream outputStream = new FileOutputStream(tempFile)) {
-            byte[] buffer = new byte[1024];
+            if (inputStream == null) throw new java.io.IOException("Unable to open document");
+            byte[] buffer = new byte[16384];
             int length;
             while ((length = inputStream.read(buffer)) > 0) {
+                if (destroyed) throw new java.io.InterruptedIOException("Viewer closed");
                 outputStream.write(buffer, 0, length);
             }
         }
 
         parcelFileDescriptor = ParcelFileDescriptor.open(tempFile, ParcelFileDescriptor.MODE_READ_ONLY);
         pdfRenderer = new PdfRenderer(parcelFileDescriptor);
+    }
 
+    private void attachPdf() {
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
@@ -146,7 +172,7 @@ public class PdfViewerActivity extends AppCompatActivity {
         });
 
         int savedPage = prefs.getInt(String.valueOf(pdfId), 0);
-        if (savedPage < pdfRenderer.getPageCount()) {
+        if (savedPage >= 0 && savedPage < pdfRenderer.getPageCount()) {
             recyclerView.scrollToPosition(savedPage);
             updatePageIndicator(savedPage);
         }
@@ -183,6 +209,8 @@ public class PdfViewerActivity extends AppCompatActivity {
         if (item.getItemId() == android.R.id.home) {
             finish();
             return true;
+        } else if (recyclerView.getAdapter() == null) {
+            return super.onOptionsItemSelected(item);
         } else if (item.getItemId() == R.id.action_bookmark) {
             showAddBookmarkDialog();
             return true;
@@ -305,10 +333,22 @@ public class PdfViewerActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        destroyed = true;
+        if (recyclerView != null) {
+            recyclerView.removeCallbacks(resetPageIndicatorSuppression);
+            recyclerView.setAdapter(null);
+        }
+        pdfIo.execute(this::closePdf);
+        pdfIo.shutdown();
         super.onDestroy();
+    }
+
+    private void closePdf() {
         try {
             if (pdfRenderer != null) {
-                pdfRenderer.close();
+                synchronized (pdfRenderer) {
+                    pdfRenderer.close();
+                }
             }
             if (parcelFileDescriptor != null) {
                 parcelFileDescriptor.close();

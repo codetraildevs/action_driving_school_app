@@ -122,14 +122,17 @@ public class App extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
         setContentView(R.layout.activity_app);
 
-        // Request GDPR/UMP consent before showing any ads
-        ConsentHelper.requestConsent(this, canShowAds -> {
+        // Request GDPR/UMP consent after the first frame so consent/network work
+        // does not block the initial cold-start render on low-RAM devices.
+        // Ads are gated on the eligibility LiveData and only load once consent
+        // resolves, so deferring this does not change ad behavior.
+        new Handler(Looper.getMainLooper()).post(() -> ConsentHelper.requestConsent(this, canShowAds -> {
             if (canShowAds) {
-                Log.d("App", "Consent obtained — ads enabled");
+                Log.d("App", "Consent obtained � ads enabled");
             } else {
-                Log.d("App", "Consent denied or pending — ads disabled");
+                Log.d("App", "Consent denied or pending � ads disabled");
             }
-        });
+        }));
 
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
 

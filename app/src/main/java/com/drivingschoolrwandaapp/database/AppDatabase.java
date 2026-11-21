@@ -28,7 +28,7 @@ import com.drivingschoolrwandaapp.database.entities.UserSubscriptionEntity;
 import com.drivingschoolrwandaapp.utils.DataConverter;
 import com.drivingschoolrwandaapp.utils.DateConverter;
 
-@Database(entities = {User.class, SubscriptionPlan.class, UserSubscriptionEntity.class, TestEntity.class, TestQuestionEntity.class, QuestionOptionEntity.class, BookmarkEntity.class, TestResultEntity.class}, version = 14, exportSchema = false)
+@Database(entities = {User.class, SubscriptionPlan.class, UserSubscriptionEntity.class, TestEntity.class, TestQuestionEntity.class, QuestionOptionEntity.class, BookmarkEntity.class, TestResultEntity.class}, version = 14, exportSchema = true)
 @TypeConverters({DateConverter.class, DataConverter.class})
 public abstract class AppDatabase extends RoomDatabase {
 
@@ -54,7 +54,7 @@ public abstract class AppDatabase extends RoomDatabase {
      * A real migration (not destructive fallback) keeps every user's existing
      * profile, subscription cache, bookmarks and PDF data intact on upgrade.
      */
-    private static final Migration MIGRATION_13_14 = new Migration(13, 14) {
+    static final Migration MIGRATION_13_14 = new Migration(13, 14) {
         @Override
         public void migrate(SupportSQLiteDatabase database) {
             database.execSQL("CREATE TABLE IF NOT EXISTS `test_results` ("
@@ -84,7 +84,6 @@ public abstract class AppDatabase extends RoomDatabase {
                                     AppDatabase.class, "driving_school_db")
                             .addMigrations(MIGRATION_13_14)
                             .fallbackToDestructiveMigration()
-                            .allowMainThreadQueries() // Allow main thread queries
                             .build();
                 }
             }

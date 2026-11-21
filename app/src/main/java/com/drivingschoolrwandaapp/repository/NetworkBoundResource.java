@@ -60,12 +60,21 @@ public abstract class NetworkBoundResource<ResultType, RequestType> {
             @Override
             public void onResponse(@NonNull Call<RequestType> call, @NonNull Response<RequestType> response) {
                 result.removeSource(dbSource);
-                if (response.isSuccessful()) {
+                if (response.isSuccessful() && response.body() != null) {
                     executeSafely(() -> {
+                        try {
                         saveCallResult(processResponse(response));
                         new Handler(Looper.getMainLooper()).post(() ->
                                 result.addSource(loadFromDb(), newData -> result.setValue(Resource.success(newData)))
                         );
+                        } catch (Exception e) {
+                            Log.e("NetworkBoundResource", "Unable to save response", e);
+                            new Handler(Looper.getMainLooper()).post(() -> {
+                                onFetchFailed();
+                                result.addSource(dbSource, data -> result.setValue(Resource.error(
+                                        context.getString(com.drivingschoolrwandaapp.R.string.something_went_wrong), data)));
+                            });
+                        }
                     });
                 } else {
                     onFetchFailed();

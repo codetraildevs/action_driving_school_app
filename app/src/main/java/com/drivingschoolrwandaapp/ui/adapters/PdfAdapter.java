@@ -22,8 +22,9 @@ import java.util.concurrent.RejectedExecutionException;
 public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.PdfViewHolder> {
 
     private final PdfRenderer pdfRenderer;
-    private final ExecutorService executorService = Executors.newFixedThreadPool(2); // Reduced threads to save memory with high-res bitmaps
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private volatile boolean detached;
     private final int screenWidth;
     private final boolean isLowRamDevice;
     // Lower renderScale (1.5f) for better memory performance on low-RAM devices.
@@ -55,6 +56,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.PdfViewHolder> {
     @Override
     public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onDetachedFromRecyclerView(recyclerView);
+        detached = true;
         executorService.shutdownNow();
     }
 
@@ -93,6 +95,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.PdfViewHolder> {
 
     class PdfViewHolder extends RecyclerView.ViewHolder {
         private final PhotoView photoView;
+        private volatile int bindingGeneration;
 
         public PdfViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -110,12 +113,14 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.PdfViewHolder> {
          * when scrolling quickly through a large PDF.
          */
         public void recycleBitmap() {
+            bindingGeneration++;
             if (photoView != null) {
                 photoView.setImageBitmap(null);
             }
         }
 
         public void bind(int position) {
+            final int generation = ++bindingGeneration;
             // Clear the current image immediately so the old bitmap can be GC'd
             // while the new one renders on a background thread.
             photoView.setImageBitmap(null);
@@ -125,25 +130,18 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.PdfViewHolder> {
             // the view width — leaving a large blank area below every rendered
             // page. Pin the view height to the page's aspect ratio (screen-width
             // based) so the rendered page fills the view exactly.
-            synchronized (pdfRenderer) {
-                PdfRenderer.Page page = pdfRenderer.openPage(position);
-                try {
-                    float pageAspect = page.getHeight() / (float) page.getWidth();
-                    int viewWidth = photoView.getWidth() > 0 ? photoView.getWidth() : screenWidth;
-                    int targetHeight = (int) (viewWidth * pageAspect);
-                    ViewGroup.LayoutParams lp = photoView.getLayoutParams();
-                    if (lp != null && lp.height != targetHeight) {
-                        lp.height = targetHeight;
-                        photoView.requestLayout();
-                    }
-                } finally {
-                    page.close();
-                }
-            }
+            final int viewWidth = photoView.getWidth() > 0 ? photoView.getWidth() : screenWidth;
 
             executeSafely(() -> {
                 synchronized (pdfRenderer) {
-                    PdfRenderer.Page page = pdfRenderer.openPage(position);
+                    if (detached || generation != bindingGeneration) return;
+                    PdfRenderer.Page page;
+                    try {
+                        page = pdfRenderer.openPage(position);
+                    } catch (RuntimeException e) {
+                        Log.w("PdfAdapter", "Unable to open PDF page " + position, e);
+                        return;
+                    }
                     
                     // Render at higher resolution for sharpness
                     int bitmapWidth = (int) (screenWidth * renderScale);
@@ -152,9 +150,11 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.PdfViewHolder> {
                     Bitmap bitmap = null;
                     try {
                         // Cap bitmap dimensions using the per-device max dimension field
-                        int cappedWidth = Math.min(bitmapWidth, maxDimension);
-                        int cappedHeight = (int) (page.getHeight() * ((float) cappedWidth / page.getWidth()));
-                        cappedHeight = Math.min(cappedHeight, maxDimension);
+                        float scale = Math.min(bitmapWidth / (float) page.getWidth(),
+                                maxDimension / (float) Math.max(page.getWidth(), page.getHeight()));
+                        int cappedWidth = Math.max(1, (int) (page.getWidth() * scale));
+                        int cappedHeight = Math.max(1, (int) (page.getHeight() * scale));
+                        final int targetHeight = Math.max(1, (int) (viewWidth * (page.getHeight() / (float) page.getWidth())));
 
                         bitmap = Bitmap.createBitmap(cappedWidth, cappedHeight, Bitmap.Config.ARGB_8888);
                         // Fill with opaque white BEFORE rendering: PdfRenderer leaves
@@ -166,9 +166,18 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.PdfViewHolder> {
 
                         final Bitmap finalBitmap = bitmap;
                         mainHandler.post(() -> {
+                            // A recycled/rebound holder must never receive an old page.
+                            if (detached || generation != bindingGeneration) {
+                                finalBitmap.recycle();
+                                return;
+                            }
+                            ViewGroup.LayoutParams lp = photoView.getLayoutParams();
+                            if (lp != null && lp.height != targetHeight) {
+                                lp.height = targetHeight;
+                                photoView.requestLayout();
+                            }
                             // Recycle any previous bitmap to free memory immediately
                             photoView.setImageBitmap(null);
-                            System.gc();
                             photoView.setImageBitmap(finalBitmap);
                         });
                     } catch (OutOfMemoryError e) {

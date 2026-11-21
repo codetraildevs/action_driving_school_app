@@ -73,7 +73,13 @@ public class DashboardFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         com.drivingschoolrwandaapp.utils.ConsentHelper.eligibility.observe(getViewLifecycleOwner(), eligible -> {
-            if (Boolean.TRUE.equals(eligible)) AdManager.loadInterstitial(requireContext());
+            if (Boolean.TRUE.equals(eligible) && isAdded()) {
+                try {
+                    AdManager.loadInterstitial(requireContext());
+                } catch (Exception e) {
+                    android.util.Log.e("DashboardFragment", "Interstitial load failed", e);
+                }
+            }
         });
         AdManager.loadInterstitial(requireContext());
 
@@ -130,7 +136,13 @@ public class DashboardFragment extends Fragment {
     private void showTransition(Runnable action) {
         View source = getView();
         AdManager.showTransitionAd(requireActivity(), () -> {
-            if (isAdded() && getView() == source) action.run();
+            if (isAdded() && getView() == source && getContext() != null) {
+            try {
+                action.run();
+            } catch (Exception e) {
+                android.util.Log.e("DashboardFragment", "Deferred navigation failed", e);
+            }
+        }
         });
     }
 
