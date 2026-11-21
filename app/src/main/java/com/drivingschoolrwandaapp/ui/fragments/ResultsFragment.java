@@ -72,7 +72,6 @@ public class ResultsFragment extends Fragment {
         passRateValue = view.findViewById(R.id.pass_rate_value);
         historyHeader = view.findViewById(R.id.history_header);
 
-        AdManager.loadRetakeAd(requireActivity());
         com.drivingschoolrwandaapp.utils.ConsentHelper.eligibility.observe(getViewLifecycleOwner(), eligible -> {
             if (Boolean.TRUE.equals(eligible)) AdManager.loadRetakeAd(requireActivity());
         });

@@ -6,4 +6,6 @@
         Ad unit IDs are selected per build in AdManager based on BuildConfig.DEBUG.
     -->
     <string name="admob_app_id" translatable="false">ca-app-pub-2864387622629553~9478146136</string>
+    <!-- Test device IDs are configured only in the debug variant. -->
+    <string name="admob_test_device_ids" translatable="false"></string>
 </resources>

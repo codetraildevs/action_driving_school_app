@@ -138,8 +138,6 @@ public class MaterialsFragment extends Fragment implements LearningMaterialAdapt
         // Load AdMob banner
         FrameLayout adContainer = view.findViewById(R.id.ad_container);
         if (adContainer != null && getActivity() != null) {
-            AdManager.loadRewardedAd(requireContext());
-            AdManager.loadInterstitial(requireContext());
             AdManager.showBanner(getActivity(), adContainer, null);
         }
     }

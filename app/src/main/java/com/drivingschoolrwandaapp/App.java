@@ -39,6 +39,7 @@ import com.drivingschoolrwandaapp.api.ApiClient;
 import com.drivingschoolrwandaapp.database.entities.User;
 import com.drivingschoolrwandaapp.ui.activities.WhatsAppGroupsActivity;
 import com.drivingschoolrwandaapp.utils.AboutUtils;
+import com.drivingschoolrwandaapp.utils.AdManager;
 import com.drivingschoolrwandaapp.utils.AnalyticsUtils;
 import com.drivingschoolrwandaapp.utils.ConsentHelper;
 import com.drivingschoolrwandaapp.viewmodel.UserViewModel;
@@ -138,6 +139,14 @@ public class App extends AppCompatActivity {
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        // Debug-only: long-press the toolbar title to open AdMob Ad Inspector.
+        if (BuildConfig.DEBUG) {
+            toolbar.setOnLongClickListener(v -> {
+                AdManager.openAdInspector(this);
+                return true;
+            });
+        }
 
         drawerLayout = findViewById(R.id.drawer_layout);
         BottomNavigationView bottomNavView = findViewById(R.id.bottom_nav_view);

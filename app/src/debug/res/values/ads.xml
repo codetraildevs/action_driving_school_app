@@ -7,4 +7,11 @@
         If a separate debug App ID is needed later, override this string here.
     -->
     <string name="admob_app_id" translatable="false">ca-app-pub-2864387622629553~9478146136</string>
+    <!--
+        Debug-only AdMob test device IDs, comma separated.
+        Copy the hashed device ID from Logcat ("Use RequestConfiguration.Builder
+        .setTestDeviceIds(Arrays.asList(...))") or Ad Inspector.
+        Example: 33BE2250B43518CCDA7DE426D04EE231
+    -->
+    <string name="admob_test_device_ids" translatable="false">426872B3E9AA306C5D39803379C7A628</string>
 </resources>

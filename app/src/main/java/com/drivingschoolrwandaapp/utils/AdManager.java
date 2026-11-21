@@ -22,11 +22,15 @@ import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.AdValue;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.OnPaidEventListener;
 import com.google.android.gms.ads.OnUserEarnedRewardListener;
+import com.google.android.gms.ads.RequestConfiguration;
+import com.google.android.gms.ads.ResponseInfo;
 import com.google.android.gms.ads.rewarded.RewardItem;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
@@ -110,6 +114,7 @@ public final class AdManager {
     private static long retakeLoadedAt;
 
     private static long lastFullScreenAt;
+    private static long lastInterstitialShownAt;
     private static long rewardedRetryAt;
     private static long retakeRetryAt;
     private static long interstitialRetryAt;
@@ -118,6 +123,10 @@ public final class AdManager {
 
     private static final long AD_MAX_AGE_MS = 55 * 60 * 1000L;
     private static final long TRANSITION_INTERVAL_MS = 120_000;
+    /** Keep a short gap after any fullscreen ad so a rewarded exit never
+     *  immediately opens an interstitial. Interstitials themselves still
+     *  respect the full {@link #TRANSITION_INTERVAL_MS} cooldown. */
+    private static final long MIN_FULLSCREEN_GAP_MS = 30_000;
 
     private AdManager() {
         /* static utility class */
@@ -132,10 +141,95 @@ public final class AdManager {
         }
         if (!initialized) {
             initialized = true;
+            configureTestDevices(context);
             MobileAds.initialize(context.getApplicationContext(),
                     status -> Log.d(TAG, "Mobile Ads initialized"));
         }
         return true;
+    }
+
+    /**
+     * Debug builds list their test device IDs in {@code admob_test_device_ids}
+     * (comma separated), so Ad Inspector and test creatives work without
+     * touching the AdMob console. Release builds always use an empty list.
+     */
+    private static void configureTestDevices(Context context) {
+        RequestConfiguration.Builder builder = new RequestConfiguration.Builder();
+        if (BuildConfig.DEBUG) {
+            String ids = context.getString(R.string.admob_test_device_ids);
+            if (ids != null && !ids.trim().isEmpty()) {
+                java.util.List<String> deviceIds = new java.util.ArrayList<>();
+                for (String id : ids.split(",")) {
+                    if (!id.trim().isEmpty()) {
+                        deviceIds.add(id.trim());
+                    }
+                }
+                builder.setTestDeviceIds(deviceIds);
+            }
+        }
+        MobileAds.setRequestConfiguration(builder.build());
+    }
+
+    /** Opens the AdMob Ad Inspector. Call from a debug-only entry point. */
+    public static void openAdInspector(@NonNull Context context) {
+        MobileAds.openAdInspector(context, error -> {
+            if (error != null) {
+                Log.w(TAG, "Ad Inspector failed: " + error.getMessage());
+            }
+        });
+    }
+
+    // ------------------------------------------------------------------
+    // Diagnostics
+    // ------------------------------------------------------------------
+    private static OnPaidEventListener paidListener(@NonNull Context context,
+                                                    @NonNull AdAnalytics.Format format) {
+        // Ads live in static fields; never let a listener pin an Activity.
+        Context appContext = context.getApplicationContext();
+        return adValue -> {
+            if (adValue == null) return;
+            Log.d(TAG, format + " paid event: valueMicros=" + adValue.getValueMicros()
+                    + ", currency=" + adValue.getCurrencyCode()
+                    + ", precision=" + adValue.getPrecisionType());
+            AdAnalytics.paid(appContext, format, adValue);
+        };
+    }
+
+    private static void logResponseInfo(String format, @Nullable ResponseInfo info) {
+        if (info == null) {
+            Log.d(TAG, format + " filled without ResponseInfo");
+            return;
+        }
+        StringBuilder message = new StringBuilder(format)
+                .append(" filled: responseId=").append(info.getResponseId())
+                .append(", adapter=").append(info.getMediationAdapterClassName());
+        if (info.getLoadedAdapterResponseInfo() != null) {
+            message.append(", source=")
+                    .append(info.getLoadedAdapterResponseInfo().getAdSourceName());
+        }
+        Log.d(TAG, message.toString());
+    }
+
+    private static void logLoadFailure(String format, @NonNull LoadAdError error) {
+        StringBuilder message = new StringBuilder(format)
+                .append(" load failed: code=").append(error.getCode())
+                .append(", domain=").append(error.getDomain())
+                .append(", message=").append(error.getMessage());
+        ResponseInfo info = error.getResponseInfo();
+        if (info != null) {
+            message.append(", responseId=").append(info.getResponseId());
+            if (info.getLoadedAdapterResponseInfo() != null) {
+                message.append(", source=")
+                        .append(info.getLoadedAdapterResponseInfo().getAdSourceName());
+            }
+        }
+        Log.w(TAG, message.toString());
+    }
+
+    private static void logShowFailure(String format, @NonNull AdError error) {
+        Log.w(TAG, format + " show failed: code=" + error.getCode()
+                + ", domain=" + error.getDomain()
+                + ", message=" + error.getMessage());
     }
 
     // ------------------------------------------------------------------
@@ -166,6 +260,7 @@ public final class AdManager {
         }
         AdView adView = new AdView(activity);
         adView.setAdUnitId(unitId);
+        adView.setOnPaidEventListener(paidListener(activity, AdAnalytics.Format.BANNER));
 
         hideBanner(container);
         container.addView(adView,
@@ -182,7 +277,14 @@ public final class AdManager {
                 }
                 bannerRetryAt.remove(unitId);
                 container.setVisibility(View.VISIBLE);
-                Log.d(TAG, "Banner ad loaded");
+                logResponseInfo("Banner", adView.getResponseInfo());
+                AdAnalytics.loaded(activity, AdAnalytics.Format.BANNER, adView.getResponseInfo());
+            }
+
+            @Override
+            public void onAdImpression() {
+                Log.d(TAG, "Banner impression");
+                AdAnalytics.impression(activity, AdAnalytics.Format.BANNER);
             }
 
             @Override
@@ -192,12 +294,12 @@ public final class AdManager {
                 // Collapse unused space and release the failed view. A later screen
                 // visit may request again after cooldown; do not loop on no-fill.
                 hideBanner(container);
-                Log.w(TAG, "Banner unavailable: code=" + error.getCode()
-                        + ", domain=" + error.getDomain() + "; retry on a later visit");
+                logLoadFailure("Banner", error);
+                AdAnalytics.loadFailed(activity, AdAnalytics.Format.BANNER, error);
             }
         });
 
-        attachDestroyOnLifecycleDestroy(activity, container, adView);
+        attachBannerLifecycle(activity, container, adView);
         measureAndLoadAdaptiveBanner(container, adView);
     }
 
@@ -208,30 +310,40 @@ public final class AdManager {
         if (owner == null && activity instanceof LifecycleOwner) {
             owner = (LifecycleOwner) activity;
         }
-        if (owner != null) {
-            ConsentHelper.eligibility.observe(owner,
-                    new androidx.lifecycle.Observer<Boolean>() {
-                        @Override
-                        public void onChanged(Boolean eligible) {
-                            if (!Boolean.TRUE.equals(eligible)
-                                    || !ConsentHelper.canShowAds()) {
-                                return;
-                            }
-                            ConsentHelper.eligibility.removeObserver(this);
-                            container.post(() -> {
-                                if (container.isAttachedToWindow()
-                                        && container.getChildCount() == 0) {
-                                    showBanner(activity, container, adUnitId);
-                                }
-                            });
-                        }
-                    });
+        if (owner == null
+                || owner.getLifecycle().getCurrentState()
+                        == androidx.lifecycle.Lifecycle.State.DESTROYED) {
+            return;
         }
+        final androidx.lifecycle.Observer<Boolean>[] observerRef =
+                new androidx.lifecycle.Observer[1];
+        androidx.lifecycle.Observer<Boolean> observer = eligible -> {
+            if (!Boolean.TRUE.equals(eligible) || !ConsentHelper.canShowAds()) {
+                return;
+            }
+            ConsentHelper.eligibility.removeObserver(observerRef[0]);
+            container.post(() -> {
+                if (container.isAttachedToWindow()
+                        && container.getChildCount() == 0) {
+                    showBanner(activity, container, adUnitId);
+                }
+            });
+        };
+        observerRef[0] = observer;
+        ConsentHelper.eligibility.observe(owner, observer);
+        // If consent is denied (or never resolves), drop the observer with the view.
+        owner.getLifecycle().addObserver(new DefaultLifecycleObserver() {
+            @Override
+            public void onDestroy(@NonNull LifecycleOwner lifecycleOwner) {
+                ConsentHelper.eligibility.removeObserver(observer);
+                lifecycleOwner.getLifecycle().removeObserver(this);
+            }
+        });
     }
 
-    private static void attachDestroyOnLifecycleDestroy(Activity activity,
-                                                       FrameLayout container,
-                                                       AdView adView) {
+    private static void attachBannerLifecycle(Activity activity,
+                                              FrameLayout container,
+                                              AdView adView) {
         LifecycleOwner owner = ViewTreeLifecycleOwner.get(container);
         if (owner == null && activity instanceof LifecycleOwner) {
             owner = (LifecycleOwner) activity;
@@ -239,9 +351,23 @@ public final class AdManager {
         if (owner != null) {
             owner.getLifecycle().addObserver(new DefaultLifecycleObserver() {
                 @Override
+                public void onStart(@NonNull LifecycleOwner lifecycleOwner) {
+                    adView.resume();
+                }
+
+                @Override
+                public void onStop(@NonNull LifecycleOwner lifecycleOwner) {
+                    adView.pause();
+                }
+
+                @Override
                 public void onDestroy(@NonNull LifecycleOwner lifecycleOwner) {
-                    adView.destroy();
                     lifecycleOwner.getLifecycle().removeObserver(this);
+                    if (adView.getParent() == container) {
+                        container.removeView(adView);
+                    }
+                    adView.destroy();
+                    container.setVisibility(View.GONE);
                 }
             });
         }
@@ -253,6 +379,11 @@ public final class AdManager {
                 .addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                     @Override
                     public void onGlobalLayout() {
+                        if (adView.getParent() != container) {
+                            container.getViewTreeObserver()
+                                    .removeOnGlobalLayoutListener(this);
+                            return;
+                        }
                         int width = container.getWidth()
                                 - container.getPaddingLeft()
                                 - container.getPaddingRight();
@@ -261,8 +392,7 @@ public final class AdManager {
                         }
                         container.getViewTreeObserver()
                                 .removeOnGlobalLayoutListener(this);
-                        if (adView.getParent() != container
-                                || !ConsentHelper.canShowAds()) {
+                        if (!ConsentHelper.canShowAds()) {
                             return;
                         }
                         int widthDp = (int) (width
@@ -270,6 +400,7 @@ public final class AdManager {
                         adView.setAdSize(
                                 AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
                                         container.getContext(), widthDp));
+                        AdAnalytics.request(container.getContext(), AdAnalytics.Format.BANNER);
                         adView.loadAd(new AdRequest.Builder().build());
                     }
                 });
@@ -306,6 +437,7 @@ public final class AdManager {
             return;
         }
         loadingReward = true;
+        AdAnalytics.request(context, AdAnalytics.Format.REWARDED);
         RewardedAd.load(context.getApplicationContext(), REWARDED_AD_UNIT_ID,
                 new AdRequest.Builder().build(),
                 new RewardedAdLoadCallback() {
@@ -313,14 +445,17 @@ public final class AdManager {
                     public void onAdLoaded(@NonNull RewardedAd ad) {
                         loadingReward = false;
                         rewardedLoadedAt = SystemClock.elapsedRealtime();
-                        Log.d(TAG, "Rewarded video loaded");
+                        logResponseInfo("Rewarded", ad.getResponseInfo());
+                        AdAnalytics.loaded(context, AdAnalytics.Format.REWARDED, ad.getResponseInfo());
+                        ad.setOnPaidEventListener(paidListener(context, AdAnalytics.Format.REWARDED));
                         rewardedAd = ConsentHelper.canShowAds() ? ad : null;
                     }
 
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError error) {
                         loadingReward = false;
-                        Log.w(TAG, "Rewarded ad load failed: " + error.getCode());
+                        logLoadFailure("Rewarded", error);
+                        AdAnalytics.loadFailed(context, AdAnalytics.Format.REWARDED, error);
                         rewardedRetryAt = SystemClock.elapsedRealtime() + LOAD_FAILURE_COOLDOWN_MS;
                     }
                 });
@@ -367,6 +502,7 @@ public final class AdManager {
             return;
         }
         loadingRetake = true;
+        AdAnalytics.request(context, AdAnalytics.Format.REWARDED_INTERSTITIAL);
         RewardedInterstitialAd.load(context.getApplicationContext(),
                 RETAKE_AD_UNIT_ID,
                 new AdRequest.Builder().build(),
@@ -375,7 +511,11 @@ public final class AdManager {
                     public void onAdLoaded(@NonNull RewardedInterstitialAd ad) {
                         loadingRetake = false;
                         retakeLoadedAt = SystemClock.elapsedRealtime();
-                        Log.d(TAG, "Rewarded interstitial loaded");
+                        logResponseInfo("Rewarded interstitial", ad.getResponseInfo());
+                        AdAnalytics.loaded(context, AdAnalytics.Format.REWARDED_INTERSTITIAL,
+                                ad.getResponseInfo());
+                        ad.setOnPaidEventListener(paidListener(context,
+                                AdAnalytics.Format.REWARDED_INTERSTITIAL));
                         if (ConsentHelper.canShowAds()) {
                             retakeAd = ad;
                         }
@@ -384,7 +524,8 @@ public final class AdManager {
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError error) {
                         loadingRetake = false;
-                        Log.w(TAG, "Retake ad load failed: " + error.getCode());
+                        logLoadFailure("Rewarded interstitial", error);
+                        AdAnalytics.loadFailed(context, AdAnalytics.Format.REWARDED_INTERSTITIAL, error);
                         retakeRetryAt = SystemClock.elapsedRealtime() + LOAD_FAILURE_COOLDOWN_MS;
                     }
                 });
@@ -468,6 +609,7 @@ public final class AdManager {
             return;
         }
         loadingInterstitial = true;
+        AdAnalytics.request(context, AdAnalytics.Format.INTERSTITIAL);
         InterstitialAd.load(context.getApplicationContext(),
                 INTERSTITIAL_AD_UNIT_ID,
                 new AdRequest.Builder().build(),
@@ -476,14 +618,19 @@ public final class AdManager {
                     public void onAdLoaded(@NonNull InterstitialAd ad) {
                         loadingInterstitial = false;
                         interstitialLoadedAt = SystemClock.elapsedRealtime();
+                        logResponseInfo("Interstitial", ad.getResponseInfo());
+                        AdAnalytics.loaded(context, AdAnalytics.Format.INTERSTITIAL,
+                                ad.getResponseInfo());
+                        ad.setOnPaidEventListener(paidListener(context,
+                                AdAnalytics.Format.INTERSTITIAL));
                         interstitialAd = ConsentHelper.canShowAds() ? ad : null;
-                        Log.d(TAG, "Transition interstitial loaded");
                     }
 
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError error) {
                         loadingInterstitial = false;
-                        Log.w(TAG, "Transition ad load failed: " + error.getCode());
+                        logLoadFailure("Interstitial", error);
+                        AdAnalytics.loadFailed(context, AdAnalytics.Format.INTERSTITIAL, error);
                         interstitialRetryAt = SystemClock.elapsedRealtime() + LOAD_FAILURE_COOLDOWN_MS;
                     }
                 });
@@ -493,9 +640,18 @@ public final class AdManager {
         if (showingFullScreen) {
             return;
         }
-        loadInterstitial(activity);
-        if (!ConsentHelper.canShowAds() || interstitialAd == null
-                || !isTransitionAllowed()) {
+        // Do not request while the 2-minute cooldown is active: that request
+        // could never be shown and only inflates the request count.
+        if (!ConsentHelper.canShowAds() || !isTransitionAllowed()) {
+            continueAction.run();
+            return;
+        }
+        if (interstitialAd != null
+                && SystemClock.elapsedRealtime() - interstitialLoadedAt >= AD_MAX_AGE_MS) {
+            interstitialAd = null;
+        }
+        if (interstitialAd == null) {
+            loadInterstitial(activity);
             continueAction.run();
             return;
         }
@@ -507,7 +663,11 @@ public final class AdManager {
 
             @Override
             public void onAdShowedFullScreenContent() {
-                lastFullScreenAt = SystemClock.elapsedRealtime();
+                long now = SystemClock.elapsedRealtime();
+                lastFullScreenAt = now;
+                lastInterstitialShownAt = now;
+                Log.d(TAG, "Interstitial impression");
+                AdAnalytics.impression(activity, AdAnalytics.Format.INTERSTITIAL);
             }
 
             @Override
@@ -517,6 +677,8 @@ public final class AdManager {
 
             @Override
             public void onAdFailedToShowFullScreenContent(@NonNull AdError error) {
+                logShowFailure("Interstitial", error);
+                AdAnalytics.showFailed(activity, AdAnalytics.Format.INTERSTITIAL, error);
                 finishTransition();
             }
 
@@ -536,10 +698,15 @@ public final class AdManager {
     }
 
     private static boolean isTransitionAllowed() {
-        if (lastFullScreenAt <= 0) {
-            return true;
+        long now = SystemClock.elapsedRealtime();
+        // Interstitials keep their own 2-minute cadence; a rewarded show only
+        // imposes the short cross-format gap instead of resetting that timer.
+        if (lastInterstitialShownAt > 0
+                && now - lastInterstitialShownAt < TRANSITION_INTERVAL_MS) {
+            return false;
         }
-        return SystemClock.elapsedRealtime() - lastFullScreenAt >= TRANSITION_INTERVAL_MS;
+        return lastFullScreenAt <= 0
+                || now - lastFullScreenAt >= MIN_FULLSCREEN_GAP_MS;
     }
 
     // ------------------------------------------------------------------
@@ -565,6 +732,14 @@ public final class AdManager {
         @Override
         public void onAdShowedFullScreenContent() {
             lastFullScreenAt = SystemClock.elapsedRealtime();
+            Log.d(TAG, format + " impression");
+            // The retake unit is a rewarded interstitial, so both formats report
+            // as rewarded_interstitial in AdMob; keep the load/paid/impression
+            // events on the same ad_format so per-format funnels reconcile.
+            AdAnalytics.Format analyticsFormat = format == JourneyAnalytics.RewardFormat.INTERSTITIAL
+                    ? AdAnalytics.Format.REWARDED_INTERSTITIAL
+                    : AdAnalytics.Format.REWARDED;
+            AdAnalytics.impression(context, analyticsFormat);
             JourneyAnalytics.reward(context, format, JourneyAnalytics.RewardStage.SHOWN, false);
         }
 
@@ -589,6 +764,12 @@ public final class AdManager {
 
         @Override
         public void onAdFailedToShowFullScreenContent(@NonNull AdError error) {
+            logShowFailure(format.name(), error);
+            AdAnalytics.showFailed(context,
+                    format == JourneyAnalytics.RewardFormat.INTERSTITIAL
+                            ? AdAnalytics.Format.REWARDED_INTERSTITIAL
+                            : AdAnalytics.Format.REWARDED,
+                    error);
             JourneyAnalytics.reward(context, format, JourneyAnalytics.RewardStage.SHOW_FAILED, false);
             showingFullScreen = false;
             callback.onAdFailedToShow();

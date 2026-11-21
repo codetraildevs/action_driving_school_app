@@ -81,7 +81,6 @@ public class DashboardFragment extends Fragment {
                 }
             }
         });
-        AdManager.loadInterstitial(requireContext());
 
         // Setup Quick Access Cards
         MaterialCardView startExamCard = view.findViewById(R.id.start_exam_card);
