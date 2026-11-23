@@ -6,7 +6,7 @@ import android.content.SharedPreferences;
 public class AppPreferences {
     private static final String PREFS_NAME = "app_prefs";
     private static final String KEY_LANGUAGE_CODE = "language_code";
-    private static final String DEFAULT_LANGUAGE = "rw"; // Changed default to Kinyarwanda
+    private static final String DEFAULT_LANGUAGE = "en"; // English for a fresh installation
     private static final String KEY_IS_GRID_LAYOUT = "is_grid_layout";
     private static final String KEY_DISCLAIMER_SHOWN = "disclaimer_shown";
     private static final String KEY_REMEMBER_ME = "remember_me";

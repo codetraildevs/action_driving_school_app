@@ -1,0 +1,11 @@
+<en-US>
+English is now the default language for new installations.
+Reduced memory usage when loading notification images.
+Improved language switching and screen state handling.
+</en-US>
+
+<fr-FR>
+L’anglais est désormais la langue par défaut pour les nouvelles installations.
+Réduction de la mémoire utilisée lors du chargement des images de notification.
+Amélioration du changement de langue et de la gestion de l’état des écrans.
+</fr-FR>

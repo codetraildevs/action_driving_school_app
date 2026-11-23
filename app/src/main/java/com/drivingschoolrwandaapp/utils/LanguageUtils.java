@@ -18,9 +18,9 @@ public class LanguageUtils {
     public static void loadAppLanguage(Context context) {
         AppPreferences appPreferences = new AppPreferences(context);
 
-        // Check if language preference is set, if not set default to Kinyarwanda
+        // Check if language preference is set, if not set default to English
         if (!appPreferences.isLanguageSet()) {
-            appPreferences.setLanguage("rw");
+            appPreferences.setLanguage("en");
         }
 
         String language = appPreferences.getLanguage();
@@ -48,7 +48,7 @@ public class LanguageUtils {
         AppPreferences appPreferences = new AppPreferences(context);
 
         String currentCode = appPreferences.getLanguage();
-        int checkedItem = 2;
+        int checkedItem = 0;
 
         for (int i = 0; i < codes.length; i++) {
             if (codes[i].equals(currentCode)) {

@@ -11,7 +11,7 @@ import org.mockito.InOrder;
 import static org.mockito.Mockito.*;
 
 public class LocaleUiTest {
-    @Test public void refreshRetainsFragmentAndRestoresViewStateWithoutChangingBackStack() {
+    @Test public void refreshLeavesStateRestorationToFragmentManagerWithoutChangingBackStack() {
         Fragment fragment = mock(Fragment.class);
         FragmentManager manager = mock(FragmentManager.class);
         FragmentTransaction detach = mock(FragmentTransaction.class, RETURNS_SELF);
@@ -26,12 +26,12 @@ public class LocaleUiTest {
         LocaleUi.refreshFragmentView(fragment);
 
         InOrder order = inOrder(view, detach, attach);
-        order.verify(view).saveHierarchyState(any());
         order.verify(detach).detach(fragment);
         order.verify(detach).commitNow();
         order.verify(attach).attach(fragment);
         order.verify(attach).commitNow();
-        order.verify(view).restoreHierarchyState(any());
+        verify(view, never()).saveHierarchyState(any());
+        verify(view, never()).restoreHierarchyState(any());
         verify(detach, never()).addToBackStack(any());
         verify(attach, never()).addToBackStack(any());
     }
@@ -51,6 +51,17 @@ public class LocaleUiTest {
         Fragment fragment = mock(Fragment.class);
         LocaleUi.refreshFragmentView(fragment);
         verify(fragment, never()).getParentFragmentManager();
+    }
+
+    @Test public void refreshDoesNotCommitAfterManagerDestroyed() {
+        Fragment fragment = mock(Fragment.class);
+        FragmentManager manager = mock(FragmentManager.class);
+        when(fragment.isAdded()).thenReturn(true);
+        when(fragment.getView()).thenReturn(mock(View.class));
+        when(fragment.getParentFragmentManager()).thenReturn(manager);
+        when(manager.isDestroyed()).thenReturn(true);
+        LocaleUi.refreshFragmentView(fragment);
+        verify(manager, never()).beginTransaction();
     }
 
     @Test public void menuTranslationKeepsExistingItemsAndClickListeners() {

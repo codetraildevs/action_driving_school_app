@@ -22,6 +22,7 @@ import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.FutureTarget;
 import com.drivingschoolrwandaapp.App;
 import com.drivingschoolrwandaapp.R;
 import com.drivingschoolrwandaapp.ui.activities.IremboActivity;
@@ -67,22 +68,31 @@ public class NotificationWorker extends Worker {
         String largeIconUrl = data.getString(KEY_ICON_URL);
 
         Bitmap largeIcon = null;
+        FutureTarget<Bitmap> iconRequest = null;
 
-        if (largeIconUrl != null && !largeIconUrl.isEmpty()) {
-            try {
-                largeIcon = Glide.with(getApplicationContext())
-                        .asBitmap()
-                        .load(largeIconUrl)
-                        .submit()
-                        .get(15, TimeUnit.SECONDS);
-                Log.d(TAG, "doWork: Large icon downloaded successfully.");
-            } catch (Exception e) {
-                Log.e(TAG, "doWork: Large icon download failed (timed out or error).", e);
-                com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
+        try {
+            if (largeIconUrl != null && !largeIconUrl.isEmpty()) {
+                try {
+                    iconRequest = Glide.with(getApplicationContext())
+                            .asBitmap()
+                            .load(largeIconUrl)
+                            .fitCenter()
+                            .disallowHardwareConfig()
+                            .submit(128, 128);
+                    largeIcon = iconRequest.get(15, TimeUnit.SECONDS);
+                    Log.d(TAG, "doWork: Large icon downloaded successfully.");
+                } catch (Exception e) {
+                    Log.e(TAG, "doWork: Large icon download failed (timed out or error).", e);
+                    com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e);
+                }
             }
-        }
 
-        sendNotification(title, body, channelId, largeIcon);
+            sendNotification(title, body, channelId, largeIcon);
+        } finally {
+            // Keep the bitmap alive until notify() has marshalled the notification,
+            // then release it (or cancel an unfinished timed-out download).
+            if (iconRequest != null) Glide.with(getApplicationContext()).clear(iconRequest);
+        }
 
         return Result.success();
     }

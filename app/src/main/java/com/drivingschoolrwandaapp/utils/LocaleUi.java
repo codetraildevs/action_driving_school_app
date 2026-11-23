@@ -1,8 +1,6 @@
 package com.drivingschoolrwandaapp.utils;
 
 import android.content.Context;
-import android.os.Parcelable;
-import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,18 +17,18 @@ public final class LocaleUi {
     public static void refreshFragmentView(Fragment fragment) {
         if (fragment == null || !fragment.isAdded() || fragment.getView() == null) return;
         FragmentManager manager = fragment.getParentFragmentManager();
-        if (manager.isStateSaved()) return;
-        SparseArray<Parcelable> state = new SparseArray<>();
-        fragment.requireView().saveHierarchyState(state);
+        if (manager.isStateSaved() || manager.isDestroyed()) return;
         // Separate transactions are intentional: a combined detach/attach is optimized away.
         // The same Fragment, ViewModels and navigation back stack are retained.
+        // FragmentManager owns view-state saving/restoration during detach/attach.
+        // Restoring the hierarchy a second time can re-enter widgets after their
+        // lifecycle callbacks have already restored them.
         try {
             manager.beginTransaction().detach(fragment).commitNow();
             manager.beginTransaction().attach(fragment).commitNow();
         } catch (Exception ignored) {
             // Avoid crashing on fragment state restoration edge cases.
         }
-        if (fragment.getView() != null) fragment.requireView().restoreHierarchyState(state);
     }
 
     public static void refreshMenu(Context context, View anchor, Menu menu, int resource) {

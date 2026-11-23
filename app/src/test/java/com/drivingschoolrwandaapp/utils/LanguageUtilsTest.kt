@@ -78,17 +78,17 @@ class LanguageUtilsTest {
     // ---------------------------------------------------------------------------
 
     @Test
-    fun `loadAppLanguage sets default rw when no language stored`() {
+    fun `loadAppLanguage sets default en when no language stored`() {
         `when`(sharedPreferences.contains("language_code")).thenReturn(false)
-        `when`(sharedPreferences.getString("language_code", "rw")).thenReturn("rw")
+        `when`(sharedPreferences.getString("language_code", "en")).thenReturn("en")
 
         LanguageUtils.loadAppLanguage(context)
 
         // Default language was persisted.
-        verify(editor).putString("language_code", "rw")
+        verify(editor).putString("language_code", "en")
         // And applied to the app locales.
         val locales = capturedLocales()
-        assertEquals("rw", locales.get(0)?.language)
+        assertEquals("en", locales.get(0)?.language)
     }
 
     // ---------------------------------------------------------------------------
@@ -98,12 +98,12 @@ class LanguageUtilsTest {
     @Test
     fun `loadAppLanguage applies the stored language`() {
         `when`(sharedPreferences.contains("language_code")).thenReturn(true)
-        `when`(sharedPreferences.getString("language_code", "rw")).thenReturn("en")
+        `when`(sharedPreferences.getString("language_code", "en")).thenReturn("en")
 
         LanguageUtils.loadAppLanguage(context)
 
         // Already set → must not overwrite.
-        verify(editor, never()).putString("language_code", "rw")
+        verify(editor, never()).putString("language_code", "en")
         verify(editor, never()).putString(anyString(), anyString())
 
         val locales = capturedLocales()
@@ -113,7 +113,7 @@ class LanguageUtilsTest {
     @Test
     fun `loadAppLanguage applies stored french language`() {
         `when`(sharedPreferences.contains("language_code")).thenReturn(true)
-        `when`(sharedPreferences.getString("language_code", "rw")).thenReturn("fr")
+        `when`(sharedPreferences.getString("language_code", "en")).thenReturn("fr")
 
         LanguageUtils.loadAppLanguage(context)
 
@@ -128,7 +128,7 @@ class LanguageUtilsTest {
     @Test
     fun `loadAppLanguage ignores a null stored language`() {
         `when`(sharedPreferences.contains("language_code")).thenReturn(true)
-        `when`(sharedPreferences.getString("language_code", "rw")).thenReturn(null)
+        `when`(sharedPreferences.getString("language_code", "en")).thenReturn(null)
 
         LanguageUtils.loadAppLanguage(context)
 
@@ -139,7 +139,7 @@ class LanguageUtilsTest {
     @Test
     fun `loadAppLanguage ignores an empty stored language`() {
         `when`(sharedPreferences.contains("language_code")).thenReturn(true)
-        `when`(sharedPreferences.getString("language_code", "rw")).thenReturn("")
+        `when`(sharedPreferences.getString("language_code", "en")).thenReturn("")
 
         LanguageUtils.loadAppLanguage(context)
 
